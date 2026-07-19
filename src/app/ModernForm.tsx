@@ -54,44 +54,46 @@ export default function ModernForm() {
   };
 
   return (
-    <div className="bg-[#121212]/60 backdrop-blur-xl border border-white/10 p-6 rounded-[24px] mb-2 transition-all">
-      <div className="flex gap-2 mb-6">
+    <div className="bg-[#121212]/60 backdrop-blur-xl border border-white/10 p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] mb-2 transition-all">
+      
+      {/* Üst Sekmeler */}
+      <div className="flex gap-2 mb-4 sm:mb-6">
         <button 
           type="button"
           onClick={() => setType('OVERHEARD')} 
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 ${type === 'OVERHEARD' ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_15px_rgba(77,163,255,0.2)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'}`}
+          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base transition-all duration-300 ${type === 'OVERHEARD' ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_15px_rgba(77,163,255,0.2)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'}`}
         >
-          <Headphones size={18} /> Overheard
+          <Headphones size={16} className="sm:w-[18px] sm:h-[18px]" /> Overheard
         </button>
         <button 
           type="button"
           onClick={() => setType('CONFESSION')} 
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 ${type === 'CONFESSION' ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_15px_rgba(77,163,255,0.2)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'}`}
+          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base transition-all duration-300 ${type === 'CONFESSION' ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_15px_rgba(77,163,255,0.2)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'}`}
         >
-          <VenetianMask size={18} /> İtiraf
+          <VenetianMask size={16} className="sm:w-[18px] sm:h-[18px]" /> İtiraf
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5">
         {type === 'OVERHEARD' && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in zoom-in-95 duration-300">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in zoom-in-95 duration-300">
             <div className="col-span-2 md:col-span-1">
                 <input 
                   required 
                   placeholder="Konum" 
                   value={location} 
                   onChange={(e) => setLocation(e.target.value)} 
-                  className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all placeholder:text-gray-500" 
+                  className="w-full bg-white/5 border border-white/10 p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all placeholder:text-gray-500" 
                 />
             </div>
             
-            <div className="col-span-1 flex flex-col gap-1">
-               <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Kişi</label>
+            <div className="col-span-1 flex flex-col gap-0.5 sm:gap-1">
+               <label className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Kişi</label>
                <select 
                 required 
                 value={people} 
                 onChange={(e) => setPeople(e.target.value)} 
-                className="bg-white/5 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all cursor-pointer appearance-none"
+                className="bg-white/5 border border-white/10 p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all cursor-pointer appearance-none"
               >
                 <option value="" disabled hidden>Seçiniz</option>
                 <option value="2 kişi" className="bg-[#1a1a1a] text-white">2 kişi</option>
@@ -101,13 +103,13 @@ export default function ModernForm() {
               </select>
             </div>
 
-            <div className="col-span-1 flex flex-col gap-1">
-              <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Grup</label>
+            <div className="col-span-1 flex flex-col gap-0.5 sm:gap-1">
+              <label className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Grup</label>
               <select 
                 required
                 value={gender} 
                 onChange={(e) => setGender(e.target.value)} 
-                className="bg-white/5 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all cursor-pointer appearance-none"
+                className="bg-white/5 border border-white/10 p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all cursor-pointer appearance-none"
               >
                 <option value="" disabled hidden>Seçiniz</option>
                 <option value="Kız" className="bg-[#1a1a1a] text-white">Kız</option>
@@ -116,14 +118,14 @@ export default function ModernForm() {
               </select>
             </div>
 
-            <div className="col-span-2 md:col-span-1 flex flex-col gap-1">
-              <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Saat Seç</label>
+            <div className="col-span-2 md:col-span-1 flex flex-col gap-0.5 sm:gap-1">
+              <label className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Saat Seç</label>
               <input 
                 type="time" 
                 required 
                 value={time} 
                 onChange={(e) => setTime(e.target.value)} 
-                className="bg-white/5 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all [color-scheme:dark] w-full" 
+                className="bg-white/5 border border-white/10 p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all [color-scheme:dark] w-full" 
               />
             </div>
           </div>
@@ -133,14 +135,14 @@ export default function ModernForm() {
             <textarea 
               required 
               maxLength={maxChars}
-              rows={4} 
+              rows={3} 
               placeholder={type === 'OVERHEARD' ? "Ne konuşuluyordu?" : "İtirafın nedir?"} 
               value={content} 
               onChange={(e) => setContent(e.target.value)} 
-              className="w-full bg-white/5 border border-white/10 p-4 pb-8 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] resize-none transition-all placeholder:text-gray-500" 
+              className="w-full bg-white/5 border border-white/10 p-3 sm:p-4 pb-8 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] resize-none transition-all placeholder:text-gray-500" 
             />
             {/* Karakter Sayacı */}
-            <div className={`absolute bottom-3 right-4 text-xs font-medium transition-colors ${content.length >= maxChars ? 'text-red-400' : 'text-gray-500'}`}>
+            <div className={`absolute bottom-2 sm:bottom-3 right-3 sm:right-4 text-[10px] sm:text-xs font-medium transition-colors ${content.length >= maxChars ? 'text-red-400' : 'text-gray-500'}`}>
                 {content.length} / {maxChars}
             </div>
         </div>
@@ -148,19 +150,19 @@ export default function ModernForm() {
         <button 
           type="submit" 
           disabled={loading} 
-          className="w-full bg-[#4DA3FF] hover:bg-blue-400 py-4 rounded-xl font-bold text-black flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(77,163,255,0.2)] hover:shadow-[0_0_25px_rgba(77,163,255,0.4)]"
+          className="w-full bg-[#4DA3FF] hover:bg-blue-400 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold text-black flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(77,163,255,0.2)] hover:shadow-[0_0_25px_rgba(77,163,255,0.4)]"
         >
           {loading ? (
-            <><Loader2 size={18} className="animate-spin" /> Gönderiliyor...</>
+            <><Loader2 size={16} className="animate-spin sm:w-[18px] sm:h-[18px]" /> Gönderiliyor...</>
           ) : (
-            <><Send size={18} /> Yönetici Onayına Gönder</>
+            <><Send size={16} className="sm:w-[18px] sm:h-[18px]" /> Yönetici Onayına Gönder</>
           )}
         </button>
       </form>
 
       {successMsg && (
-        <div className="mt-5 p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl flex items-center gap-3 justify-center animate-in fade-in zoom-in-95 duration-300 font-medium text-sm">
-          <CheckCircle2 size={20} /> Gönderin başarıyla alındı! Onaylandıktan sonra yayında.
+        <div className="mt-4 sm:mt-5 p-3 sm:p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl flex items-center gap-2 sm:gap-3 justify-center animate-in fade-in zoom-in-95 duration-300 font-medium text-xs sm:text-sm">
+          <CheckCircle2 size={18} className="sm:w-[20px] sm:h-[20px]" /> Gönderin başarıyla alındı!
         </div>
       )}
     </div>
