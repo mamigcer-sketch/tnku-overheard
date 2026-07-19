@@ -1,10 +1,20 @@
 import prisma from '@/lib/prisma';
 import CommentForm from '@/components/CommentForm';
-import Link from 'next/link';
-import { ArrowLeft, MessageCircle } from 'lucide-react';
+import BackButton from '@/components/BackButton';
+import { MessageCircle } from 'lucide-react';
+
+// 1. SİHİRLİ SATIR: Vercel'in bu sayfayı build sırasında zorla statik yapmaya çalışmasını engeller
+export const dynamic = 'force-dynamic';
 
 export default async function PostPage({ params }: { params: { id: string } }) {
-  const { id } = await params; // Next.js 15 için id'yi böyle alıyoruz
+  // Parametreleri güvenli bir şekilde alalım
+  const resolvedParams = await params;
+  const id = resolvedParams?.id;
+
+  // 2. KORUMA: Eğer Vercel test ediyorsa veya ID yoksa, Prisma'yı durdurup hata vermesini engelliyoruz
+  if (!id) {
+    return <div className="min-h-screen bg-[#0B0B0B] p-10 text-center text-white">Yükleniyor...</div>;
+  }
 
   // Postu ve ona bağlı yorumları aynı anda çekiyoruz
   const post = await prisma.post.findUnique({
@@ -16,14 +26,14 @@ export default async function PostPage({ params }: { params: { id: string } }) {
     }
   });
 
-  if (!post) return <div className="p-10 text-center text-white">Post bulunamadı kanka...</div>;
+  if (!post) return <div className="min-h-screen bg-[#0B0B0B] p-10 text-center text-white">Post bulunamadı kanka...</div>;
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white p-4 md:p-8">
       <div className="max-w-2xl mx-auto">
-        <Link href="/" className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors mb-8">
-          <ArrowLeft size={20} /> Geri Dön
-        </Link>
+        
+        {/* AKILLI GERİ DÖN BUTONU */}
+        <BackButton />
 
         {/* Post Detayı */}
         <article className="bg-white/[0.03] border border-white/[0.08] p-6 rounded-[20px] mb-8">
