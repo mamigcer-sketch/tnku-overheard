@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import { Menu, X, Heart, ShieldAlert, BookOpen, FileText, ExternalLink } from 'lucide-react';
+import { Menu, X, Heart, ShieldAlert, BookOpen, FileText, ExternalLink, Download } from 'lucide-react';
 import Link from 'next/link';
 
 export default function MobileMenu() {
@@ -54,6 +54,17 @@ export default function MobileMenu() {
                   </Link>
                 )
               ))}
+
+              {/* Uygulamayı Yükle Butonu */}
+              <button 
+                onClick={() => {
+                  setIsOpen(false);
+                  alert("Kanka, iPhone kullanıyorsan 'Paylaş' simgesine basıp 'Ana Ekrana Ekle' de. Android'de ise tarayıcı menüsünden 'Uygulamayı Yükle' seçeneğini kullan!");
+                }}
+                className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#4DA3FF]/10 text-[#4DA3FF] font-medium text-sm transition-all border-t border-white/5 mt-2"
+              >
+                <Download size={18} /> Uygulamayı Yükle
+              </button>
             </div>
           </div>
         </>
