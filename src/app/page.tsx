@@ -37,7 +37,7 @@ export default async function Home({ searchParams }: any) {
   const params = await searchParams;
   const currentFilter = params?.f || 'Tümü';
   const searchQuery = params?.q || '';
-  const page = parseInt(params?.page || '1'); // Sayfa numarasını al
+  const page = parseInt(params?.page || '1');
 
   let whereQuery: any = { status: 'APPROVED' };
   let orderQuery: any = { createdAt: 'desc' };
@@ -47,11 +47,11 @@ export default async function Home({ searchParams }: any) {
   }
   if (currentFilter === 'İtiraf') whereQuery.type = 'CONFESSION';
   
-  // HAFTANIN EN POPÜLERİ MANTIĞI BURADA EKLENDİ
-  if (currentFilter === 'En Popüler') {
+  // 🔥 TREND MANTIĞI (Son 7 günün en çok beğenilenleri)
+  if (currentFilter === '🔥 Trend') {
     orderQuery = { likes: 'desc' };
     const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // Son 7 gün
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
     whereQuery.createdAt = { gte: oneWeekAgo };
   }
 
@@ -59,17 +59,16 @@ export default async function Home({ searchParams }: any) {
     whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
   }
 
-  // --- SAYFALAMA MANTIĞI ---
   const pageSize = 10;
   const posts = await prisma.post.findMany({
     where: whereQuery,
     orderBy: orderQuery,
-    skip: (page - 1) * pageSize, // Kaç gönderi atlanacak
-    take: pageSize, // Kaç tane alınacak
+    skip: (page - 1) * pageSize,
+    take: pageSize,
     include: { comments: { select: { id: true } } }
   });
 
-  const filters = ['Tümü', 'Overheard', 'İtiraf', 'En Yeni', 'En Popüler'];
+  const filters = ['Tümü', 'Overheard', 'İtiraf', 'En Yeni', '🔥 Trend'];
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white">
@@ -85,7 +84,6 @@ export default async function Home({ searchParams }: any) {
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         
-        {/* YENİ PAYLAŞIM ALANI (AKORDEON YAPISI) */}
         <div className="mb-6">
           <details className="group [&_summary::-webkit-details-marker]:hidden">
             <summary className="list-none cursor-pointer flex items-center justify-between bg-[#121212] border border-white/10 hover:border-white/20 p-4 rounded-2xl transition-all shadow-lg">
@@ -127,7 +125,7 @@ export default async function Home({ searchParams }: any) {
           {posts.length === 0 ? (
             <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
               <p className="text-gray-400 font-medium">
-                {currentFilter === 'En Popüler' 
+                {currentFilter === '🔥 Trend' 
                   ? 'Bu hafta henüz popülerleşen bir fısıltı yok kanka.' 
                   : 'Aradığın kriterlerde gönderi bulunamadı kanka.'}
               </p>
@@ -143,7 +141,6 @@ export default async function Home({ searchParams }: any) {
                 />
               ))}
               
-              {/* Daha Fazla Göster Butonu */}
               {posts.length === pageSize && (
                 <div className="flex justify-center pt-4">
                   <Link 
