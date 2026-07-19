@@ -1,19 +1,21 @@
 import prisma from '@/lib/prisma';
 import CommentForm from '@/components/CommentForm';
 import BackButton from '@/components/BackButton';
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Home } from 'lucide-react'; // Home ikonunu ekledik
+import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
 
 export default async function PostPage({ params }: any) {
   const resolvedParams = await params;
+  const postId = resolvedParams?.id;
 
-  if (!resolvedParams || !resolvedParams.id) {
+  if (!postId) {
     return <div className="min-h-screen bg-[#0B0B0B] p-10 text-center text-white">Yükleniyor...</div>;
   }
 
   const post = await prisma.post.findUnique({
-    where: { id: String(resolvedParams.id) },
+    where: { id: String(postId) },
     include: { 
       comments: { 
         orderBy: { createdAt: 'desc' } 
@@ -27,8 +29,22 @@ export default async function PostPage({ params }: any) {
     <main className="min-h-screen bg-[#0B0B0B] text-white p-4 md:p-8">
       <div className="max-w-2xl mx-auto">
         
-        <BackButton />
+        {/* ÜST MENÜ: HEM LOGO HEM GERİ BUTONU */}
+        <header className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
+          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
+             <h1 className="text-xl font-extrabold tracking-tighter">
+                TNKU<span className="text-[#4DA3FF]">OVERHEARD</span>
+             </h1>
+          </Link>
+          <div className="flex gap-4">
+            <BackButton />
+            <Link href="/" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
+              <Home size={18} /> Ana Sayfa
+            </Link>
+          </div>
+        </header>
 
+        {/* Post Detayı */}
         <article className="bg-white/[0.03] border border-white/[0.08] p-6 rounded-[20px] mb-8">
           <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 border ${post.type === 'CONFESSION' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20 text-[#4DA3FF]'}`}>
             {post.type === 'CONFESSION' ? 'İTİRAF' : 'OVERHEARD'}
@@ -39,6 +55,7 @@ export default async function PostPage({ params }: any) {
           </div>
         </article>
 
+        {/* Yorumlar Bölümü */}
         <div className="space-y-6">
           <h2 className="text-lg font-medium flex items-center gap-2">
             <MessageCircle size={20} /> Anonim Yorumlar ({post.comments.length})
