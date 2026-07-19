@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
-import { Heart, Eye, MapPin, Clock, Users, User } from "lucide-react"; // İkonlar eklendi
+import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle } from "lucide-react"; // MessageCircle eklendi
 import Link from "next/link";
 import { incrementView } from "@/app/post/actions";
 
@@ -16,10 +16,10 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
       (entries) => {
         if (entries[0].isIntersecting && !hasViewed) {
           incrementView(post.id);
-          setHasViewed(true); // Sadece bir kere artsın diye işaretledik
+          setHasViewed(true);
         }
       },
-      { threshold: 0.5 } // Postun yarısı ekrana girince say
+      { threshold: 0.5 }
     );
 
     if (cardRef.current) observer.observe(cardRef.current);
@@ -30,9 +30,7 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     <div ref={cardRef} className="group bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-5 rounded-[20px] hover:bg-white/[0.05] transition-all">
       <Link href={`/post/${post.id}`} className="block">
         
-        {/* ROZETLERİN (TAGS) OLDUĞU KISIM */}
         <div className="flex flex-wrap gap-2 mb-4 text-xs font-medium text-gray-400">
-          
           <span className={`px-3 py-1 rounded-full border ${post.type === 'CONFESSION' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20 text-[#4DA3FF]'}`}>
             {post.type === 'CONFESSION' ? 'İTİRAF' : 'OVERHEARD'}
           </span>
@@ -60,14 +58,13 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
               <User size={12} /> {post.gender}
             </span>
           )}
-
         </div>
         
         <p className="text-white text-[17px] leading-relaxed mb-6 font-light">{post.content}</p>
       </Link>
 
       <div className="flex items-center justify-between border-t border-white/10 pt-4 text-gray-400 px-2 -mt-4">
-        <div className="flex gap-5">
+        <div className="flex gap-4 md:gap-5">
           <form action={incrementLike}>
             <input type="hidden" name="id" value={post.id} />
             <button type="submit" disabled={isLiked} className={`flex items-center gap-2 transition-colors ${isLiked ? 'text-red-500' : 'hover:text-red-400'}`}>
@@ -78,9 +75,15 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
           <div className="flex items-center gap-2">
             <Eye size={18} /> <span className="text-sm">{post.views}</span>
           </div>
+          
+          {/* YORUM SAYISI İKONU BURAYA EKLENDİ */}
+          <div className="flex items-center gap-2">
+            <MessageCircle size={18} /> <span className="text-sm">{post.comments?.length || 0}</span>
+          </div>
+
           <button 
             onClick={() => setShowComment(!showComment)}
-            className="text-sm hover:text-[#4DA3FF] transition-colors"
+            className="text-sm hover:text-[#4DA3FF] transition-colors ml-1 md:ml-0"
           >
             {showComment ? "Vazgeç" : "Yorum Yap"}
           </button>

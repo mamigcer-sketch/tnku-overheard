@@ -1,11 +1,11 @@
 import { PrismaClient } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
-  Inbox, Check, X, Trash2, Lock, KeyRound, LogOut 
+  Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
+  MapPin, Clock, Users, User // Yeni rozet ikonları eklendi
 } from 'lucide-react';
 
 // --- AYARLAR ---
@@ -56,14 +56,16 @@ export default async function AdminDashboard({ searchParams }: any) {
   // --- 2. ANA ADMİN PANELİ ---
   const params = await searchParams;
   const currentTab = params?.tab || 'Dashboard';
-  const editId = params?.edit;
 
   const totalPosts = await prisma.post.count({ where: { status: 'APPROVED' } });
   const pendingPostsCount = await prisma.post.count({ where: { status: 'PENDING' } });
   
   let queryFilter: any = { status: 'PENDING' };
   if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
-  if (currentTab === 'Overheard') queryFilter = { status: 'APPROVED', type: 'OVERHEARD' };
+  
+  // Overheard sekmesi admin panelinde de hata vermesin diye düzeltildi
+  if (currentTab === 'Overheard') queryFilter = { status: 'APPROVED', type: { in: ['OVERHEARD', 'OVERHED'] } };
+  
   if (currentTab === 'İtiraflar') queryFilter = { status: 'APPROVED', type: 'CONFESSION' };
 
   const displayPosts = await prisma.post.findMany({
@@ -146,7 +148,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
         <h2 className="text-2xl font-bold mb-6 hidden md:block">{currentTab} Paneli</h2>
         
-        {/* İSTATİSTİKLER (Mobilde yan yana 2 kutu, masaüstünde 4 kutu) */}
+        {/* İSTATİSTİKLER */}
         {(currentTab === 'Dashboard' || currentTab === 'Bekleyenler') && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
               <div className="bg-[#121212] p-5 rounded-2xl border border-white/5">
@@ -169,6 +171,38 @@ export default async function AdminDashboard({ searchParams }: any) {
           ) : (
             displayPosts.map((post) => (
               <article key={post.id} className="bg-[#121212] p-5 md:p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
+                
+                {/* --- BİLGİ ROZETLERİ (BURAYI EKLEDİK) --- */}
+                <div className="flex flex-wrap gap-2 text-xs font-medium text-gray-400">
+                  <span className={`px-2 py-1 rounded-md border ${post.type === 'CONFESSION' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20 text-[#4DA3FF]'}`}>
+                    {post.type === 'CONFESSION' ? 'İTİRAF' : 'OVERHEARD'}
+                  </span>
+                  
+                  {post.location && (
+                    <span className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                      <MapPin size={12} /> {post.location}
+                    </span>
+                  )}
+
+                  {post.time && (
+                    <span className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                      <Clock size={12} /> {post.time}
+                    </span>
+                  )}
+
+                  {post.people && (
+                    <span className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                      <Users size={12} /> {post.people}
+                    </span>
+                  )}
+
+                  {post.gender && (
+                    <span className="flex items-center gap-1 bg-white/5 px-2 py-1 rounded-md border border-white/5">
+                      <User size={12} /> {post.gender}
+                    </span>
+                  )}
+                </div>
+
                 <p className="text-white text-[15px] md:text-[17px] leading-relaxed">{post.content}</p>
                 
                 {/* BUTONLAR */}

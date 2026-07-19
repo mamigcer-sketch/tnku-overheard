@@ -48,6 +48,12 @@ export default async function Home({ searchParams }: any) {
   const posts = await prisma.post.findMany({
     where: whereQuery,
     orderBy: orderQuery,
+    // YORUM SAYISINI ÇEKMEK İÇİN BU KISIM EKLENDİ
+    include: {
+      comments: {
+        select: { id: true } // Sadece ID'leri alıyoruz ki site yavaşlamasın
+      }
+    }
   });
 
   const filters = ['Tümü', 'Overheard', 'İtiraf', 'En Yeni', 'En Popüler'];

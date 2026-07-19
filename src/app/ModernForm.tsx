@@ -6,7 +6,6 @@ import { Headphones, VenetianMask, Send, CheckCircle2 } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
 
 export default function ModernForm() {
-  // BURADAKİ OVERHED YAZILARI OVERHEARD OLARAK DÜZELTİLDİ
   const [type, setType] = useState<'OVERHEARD' | 'CONFESSION'>('OVERHEARD'); 
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');
@@ -85,38 +84,47 @@ export default function ModernForm() {
               className="col-span-2 md:col-span-1 bg-white/5 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF]" 
             />
             
-            <select 
-              required 
-              value={people} 
-              onChange={(e) => setPeople(e.target.value)} 
-              className="bg-[#1a1a1a] border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] cursor-pointer"
-            >
-              <option value="" disabled hidden>Kişi Seçiniz</option>
-              <option value="2 kişi" className="bg-[#1a1a1a] text-white">2 kişi</option>
-              <option value="3 kişi" className="bg-[#1a1a1a] text-white">3 kişi</option>
-              <option value="4 kişi" className="bg-[#1a1a1a] text-white">4 kişi</option>
-              <option value="Kalabalık" className="bg-[#1a1a1a] text-white">Kalabalık</option>
-            </select>
+            <div className="col-span-1 flex flex-col gap-1">
+               <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Kişi</label>
+               <select 
+                required 
+                value={people} 
+                onChange={(e) => setPeople(e.target.value)} 
+                className="bg-[#1a1a1a] border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] cursor-pointer"
+              >
+                <option value="" disabled hidden>Seçiniz</option>
+                <option value="2 kişi" className="bg-[#1a1a1a] text-white">2 kişi</option>
+                <option value="3 kişi" className="bg-[#1a1a1a] text-white">3 kişi</option>
+                <option value="4 kişi" className="bg-[#1a1a1a] text-white">4 kişi</option>
+                <option value="Kalabalık" className="bg-[#1a1a1a] text-white">Kalabalık</option>
+              </select>
+            </div>
 
-            <select 
-              required
-              value={gender} 
-              onChange={(e) => setGender(e.target.value)} 
-              className="bg-[#1a1a1a] border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] cursor-pointer"
-            >
-              <option value="" disabled hidden>Grup Seçiniz</option>
-              <option value="Kız" className="bg-[#1a1a1a] text-white">Kız</option>
-              <option value="Erkek" className="bg-[#1a1a1a] text-white">Erkek</option>
-              <option value="Karışık" className="bg-[#1a1a1a] text-white">Karışık</option>
-            </select>
+            <div className="col-span-1 flex flex-col gap-1">
+              <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Grup</label>
+              <select 
+                required
+                value={gender} 
+                onChange={(e) => setGender(e.target.value)} 
+                className="bg-[#1a1a1a] border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] cursor-pointer"
+              >
+                <option value="" disabled hidden>Seçiniz</option>
+                <option value="Kız" className="bg-[#1a1a1a] text-white">Kız</option>
+                <option value="Erkek" className="bg-[#1a1a1a] text-white">Erkek</option>
+                <option value="Karışık" className="bg-[#1a1a1a] text-white">Karışık</option>
+              </select>
+            </div>
 
-            <input 
-              type="time" 
-              required 
-              value={time} 
-              onChange={(e) => setTime(e.target.value)} 
-              className="bg-white/5 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] [color-scheme:dark]" 
-            />
+            <div className="col-span-2 md:col-span-1 flex flex-col gap-1">
+              <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Saat Seç</label>
+              <input 
+                type="time" 
+                required 
+                value={time} 
+                onChange={(e) => setTime(e.target.value)} 
+                className="bg-white/5 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] [color-scheme:dark] w-full" 
+              />
+            </div>
           </div>
         )}
 
