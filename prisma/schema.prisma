@@ -28,3 +28,4 @@ model Comment {
   createdAt DateTime @default(now())
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+} // 
