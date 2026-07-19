@@ -86,21 +86,23 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
               </span>
             )}
 
+            {/* hidden sm:flex kaldırıldı, mobilde de görünecek */}
             {post.people && (
-              <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5 hidden sm:flex">
+              <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5">
                 <Users size={12} /> {post.people}
               </span>
             )}
 
+            {/* hidden sm:flex kaldırıldı, mobilde de görünecek */}
             {post.gender && (
-              <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5 hidden sm:flex">
+              <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5">
                 <User size={12} /> {post.gender}
               </span>
             )}
           </div>
           
-          {/* Gönderi Zamanı */}
-          <span className="text-xs text-gray-500 font-medium whitespace-nowrap bg-white/5 px-3 py-1 rounded-full">
+          {/* Gönderi Zamanı (Mobilde alt satıra düşerse diye mt-1 eklendi) */}
+          <span className="text-xs text-gray-500 font-medium whitespace-nowrap bg-white/5 px-3 py-1 rounded-full mt-1 sm:mt-0">
             {getRelativeTime(post.createdAt)}
           </span>
         </div>
