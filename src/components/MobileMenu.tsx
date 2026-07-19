@@ -10,7 +10,7 @@ export default function MobileMenu() {
   const menuItems = [
     { name: 'Paylaşımlarım', icon: <Heart size={18} />, href: '/my-posts', isExternal: false },
     { name: 'Bildir / Şikayet', icon: <ShieldAlert size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
-    { name: 'Yenilikler', icon: <Sparkles size={18} />, href: '/updates', isExternal: false },
+   
   ];
 
   return (
