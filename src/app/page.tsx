@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
+import { Plus, ChevronDown } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,7 +77,30 @@ export default async function Home({ searchParams }: any) {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-8">
-        <ModernForm />
+        
+        {/* YENİ PAYLAŞIM ALANI (AKORDEON YAPISI) */}
+        <div className="mb-6">
+          <details className="group [&_summary::-webkit-details-marker]:hidden">
+            <summary className="list-none cursor-pointer flex items-center justify-between bg-[#121212] border border-white/10 hover:border-white/20 p-4 rounded-2xl transition-all shadow-lg">
+              <div className="flex items-center gap-3">
+                <div className="bg-[#4DA3FF]/10 p-2.5 rounded-xl">
+                  <Plus className="text-[#4DA3FF]" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-semibold text-white text-base">Bir şeyler paylaşmak ister misin?</h3>
+                  <p className="text-xs text-gray-500">Kampüste duyduklarını veya itiraflarını anonim yaz.</p>
+                </div>
+              </div>
+              <div className="bg-white/5 p-2 rounded-xl group-open:rotate-180 transition-transform duration-300">
+                <ChevronDown size={18} className="text-gray-400" />
+              </div>
+            </summary>
+            <div className="pt-4 animate-in fade-in slide-in-from-top-4 duration-500">
+              <ModernForm />
+            </div>
+          </details>
+        </div>
+        
         <SearchBar />
 
         <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
@@ -85,7 +109,7 @@ export default async function Home({ searchParams }: any) {
               key={filter} 
               href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`} 
               scroll={false}
-              className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap ${currentFilter === filter ? 'bg-[#4DA3FF] text-black' : 'bg-white/5 text-gray-300'}`}
+              className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap ${currentFilter === filter ? 'bg-[#4DA3FF] text-black shadow-[0_0_15px_rgba(77,163,255,0.3)]' : 'bg-[#121212] border border-white/5 text-gray-300 hover:bg-white/5 transition-colors'}`}
             >
               {filter}
             </Link>
@@ -94,8 +118,8 @@ export default async function Home({ searchParams }: any) {
 
         <div className="space-y-5">
           {posts.length === 0 ? (
-            <div className="text-center text-gray-500 py-10 border border-white/5 rounded-2xl bg-[#121212]">
-              Aradığın kriterlerde gönderi bulunamadı kanka.
+            <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
+              <p className="text-gray-400 font-medium">Aradığın kriterlerde gönderi bulunamadı kanka.</p>
             </div>
           ) : (
             <>
@@ -113,7 +137,7 @@ export default async function Home({ searchParams }: any) {
                 <div className="flex justify-center pt-4">
                   <Link 
                     href={`/?f=${currentFilter}${searchQuery ? `&q=${searchQuery}` : ''}&page=${page + 1}`}
-                    className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-sm transition-all"
+                    className="px-8 py-3 bg-[#121212] border border-white/10 hover:border-white/30 rounded-full text-sm font-medium text-white transition-all hover:bg-white/5"
                   >
                     Daha Fazla Göster
                   </Link>

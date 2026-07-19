@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Headphones, VenetianMask, Send, CheckCircle2 } from 'lucide-react';
+import { Headphones, VenetianMask, Send, CheckCircle2, Loader2 } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
 
 export default function ModernForm() {
@@ -16,6 +16,7 @@ export default function ModernForm() {
   const [successMsg, setSuccessMsg] = useState(false);
   
   const router = useRouter();
+  const maxChars = 500; // Karakter sınırı eklendi
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,36 +54,36 @@ export default function ModernForm() {
   };
 
   return (
-    <div className="bg-[#121212]/60 backdrop-blur-xl border border-white/10 p-6 rounded-[24px] shadow-lg mb-10 transition-all">
-      <h2 className="text-xl font-semibold text-white mb-6 text-center">Ne paylaşmak istiyorsun?</h2>
-      
+    <div className="bg-[#121212]/60 backdrop-blur-xl border border-white/10 p-6 rounded-[24px] mb-2 transition-all">
       <div className="flex gap-2 mb-6">
         <button 
           type="button"
           onClick={() => setType('OVERHEARD')} 
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${type === 'OVERHEARD' ? 'bg-[#4DA3FF] text-black font-bold' : 'bg-white/5 text-gray-400'}`}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 ${type === 'OVERHEARD' ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_15px_rgba(77,163,255,0.2)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'}`}
         >
           <Headphones size={18} /> Overheard
         </button>
         <button 
           type="button"
           onClick={() => setType('CONFESSION')} 
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${type === 'CONFESSION' ? 'bg-[#4DA3FF] text-black font-bold' : 'bg-white/5 text-gray-400'}`}
+          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all duration-300 ${type === 'CONFESSION' ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_15px_rgba(77,163,255,0.2)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'}`}
         >
           <VenetianMask size={18} /> İtiraf
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+      <form onSubmit={handleSubmit} className="space-y-5">
         {type === 'OVERHEARD' && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <input 
-              required 
-              placeholder="Konum" 
-              value={location} 
-              onChange={(e) => setLocation(e.target.value)} 
-              className="col-span-2 md:col-span-1 bg-white/5 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF]" 
-            />
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 animate-in fade-in zoom-in-95 duration-300">
+            <div className="col-span-2 md:col-span-1">
+                <input 
+                  required 
+                  placeholder="Konum" 
+                  value={location} 
+                  onChange={(e) => setLocation(e.target.value)} 
+                  className="w-full bg-white/5 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all placeholder:text-gray-500" 
+                />
+            </div>
             
             <div className="col-span-1 flex flex-col gap-1">
                <label className="text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Kişi</label>
@@ -90,7 +91,7 @@ export default function ModernForm() {
                 required 
                 value={people} 
                 onChange={(e) => setPeople(e.target.value)} 
-                className="bg-[#1a1a1a] border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] cursor-pointer"
+                className="bg-white/5 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all cursor-pointer appearance-none"
               >
                 <option value="" disabled hidden>Seçiniz</option>
                 <option value="2 kişi" className="bg-[#1a1a1a] text-white">2 kişi</option>
@@ -106,7 +107,7 @@ export default function ModernForm() {
                 required
                 value={gender} 
                 onChange={(e) => setGender(e.target.value)} 
-                className="bg-[#1a1a1a] border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] cursor-pointer"
+                className="bg-white/5 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all cursor-pointer appearance-none"
               >
                 <option value="" disabled hidden>Seçiniz</option>
                 <option value="Kız" className="bg-[#1a1a1a] text-white">Kız</option>
@@ -122,33 +123,44 @@ export default function ModernForm() {
                 required 
                 value={time} 
                 onChange={(e) => setTime(e.target.value)} 
-                className="bg-white/5 border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] [color-scheme:dark] w-full" 
+                className="bg-white/5 border border-white/10 p-3.5 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all [color-scheme:dark] w-full" 
               />
             </div>
           </div>
         )}
 
-        <textarea 
-          required 
-          rows={4} 
-          placeholder={type === 'OVERHEARD' ? "Ne konuşuluyordu?" : "İtirafın nedir?"} 
-          value={content} 
-          onChange={(e) => setContent(e.target.value)} 
-          className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-[#4DA3FF] resize-none" 
-        />
+        <div className="relative">
+            <textarea 
+              required 
+              maxLength={maxChars}
+              rows={4} 
+              placeholder={type === 'OVERHEARD' ? "Ne konuşuluyordu?" : "İtirafın nedir?"} 
+              value={content} 
+              onChange={(e) => setContent(e.target.value)} 
+              className="w-full bg-white/5 border border-white/10 p-4 pb-8 rounded-xl text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] resize-none transition-all placeholder:text-gray-500" 
+            />
+            {/* Karakter Sayacı */}
+            <div className={`absolute bottom-3 right-4 text-xs font-medium transition-colors ${content.length >= maxChars ? 'text-red-400' : 'text-gray-500'}`}>
+                {content.length} / {maxChars}
+            </div>
+        </div>
 
         <button 
           type="submit" 
           disabled={loading} 
-          className="w-full bg-[#4DA3FF] hover:bg-blue-400 py-4 rounded-xl font-bold text-black flex items-center justify-center gap-2 transition-all disabled:opacity-50"
+          className="w-full bg-[#4DA3FF] hover:bg-blue-400 py-4 rounded-xl font-bold text-black flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(77,163,255,0.2)] hover:shadow-[0_0_25px_rgba(77,163,255,0.4)]"
         >
-          {loading ? 'Gönderiliyor...' : <><Send size={18} /> Gönder</>}
+          {loading ? (
+            <><Loader2 size={18} className="animate-spin" /> Gönderiliyor...</>
+          ) : (
+            <><Send size={18} /> Yönetici Onayına Gönder</>
+          )}
         </button>
       </form>
 
       {successMsg && (
-        <div className="mt-4 p-4 bg-green-500/20 border border-green-500/50 text-green-400 rounded-xl flex items-center gap-2 justify-center">
-          <CheckCircle2 size={18} /> Gönderin alındı! Yönetici onayından sonra yayınlanacak.
+        <div className="mt-5 p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl flex items-center gap-3 justify-center animate-in fade-in zoom-in-95 duration-300 font-medium text-sm">
+          <CheckCircle2 size={20} /> Gönderin başarıyla alındı! Onaylandıktan sonra yayında.
         </div>
       )}
     </div>

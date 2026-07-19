@@ -2,9 +2,27 @@
 
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
-import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2 } from "lucide-react"; // Share2 eklendi
+import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2 } from "lucide-react";
 import Link from "next/link";
 import { incrementView } from "@/app/post/actions";
+
+// Ne kadar zaman önce paylaşıldığını hesaplayan fonksiyon
+const getRelativeTime = (dateString: string) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+  const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+
+  if (diffInSeconds < 60) return "Az önce";
+  const diffInMinutes = Math.floor(diffInSeconds / 60);
+  if (diffInMinutes < 60) return `${diffInMinutes} dk önce`;
+  const diffInHours = Math.floor(diffInMinutes / 60);
+  if (diffInHours < 24) return `${diffInHours} saat önce`;
+  const diffInDays = Math.floor(diffInHours / 24);
+  if (diffInDays === 1) return "Dün";
+  if (diffInDays < 7) return `${diffInDays} gün önce`;
+  return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+};
 
 export default function PostCard({ post, isLiked, incrementLike }: any) {
   const [showComment, setShowComment] = useState(false);
@@ -26,20 +44,17 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     return () => observer.disconnect();
   }, [post.id, hasViewed]);
 
-  // PAYLAŞMA FONKSİYONU
   const handleShare = async () => {
     const shareData = {
       title: 'TNKU Overheard',
-      text: 'Şu itirafa bakmalısın, koptum!',
+      text: 'Şu paylaşıma bakmalısın!',
       url: `${window.location.origin}/post/${post.id}`,
     };
 
     try {
       if (navigator.share) {
-        // Telefondaysa direkt native paylaşım menüsünü açar
         await navigator.share(shareData);
       } else {
-        // Bilgisayardaysa linki kopyalar
         await navigator.clipboard.writeText(shareData.url);
         alert('Link kopyalandı kanka!');
       }
@@ -49,79 +64,95 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   };
 
   return (
-    <div ref={cardRef} className="group bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-5 rounded-[20px] hover:bg-white/[0.05] transition-all">
+    <div ref={cardRef} className="group bg-[#121212]/80 backdrop-blur-md border border-white/[0.08] p-5 rounded-[24px] hover:bg-[#1a1a1a]/90 hover:border-white/10 transition-all duration-300 shadow-lg">
       <Link href={`/post/${post.id}`} className="block">
         
-        <div className="flex flex-wrap gap-2 mb-4 text-xs font-medium text-gray-400">
-          <span className={`px-3 py-1 rounded-full border ${post.type === 'CONFESSION' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20 text-[#4DA3FF]'}`}>
-            {post.type === 'CONFESSION' ? 'İTİRAF' : 'OVERHEARD'}
-          </span>
+        {/* Üst Bilgi Çubuğu (Etiketler ve Zaman) */}
+        <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
+          <div className="flex flex-wrap gap-2 text-xs font-medium text-gray-400">
+            <span className={`px-3 py-1 rounded-full border ${post.type === 'CONFESSION' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20 text-[#4DA3FF]'}`}>
+              {post.type === 'CONFESSION' ? 'İTİRAF' : 'OVERHEARD'}
+            </span>
+            
+            {post.location && (
+              <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                <MapPin size={12} /> {post.location}
+              </span>
+            )}
+
+            {post.time && (
+              <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5">
+                <Clock size={12} /> {post.time}
+              </span>
+            )}
+
+            {post.people && (
+              <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5 hidden sm:flex">
+                <Users size={12} /> {post.people}
+              </span>
+            )}
+
+            {post.gender && (
+              <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5 hidden sm:flex">
+                <User size={12} /> {post.gender}
+              </span>
+            )}
+          </div>
           
-          {post.location && (
-            <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5">
-              <MapPin size={12} /> {post.location}
-            </span>
-          )}
-
-          {post.time && (
-            <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5">
-              <Clock size={12} /> {post.time}
-            </span>
-          )}
-
-          {post.people && (
-            <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5">
-              <Users size={12} /> {post.people}
-            </span>
-          )}
-
-          {post.gender && (
-            <span className="flex items-center gap-1 bg-white/5 px-3 py-1 rounded-full border border-white/5">
-              <User size={12} /> {post.gender}
-            </span>
-          )}
+          {/* Gönderi Zamanı */}
+          <span className="text-xs text-gray-500 font-medium whitespace-nowrap bg-white/5 px-3 py-1 rounded-full">
+            {getRelativeTime(post.createdAt)}
+          </span>
         </div>
         
-        <p className="text-white text-[17px] leading-relaxed mb-6 font-light">{post.content}</p>
+        <p className="text-white text-[16px] leading-relaxed mb-6 font-normal break-words">{post.content}</p>
       </Link>
 
-      <div className="flex items-center justify-between border-t border-white/10 pt-4 text-gray-400 px-2 -mt-4">
-        <div className="flex gap-4 md:gap-5">
+      {/* Alt Etkileşim Çubuğu */}
+      <div className="flex items-center justify-between border-t border-white/5 pt-4 text-gray-400">
+        <div className="flex items-center gap-5">
           <form action={incrementLike}>
             <input type="hidden" name="id" value={post.id} />
-            <button type="submit" disabled={isLiked} className={`flex items-center gap-2 transition-colors ${isLiked ? 'text-red-500' : 'hover:text-red-400'}`}>
-              <Heart size={18} className={isLiked ? 'fill-red-500' : ''} /> 
-              <span className="text-sm">{post.likes}</span>
+            <button type="submit" disabled={isLiked} className={`flex items-center gap-1.5 transition-all group-button ${isLiked ? 'text-red-500' : 'hover:text-red-400'}`}>
+              <Heart size={18} className={`transition-transform ${isLiked ? 'fill-red-500 scale-110' : 'active:scale-95'}`} /> 
+              <span className="text-sm font-medium">{post.likes}</span>
             </button>
           </form>
           
-          <div className="flex items-center gap-2">
-            <Eye size={18} /> <span className="text-sm">{post.views}</span>
+          <div className="flex items-center gap-1.5">
+            <Eye size={18} /> <span className="text-sm font-medium">{post.views}</span>
           </div>
           
-          <div className="flex items-center gap-2">
-            <MessageCircle size={18} /> <span className="text-sm">{post.comments?.length || 0}</span>
+          <div className="flex items-center gap-1.5">
+            <MessageCircle size={18} /> <span className="text-sm font-medium">{post.comments?.length || 0}</span>
           </div>
+        </div>
 
+        <div className="flex items-center gap-3">
           <button 
-            onClick={() => setShowComment(!showComment)}
-            className="text-sm hover:text-[#4DA3FF] transition-colors"
+            onClick={(e) => {
+              e.preventDefault();
+              setShowComment(!showComment);
+            }}
+            className={`text-xs font-medium px-4 py-1.5 rounded-full transition-all flex items-center gap-1 border ${showComment ? 'bg-red-500/10 text-red-400 border-red-500/20' : 'bg-[#4DA3FF]/10 text-[#4DA3FF] border-[#4DA3FF]/20 hover:bg-[#4DA3FF]/20'}`}
           >
             {showComment ? "Vazgeç" : "Yorum Yap"}
           </button>
-        </div>
 
-        {/* PAYLAŞ BUTONU */}
-        <button onClick={handleShare} className="hover:text-white transition-colors">
-          <Share2 size={18} />
-        </button>
+          <button onClick={handleShare} className="hover:text-white transition-colors bg-white/5 p-1.5 rounded-full hover:bg-white/10">
+            <Share2 size={16} />
+          </button>
+        </div>
       </div>
 
-      {showComment && (
-        <div className="mt-4 border-t border-white/10 pt-4">
-          <CommentForm postId={post.id} />
+      {/* Yorum Formu (Akordeon gibi açılır) */}
+      <div className={`grid transition-all duration-300 ease-in-out ${showComment ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+        <div className="overflow-hidden">
+          <div className="border-t border-white/5 pt-4">
+            <CommentForm postId={post.id} />
+          </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
