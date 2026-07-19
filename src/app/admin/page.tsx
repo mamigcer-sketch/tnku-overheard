@@ -281,4 +281,4 @@ export default async function AdminDashboard({ searchParams }: any) {
 
     </div>
   );
-}
+}export const maxDuration = 30;
