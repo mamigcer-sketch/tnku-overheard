@@ -6,11 +6,12 @@ import { Headphones, VenetianMask, Send, CheckCircle2 } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
 
 export default function ModernForm() {
-  const [type, setType] = useState<'OVERHED' | 'CONFESSION'>('OVERHED');
+  // BURADAKİ OVERHED YAZILARI OVERHEARD OLARAK DÜZELTİLDİ
+  const [type, setType] = useState<'OVERHEARD' | 'CONFESSION'>('OVERHEARD'); 
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');
-  const [people, setPeople] = useState('2 kişi');
-  const [gender, setGender] = useState('Kız');
+  const [people, setPeople] = useState(''); 
+  const [gender, setGender] = useState(''); 
   const [time, setTime] = useState('');
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
@@ -39,8 +40,8 @@ export default function ModernForm() {
 
       setContent('');
       setLocation('');
-      setPeople('2 kişi');
-      setGender('Kız');
+      setPeople(''); 
+      setGender(''); 
       setTime('');
       setSuccessMsg(true);
       setTimeout(() => setSuccessMsg(false), 5000);
@@ -59,8 +60,8 @@ export default function ModernForm() {
       <div className="flex gap-2 mb-6">
         <button 
           type="button"
-          onClick={() => setType('OVERHED')} 
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${type === 'OVERHED' ? 'bg-[#4DA3FF] text-black font-bold' : 'bg-white/5 text-gray-400'}`}
+          onClick={() => setType('OVERHEARD')} 
+          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl transition-all ${type === 'OVERHEARD' ? 'bg-[#4DA3FF] text-black font-bold' : 'bg-white/5 text-gray-400'}`}
         >
           <Headphones size={18} /> Overheard
         </button>
@@ -74,7 +75,7 @@ export default function ModernForm() {
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
-        {type === 'OVERHED' && (
+        {type === 'OVERHEARD' && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <input 
               required 
@@ -85,10 +86,12 @@ export default function ModernForm() {
             />
             
             <select 
+              required 
               value={people} 
               onChange={(e) => setPeople(e.target.value)} 
               className="bg-[#1a1a1a] border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] cursor-pointer"
             >
+              <option value="" disabled hidden>Kişi Seçiniz</option>
               <option value="2 kişi" className="bg-[#1a1a1a] text-white">2 kişi</option>
               <option value="3 kişi" className="bg-[#1a1a1a] text-white">3 kişi</option>
               <option value="4 kişi" className="bg-[#1a1a1a] text-white">4 kişi</option>
@@ -96,10 +99,12 @@ export default function ModernForm() {
             </select>
 
             <select 
+              required
               value={gender} 
               onChange={(e) => setGender(e.target.value)} 
               className="bg-[#1a1a1a] border border-white/10 p-3 rounded-xl text-white outline-none focus:border-[#4DA3FF] cursor-pointer"
             >
+              <option value="" disabled hidden>Grup Seçiniz</option>
               <option value="Kız" className="bg-[#1a1a1a] text-white">Kız</option>
               <option value="Erkek" className="bg-[#1a1a1a] text-white">Erkek</option>
               <option value="Karışık" className="bg-[#1a1a1a] text-white">Karışık</option>
@@ -118,7 +123,7 @@ export default function ModernForm() {
         <textarea 
           required 
           rows={4} 
-          placeholder={type === 'OVERHED' ? "Ne konuşuluyordu?" : "İtirafın nedir?"} 
+          placeholder={type === 'OVERHEARD' ? "Ne konuşuluyordu?" : "İtirafın nedir?"} 
           value={content} 
           onChange={(e) => setContent(e.target.value)} 
           className="w-full bg-white/5 border border-white/10 p-4 rounded-xl text-white outline-none focus:border-[#4DA3FF] resize-none" 
