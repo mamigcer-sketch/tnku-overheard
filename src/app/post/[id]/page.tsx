@@ -3,30 +3,30 @@ import CommentForm from '@/components/CommentForm';
 import BackButton from '@/components/BackButton';
 import { MessageCircle } from 'lucide-react';
 
-// 1. SİHİRLİ SATIR: Vercel'in bu sayfayı build sırasında zorla statik yapmaya çalışmasını engeller
+// Vercel'in bu sayfayı statik olarak derlemesini engeller
 export const dynamic = 'force-dynamic';
 
-export default async function PostPage({ params }: { params: { id: string } }) {
-  // Parametreleri güvenli bir şekilde alalım
+export default async function PostPage({ params }: any) {
+  // Next.js 14 ve 15 uyumlu güvenli parametre alma
   const resolvedParams = await params;
-  const id = resolvedParams?.id;
+  const postId = resolvedParams?.id;
 
-  // 2. KORUMA: Eğer Vercel test ediyorsa veya ID yoksa, Prisma'yı durdurup hata vermesini engelliyoruz
-  if (!id) {
+  // ZIRH 1: Eğer Vercel test ediyorsa veya ID yoksa veritabanına SAKIN gitme!
+  if (!postId) {
     return <div className="min-h-screen bg-[#0B0B0B] p-10 text-center text-white">Yükleniyor...</div>;
   }
 
-  // Postu ve ona bağlı yorumları aynı anda çekiyoruz
+  // ZIRH 2: Artık ID'nin dolu olduğundan %100 eminiz, sorguyu çalıştırabiliriz.
   const post = await prisma.post.findUnique({
-    where: { id },
+    where: { id: String(postId) }, // Güvenlik için String'e zorluyoruz
     include: { 
       comments: { 
-        orderBy: { createdAt: 'desc' } // En yeni yorum en üstte
+        orderBy: { createdAt: 'desc' } 
       } 
     }
   });
 
-  if (!post) return <div className="min-h-screen bg-[#0B0B0B] p-10 text-center text-white">Post bulunamadı kanka...</div>;
+  if (!post) return <div className="p-10 text-center text-white">Post bulunamadı kanka...</div>;
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white p-4 md:p-8">
@@ -57,7 +57,7 @@ export default async function PostPage({ params }: { params: { id: string } }) {
             {post.comments.length === 0 ? (
               <p className="text-gray-500 text-sm italic">Henüz kimse bir şey fısıldamamış. İlk sen ol!</p>
             ) : (
-              post.comments.map((comment) => (
+              post.comments.map((comment: any) => (
                 <div key={comment.id} className="bg-white/[0.02] border border-white/[0.05] p-4 rounded-xl">
                   <p className="text-gray-200 text-sm">{comment.content}</p>
                   <span className="text-[10px] text-gray-600 mt-2 block">
