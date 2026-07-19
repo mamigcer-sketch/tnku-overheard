@@ -16,7 +16,7 @@ export default function ModernForm() {
   const [successMsg, setSuccessMsg] = useState(false);
   
   const router = useRouter();
-  const maxChars = 500; // Karakter sınırı eklendi
+  const maxChars = 500;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,6 +72,13 @@ export default function ModernForm() {
         >
           <VenetianMask size={16} className="sm:w-[18px] sm:h-[18px]" /> İtiraf
         </button>
+      </div>
+
+      {/* Uyarı Kutusu */}
+      <div className="flex items-center justify-center gap-2 text-[#4DA3FF]/70 bg-[#4DA3FF]/5 px-4 py-3 rounded-xl mb-6 border border-[#4DA3FF]/10">
+        <span className="text-[11px] sm:text-xs font-medium text-center">
+          ⚠️ Lütfen paylaşımını doğru kategoriyle (Overheard veya İtiraf) işaretle.
+        </span>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5">
@@ -141,7 +148,6 @@ export default function ModernForm() {
               onChange={(e) => setContent(e.target.value)} 
               className="w-full bg-white/5 border border-white/10 p-3 sm:p-4 pb-8 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] resize-none transition-all placeholder:text-gray-500" 
             />
-            {/* Karakter Sayacı */}
             <div className={`absolute bottom-2 sm:bottom-3 right-3 sm:right-4 text-[10px] sm:text-xs font-medium transition-colors ${content.length >= maxChars ? 'text-red-400' : 'text-gray-500'}`}>
                 {content.length} / {maxChars}
             </div>
