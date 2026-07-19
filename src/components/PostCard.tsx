@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
-import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle } from "lucide-react"; // MessageCircle eklendi
+import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2 } from "lucide-react"; // Share2 eklendi
 import Link from "next/link";
 import { incrementView } from "@/app/post/actions";
 
@@ -25,6 +25,28 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     if (cardRef.current) observer.observe(cardRef.current);
     return () => observer.disconnect();
   }, [post.id, hasViewed]);
+
+  // PAYLAŞMA FONKSİYONU
+  const handleShare = async () => {
+    const shareData = {
+      title: 'TNKU Overheard',
+      text: 'Şu itirafa bakmalısın, koptum!',
+      url: `${window.location.origin}/post/${post.id}`,
+    };
+
+    try {
+      if (navigator.share) {
+        // Telefondaysa direkt native paylaşım menüsünü açar
+        await navigator.share(shareData);
+      } else {
+        // Bilgisayardaysa linki kopyalar
+        await navigator.clipboard.writeText(shareData.url);
+        alert('Link kopyalandı kanka!');
+      }
+    } catch (err) {
+      console.error('Paylaşım hatası:', err);
+    }
+  };
 
   return (
     <div ref={cardRef} className="group bg-white/[0.03] backdrop-blur-md border border-white/[0.08] p-5 rounded-[20px] hover:bg-white/[0.05] transition-all">
@@ -72,23 +94,27 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
               <span className="text-sm">{post.likes}</span>
             </button>
           </form>
+          
           <div className="flex items-center gap-2">
             <Eye size={18} /> <span className="text-sm">{post.views}</span>
           </div>
           
-          {/* YORUM SAYISI İKONU BURAYA EKLENDİ */}
           <div className="flex items-center gap-2">
             <MessageCircle size={18} /> <span className="text-sm">{post.comments?.length || 0}</span>
           </div>
 
           <button 
             onClick={() => setShowComment(!showComment)}
-            className="text-sm hover:text-[#4DA3FF] transition-colors ml-1 md:ml-0"
+            className="text-sm hover:text-[#4DA3FF] transition-colors"
           >
             {showComment ? "Vazgeç" : "Yorum Yap"}
           </button>
         </div>
-        <span className="text-xs">{post.createdAt.toLocaleDateString('tr-TR')}</span>
+
+        {/* PAYLAŞ BUTONU */}
+        <button onClick={handleShare} className="hover:text-white transition-colors">
+          <Share2 size={18} />
+        </button>
       </div>
 
       {showComment && (
