@@ -5,8 +5,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
-  Inbox, BarChart2, Settings, Check, X, Trash2, 
-  MapPin, Users, Heart, Eye, Clock, Edit3, Lock, KeyRound, LogOut
+  Inbox, Check, X, Trash2, Lock, KeyRound, LogOut 
 } from 'lucide-react';
 
 // --- AYARLAR ---
@@ -40,10 +39,10 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-center text-white mb-2">Gizli Kontrol Merkezi</h1>
-          <form action={login} className="space-y-4">
+          <form action={login} className="space-y-4 mt-8">
             <div className="relative">
               <KeyRound className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
-              <input type="password" name="password" placeholder="Şifre" className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white outline-none" />
+              <input type="password" name="password" placeholder="Şifre" className="w-full bg-[#1A1A1A] border border-white/10 rounded-xl py-4 pl-12 pr-4 text-white outline-none focus:border-[#4DA3FF] transition-colors" />
             </div>
             <button type="submit" className="w-full bg-[#4DA3FF] hover:bg-[#3b8ce0] text-black font-bold py-4 rounded-xl transition-all">
               Giriş Yap
@@ -61,7 +60,6 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   const totalPosts = await prisma.post.count({ where: { status: 'APPROVED' } });
   const pendingPostsCount = await prisma.post.count({ where: { status: 'PENDING' } });
-  const stats = await prisma.post.aggregate({ _sum: { likes: true, views: true }, where: { status: 'APPROVED' } });
   
   let queryFilter: any = { status: 'PENDING' };
   if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
@@ -72,8 +70,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     where: queryFilter,
     orderBy: { createdAt: 'desc' },
   });
-
-  const postToEdit = editId ? displayPosts.find(p => p.id === editId) : null;
 
   async function approvePost(formData: FormData) {
     'use server';
@@ -93,13 +89,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/admin');
   }
 
-  async function updatePost(formData: FormData) {
-    'use server';
-    const content = formData.get('content') as string;
-    if(content) await prisma.post.update({ where: { id: formData.get('id') as string }, data: { content } });
-    redirect(`/admin?tab=${formData.get('currentTab')}`);
-  }
-
   async function logout() {
     'use server';
     const cookiesList = await cookies();
@@ -117,52 +106,106 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   return (
     <div className="flex h-screen bg-[#0B0B0B] text-white overflow-hidden">
+      {/* MASAÜSTÜ SOL MENÜ */}
       <aside className="w-64 bg-[#121212] border-r border-white/5 flex flex-col p-6 hidden md:flex">
         <h1 className="text-xl font-bold mb-10">TNKU<span className="text-[#4DA3FF]">ADMIN</span></h1>
         <nav className="space-y-2 flex-1">
           {menuItems.map((item, i) => (
-            <Link href={`/admin?tab=${item.label}`} key={i} className={`flex items-center gap-3 px-4 py-3 rounded-xl ${currentTab === item.label ? 'bg-[#4DA3FF]/10 text-[#4DA3FF]' : 'text-gray-400 hover:text-white'}`}>
+            <Link href={`/admin?tab=${item.label}`} key={i} className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${currentTab === item.label ? 'bg-[#4DA3FF]/10 text-[#4DA3FF] font-medium' : 'text-gray-400 hover:text-white'}`}>
               <item.icon size={20} /> {item.label}
             </Link>
           ))}
         </nav>
         <form action={logout}>
-          <button type="submit" className="w-full flex items-center justify-center gap-2 text-red-400 py-3 rounded-xl border border-red-500/20">
+          <button type="submit" className="w-full flex items-center justify-center gap-2 text-red-400 py-3 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-colors">
             <LogOut size={18} /> Çıkış Yap
           </button>
         </form>
       </aside>
 
-      <main className="flex-1 overflow-y-auto p-10">
-        <h2 className="text-2xl font-bold mb-8">{currentTab} Paneli</h2>
+      <main className="flex-1 overflow-y-auto p-4 md:p-10">
         
-        {/* İstatistikler */}
-        <div className="grid grid-cols-4 gap-6 mb-12">
-            <div className="bg-[#121212] p-6 rounded-2xl border border-white/5">
-                <p className="text-gray-400 text-sm">Toplam</p>
-                <p className="text-3xl font-bold text-blue-400">{totalPosts}</p>
-            </div>
-            <div className="bg-[#121212] p-6 rounded-2xl border border-white/5">
-                <p className="text-gray-400 text-sm">Bekleyen</p>
-                <p className="text-3xl font-bold text-yellow-400">{pendingPostsCount}</p>
-            </div>
+        {/* MOBİL ÜST MENÜ */}
+        <div className="md:hidden mb-6">
+          <div className="flex items-center justify-between mb-4 pt-2">
+            <h1 className="text-xl font-bold">TNKU<span className="text-[#4DA3FF]">ADMIN</span></h1>
+            <form action={logout}>
+              <button type="submit" className="text-red-400 p-2.5 bg-red-500/10 rounded-xl border border-red-500/20">
+                <LogOut size={18} />
+              </button>
+            </form>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+            {menuItems.map((item, i) => (
+              <Link href={`/admin?tab=${item.label}`} key={i} className={`flex-shrink-0 px-4 py-2.5 rounded-xl text-sm font-medium transition-all ${currentTab === item.label ? 'bg-[#4DA3FF] text-black' : 'bg-[#121212] border border-white/5 text-gray-400'}`}>
+                {item.label}
+              </Link>
+            ))}
+          </div>
         </div>
 
-        <div className="max-w-3xl space-y-5">
-          {displayPosts.map((post) => (
-            <article key={post.id} className="bg-[#121212] p-6 rounded-2xl border border-white/10">
-              <p className="text-white mb-4">{post.content}</p>
-              <div className="flex gap-3">
-                {post.status === 'PENDING' && (
-                  <>
-                    <form action={approvePost}><input type="hidden" name="id" value={post.id} /><button type="submit" className="text-green-400">Onayla</button></form>
-                    <form action={rejectPost}><input type="hidden" name="id" value={post.id} /><button type="submit" className="text-orange-400">Reddet</button></form>
-                  </>
-                )}
-                <form action={deletePost}><input type="hidden" name="id" value={post.id} /><button type="submit" className="text-red-400">Sil</button></form>
+        <h2 className="text-2xl font-bold mb-6 hidden md:block">{currentTab} Paneli</h2>
+        
+        {/* İSTATİSTİKLER (Mobilde yan yana 2 kutu, masaüstünde 4 kutu) */}
+        {(currentTab === 'Dashboard' || currentTab === 'Bekleyenler') && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-[#121212] p-5 rounded-2xl border border-white/5">
+                  <p className="text-gray-400 text-xs md:text-sm mb-1 font-medium">Toplam</p>
+                  <p className="text-2xl md:text-3xl font-bold text-[#4DA3FF]">{totalPosts}</p>
               </div>
-            </article>
-          ))}
+              <div className="bg-[#121212] p-5 rounded-2xl border border-white/5">
+                  <p className="text-gray-400 text-xs md:text-sm mb-1 font-medium">Bekleyen</p>
+                  <p className="text-2xl md:text-3xl font-bold text-yellow-400">{pendingPostsCount}</p>
+              </div>
+          </div>
+        )}
+
+        {/* GÖNDERİLER */}
+        <div className="max-w-3xl space-y-4">
+          {displayPosts.length === 0 ? (
+            <div className="bg-[#121212] border border-white/5 p-10 rounded-[24px] text-center text-gray-500">
+              Gösterilecek veri yok kanka.
+            </div>
+          ) : (
+            displayPosts.map((post) => (
+              <article key={post.id} className="bg-[#121212] p-5 md:p-6 rounded-2xl border border-white/10 flex flex-col gap-4">
+                <p className="text-white text-[15px] md:text-[17px] leading-relaxed">{post.content}</p>
+                
+                {/* BUTONLAR */}
+                <div className="grid grid-cols-3 gap-2 pt-4 border-t border-white/5">
+                  {post.status === 'PENDING' ? (
+                    <>
+                      <form action={approvePost} className="w-full">
+                        <input type="hidden" name="id" value={post.id} />
+                        <button type="submit" className="w-full bg-green-500/10 hover:bg-green-500/20 text-green-400 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1 transition-colors border border-green-500/20">
+                          <Check size={16} /> Onayla
+                        </button>
+                      </form>
+                      <form action={rejectPost} className="w-full">
+                        <input type="hidden" name="id" value={post.id} />
+                        <button type="submit" className="w-full bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1 transition-colors border border-orange-500/20">
+                          <X size={16} /> Reddet
+                        </button>
+                      </form>
+                      <form action={deletePost} className="w-full">
+                        <input type="hidden" name="id" value={post.id} />
+                        <button type="submit" className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-1 transition-colors border border-red-500/20">
+                          <Trash2 size={16} /> Sil
+                        </button>
+                      </form>
+                    </>
+                  ) : (
+                    <form action={deletePost} className="w-full col-span-3">
+                      <input type="hidden" name="id" value={post.id} />
+                      <button type="submit" className="w-full bg-red-500/10 hover:bg-red-500/20 text-red-400 py-3 rounded-xl text-sm font-medium flex items-center justify-center gap-2 transition-colors border border-red-500/20">
+                        <Trash2 size={18} /> Bu Gönderiyi Sil
+                      </button>
+                    </form>
+                  )}
+                </div>
+              </article>
+            ))
+          )}
         </div>
       </main>
     </div>
