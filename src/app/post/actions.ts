@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { prisma } from '@/lib/prisma';
 import { revalidatePath } from "next/cache";
 
 // 1. Post Oluşturma (ModernForm.tsx bunu kullanıyor)
