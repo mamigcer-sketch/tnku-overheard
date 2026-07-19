@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 import CommentForm from '@/components/CommentForm';
 import BackButton from '@/components/BackButton';
-import { MessageCircle, Home } from 'lucide-react'; // Home ikonunu ekledik
+import { MessageCircle, Home } from 'lucide-react';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -29,18 +29,21 @@ export default async function PostPage({ params }: any) {
     <main className="min-h-screen bg-[#0B0B0B] text-white p-4 md:p-8">
       <div className="max-w-2xl mx-auto">
         
-        {/* ÜST MENÜ: HEM LOGO HEM GERİ BUTONU */}
-        <header className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
-          <Link href="/" className="flex items-center gap-2 hover:opacity-80 transition-opacity">
-             <h1 className="text-xl font-extrabold tracking-tighter">
-                TNKU<span className="text-[#4DA3FF]">OVERHEARD</span>
-             </h1>
-          </Link>
-          <div className="flex gap-4">
-            <BackButton />
-            <Link href="/" className="flex items-center gap-1 text-gray-400 hover:text-white transition-colors">
-              <Home size={18} /> Ana Sayfa
+        {/* DÜZELTİLMİŞ HEADER: LOGO SOLDA, BUTONLAR SAĞDA */}
+        <header className="flex flex-col gap-4 mb-8 border-b border-white/5 pb-6">
+          <div className="flex items-center justify-between">
+            <Link href="/" className="hover:opacity-80 transition-opacity">
+               <h1 className="text-xl font-extrabold tracking-tighter">
+                  TNKU<span className="text-[#4DA3FF]">OVERHEARD</span>
+               </h1>
             </Link>
+            
+            <div className="flex items-center gap-4">
+              <BackButton />
+              <Link href="/" className="flex items-center gap-1.5 text-gray-400 hover:text-white transition-colors text-sm font-medium">
+                <Home size={18} /> <span className="hidden sm:inline">Ana Sayfa</span>
+              </Link>
+            </div>
           </div>
         </header>
 
