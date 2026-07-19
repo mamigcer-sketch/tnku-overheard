@@ -5,12 +5,11 @@ import Link from 'next/link';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
-import SearchBar from '@/components/SearchBar'; // <-- EKLENDİ
+import SearchBar from '@/components/SearchBar';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home({ searchParams }: any) {
-  // ... (incrementLike fonksiyonu aynı kalsın) ...
   async function incrementLike(formData: FormData) {
     'use server';
     const id = formData.get('id') as string;
@@ -36,7 +35,7 @@ export default async function Home({ searchParams }: any) {
   
   const params = await searchParams;
   const currentFilter = params?.f || 'Tümü';
-  const searchQuery = params?.q || ''; // Arama sorgusunu al
+  const searchQuery = params?.q || '';
 
   let whereQuery: any = { status: 'APPROVED' };
   let orderQuery: any = { createdAt: 'desc' };
@@ -63,7 +62,6 @@ export default async function Home({ searchParams }: any) {
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white">
-      {/* ... header aynı ... */}
       <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-white/10 px-4 py-4 md:px-8 flex items-center relative">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-3 pointer-events-auto hover:opacity-80 transition-opacity">
@@ -77,12 +75,16 @@ export default async function Home({ searchParams }: any) {
       <div className="max-w-2xl mx-auto px-4 py-8">
         <ModernForm />
         
-        {/* ARAMA KUTUSU BURADA */}
         <SearchBar />
 
         <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
           {filters.map((filter) => (
-            <Link key={filter} href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`} className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap ${currentFilter === filter ? 'bg-[#4DA3FF] text-black' : 'bg-white/5 text-gray-300'}`}>
+            <Link 
+              key={filter} 
+              href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`} 
+              scroll={false}
+              className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap ${currentFilter === filter ? 'bg-[#4DA3FF] text-black' : 'bg-white/5 text-gray-300'}`}
+            >
               {filter}
             </Link>
           ))}

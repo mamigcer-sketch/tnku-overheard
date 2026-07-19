@@ -22,14 +22,9 @@ model Post {
   comments  Comment[]
 }
 
-model Comment {
+model Comment 
   id        String   @id @default(cuid())
   content   String
   createdAt DateTime @default(now())
   postId    String
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-}model Announcement {
-  id        String   @id @default(cuid())
-  content   String
-  createdAt DateTime @default(now())
-}
