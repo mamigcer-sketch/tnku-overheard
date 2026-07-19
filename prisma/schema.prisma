@@ -22,7 +22,7 @@ model Post {
   comments  Comment[]
 }
 
-model Comment 
+model Comment {
   id        String   @id @default(cuid())
   content   String
   createdAt DateTime @default(now())
