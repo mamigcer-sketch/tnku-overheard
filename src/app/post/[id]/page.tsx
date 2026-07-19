@@ -3,22 +3,17 @@ import CommentForm from '@/components/CommentForm';
 import BackButton from '@/components/BackButton';
 import { MessageCircle } from 'lucide-react';
 
-// Vercel'in bu sayfayı statik olarak derlemesini engeller
 export const dynamic = 'force-dynamic';
 
 export default async function PostPage({ params }: any) {
-  // Next.js 14 ve 15 uyumlu güvenli parametre alma
   const resolvedParams = await params;
-  const postId = resolvedParams?.id;
 
-  // ZIRH 1: Eğer Vercel test ediyorsa veya ID yoksa veritabanına SAKIN gitme!
-  if (!postId) {
+  if (!resolvedParams || !resolvedParams.id) {
     return <div className="min-h-screen bg-[#0B0B0B] p-10 text-center text-white">Yükleniyor...</div>;
   }
 
-  // ZIRH 2: Artık ID'nin dolu olduğundan %100 eminiz, sorguyu çalıştırabiliriz.
   const post = await prisma.post.findUnique({
-    where: { id: String(postId) }, // Güvenlik için String'e zorluyoruz
+    where: { id: String(resolvedParams.id) },
     include: { 
       comments: { 
         orderBy: { createdAt: 'desc' } 
@@ -26,16 +21,14 @@ export default async function PostPage({ params }: any) {
     }
   });
 
-  if (!post) return <div className="p-10 text-center text-white">Post bulunamadı kanka...</div>;
+  if (!post) return <div className="min-h-screen bg-[#0B0B0B] p-10 text-center text-white">Post bulunamadı kanka...</div>;
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white p-4 md:p-8">
       <div className="max-w-2xl mx-auto">
         
-        {/* AKILLI GERİ DÖN BUTONU */}
         <BackButton />
 
-        {/* Post Detayı */}
         <article className="bg-white/[0.03] border border-white/[0.08] p-6 rounded-[20px] mb-8">
           <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 border ${post.type === 'CONFESSION' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20 text-[#4DA3FF]'}`}>
             {post.type === 'CONFESSION' ? 'İTİRAF' : 'OVERHEARD'}
@@ -46,13 +39,11 @@ export default async function PostPage({ params }: any) {
           </div>
         </article>
 
-        {/* Yorumlar Bölümü */}
         <div className="space-y-6">
           <h2 className="text-lg font-medium flex items-center gap-2">
             <MessageCircle size={20} /> Anonim Yorumlar ({post.comments.length})
           </h2>
 
-          {/* Yorum Listesi */}
           <div className="space-y-4">
             {post.comments.length === 0 ? (
               <p className="text-gray-500 text-sm italic">Henüz kimse bir şey fısıldamamış. İlk sen ol!</p>
@@ -68,7 +59,6 @@ export default async function PostPage({ params }: any) {
             )}
           </div>
 
-          {/* Yorum Yapma Kutusu */}
           <div className="pt-6 border-t border-white/10">
             <h3 className="text-sm text-gray-400 mb-2">Anonim olarak yorumla:</h3>
             <CommentForm postId={post.id} />

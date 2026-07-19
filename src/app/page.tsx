@@ -1,68 +1,107 @@
 import prisma from '@/lib/prisma';
-import CommentForm from '@/components/CommentForm';
-import BackButton from '@/components/BackButton'; // <-- YENİ BUTONUMUZ BURADA
-import { MessageCircle } from 'lucide-react';
+import ModernForm from './ModernForm';
+import PostCard from '@/components/PostCard';
+import Link from 'next/link';
+import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
+import MobileMenu from '@/components/MobileMenu';
 
-export default async function PostPage({ params }: { params: { id: string } }) {
-  const { id } = await params;
+// Vercel build hatalarını engellemek için eklendi
+export const dynamic = 'force-dynamic';
 
-  // Postu ve ona bağlı yorumları aynı anda çekiyoruz
-  const post = await prisma.post.findUnique({
-    where: { id },
-    include: { 
-      comments: { 
-        orderBy: { createdAt: 'desc' } // En yeni yorum en üstte
-      } 
+export default async function Home({ searchParams }: any) {
+  async function incrementLike(formData: FormData) {
+    'use server';
+    const id = formData.get('id') as string;
+    const cookieStore = await cookies();
+    const likedPostsCookie = cookieStore.get('liked_posts')?.value || '';
+    const likedPosts = likedPostsCookie.split(',');
+
+    if (!likedPosts.includes(id)) {
+      await prisma.post.update({
+        where: { id },
+        data: { likes: { increment: 1 } }
+      });
+      cookieStore.set('liked_posts', [...likedPosts, id].join(','), { 
+        maxAge: 60 * 60 * 24 * 365,
+        httpOnly: true 
+      });
+      revalidatePath('/');
     }
+  }
+
+  const cookieStore = await cookies();
+  const likedPosts = cookieStore.get('liked_posts')?.value?.split(',') || [];
+  
+  const params = await searchParams;
+  const currentFilter = params?.f || 'Tümü';
+
+  let whereQuery: any = { status: 'APPROVED' };
+  let orderQuery: any = { createdAt: 'desc' };
+
+  if (currentFilter === 'Overheard') {
+    whereQuery.type = { in: ['OVERHEARD', 'OVERHED'] };
+  }
+  if (currentFilter === 'İtiraf') whereQuery.type = 'CONFESSION';
+  if (currentFilter === 'En Popüler') orderQuery = { likes: 'desc' };
+
+  const posts = await prisma.post.findMany({
+    where: whereQuery,
+    orderBy: orderQuery,
   });
 
-  if (!post) return <div className="p-10 text-center text-white">Post bulunamadı kanka...</div>;
+  const filters = ['Tümü', 'Overheard', 'İtiraf', 'En Yeni', 'En Popüler'];
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] text-white p-4 md:p-8">
-      <div className="max-w-2xl mx-auto">
+    <main className="min-h-screen bg-[#0B0B0B] text-white">
+      <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-white/10 px-4 py-4 md:px-8 flex items-center relative">
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+          <Link 
+            href="https://instagram.com/tnkuoverheard" 
+            target="_blank" 
+            className="flex items-center gap-3 pointer-events-auto hover:opacity-80 transition-opacity"
+          >
+            <img 
+              src="/logo.jpg" 
+              alt="TNKU Overheard Logo" 
+              className="w-10 h-10 object-cover rounded-xl border border-white/10 shadow-[0_0_10px_rgba(77,163,255,0.1)]" 
+            />
+            <h1 className="text-2xl font-extrabold tracking-tighter">
+              TNKU<span className="text-[#4DA3FF]">OVERHEARD</span>
+            </h1>
+          </Link>
+        </div>
+        <div className="ml-auto z-10">
+          <MobileMenu />
+        </div>
+      </header>
+
+      <div className="max-w-2xl mx-auto px-4 py-8">
+        <ModernForm />
         
-        {/* AKILLI GERİ DÖN BUTONU */}
-        <BackButton />
+        <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+          {filters.map((filter) => (
+            <Link key={filter} href={`/?f=${filter}`} className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap ${currentFilter === filter ? 'bg-[#4DA3FF] text-black' : 'bg-white/5 text-gray-300'}`}>
+              {filter}
+            </Link>
+          ))}
+        </div>
 
-        {/* Post Detayı */}
-        <article className="bg-white/[0.03] border border-white/[0.08] p-6 rounded-[20px] mb-8">
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium mb-4 border ${post.type === 'CONFESSION' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20 text-[#4DA3FF]'}`}>
-            {post.type === 'CONFESSION' ? 'İTİRAF' : 'OVERHEARD'}
-          </span>
-          <p className="text-xl md:text-2xl leading-relaxed font-light">{post.content}</p>
-          <div className="mt-6 text-sm text-gray-500">
-            {post.createdAt.toLocaleDateString('tr-TR')}
-          </div>
-        </article>
-
-        {/* Yorumlar Bölümü */}
-        <div className="space-y-6">
-          <h2 className="text-lg font-medium flex items-center gap-2">
-            <MessageCircle size={20} /> Anonim Yorumlar ({post.comments.length})
-          </h2>
-
-          {/* Yorum Listesi */}
-          <div className="space-y-4">
-            {post.comments.length === 0 ? (
-              <p className="text-gray-500 text-sm italic">Henüz kimse bir şey fısıldamamış. İlk sen ol!</p>
-            ) : (
-              post.comments.map((comment) => (
-                <div key={comment.id} className="bg-white/[0.02] border border-white/[0.05] p-4 rounded-xl">
-                  <p className="text-gray-200 text-sm">{comment.content}</p>
-                  <span className="text-[10px] text-gray-600 mt-2 block">
-                    {comment.createdAt.toLocaleDateString('tr-TR')}
-                  </span>
-                </div>
-              ))
-            )}
-          </div>
-
-          {/* Yorum Yapma Kutusu */}
-          <div className="pt-6 border-t border-white/10">
-            <h3 className="text-sm text-gray-400 mb-2">Anonim olarak yorumla:</h3>
-            <CommentForm postId={post.id} />
-          </div>
+        <div className="space-y-5">
+          {posts.length === 0 ? (
+            <div className="text-center text-gray-500 py-10 border border-white/5 rounded-2xl bg-[#121212]">
+              Bu kategoride henüz gönderi yok.
+            </div>
+          ) : (
+            posts.map((post: any) => (
+              <PostCard 
+                key={post.id} 
+                post={post} 
+                isLiked={likedPosts.includes(post.id)} 
+                incrementLike={incrementLike}
+              />
+            ))
+          )}
         </div>
       </div>
     </main>
