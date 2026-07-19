@@ -49,7 +49,6 @@ export default async function AdminDashboard({ searchParams }: any) {
   const params = await searchParams;
   const currentTab = params?.tab || 'Dashboard';
 
-  // Veritabanından tüm analizleri tek seferde çekiyoruz
   const [total, pending, approved, rejected, aggregateStats] = await Promise.all([
     prisma.post.count(),
     prisma.post.count({ where: { status: 'PENDING' } }),
@@ -79,12 +78,11 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: Rss, label: 'Akış' }, 
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
-    { icon: Inbox, label: 'Bekleyenler', badge: pending } // Badge özelliği eklendi
+    { icon: Inbox, label: 'Bekleyenler', badge: pending }
   ];
 
   return (
     <div className="flex h-screen bg-[#0B0B0B] text-white">
-      {/* SOL MENÜ */}
       <aside className="w-64 bg-[#121212] border-r border-white/5 p-6 hidden md:flex flex-col">
         <h1 className="text-xl font-bold mb-10 tracking-tight">TNKU<span className="text-[#4DA3FF]">ADMIN</span></h1>
         <nav className="space-y-2 flex-1">
@@ -93,7 +91,6 @@ export default async function AdminDashboard({ searchParams }: any) {
               <div className="flex items-center gap-3">
                 <item.icon size={20} /> <span className="font-medium">{item.label}</span>
               </div>
-              {/* Bekleyen sayısını menüde gösteren badge */}
               {item.badge && item.badge > 0 ? (
                 <span className="bg-[#4DA3FF] text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{item.badge}</span>
               ) : null}
@@ -103,8 +100,7 @@ export default async function AdminDashboard({ searchParams }: any) {
         <form action={logout}><button className="w-full flex items-center justify-center gap-2 text-red-400 py-3 rounded-xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 transition-colors"><LogOut size={18} /> Güvenli Çıkış</button></form>
       </aside>
 
-      {/* ANA EKRAN */}
-      <main className="flex-1 overflow-y-auto p-4 md:p-10 scrollbar-hide">
+      <main className="flex-1 overflow-y-auto p-4 md:p-10 scrollbar-hide pb-20">
         <header className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
             <h2 className="text-2xl font-bold flex items-center gap-3"><BarChart3 className="text-[#4DA3FF]" /> {currentTab} Paneli</h2>
             <div className="flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
@@ -112,7 +108,6 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
         </header>
 
-        {/* İSTATİSTİK KARTLARI (2 SATIR) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
             {[
                 { label: 'TOPLAM GÖNDERİ', val: total, color: 'text-white', bg: 'bg-[#121212]' },
@@ -127,7 +122,6 @@ export default async function AdminDashboard({ searchParams }: any) {
             ))}
         </div>
         
-        {/* ETKİLEŞİM İSTATİSTİKLERİ */}
         <div className="grid grid-cols-2 gap-4 mb-10">
             <div className="bg-[#121212] p-5 rounded-2xl border border-white/5 flex items-center gap-4">
                 <div className="p-3 bg-pink-500/10 rounded-xl border border-pink-500/20"><Heart className="text-pink-500" size={24}/></div>
@@ -145,8 +139,7 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
         </div>
 
-        {/* GÖNDERİ LİSTESİ */}
-        <div className="max-w-4xl space-y-5">
+        <div className="max-w-4xl space-y-5 pb-20">
           {displayPosts.length === 0 ? (
              <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
                  <div className="bg-white/5 p-4 rounded-full mb-4"><Inbox className="text-gray-500" size={32}/></div>
@@ -155,8 +148,6 @@ export default async function AdminDashboard({ searchParams }: any) {
           ) : (
             displayPosts.map((post) => (
               <article key={post.id} className="bg-[#121212] p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all flex flex-col gap-4 shadow-lg">
-                
-                {/* Kart Üst Bilgi Çubuğu */}
                 <div className="flex flex-wrap justify-between items-center pb-4 border-b border-white/5 gap-2">
                     <div className="flex gap-2">
                         <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider ${post.type === 'CONFESSION' ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
@@ -171,27 +162,24 @@ export default async function AdminDashboard({ searchParams }: any) {
                     </span>
                 </div>
 
-                {/* İçerik */}
                 <p className="text-white text-[16px] leading-relaxed py-2">{post.content}</p>
                 
-                {/* Kart Alt Çubuğu: İstatistikler ve Butonlar */}
-                <div className="flex flex-wrap justify-between items-center pt-2 gap-4">
+                <div className="flex flex-wrap justify-between items-center pt-2 gap-3">
                   <div className="flex gap-4 text-gray-500 text-sm font-medium">
-                      <span className="flex items-center gap-1.5"><Heart size={16} className={post.likes > 0 ? "text-pink-500" : ""}/> {post.likes} Beğeni</span>
-                      <span className="flex items-center gap-1.5"><Eye size={16} className={post.views > 0 ? "text-blue-500" : ""}/> {post.views} Tıklanma</span>
+                      <span className="flex items-center gap-1.5"><Heart size={16} className={post.likes > 0 ? "text-pink-500" : ""}/> {post.likes}</span>
+                      <span className="flex items-center gap-1.5"><Eye size={16} className={post.views > 0 ? "text-blue-500" : ""}/> {post.views}</span>
                   </div>
                   
-                  <div className="flex gap-2 w-full sm:w-auto">
+                  <div className="flex gap-2 w-full flex-wrap">
                     {post.status === 'PENDING' ? (
                       <>
-                        <form action={approvePost} className="flex-1 sm:flex-none"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-green-500/10 text-green-400 px-6 py-2.5 rounded-xl text-sm font-medium border border-green-500/20 hover:bg-green-500/20 flex items-center justify-center gap-2 transition-all"><Check size={16}/> Onayla</button></form>
-                        <form action={rejectPost} className="flex-1 sm:flex-none"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-orange-500/10 text-orange-400 px-6 py-2.5 rounded-xl text-sm font-medium border border-orange-500/20 hover:bg-orange-500/20 flex items-center justify-center gap-2 transition-all"><X size={16}/> Reddet</button></form>
+                        <form action={approvePost} className="flex-1 min-w-[120px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-green-500/10 text-green-400 py-2.5 rounded-xl text-xs font-bold border border-green-500/20 hover:bg-green-500/20 flex items-center justify-center gap-2 transition-all"><Check size={14}/> Onayla</button></form>
+                        <form action={rejectPost} className="flex-1 min-w-[120px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-orange-500/10 text-orange-400 py-2.5 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center justify-center gap-2 transition-all"><X size={14}/> Reddet</button></form>
                       </>
                     ) : null}
-                    <form action={deletePost} className="flex-1 sm:flex-none"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-red-500/10 text-red-400 px-6 py-2.5 rounded-xl text-sm font-medium border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-2 transition-all"><Trash2 size={16}/> Sil</button></form>
+                    <form action={deletePost} className="flex-1 min-w-[120px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-red-500/10 text-red-400 py-2.5 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-2 transition-all"><Trash2 size={14}/> Sil</button></form>
                   </div>
                 </div>
-
               </article>
             ))
           )}
