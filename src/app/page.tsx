@@ -46,7 +46,14 @@ export default async function Home({ searchParams }: any) {
     whereQuery.type = { in: ['OVERHEARD', 'OVERHED'] };
   }
   if (currentFilter === 'İtiraf') whereQuery.type = 'CONFESSION';
-  if (currentFilter === 'En Popüler') orderQuery = { likes: 'desc' };
+  
+  // HAFTANIN EN POPÜLERİ MANTIĞI BURADA EKLENDİ
+  if (currentFilter === 'En Popüler') {
+    orderQuery = { likes: 'desc' };
+    const oneWeekAgo = new Date();
+    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7); // Son 7 gün
+    whereQuery.createdAt = { gte: oneWeekAgo };
+  }
 
   if (searchQuery) {
     whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
@@ -119,7 +126,11 @@ export default async function Home({ searchParams }: any) {
         <div className="space-y-5">
           {posts.length === 0 ? (
             <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
-              <p className="text-gray-400 font-medium">Aradığın kriterlerde gönderi bulunamadı kanka.</p>
+              <p className="text-gray-400 font-medium">
+                {currentFilter === 'En Popüler' 
+                  ? 'Bu hafta henüz popülerleşen bir fısıltı yok kanka.' 
+                  : 'Aradığın kriterlerde gönderi bulunamadı kanka.'}
+              </p>
             </div>
           ) : (
             <>
