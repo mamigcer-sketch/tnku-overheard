@@ -119,8 +119,84 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
         </header>
 
-        {/* İSTATİSTİKLER VE GÖNDERİ LİSTESİ... (Aşağıdaki kısımlar aynı kalıyor) */}
-        {/* ... */}
+        {/* İSTATİSTİKLER */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+            {[
+                { label: 'TOPLAM GÖNDERİ', val: total, color: 'text-white', bg: 'bg-[#121212]' },
+                { label: 'ONAY BEKLEYEN', val: pending, color: 'text-yellow-400', bg: 'bg-yellow-500/5 border-yellow-500/20' },
+                { label: 'YAYINDA OLAN', val: approved, color: 'text-green-400', bg: 'bg-green-500/5 border-green-500/20' },
+                { label: 'REDDEDİLEN', val: rejected, color: 'text-red-400', bg: 'bg-red-500/5 border-red-500/20' },
+            ].map((stat, i) => (
+                <div key={i} className={`${stat.bg} p-6 rounded-2xl border ${stat.bg.includes('border') ? stat.bg.split(' ')[1] : 'border-white/5'} transition-all hover:-translate-y-1`}>
+                    <p className="text-gray-500 text-[10px] font-bold tracking-widest uppercase mb-2">{stat.label}</p>
+                    <p className={`text-4xl font-black ${stat.color}`}>{stat.val}</p>
+                </div>
+            ))}
+        </div>
+        
+        <div className="grid grid-cols-2 gap-4 mb-10">
+            <div className="bg-[#121212] p-5 rounded-2xl border border-white/5 flex items-center gap-4">
+                <div className="p-3 bg-pink-500/10 rounded-xl border border-pink-500/20"><Heart className="text-pink-500" size={24}/></div>
+                <div>
+                    <p className="text-gray-500 text-[11px] font-bold tracking-widest uppercase">Toplam Beğeni</p>
+                    <p className="text-2xl font-bold text-white">{totalLikes}</p>
+                </div>
+            </div>
+            <div className="bg-[#121212] p-5 rounded-2xl border border-white/5 flex items-center gap-4">
+                <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20"><Eye className="text-blue-500" size={24}/></div>
+                <div>
+                    <p className="text-gray-500 text-[11px] font-bold tracking-widest uppercase">Toplam Görüntülenme</p>
+                    <p className="text-2xl font-bold text-white">{totalViews}</p>
+                </div>
+            </div>
+        </div>
+
+        {/* LİSTELEME */}
+        <div className="max-w-4xl space-y-5">
+          {displayPosts.length === 0 ? (
+             <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
+                 <div className="bg-white/5 p-4 rounded-full mb-4"><Inbox className="text-gray-500" size={32}/></div>
+                 <p className="text-gray-400 font-medium">Bu sekmede gösterilecek gönderi bulunmuyor.</p>
+             </div>
+          ) : (
+            displayPosts.map((post) => (
+              <article key={post.id} className="bg-[#121212] p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all flex flex-col gap-4 shadow-lg">
+                <div className="flex flex-wrap justify-between items-center pb-4 border-b border-white/5 gap-2">
+                    <div className="flex gap-2">
+                        <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider ${post.type === 'CONFESSION' ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
+                            <Tag size={12}/> {post.type === 'CONFESSION' ? 'İtiraf' : 'Overheard'}
+                        </span>
+                        <span className="text-[11px] font-medium px-2.5 py-1 bg-white/5 rounded-md text-gray-400 flex items-center gap-1">
+                            <Calendar size={12}/> {new Date(post.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
+                        </span>
+                    </div>
+                    <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${post.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : post.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                        {post.status === 'PENDING' ? 'ONAY BEKLİYOR' : post.status === 'APPROVED' ? 'YAYINDA' : 'REDDEDİLDİ'}
+                    </span>
+                </div>
+
+                <p className="text-white text-[16px] leading-relaxed py-2">{post.content}</p>
+                
+                <div className="flex flex-wrap justify-between items-center pt-2 gap-3">
+                  <div className="flex gap-4 text-gray-500 text-sm font-medium">
+                      <span className="flex items-center gap-1.5"><Heart size={16} className={post.likes > 0 ? "text-pink-500" : ""}/> {post.likes}</span>
+                      <span className="flex items-center gap-1.5"><Eye size={16} className={post.views > 0 ? "text-blue-500" : ""}/> {post.views}</span>
+                  </div>
+                  
+                  <div className="flex gap-2 w-full flex-wrap">
+                    {post.status === 'PENDING' ? (
+                      <>
+                        <form action={approvePost} className="flex-1 min-w-[120px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-green-500/10 text-green-400 py-2.5 rounded-xl text-xs font-bold border border-green-500/20 hover:bg-green-500/20 flex items-center justify-center gap-2 transition-all"><Check size={14}/> Onayla</button></form>
+                        <form action={rejectPost} className="flex-1 min-w-[120px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-orange-500/10 text-orange-400 py-2.5 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center justify-center gap-2 transition-all"><X size={14}/> Reddet</button></form>
+                      </>
+                    ) : null}
+                    <form action={deletePost} className="flex-1 min-w-[120px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-red-500/10 text-red-400 py-2.5 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-2 transition-all"><Trash2 size={14}/> Sil</button></form>
+                  </div>
+                </div>
+              </article>
+            ))
+          )}
+        </div>
       </main>
     </div>
   );
