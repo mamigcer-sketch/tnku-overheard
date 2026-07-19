@@ -36,25 +36,28 @@ export default async function Home({ searchParams }: any) {
   const params = await searchParams;
   const currentFilter = params?.f || 'Tümü';
   const searchQuery = params?.q || '';
+  const page = parseInt(params?.page || '1'); // Sayfa numarasını al
 
   let whereQuery: any = { status: 'APPROVED' };
   let orderQuery: any = { createdAt: 'desc' };
 
-  // --- FİLTRELER ---
   if (currentFilter === 'Overheard') {
     whereQuery.type = { in: ['OVERHEARD', 'OVERHED'] };
   }
   if (currentFilter === 'İtiraf') whereQuery.type = 'CONFESSION';
   if (currentFilter === 'En Popüler') orderQuery = { likes: 'desc' };
 
-  // --- ARAMA MANTIĞI ---
   if (searchQuery) {
     whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
   }
 
+  // --- SAYFALAMA MANTIĞI ---
+  const pageSize = 10;
   const posts = await prisma.post.findMany({
     where: whereQuery,
     orderBy: orderQuery,
+    skip: (page - 1) * pageSize, // Kaç gönderi atlanacak
+    take: pageSize, // Kaç tane alınacak
     include: { comments: { select: { id: true } } }
   });
 
@@ -74,7 +77,6 @@ export default async function Home({ searchParams }: any) {
 
       <div className="max-w-2xl mx-auto px-4 py-8">
         <ModernForm />
-        
         <SearchBar />
 
         <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
@@ -96,14 +98,28 @@ export default async function Home({ searchParams }: any) {
               Aradığın kriterlerde gönderi bulunamadı kanka.
             </div>
           ) : (
-            posts.map((post: any) => (
-              <PostCard 
-                key={post.id} 
-                post={post} 
-                isLiked={likedPosts.includes(post.id)} 
-                incrementLike={incrementLike}
-              />
-            ))
+            <>
+              {posts.map((post: any) => (
+                <PostCard 
+                  key={post.id} 
+                  post={post} 
+                  isLiked={likedPosts.includes(post.id)} 
+                  incrementLike={incrementLike}
+                />
+              ))}
+              
+              {/* Daha Fazla Göster Butonu */}
+              {posts.length === pageSize && (
+                <div className="flex justify-center pt-4">
+                  <Link 
+                    href={`/?f=${currentFilter}${searchQuery ? `&q=${searchQuery}` : ''}&page=${page + 1}`}
+                    className="px-6 py-3 bg-white/5 hover:bg-white/10 rounded-xl text-sm transition-all"
+                  >
+                    Daha Fazla Göster
+                  </Link>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
