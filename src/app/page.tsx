@@ -68,14 +68,20 @@ export default async function Home({ searchParams }: any) {
     whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
   }
 
-  const posts = await prisma.post.findMany({
-    where: whereQuery,
-    orderBy: orderQuery,
-    take: totalTake,
-    include: { comments: { select: { id: true } } }
-  });
-
-  const totalPostsCount = await prisma.post.count({ where: whereQuery });
+  // 📢 (prisma as any) ile önbellek hatası kesin olarak bypass edildi
+  const [posts, totalPostsCount, activeAnnouncement] = await Promise.all([
+    prisma.post.findMany({
+      where: whereQuery,
+      orderBy: orderQuery,
+      take: totalTake,
+      include: { comments: { select: { id: true } } }
+    }),
+    prisma.post.count({ where: whereQuery }),
+    (prisma as any).announcement.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' }
+    })
+  ]);
 
   const filters = ['Tümü', 'Overheard', 'İtiraf', 'En Yeni', '🔥 Trend'];
 
@@ -94,6 +100,18 @@ export default async function Home({ searchParams }: any) {
 
       <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
         
+        {/* 📢 Admin Panellerinden Eklenen Aktif Duyuru Banner'ı */}
+        {activeAnnouncement && (
+          <div className="mb-6 bg-gradient-to-r from-[#4DA3FF]/10 via-purple-500/10 to-[#4DA3FF]/10 border border-[#4DA3FF]/20 p-4 rounded-[20px] flex items-center gap-3 animate-in fade-in duration-500 shadow-lg">
+            <div className="bg-[#4DA3FF] text-black px-2.5 py-1 rounded-xl shrink-0 font-black text-[10px] uppercase tracking-wider shadow">
+              Duyuru
+            </div>
+            <p className="text-gray-200 text-[13px] sm:text-[14px] font-medium leading-relaxed">
+              {activeAnnouncement.content}
+            </p>
+          </div>
+        )}
+
         {/* Premium Paylaşım Akordeonu */}
         <div className="mb-8">
           <details className="group [&_summary::-webkit-details-marker]:hidden">

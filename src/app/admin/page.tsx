@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -60,14 +60,19 @@ export default async function AdminDashboard({ searchParams }: any) {
   const totalLikes = aggregateStats._sum.likes || 0;
   const totalViews = aggregateStats._sum.views || 0;
 
-  // VERİ ÇEKME MANTIĞI: Sekme Yorumlarsa Yorumları, Değilse Gönderileri Çek
+  // VERİ ÇEKME MANTIĞI
   let displayPosts: any[] = [];
   let displayComments: any[] = [];
+  let announcements: any[] = [];
 
   if (currentTab === 'Yorumlar') {
     displayComments = await prisma.comment.findMany({ 
       orderBy: { createdAt: 'desc' },
       include: { post: { select: { content: true, type: true } } }
+    });
+  } else if (currentTab === 'Duyurular') {
+    announcements = await prisma.announcement.findMany({
+      orderBy: { createdAt: 'desc' },
     });
   } else {
     let queryFilter: any = { status: 'PENDING' };
@@ -78,11 +83,37 @@ export default async function AdminDashboard({ searchParams }: any) {
     displayPosts = await prisma.post.findMany({ where: queryFilter, orderBy: { createdAt: 'desc' } });
   }
 
-  // SERVER ACTIONS (Gönderi ve Yorum İşlemleri)
-  async function approvePost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'APPROVED' } }); revalidatePath('/admin'); }
-  async function rejectPost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'REJECTED' } }); revalidatePath('/admin'); }
-  async function deletePost(formData: FormData) { 'use server'; await prisma.post.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
+  // SERVER ACTIONS (Gönderi, Yorum ve Duyuru İşlemleri)
+  async function approvePost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'APPROVED' } }); revalidatePath('/admin'); revalidatePath('/'); }
+  async function rejectPost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'REJECTED' } }); revalidatePath('/admin'); revalidatePath('/'); }
+  async function deletePost(formData: FormData) { 'use server'; await prisma.post.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function deleteComment(formData: FormData) { 'use server'; await prisma.comment.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
+  
+  async function createAnnouncement(formData: FormData) { 
+    'use server'; 
+    const content = formData.get('content') as string;
+    if (!content) return;
+    await prisma.announcement.create({ data: { content, isActive: true } }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
+  
+  async function toggleAnnouncement(formData: FormData) { 
+    'use server'; 
+    const id = formData.get('id') as string;
+    const currentState = formData.get('isActive') === 'true';
+    await prisma.announcement.update({ where: { id }, data: { isActive: !currentState } }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
+
+  async function deleteAnnouncement(formData: FormData) { 
+    'use server'; 
+    await prisma.announcement.delete({ where: { id: formData.get('id') as string } }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
+
   async function logout() { 'use server'; (await cookies()).delete('admin_auth'); revalidatePath('/admin'); }
 
   const menuItems = [
@@ -91,7 +122,8 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Inbox, label: 'Bekleyenler', badge: pending },
-    { icon: MessageSquare, label: 'Yorumlar' }
+    { icon: MessageSquare, label: 'Yorumlar' },
+    { icon: Bell, label: 'Duyurular' }
   ];
 
   return (
@@ -127,7 +159,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       <main className="flex-1 overflow-y-auto p-4 md:p-10 scrollbar-hide pb-28">
         <header className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
             <h2 className="text-2xl font-bold flex items-center gap-3">
-              {currentTab === 'Yorumlar' ? <MessageSquare className="text-[#4DA3FF]" /> : <BarChart3 className="text-[#4DA3FF]" />} 
+              {currentTab === 'Yorumlar' ? <MessageSquare className="text-[#4DA3FF]" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF]" /> : <BarChart3 className="text-[#4DA3FF]" />} 
               {currentTab} Paneli
             </h2>
             <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
@@ -135,8 +167,8 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
         </header>
 
-        {/* İSTATİSTİKLER */}
-        {currentTab !== 'Yorumlar' && (
+        {/* İSTATİSTİKLER (Sadece Dashboard ve İtiraf/Akış sekmelerinde görünür) */}
+        {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {[
@@ -210,6 +242,62 @@ export default async function AdminDashboard({ searchParams }: any) {
                 </article>
               ))
             )
+          ) : currentTab === 'Duyurular' ? (
+            <div className="space-y-6">
+              {/* Duyuru Ekleme Formu */}
+              <form action={createAnnouncement} className="bg-[#121212] border border-white/5 p-6 rounded-[24px] space-y-4">
+                <h3 className="font-bold text-gray-200 text-sm">Yeni Duyuru Oluştur</h3>
+                <textarea 
+                  name="content" 
+                  required
+                  placeholder="Örn: 📌 Şenlik biletleri satışa çıktı! Detaylar için Instagram'a göz atın."
+                  className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#4DA3FF] resize-none h-24"
+                />
+                <button type="submit" className="px-6 py-3 bg-[#4DA3FF] text-black font-bold rounded-xl text-sm hover:bg-[#4DA3FF]/90 transition-all flex items-center gap-2">
+                  <Plus size={16} /> Duyuruyu Yayınla
+                </button>
+              </form>
+
+              {/* Duyurular Listesi */}
+              <div className="space-y-4">
+                <h3 className="font-bold text-gray-200 text-sm pt-2">Yayınlanan Duyurular</h3>
+                {announcements.length === 0 ? (
+                  <div className="text-center py-12 bg-[#121212] border border-white/5 rounded-2xl text-gray-500 text-sm">
+                    Henüz eklenmiş bir duyuru yok.
+                  </div>
+                ) : (
+                  announcements.map((item: any) => (
+                    <div key={item.id} className="bg-[#121212] border border-white/5 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${item.isActive ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`} />
+                          <span className="text-xs font-bold text-gray-400">{item.isActive ? 'Aktif (Yayında)' : 'Pasif (Gizli)'}</span>
+                        </div>
+                        <p className="text-gray-100 text-sm font-medium">{item.content}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <form action={toggleAnnouncement}>
+                          <input type="hidden" name="id" value={item.id} />
+                          <input type="hidden" name="isActive" value={String(item.isActive)} />
+                          <button type="submit" className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${item.isActive ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20'}`}>
+                            {item.isActive ? <XCircle size={14} /> : <CheckCircle size={14} />}
+                            {item.isActive ? 'Pasife Al' : 'Aktif Et'}
+                          </button>
+                        </form>
+
+                        <form action={deleteAnnouncement}>
+                          <input type="hidden" name="id" value={item.id} />
+                          <button type="submit" className="p-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all">
+                            <Trash2 size={16} />
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           ) : (
             displayPosts.length === 0 ? (
                <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
@@ -232,7 +320,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                           {post.status === 'PENDING' ? 'ONAY BEKLİYOR' : post.status === 'APPROVED' ? 'YAYINDA' : 'REDDEDİLDİ'}
                       </span>
                   </div>
-  
+ 
                   <p className="text-white text-[16px] leading-relaxed py-2">{post.content}</p>
                   
                   <div className="flex flex-wrap justify-between items-center pt-2 gap-3">
