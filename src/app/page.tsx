@@ -6,8 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
-import NotificationBell from '@/components/NotificationBell'; // 🔥 Bildirim Bileşeni Eklendi
-import { Plus, ChevronDown, MessageSquareHeart } from 'lucide-react'; // 🔥 İkon Eklendi
+import NotificationBell from '@/components/NotificationBell';
+import { Plus, ChevronDown, MessageSquareHeart } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,7 +52,6 @@ export default async function Home({ searchParams }: any) {
   let whereQuery: any = { status: 'APPROVED' };
   let orderQuery: any = { createdAt: 'desc' };
 
-  // Filtre Mantığı
   if (currentFilter === 'Overheard') whereQuery.type = { in: ['OVERHEARD', 'OVERHED'] };
   if (currentFilter === 'İtiraf') whereQuery.type = 'CONFESSION';
   
@@ -79,7 +78,6 @@ export default async function Home({ searchParams }: any) {
     })
   ]);
 
-  // 🔥 BİLDİRİMLERİ ÇEKME MANTIĞI
   const authorId = cookieStore.get('tnku_author_id')?.value;
   let notifications: any[] = [];
   
@@ -88,7 +86,7 @@ export default async function Home({ searchParams }: any) {
       notifications = await (prisma as any).notification.findMany({
         where: { userUuid: authorId },
         orderBy: { createdAt: 'desc' },
-        take: 15 // Son 15 bildirimi getir
+        take: 15
       });
     } catch (err) {
       console.error("Bildirimler çekilemedi:", err);
@@ -100,21 +98,21 @@ export default async function Home({ searchParams }: any) {
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden">
       
-      {/* 🔥 AURORA (GLASSMORPHISM) ARKA PLAN EFEKTLERİ */}
       <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/15 blur-[120px] pointer-events-none -z-10" />
       <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/15 blur-[140px] pointer-events-none -z-10" />
       <div className="fixed top-[40%] left-[50%] w-[300px] h-[300px] rounded-full bg-pink-500/5 blur-[100px] pointer-events-none -z-10" />
 
-      {/* HEADER - Camsı (glass) efekt ve Yeni İkonlar */}
-      <header className="sticky top-0 z-50 bg-[#0B0B0B]/40 backdrop-blur-3xl border-b border-white/[0.03] px-4 py-4 md:px-8 flex items-center transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-3 pointer-events-auto hover:opacity-80 transition-opacity">
-            <img src="/logo.jpg" alt="Logo" className="w-9 h-9 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
-            <h1 className="text-xl font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
-          </Link>
-        </div>
-        <div className="ml-auto z-10 flex items-center gap-2 sm:gap-3 pointer-events-auto">
-          {/* 🔥 Bildirim Çanı */}
+      {/* 🔥 ONARILAN HEADER KISMI */}
+      <header className="sticky top-0 z-50 bg-[#0B0B0B]/40 backdrop-blur-3xl border-b border-white/[0.03] px-4 py-4 md:px-8 flex items-center justify-between transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)] gap-2">
+        
+        {/* LOGO (Sola dayalı, mobilde daha kibar) */}
+        <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity shrink-0">
+          <img src="/logo.jpg" alt="Logo" className="w-8 h-8 sm:w-9 sm:h-9 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
+          <h1 className="text-base sm:text-xl font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
+        </Link>
+        
+        {/* İKONLAR (Sağa dayalı) */}
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <NotificationBell notifications={notifications} />
           
           <Link 
