@@ -2,11 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
-import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, AlertTriangle } from "lucide-react";
+import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { incrementView, submitReport } from "@/app/post/actions";
 
-// 🚀 Avatar ve İsim Havuzu
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 const emojis = ["🦊", "🐼", "🦉", "🦝", "🐨", "🦁", "🐸", "🐙", "🦋", "🦖", "🦄", "🐧", "🐱", "🐶", "🐰", "🐯"];
@@ -59,7 +58,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
   const [reported, setReported] = useState(false); 
   
-  // 🔥 ÖZEL MODAL STATE'LERİ
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
@@ -119,7 +117,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     setTimeout(() => setIsLikingAnimation(false), 1000);
   };
 
-  // 🔥 ŞİKAYET MODALINI AÇ
   const handleReportClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (reported) return;
@@ -127,7 +124,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     setShowReportModal(true);
   };
 
-  // 🔥 ŞİKAYETİ GÖNDER
   const submitReportAction = async () => {
     if (!reportReason.trim()) return;
     setIsSubmittingReport(true);
@@ -174,7 +170,7 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   };
 
   const isConfession = post.type === 'CONFESSION';
-  const isTrending = post.likes >= 10 && (new Date().getTime() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000); 
+  const isTrending = post.likes >= 10; // 🔥 Hydration hatasını önlemek için basitleştirildi
 
   const hoverGlow = isConfession 
     ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
@@ -283,7 +279,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
         </div>
       </div>
 
-      {/* 🔥 SİHİRLİ DOKUNUŞ: PROFESYONEL ŞİKAYET MODALI */}
       {showReportModal && (
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
@@ -295,7 +290,7 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
           >
             <div className="flex items-center gap-3 mb-4">
               <div className="bg-red-500/10 p-3 rounded-2xl border border-red-500/20">
-                <AlertTriangle className="text-red-500 w-6 h-6" />
+                <ShieldAlert className="text-red-500 w-6 h-6" />
               </div>
               <div>
                 <h3 className="text-white font-bold text-lg leading-tight">Şikayet Et</h3>

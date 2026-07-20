@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 import BackButton from '@/components/BackButton';
 import CommentSection from '@/components/CommentSection';
-import { MessageCircle, Home, MapPin, Clock, Users, User, Heart, Eye, Flame } from 'lucide-react';
+import { Home, MapPin, Clock, Users, User, Heart, Eye, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 
@@ -57,7 +57,6 @@ export default async function PostPage({ params }: any) {
 
   if (!post) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-gray-500 font-medium">Post bulunamadı...</div>;
 
-  // 🔥 RAW SQL ile Beğenileri Çekiyoruz (Prisma bug'larına karşı %100 koruma)
   const cookieStore = await cookies();
   const authorId = cookieStore.get('tnku_author_id')?.value;
   let userLikedCommentIds: string[] = [];
@@ -75,7 +74,7 @@ export default async function PostPage({ params }: any) {
   }
 
   const isConfession = post.type === 'CONFESSION';
-  const isTrending = post.likes >= 10 && (new Date().getTime() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000);
+  const isTrending = post.likes >= 10; // 🔥 Hydration hatasını önlemek için basitleştirildi
   const authorData = getAnonymousData((post as any).authorUuid || post.id);
 
   const glowStyle = isConfession 
@@ -103,7 +102,6 @@ export default async function PostPage({ params }: any) {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 pb-12 relative z-10">
-        
         <article className={`bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-6 rounded-[24px] mb-8 relative overflow-hidden transition-all duration-500 ${glowStyle}`}>
           {isTrending && (
             <div className={`absolute -inset-[1px] opacity-100 blur-xl -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/20 to-pink-500/20' : 'from-[#4DA3FF]/20 to-blue-500/20'}`} />
@@ -159,7 +157,6 @@ export default async function PostPage({ params }: any) {
           postAuthorUuid={(post as any).authorUuid} 
           userLikedCommentIds={userLikedCommentIds} 
         />
-
       </div>
     </main>
   );
