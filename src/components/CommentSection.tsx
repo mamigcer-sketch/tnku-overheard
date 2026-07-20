@@ -32,23 +32,21 @@ const getAnonymousData = (id: string) => {
 export default function CommentSection({ postId, comments, postAuthorUuid }: { postId: string; comments: any[]; postAuthorUuid: string }) {
   const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
 
+  // Ana yorumlar (istersen onları da en eskiye/en yeniye göre ayarlayabilirsin, ana yorumlar genelde ters sırada kalabilir veya düz)
   const parentComments = comments.filter((c: any) => !c.parentId);
 
   const handleReplyClick = (targetCommentId: string, authorName: string) => {
     const targetComment = comments.find((c: any) => c.id === targetCommentId);
     const rootParentId = targetComment?.parentId ? targetComment.parentId : targetCommentId;
 
-    // Kök ebeveyn ID'sini korurken, ekrana yazılacak ismi güncelliyoruz
     setReplyingTo({ id: rootParentId, name: authorName });
     
-    // 🔥 AKILLI ODAKLANMA VE İMLEÇ AYARI: 
-    // Yazı kutuya yerleştikten hemen sonra imleci @etiket'in tam arkasına atıp klavyeyi açıyoruz
     setTimeout(() => {
       const textarea = document.querySelector('#comment-form-section textarea') as HTMLTextAreaElement;
       if (textarea) {
         textarea.focus();
         const textLength = textarea.value.length;
-        textarea.setSelectionRange(textLength, textLength); // İmleci en sona taşır
+        textarea.setSelectionRange(textLength, textLength);
         textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
     }, 100);
@@ -73,7 +71,10 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
             const commentAuthor = getAnonymousData(comment.authorId || comment.id);
             const isPostAuthor = comment.authorId && comment.authorId === postAuthorUuid;
             
-            const replies = comments.filter((c: any) => c.parentId === comment.id);
+            // 🔥 KRİTİK DÜZELTME: Yanıtları tarihe göre ARTAN (eskiden yeniye) sıralıyoruz. Böylece yeni gelen hep EN ALTA ekleniyor!
+            const replies = comments
+              .filter((c: any) => c.parentId === comment.id)
+              .sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
             return (
               <div key={comment.id} className="space-y-3">

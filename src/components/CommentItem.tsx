@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Heart, Reply } from "lucide-react";
+import { likeComment } from "@/app/post/actions";
 
 const getRelativeTime = (dateString: string | Date) => {
   if (!dateString) return "";
@@ -30,13 +31,22 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor, onRe
     }
   };
 
-  const handleLike = () => {
+  const handleLike = async () => {
     if (localLiked) return;
     triggerHaptic();
+    
+    // Anlık görsel tepki (Optimistic UI)
     setLocalLiked(true);
     setLocalLikesCount((prev: number) => prev + 1);
     setIsLikingAnimation(true);
     setTimeout(() => setIsLikingAnimation(false), 1000);
+
+    try {
+      // 🔥 Veritabanına kalıcı olarak işliyoruz
+      await likeComment(comment.id, comment.postId);
+    } catch (err) {
+      console.error("Beğeni kaydedilemedi:", err);
+    }
   };
 
   return (
@@ -80,7 +90,6 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor, onRe
           <span className="text-[11px] font-bold">{localLikesCount}</span>
         </button>
 
-        {/* 🔥 ARTIK YANITLARA DA YANITLA BUTONU EKLENDİ */}
         {onReply && (
           <button 
             onClick={() => { triggerHaptic(); onReply(comment.id, commentAuthor.name); }}

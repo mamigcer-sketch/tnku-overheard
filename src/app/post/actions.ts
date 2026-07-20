@@ -8,6 +8,7 @@ import { cookies } from 'next/headers';
 export async function createPost(formData: FormData) {
   const cookieStore = await cookies();
   
+  // Kullanıcının sabit kimliğini (çerezini) alıyoruz, yoksa oluşturuyoruz
   let authorUuid = cookieStore.get('tnku_author_id')?.value;
 
   if (!authorUuid) {
@@ -42,8 +43,8 @@ export async function createPost(formData: FormData) {
       location,
       people,
       gender,
-      authorUuid, 
-      status: 'PENDING', 
+      authorUuid, // Postu kimin attığı veritabanına sabit olarak kaydediliyor
+      status: 'PENDING', // Admin onayına düşer
     },
   });
 
@@ -67,7 +68,7 @@ export async function addComment(formData: FormData) {
     });
   }
 
-  // Ban Kontrolü
+  // Ban Kontrolü: Yorum atan kullanıcı engellenmiş mi?
   const isBanned = await (prisma as any).bannedUser.findUnique({
     where: { userUuid: authorId }
   });
@@ -87,7 +88,7 @@ export async function addComment(formData: FormData) {
       postId,
       content: content.trim(),
       authorId, 
-      parentId: parentId || null, // 🔥 Instagram tarzı yanıt sistemi desteği
+      parentId: parentId || null, // Instagram tarzı yanıt sistemi desteği
     },
   });
   
@@ -111,4 +112,13 @@ export async function getPostsByIds(ids: string[]) {
     },
     orderBy: { createdAt: 'desc' }
   });
+}
+
+// 5. Yorum Beğenisini Artırma ve Kalıcı Hale Getirme
+export async function likeComment(commentId: string, postId: string) {
+  await prisma.comment.update({
+    where: { id: commentId },
+    data: { likes: { increment: 1 } }
+  });
+  revalidatePath(`/post/${postId}`);
 }

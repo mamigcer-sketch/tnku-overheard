@@ -28,9 +28,9 @@ model Comment {
   content   String
   createdAt DateTime  @default(now())
   postId    String
-  authorId  String?   // Aynı kişinin yorumlarını eşleştirmek için eklendi
+  authorId  String?   
+  likes     Int       @default(0) // 🔥 YENİ: Yorum beğenisi veritabanına eklendi
   
-  // 🔥 YENİ: Instagram tarzı yanıt (thread) sistemi için ebeveyn bağlantısı
   parentId  String?
   parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   Comment[] @relation("CommentReplies")
