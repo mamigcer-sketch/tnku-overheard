@@ -59,7 +59,7 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   const [localLikesCount, setLocalLikesCount] = useState(post.likes);
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
   
-  // ✨ YENİ: Çift Tıklama (Instagram Kalbi) State'i
+  // Çift Tıklama (Instagram Kalbi) State'i
   const [showBigHeart, setShowBigHeart] = useState(false);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -84,7 +84,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     );
     if (cardRef.current) observer.observe(cardRef.current);
     
-    // Component unmount olduğunda timer'ı temizle (Memory leak olmasın)
     return () => {
       observer.disconnect();
       if (clickTimeout.current) clearTimeout(clickTimeout.current);
@@ -107,7 +106,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     } catch (err) { console.error('Paylaşım hatası:', err); }
   };
 
-  // Standart butondan beğenme fonksiyonu
   const handleLikeClick = (e: React.FormEvent) => {
     if (localLiked) return;
     triggerHaptic(); 
@@ -117,20 +115,20 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     setTimeout(() => setIsLikingAnimation(false), 1000);
   };
 
-  // ✨ YENİ: Akıllı Tıklama Yöneticisi (Single vs Double Click)
+  // 🔥 YENİ: BÜTÜN KART İÇİN TIKLAMA YÖNETİCİSİ
   const handleCardInteraction = (e: React.MouseEvent) => {
-    // Eğer tıklanan yer alt kısımdaki butonlarsa müdahale etme
+    // Tıklanan şey form, input, buton veya .interactive-zone içindeyse ana kart tetiklenmesin!
     const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('form')) return;
+    if (target.closest('button') || target.closest('form') || target.closest('.interactive-zone')) return;
 
     if (clickTimeout.current) {
-      // ÇİFT TIKLANDI: Timer'ı iptal et ve beğeni at
+      // ÇİFT TIKLANDI
       clearTimeout(clickTimeout.current);
       clickTimeout.current = null;
       
-      triggerHaptic(100); // Çift tıkta biraz daha uzun titreşim
-      setShowBigHeart(true); // Dev kalbi göster
-      setTimeout(() => setShowBigHeart(false), 900); // Kalp 0.9sn sonra kaybolsun
+      triggerHaptic(100); 
+      setShowBigHeart(true); 
+      setTimeout(() => setShowBigHeart(false), 900); 
 
       if (!localLiked) {
         setLocalLiked(true);
@@ -138,13 +136,12 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
         setIsLikingAnimation(true);
         setTimeout(() => setIsLikingAnimation(false), 1000);
         
-        // Veritabanını güncelle
         const formData = new FormData();
         formData.append('id', post.id);
         incrementLike(formData);
       }
     } else {
-      // TEK TIKLANDI: 250ms bekle, ikinci tık gelmezse detay sayfasına git
+      // TEK TIKLANDI
       clickTimeout.current = setTimeout(() => {
         router.push(`/post/${post.id}`);
         clickTimeout.current = null;
@@ -164,7 +161,9 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   return (
     <div 
       ref={cardRef} 
-      className={`relative group bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-5 sm:p-6 rounded-[24px] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-all duration-700 ease-out will-change-[opacity,transform] select-none ${hoverGlow} ${
+      // 🔥 onClick ve cursor-pointer KARTIN EN DIŞINA EKLENDİ
+      onClick={handleCardInteraction} 
+      className={`relative group bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-5 sm:p-6 rounded-[24px] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-all duration-700 ease-out will-change-[opacity,transform] select-none cursor-pointer ${hoverGlow} ${
         isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-[0.98]'
       }`}
     >
@@ -173,30 +172,26 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
         <div className={`absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/30 to-pink-500/30' : 'from-[#4DA3FF]/30 to-blue-500/30'}`} />
       )}
 
-      {/* ✨ YENİ: İNSTAGRAM ÇİFT TIK DEV KALP EFEKTİ */}
+      {/* DEV KALP EFEKTİ */}
       <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-500 ease-out ${
         showBigHeart ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-[0.3] translate-y-8'
       }`}>
         <Heart size={100} className="text-pink-500 drop-shadow-[0_0_40px_rgba(236,72,153,0.8)] fill-pink-500" />
       </div>
 
-      {/* Önceden <Link> olan yeri, Akıllı Tıklama <div'ine> çevirdik */}
-      <div onClick={handleCardInteraction} className="block relative z-10 cursor-pointer">
+      <div className="block relative z-10">
         <div className="flex justify-between items-start gap-3 mb-4">
           <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
-            
             <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
               {isTrending && <Flame size={12} className="animate-pulse" />}
               {isConfession ? 'İTİRAF' : 'OVERHEARD'}
             </span>
-
             <span className="flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border border-white/[0.05] shadow-sm hover:bg-white/[0.08] transition-colors">
               <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
                 {authorData.emoji}
               </div>
               <span className="font-semibold text-[11px] tracking-wide">@{authorData.name}</span>
             </span>
-            
             {post.location && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><MapPin className="w-3 h-3" /> {post.location}</span>}
             {post.time && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><Clock className="w-3 h-3" /> {post.time}</span>}
             {post.people && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><Users className="w-3 h-3" /> {post.people}</span>}
@@ -204,14 +199,16 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
           </div>
           <span className="shrink-0 text-[11px] text-gray-500 font-medium">{getRelativeTime(post.createdAt)}</span>
         </div>
-        
         <p className="text-gray-100 text-[15px] sm:text-[16px] leading-relaxed mb-4 sm:mb-5 font-medium break-words tracking-wide">
           {post.content}
         </p>
       </div>
 
-      {/* Alt Etkileşim Butonları */}
-      <div className="flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400 relative z-10">
+      {/* Alt Etkileşim Butonları - BURASI İZOLE EDİLDİ (stopPropagation) */}
+      <div 
+        onClick={(e) => e.stopPropagation()} 
+        className="interactive-zone flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400 relative z-10 cursor-default"
+      >
         <div className="flex items-center gap-6">
           <form action={incrementLike} onSubmit={handleLikeClick}>
             <input type="hidden" name="id" value={post.id} />
@@ -254,7 +251,11 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
         </button>
       </div>
 
-      <div className={`grid transition-all duration-500 ease-in-out relative z-10 ${showComment ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+      {/* Yorum Formu (Açılır/Kapanır Akordeon) - BURASI İZOLE EDİLDİ (stopPropagation) */}
+      <div 
+        onClick={(e) => e.stopPropagation()} 
+        className={`interactive-zone grid transition-all duration-500 ease-in-out relative z-10 cursor-default ${showComment ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}
+      >
         <div className="overflow-hidden">
           <div className="border-t border-white/[0.04] pt-4">
             <CommentForm postId={post.id} />
