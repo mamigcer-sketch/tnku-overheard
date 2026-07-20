@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Headphones, VenetianMask, Send, CheckCircle2, Loader2 } from 'lucide-react';
+import { Headphones, VenetianMask, Send, CheckCircle2, Loader2, Info } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
 
 export default function ModernForm() {
@@ -54,101 +54,124 @@ export default function ModernForm() {
   };
 
   return (
-    <div className="bg-[#121212]/60 backdrop-blur-xl border border-white/10 p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] mb-2 transition-all">
+    <div className="relative bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] mb-2 transition-all overflow-hidden group/form">
       
+      {/* Formun arkasındaki çok hafif iç parıltı (Hover durumunda canlanır) */}
+      <div className="absolute -inset-[1px] opacity-0 group-hover/form:opacity-100 transition-opacity duration-1000 blur-2xl -z-10 bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+
       {/* Üst Sekmeler */}
-      <div className="flex gap-2 mb-4 sm:mb-6">
+      <div className="flex gap-2 sm:gap-3 mb-4 sm:mb-6 p-1 bg-white/[0.02] backdrop-blur-md rounded-[16px] border border-white/[0.03] shadow-inner">
         <button 
           type="button"
           onClick={() => setType('OVERHEARD')} 
-          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base transition-all duration-300 ${type === 'OVERHEARD' ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_15px_rgba(77,163,255,0.2)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'}`}
+          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base transition-all duration-300 ${
+            type === 'OVERHEARD' 
+              ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_20px_rgba(77,163,255,0.3)] scale-100' 
+              : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] scale-95 hover:scale-100'
+          }`}
         >
           <Headphones size={16} className="sm:w-[18px] sm:h-[18px]" /> Overheard
         </button>
         <button 
           type="button"
           onClick={() => setType('CONFESSION')} 
-          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base transition-all duration-300 ${type === 'CONFESSION' ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_15px_rgba(77,163,255,0.2)]' : 'bg-white/5 text-gray-400 hover:bg-white/10 hover:text-gray-200'}`}
+          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2.5 sm:py-3 rounded-xl text-sm sm:text-base transition-all duration-300 ${
+            type === 'CONFESSION' 
+              ? 'bg-purple-500 text-white font-bold shadow-[0_0_20px_rgba(168,85,247,0.4)] scale-100' 
+              : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] scale-95 hover:scale-100'
+          }`}
         >
           <VenetianMask size={16} className="sm:w-[18px] sm:h-[18px]" /> İtiraf
         </button>
       </div>
 
-      {/* Uyarı Kutusu */}
-      <div className="flex items-center justify-center gap-2 text-[#4DA3FF]/70 bg-[#4DA3FF]/5 px-4 py-3 rounded-xl mb-6 border border-[#4DA3FF]/10">
-        <span className="text-[11px] sm:text-xs font-medium text-center">
-          ⚠️ Lütfen paylaşımını doğru kategoriyle (Overheard veya İtiraf) işaretle.
+      {/* Uyarı Kutusu (Camsı) */}
+      <div className="flex items-center justify-center gap-2 text-white/70 bg-white/[0.03] backdrop-blur-md px-4 py-3 rounded-xl mb-6 border border-white/[0.05] shadow-sm">
+        <Info size={14} className={type === 'CONFESSION' ? 'text-purple-400' : 'text-[#4DA3FF]'} />
+        <span className="text-[11px] sm:text-xs font-medium text-center tracking-wide">
+          Lütfen paylaşımını doğru kategoriyle işaretlediğinden emin ol.
         </span>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5">
+      <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5 relative z-10">
         {type === 'OVERHEARD' && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 animate-in fade-in zoom-in-95 duration-300">
+            
             <div className="col-span-2 md:col-span-1">
                 <input 
                   required 
-                  placeholder="Konum" 
+                  placeholder="Konum (Örn: Yemekhane)" 
                   value={location} 
                   onChange={(e) => setLocation(e.target.value)} 
-                  className="w-full bg-white/5 border border-white/10 p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all placeholder:text-gray-500" 
+                  className="w-full bg-white/[0.03] backdrop-blur-md border border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.05] focus:bg-white/[0.06] p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/30 focus:border-[#4DA3FF]/50 transition-all placeholder:text-gray-500 shadow-inner" 
                 />
             </div>
             
-            <div className="col-span-1 flex flex-col gap-0.5 sm:gap-1">
-               <label className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Kişi</label>
+            <div className="col-span-1 flex flex-col gap-1 sm:gap-1.5">
+               <label className="text-[9px] sm:text-[10px] text-gray-400 uppercase font-bold tracking-wider px-1">Kişi Sayısı</label>
                <select 
                 required 
                 value={people} 
                 onChange={(e) => setPeople(e.target.value)} 
-                className="bg-white/5 border border-white/10 p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all cursor-pointer appearance-none"
+                className="bg-white/[0.03] backdrop-blur-md border border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.05] focus:bg-white/[0.06] p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/30 focus:border-[#4DA3FF]/50 transition-all cursor-pointer shadow-inner appearance-none"
               >
                 <option value="" disabled hidden>Seçiniz</option>
-                <option value="2 kişi" className="bg-[#1a1a1a] text-white">2 kişi</option>
-                <option value="3 kişi" className="bg-[#1a1a1a] text-white">3 kişi</option>
-                <option value="4 kişi" className="bg-[#1a1a1a] text-white">4 kişi</option>
+                <option value="2 kişi" className="bg-[#1a1a1a] text-white">2 Kişi</option>
+                <option value="3 kişi" className="bg-[#1a1a1a] text-white">3 Kişi</option>
+                <option value="4 kişi" className="bg-[#1a1a1a] text-white">4 Kişi</option>
                 <option value="Kalabalık" className="bg-[#1a1a1a] text-white">Kalabalık</option>
               </select>
             </div>
 
-            <div className="col-span-1 flex flex-col gap-0.5 sm:gap-1">
-              <label className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Grup</label>
+            <div className="col-span-1 flex flex-col gap-1 sm:gap-1.5">
+              <label className="text-[9px] sm:text-[10px] text-gray-400 uppercase font-bold tracking-wider px-1">Grup Türü</label>
               <select 
                 required
                 value={gender} 
                 onChange={(e) => setGender(e.target.value)} 
-                className="bg-white/5 border border-white/10 p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all cursor-pointer appearance-none"
+                className="bg-white/[0.03] backdrop-blur-md border border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.05] focus:bg-white/[0.06] p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/30 focus:border-[#4DA3FF]/50 transition-all cursor-pointer shadow-inner appearance-none"
               >
                 <option value="" disabled hidden>Seçiniz</option>
-                <option value="Kız" className="bg-[#1a1a1a] text-white">Kız</option>
-                <option value="Erkek" className="bg-[#1a1a1a] text-white">Erkek</option>
-                <option value="Karışık" className="bg-[#1a1a1a] text-white">Karışık</option>
+                <option value="Kız" className="bg-[#1a1a1a] text-white">Sadece Kız</option>
+                <option value="Erkek" className="bg-[#1a1a1a] text-white">Sadece Erkek</option>
+                <option value="Karışık" className="bg-[#1a1a1a] text-white">Karışık Grup</option>
               </select>
             </div>
 
-            <div className="col-span-2 md:col-span-1 flex flex-col gap-0.5 sm:gap-1">
-              <label className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-bold tracking-wider px-1">Saat Seç</label>
+            <div className="col-span-2 md:col-span-1 flex flex-col gap-1 sm:gap-1.5">
+              <label className="text-[9px] sm:text-[10px] text-gray-400 uppercase font-bold tracking-wider px-1">Olay Saati</label>
               <input 
                 type="time" 
                 required 
                 value={time} 
                 onChange={(e) => setTime(e.target.value)} 
-                className="bg-white/5 border border-white/10 p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all [color-scheme:dark] w-full" 
+                className="bg-white/[0.03] backdrop-blur-md border border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.05] focus:bg-white/[0.06] p-2.5 sm:p-3.5 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/30 focus:border-[#4DA3FF]/50 transition-all [color-scheme:dark] w-full shadow-inner" 
               />
             </div>
           </div>
         )}
 
-        <div className="relative">
+        <div className="relative group/textarea">
             <textarea 
               required 
               maxLength={maxChars}
               rows={3} 
-              placeholder={type === 'OVERHEARD' ? "Ne konuşuluyordu?" : "İtirafın nedir?"} 
+              placeholder={type === 'OVERHEARD' ? "Duyduğun o efsane diyalog neydi? 🤫" : "Sırrını buraya fısılda... 🎭"} 
               value={content} 
               onChange={(e) => setContent(e.target.value)} 
-              className="w-full bg-white/5 border border-white/10 p-3 sm:p-4 pb-8 rounded-xl text-sm sm:text-base text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] resize-none transition-all placeholder:text-gray-500" 
+              className={`w-full bg-white/[0.03] backdrop-blur-md border border-white/[0.05] group-hover/textarea:border-white/[0.1] group-hover/textarea:bg-white/[0.05] p-3 sm:p-4 pb-8 rounded-xl text-sm sm:text-base text-white outline-none resize-none transition-all shadow-inner placeholder:text-gray-600 ${
+                type === 'CONFESSION' 
+                  ? 'focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50' 
+                  : 'focus:ring-2 focus:ring-[#4DA3FF]/30 focus:border-[#4DA3FF]/50'
+              }`} 
             />
-            <div className={`absolute bottom-2 sm:bottom-3 right-3 sm:right-4 text-[10px] sm:text-xs font-medium transition-colors ${content.length >= maxChars ? 'text-red-400' : 'text-gray-500'}`}>
+            <div className={`absolute bottom-2 sm:bottom-3 right-3 sm:right-4 text-[10px] sm:text-xs font-bold transition-colors ${
+              content.length >= maxChars 
+                ? 'text-red-400' 
+                : content.length > maxChars * 0.8 
+                  ? 'text-yellow-400' 
+                  : 'text-gray-600'
+            }`}>
                 {content.length} / {maxChars}
             </div>
         </div>
@@ -156,19 +179,28 @@ export default function ModernForm() {
         <button 
           type="submit" 
           disabled={loading} 
-          className="w-full bg-[#4DA3FF] hover:bg-blue-400 py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold text-black flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_0_20px_rgba(77,163,255,0.2)] hover:shadow-[0_0_25px_rgba(77,163,255,0.4)]"
+          className={`w-full py-3 sm:py-4 rounded-xl text-sm sm:text-base font-bold text-white flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_20px_rgba(0,0,0,0.2)] active:scale-95 ${
+            type === 'CONFESSION' 
+              ? 'bg-purple-600 hover:bg-purple-500 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]' 
+              : 'bg-[#4DA3FF] text-black hover:bg-blue-400 hover:shadow-[0_0_30px_rgba(77,163,255,0.4)]'
+          }`}
         >
           {loading ? (
-            <><Loader2 size={16} className="animate-spin sm:w-[18px] sm:h-[18px]" /> Gönderiliyor...</>
+            <><Loader2 size={18} className="animate-spin sm:w-[20px] sm:h-[20px]" /> Kapsüle Yükleniyor...</>
           ) : (
-            <><Send size={16} className="sm:w-[18px] sm:h-[18px]" /> Yönetici Onayına Gönder</>
+            <><Send size={18} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> {type === 'CONFESSION' ? 'İtirafı Gönder' : 'Fısıltıyı Gönder'}</>
           )}
         </button>
       </form>
 
+      {/* Başarı Mesajı - Animasyonlu Cam Kutu */}
       {successMsg && (
-        <div className="mt-4 sm:mt-5 p-3 sm:p-4 bg-green-500/10 border border-green-500/20 text-green-400 rounded-xl flex items-center gap-2 sm:gap-3 justify-center animate-in fade-in zoom-in-95 duration-300 font-medium text-xs sm:text-sm">
-          <CheckCircle2 size={18} className="sm:w-[20px] sm:h-[20px]" /> Gönderin başarıyla alındı!
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-[#0B0B0B]/80 backdrop-blur-md rounded-[20px] sm:rounded-[24px] animate-in fade-in duration-300">
+          <div className="p-4 sm:p-5 bg-green-500/10 border border-green-500/20 text-green-400 rounded-2xl flex flex-col items-center gap-2 sm:gap-3 justify-center animate-in zoom-in-95 duration-500 shadow-[0_0_40px_rgba(34,197,94,0.2)]">
+            <CheckCircle2 size={32} className="sm:w-[40px] sm:h-[40px] animate-bounce" /> 
+            <span className="font-bold text-sm sm:text-base tracking-wide">Onaya Gönderildi!</span>
+            <span className="text-[11px] sm:text-xs text-green-400/70 font-medium">Yönetici onayından sonra yayınlanacaktır.</span>
+          </div>
         </div>
       )}
     </div>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
-import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2 } from "lucide-react";
+import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame } from "lucide-react";
 import Link from "next/link";
 import { incrementView } from "@/app/post/actions";
 
@@ -29,17 +29,33 @@ const animals = [
   "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"
 ];
 
-// Verilen ID'ye göre stabil rastgele isim türeten fonksiyon
-const getAnonymousName = (id: string) => {
-  if (!id) return "Gizemli Yolcu";
+const emojis = ["🦊", "🐼", "🦉", "🦝", "🐨", "🦁", "🐸", "🐙", "🦋", "🦖", "🦄", "🐧", "🐱", "🐶", "🐰", "🐯"];
+const gradients = [
+  "from-blue-400 to-indigo-600",
+  "from-pink-400 to-rose-600",
+  "from-purple-400 to-fuchsia-600",
+  "from-emerald-400 to-teal-600",
+  "from-amber-400 to-orange-600",
+  "from-cyan-400 to-blue-600"
+];
+
+// Verilen ID'ye göre stabil rastgele isim ve avatar türeten fonksiyon
+const getAnonymousData = (id: string) => {
+  if (!id) return { name: "Gizemli Yolcu", emoji: "👤", gradient: gradients[0] };
   let hash = 0;
   for (let i = 0; i < id.length; i++) {
     hash = id.charCodeAt(i) + ((hash << 5) - hash);
   }
   const positiveHash = Math.abs(hash);
+  
   const adj = adjectives[positiveHash % adjectives.length];
   const ani = animals[Math.floor(positiveHash / adjectives.length) % animals.length];
-  return `${adj} ${ani}`;
+  
+  return {
+    name: `${adj} ${ani}`,
+    emoji: emojis[positiveHash % emojis.length],
+    gradient: gradients[Math.floor(positiveHash / emojis.length) % gradients.length]
+  };
 };
 
 const getRelativeTime = (dateString: string) => {
@@ -99,28 +115,43 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   };
 
   const isConfession = post.type === 'CONFESSION';
-  const hoverGlow = isConfession 
-    ? 'hover:shadow-[0_0_30px_rgba(168,85,247,0.06)] hover:border-purple-500/20' 
-    : 'hover:shadow-[0_0_30px_rgba(77,163,255,0.06)] hover:border-[#4DA3FF]/20';
+  const isTrending = post.likes >= 10; // 10 beğeni ve üzeri "Trend" sayılır ve parlar 🔥
 
-  // 🔥 İŞTE KRİTİK NOKTA: Eğer postun authorUuid'si varsa onu baz al, yoksa post.id'yi kullan!
-  // Böylece senin tarayıcından atılan tüm postlar aynı authorUuid'ye sahip olduğu için TEK BİR NİCK çıkacak.
-  const authorNickname = getAnonymousName(post.authorUuid || post.id);
+  const hoverGlow = isConfession 
+    ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
+    : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
+
+  // Yazar Bilgileri (İsim + Renk + Emoji)
+  const authorData = getAnonymousData(post.authorUuid || post.id);
 
   return (
-    <div ref={cardRef} className={`group bg-[#121212]/60 backdrop-blur-2xl border border-white/[0.04] p-5 sm:p-6 rounded-[24px] transition-all duration-500 ${hoverGlow}`}>
-      <Link href={`/post/${post.id}`} className="block">
+    <div 
+      ref={cardRef} 
+      className={`relative group bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-5 sm:p-6 rounded-[24px] transition-all duration-500 overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] ${hoverGlow}`}
+    >
+      {/* 🔥 Trend Olan Gönderiler İçin Arka Plan Yansıması */}
+      {isTrending && (
+        <div className={`absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/30 to-pink-500/30' : 'from-[#4DA3FF]/30 to-blue-500/30'}`} />
+      )}
+
+      <Link href={`/post/${post.id}`} className="block relative z-10">
         
         {/* Üst Bilgi Çubuğu */}
         <div className="flex justify-between items-start gap-3 mb-4">
           <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
-            <span className={`px-2.5 py-1 rounded-md uppercase ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
+            
+            {/* Kategori Etiketi */}
+            <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
+              {isTrending && <Flame size={12} className="animate-pulse" />}
               {isConfession ? 'İTİRAF' : 'OVERHEARD'}
             </span>
 
-            {/* 🔥 Komik Anonim Yazar Rozeti */}
-            <span className="bg-white/[0.05] text-gray-300 px-2.5 py-1 rounded-md border border-white/[0.05]">
-              @{authorNickname}
+            {/* 🎨 Rastgele Avatar & İsim Rozeti */}
+            <span className="flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border border-white/[0.05] shadow-sm hover:bg-white/[0.08] transition-colors">
+              <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
+                {authorData.emoji}
+              </div>
+              <span className="font-semibold text-[11px] tracking-wide">@{authorData.name}</span>
             </span>
             
             {post.location && (
@@ -154,19 +185,19 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
         </div>
         
         {/* İçerik */}
-        <p className="text-gray-100 text-[14px] sm:text-[15px] leading-relaxed mb-4 sm:mb-5 font-medium break-words tracking-wide">
+        <p className="text-gray-100 text-[15px] sm:text-[16px] leading-relaxed mb-4 sm:mb-5 font-medium break-words tracking-wide">
           {post.content}
         </p>
       </Link>
 
       {/* Modern Alt Etkileşim Çubuğu */}
-      <div className="flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400">
+      <div className="flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400 relative z-10">
         <div className="flex items-center gap-6">
           {/* Beğeni Butonu */}
           <form action={incrementLike}>
             <input type="hidden" name="id" value={post.id} />
-            <button type="submit" disabled={isLiked} className={`flex items-center gap-1.5 transition-colors group-button ${isLiked ? 'text-pink-500' : 'hover:text-pink-400'}`}>
-              <Heart size={18} className={`transition-transform ${isLiked ? 'fill-pink-500 scale-110' : 'active:scale-95'}`} /> 
+            <button type="submit" disabled={isLiked} className={`flex items-center gap-1.5 transition-all group-button ${isLiked ? 'text-pink-500' : 'hover:text-pink-400'}`}>
+              <Heart size={18} className={`transition-all duration-300 ${isLiked ? 'fill-pink-500 scale-110 drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]' : 'active:scale-75'}`} /> 
               <span className="text-[13px] font-bold">{post.likes}</span>
             </button>
           </form>
@@ -188,13 +219,13 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
         </div>
 
         {/* Paylaş Butonu */}
-        <button onClick={handleShare} className="hover:text-white transition-colors bg-white/[0.03] p-2 rounded-full hover:bg-white/[0.08]">
+        <button onClick={handleShare} className="hover:text-white transition-all duration-300 bg-white/[0.03] p-2 rounded-full hover:bg-white/[0.08] hover:scale-110 active:scale-95">
           <Share2 size={16} />
         </button>
       </div>
 
       {/* Yorum Formu (Açılır/Kapanır Akordeon) */}
-      <div className={`grid transition-all duration-300 ease-in-out ${showComment ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+      <div className={`grid transition-all duration-300 ease-in-out relative z-10 ${showComment ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
         <div className="overflow-hidden">
           <div className="border-t border-white/[0.04] pt-4">
             <CommentForm postId={post.id} />
