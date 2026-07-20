@@ -72,62 +72,71 @@ export default async function Home({ searchParams }: any) {
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white">
-      <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-white/10 px-4 py-4 md:px-8 flex items-center relative">
+      {/* Şeffaf ve Daha Zarif Header */}
+      <header className="sticky top-0 z-50 bg-[#0B0B0B]/60 backdrop-blur-2xl border-b border-white/[0.03] px-4 py-4 md:px-8 flex items-center relative transition-all">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-3 pointer-events-auto hover:opacity-80 transition-opacity">
-            <img src="/logo.jpg" alt="Logo" className="w-10 h-10 object-cover rounded-xl border border-white/10" />
-            <h1 className="text-2xl font-extrabold tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
+            <img src="/logo.jpg" alt="Logo" className="w-9 h-9 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
+            <h1 className="text-xl font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
           </Link>
         </div>
         <div className="ml-auto z-10"><MobileMenu /></div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-8">
+      <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
         
-        <div className="mb-6">
+        {/* Premium Paylaşım Akordeonu */}
+        <div className="mb-8">
           <details className="group [&_summary::-webkit-details-marker]:hidden">
-            <summary className="list-none cursor-pointer flex items-center justify-between bg-[#121212] border border-white/10 hover:border-white/20 p-4 rounded-2xl transition-all shadow-lg">
-              <div className="flex items-center gap-3">
-                <div className="bg-[#4DA3FF]/10 p-2.5 rounded-xl">
+            <summary className="list-none cursor-pointer flex items-center justify-between bg-[#121212]/60 backdrop-blur-xl border border-white/[0.05] hover:border-white/[0.1] hover:bg-[#121212]/80 p-4 sm:p-5 rounded-[24px] transition-all duration-300 shadow-lg">
+              <div className="flex items-center gap-4">
+                <div className="bg-[#4DA3FF]/10 p-3 rounded-2xl border border-[#4DA3FF]/10 group-hover:scale-105 transition-transform">
                   <Plus className="text-[#4DA3FF]" size={20} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white text-base">Bir şeyler paylaşmak ister misin?</h3>
-                  <p className="text-xs text-gray-500">Kampüste duyduklarını veya itiraflarını anonim yaz.</p>
+                  <h3 className="font-bold text-gray-100 text-[15px]">Fısıldamak ister misin?</h3>
+                  <p className="text-[12px] text-gray-500 font-medium mt-0.5">Kampüste olan biteni anonim paylaş.</p>
                 </div>
               </div>
-              <div className="bg-white/5 p-2 rounded-xl group-open:rotate-180 transition-transform duration-300">
-                <ChevronDown size={18} className="text-gray-400" />
+              <div className="bg-white/5 w-8 h-8 flex items-center justify-center rounded-full group-open:rotate-180 transition-transform duration-500">
+                <ChevronDown size={16} className="text-gray-400" />
               </div>
             </summary>
-            <div className="pt-4 animate-in fade-in slide-in-from-top-4 duration-500">
+            <div className="pt-4 animate-in fade-in slide-in-from-top-2 duration-500">
               <ModernForm />
             </div>
           </details>
         </div>
         
-        <SearchBar />
+        <div className="mb-6">
+          <SearchBar />
+        </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-4 mb-6 scrollbar-hide">
+        {/* Yeni Nesil Filtre Hapları (Pills) */}
+        <div className="flex gap-2.5 overflow-x-auto pb-6 mb-2 scrollbar-hide snap-x">
           {filters.map((filter) => (
             <Link 
               key={filter} 
               href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`} 
               scroll={false}
-              className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap ${currentFilter === filter ? 'bg-[#4DA3FF] text-black shadow-[0_0_15px_rgba(77,163,255,0.3)]' : 'bg-[#121212] border border-white/5 text-gray-300 hover:bg-white/5 transition-colors'}`}
+              className={`px-5 py-2.5 rounded-full text-[13px] font-bold whitespace-nowrap snap-start transition-all duration-300 ${
+                currentFilter === filter 
+                  ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.15)]' 
+                  : 'bg-white/[0.03] border border-white/[0.05] text-gray-400 hover:text-gray-200 hover:bg-white/[0.08]'
+              }`}
             >
               {filter}
             </Link>
           ))}
         </div>
 
-        <div className="space-y-5">
+        <div className="space-y-6">
           {posts.length === 0 ? (
-            <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
-              <p className="text-gray-400 font-medium">
+            <div className="text-center py-20 bg-[#121212]/50 rounded-[24px] border border-white/[0.05] flex flex-col items-center justify-center">
+              <p className="text-gray-400 font-medium text-[14px]">
                 {currentFilter === '🔥 Trend' 
-                  ? 'Bu hafta henüz popülerleşen bir fısıltı yok kanka.' 
-                  : 'Aradığın kriterlerde gönderi bulunamadı kanka.'}
+                  ? 'Bu hafta henüz popülerleşen bir fısıltı yok.' 
+                  : 'Aradığın kriterlerde gönderi bulunamadı.'}
               </p>
             </div>
           ) : (
@@ -142,10 +151,10 @@ export default async function Home({ searchParams }: any) {
               ))}
               
               {posts.length === pageSize && (
-                <div className="flex justify-center pt-4">
+                <div className="flex justify-center pt-6">
                   <Link 
                     href={`/?f=${currentFilter}${searchQuery ? `&q=${searchQuery}` : ''}&page=${page + 1}`}
-                    className="px-8 py-3 bg-[#121212] border border-white/10 hover:border-white/30 rounded-full text-sm font-medium text-white transition-all hover:bg-white/5"
+                    className="px-8 py-3.5 bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.2] rounded-full text-[13px] font-bold text-gray-300 transition-all hover:bg-white/[0.08] hover:text-white"
                   >
                     Daha Fazla Göster
                   </Link>
