@@ -37,7 +37,11 @@ export default async function Home({ searchParams }: any) {
   const params = await searchParams;
   const currentFilter = params?.f || 'Tümü';
   const searchQuery = params?.q || '';
+  
+  // 🔥 SONSUZ AKIŞ (LOAD MORE) MANTIĞI: 1. sayfadan basılan sayfaya kadar HEPSİNİ birden getirir
   const page = parseInt(params?.page || '1');
+  const pageSize = 10;
+  const totalTake = page * pageSize; // Kaç tane post gösterileceğini hesaplar (1. sayfa: 10, 2. sayfa: 20 vb.)
 
   let whereQuery: any = { status: 'APPROVED' };
   let orderQuery: any = { createdAt: 'desc' };
@@ -59,14 +63,16 @@ export default async function Home({ searchParams }: any) {
     whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
   }
 
-  const pageSize = 10;
+  // Veritabanından o anki sayfa derinliğine göre postları çekiyoruz
   const posts = await prisma.post.findMany({
     where: whereQuery,
     orderBy: orderQuery,
-    skip: (page - 1) * pageSize,
-    take: pageSize,
+    take: totalTake,
     include: { comments: { select: { id: true } } }
   });
+
+  // Toplam post sayısını buluyoruz ki daha fazla post kalıp kalmadığını anlayalım
+  const totalPostsCount = await prisma.post.count({ where: whereQuery });
 
   const filters = ['Tümü', 'Overheard', 'İtiraf', 'En Yeni', '🔥 Trend'];
 
@@ -94,8 +100,8 @@ export default async function Home({ searchParams }: any) {
                   <Plus className="text-[#4DA3FF]" size={20} />
                 </div>
                 <div>
-                  <h3 className="font-bold text-gray-100 text-[15px]">Fısıldamak ister misin?</h3>
-                  <p className="text-[12px] text-gray-500 font-medium mt-0.5">Kampüste olan biteni anonim paylaş.</p>
+                  <h3 className="font-bold text-gray-100 text-[15px]">Anonim paylaşım yapmak ister misin?</h3>
+                  <p className="text-[12px] text-gray-500 font-medium mt-0.5">Kampüste olan biteni anonim fısılda.</p>
                 </div>
               </div>
               <div className="bg-white/5 w-8 h-8 flex items-center justify-center rounded-full group-open:rotate-180 transition-transform duration-500">
@@ -150,11 +156,13 @@ export default async function Home({ searchParams }: any) {
                 />
               ))}
               
-              {posts.length === pageSize && (
+              {/* Eğer gösterilen post sayısı veritabanındaki toplam post sayısından azsa butonu göster */}
+              {posts.length < totalPostsCount && (
                 <div className="flex justify-center pt-6">
                   <Link 
                     href={`/?f=${currentFilter}${searchQuery ? `&q=${searchQuery}` : ''}&page=${page + 1}`}
-                    className="px-8 py-3.5 bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.2] rounded-full text-[13px] font-bold text-gray-300 transition-all hover:bg-white/[0.08] hover:text-white"
+                    scroll={false}
+                    className="px-8 py-3.5 bg-white/[0.03] border border-white/[0.08] hover:border-white/[0.2] rounded-full text-[13px] font-bold text-gray-300 transition-all hover:bg-white/[0.08] hover:text-white shadow-lg"
                   >
                     Daha Fazla Göster
                   </Link>
