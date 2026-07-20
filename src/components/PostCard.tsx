@@ -115,7 +115,9 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   };
 
   const isConfession = post.type === 'CONFESSION';
-  const isTrending = post.likes >= 10; // 10 beğeni ve üzeri "Trend" sayılır ve parlar 🔥
+  
+  // 🔥 10 beğeni alması VE atıldığı andan itibaren 24 saat (86.400.000 ms) geçmemiş olması şartı eklendi
+  const isTrending = post.likes >= 10 && (new Date().getTime() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000); 
 
   const hoverGlow = isConfession 
     ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
