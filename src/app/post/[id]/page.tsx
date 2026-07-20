@@ -24,99 +24,126 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// Yorum Avatarları İçin Renk Temaları
+// Yorum Avatarları İçin Soft Renk Temaları (Daha Premium)
 const avatarThemes = [
-  { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400' },
-  { bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400' },
-  { bg: 'bg-pink-500/10', border: 'border-pink-500/20', text: 'text-pink-400' },
-  { bg: 'bg-green-500/10', border: 'border-green-500/20', text: 'text-green-400' },
+  { bg: 'bg-blue-500/5', border: 'border-blue-500/10', text: 'text-blue-400' },
+  { bg: 'bg-purple-500/5', border: 'border-purple-500/10', text: 'text-purple-400' },
+  { bg: 'bg-pink-500/5', border: 'border-pink-500/10', text: 'text-pink-400' },
+  { bg: 'bg-teal-500/5', border: 'border-teal-500/10', text: 'text-teal-400' },
 ];
 
 export default async function PostPage({ params }: any) {
   const resolvedParams = await params;
   const postId = resolvedParams?.id;
 
-  if (!postId) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-white">Yükleniyor...</div>;
+  if (!postId) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-white font-medium">Yükleniyor...</div>;
 
   const post = await prisma.post.findUnique({
     where: { id: String(postId) },
     include: { comments: { orderBy: { createdAt: 'desc' } } }
   });
 
-  if (!post) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-gray-500">Post bulunamadı kanka...</div>;
+  if (!post) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-gray-500 font-medium">Post bulunamadı...</div>;
+
+  const isConfession = post.type === 'CONFESSION';
+  const glowStyle = isConfession 
+    ? 'shadow-[0_0_40px_rgba(168,85,247,0.07)] border-purple-500/20' 
+    : 'shadow-[0_0_40px_rgba(77,163,255,0.07)] border-[#4DA3FF]/20';
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white">
-      <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-white/10 px-4 py-4 md:px-8 mb-6">
+      {/* Şeffaf Header */}
+      <header className="sticky top-0 z-50 bg-[#0B0B0B]/70 backdrop-blur-xl border-b border-white/5 px-4 py-4 md:px-8 mb-6">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="hover:opacity-80 transition-opacity">
-            <h1 className="text-xl font-extrabold tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
+            <h1 className="text-lg font-extrabold tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
           </Link>
           <div className="flex items-center gap-3">
             <BackButton />
-            <Link href="/" className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition-colors text-sm font-medium border border-white/5">
-              <Home size={16} /> <span className="hidden sm:inline">Ana Sayfa</span>
+            <Link href="/" className="flex items-center gap-2 bg-white/5 hover:bg-white/10 px-4 py-2 rounded-full transition-colors text-[13px] font-medium border border-white/5">
+              <Home size={14} /> <span className="hidden sm:inline">Ana Sayfa</span>
             </Link>
           </div>
         </div>
       </header>
 
       <div className="max-w-2xl mx-auto px-4 pb-12">
-        <article className="bg-[#121212]/90 backdrop-blur-md border border-white/[0.08] p-5 md:p-8 rounded-[24px] mb-8 shadow-lg">
+        {/* ANA GÖNDERİ KARTI */}
+        <article className={`bg-[#121212]/80 backdrop-blur-xl border p-6 rounded-[24px] mb-8 relative overflow-hidden transition-all duration-500 ${glowStyle}`}>
           
-          {/* Mobilde düzenlenmiş etiketler */}
-          <div className="flex flex-wrap justify-between items-start gap-2 mb-5">
-            <div className="flex flex-wrap gap-1.5 text-[11px] font-medium text-gray-400">
-              <span className={`px-2 py-0.5 rounded-full border ${post.type === 'CONFESSION' ? 'bg-purple-500/10 border-purple-500/20 text-purple-400' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20 text-[#4DA3FF]'}`}>
-                {post.type === 'CONFESSION' ? 'İTİRAF' : 'OVERHEARD'}
+          {/* Üst Bilgi Çubuğu */}
+          <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
+            <div className="flex flex-wrap gap-1.5 text-[10px] font-bold tracking-wide">
+              <span className={`px-2.5 py-1 rounded-md uppercase ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
+                {isConfession ? 'İTİRAF' : 'OVERHEARD'}
               </span>
-              {post.location && <span className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full border border-white/5"><MapPin size={12} /> {post.location}</span>}
-              {post.time && <span className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full border border-white/5"><Clock size={12} /> {post.time}</span>}
-              {post.people && <span className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full border border-white/5"><Users size={12} /> {post.people}</span>}
-              {post.gender && <span className="flex items-center gap-1 bg-white/5 px-2 py-0.5 rounded-full border border-white/5"><User size={12} /> {post.gender}</span>}
+              {post.location && <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-md text-gray-400"><MapPin size={10} /> {post.location}</span>}
+              {post.time && <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-md text-gray-400"><Clock size={10} /> {post.time}</span>}
+              {post.people && <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-md text-gray-400"><Users size={10} /> {post.people}</span>}
+              {post.gender && <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-md text-gray-400"><User size={10} /> {post.gender}</span>}
             </div>
-            <span className="text-[11px] text-gray-500 font-medium bg-white/5 px-2 py-0.5 rounded-full shrink-0">
+            <span className="text-[10px] text-gray-500 font-medium">
               {getRelativeTime(post.createdAt)}
             </span>
           </div>
 
-          <p className="text-lg md:text-2xl leading-relaxed font-normal text-white mb-8 break-words">{post.content}</p>
+          {/* İçerik - Zarafet katıldı, boyut ufaltıldı, okuma kolaylığı eklendi */}
+          <p className="text-[15px] sm:text-[16px] leading-relaxed font-medium text-gray-100 mb-6 break-words tracking-wide">
+            {post.content}
+          </p>
 
-          <div className="flex items-center gap-5 border-t border-white/5 pt-4 text-gray-400">
-            <div className="flex items-center gap-1.5"><Heart size={18} className="text-pink-500" /> <span className="font-medium text-white">{post.likes}</span></div>
-            <div className="flex items-center gap-1.5"><Eye size={18} className="text-blue-500" /> <span className="font-medium text-white">{post.views}</span></div>
+          {/* İstatistikler */}
+          <div className="flex items-center gap-4 pt-4 border-t border-white/5">
+            <div className="flex items-center gap-1.5 bg-pink-500/5 px-3 py-1.5 rounded-lg border border-pink-500/10">
+              <Heart size={14} className="text-pink-400" /> 
+              <span className="text-xs font-bold text-pink-100">{post.likes}</span>
+            </div>
+            <div className="flex items-center gap-1.5 bg-blue-500/5 px-3 py-1.5 rounded-lg border border-blue-500/10">
+              <Eye size={14} className="text-blue-400" /> 
+              <span className="text-xs font-bold text-blue-100">{post.views}</span>
+            </div>
           </div>
         </article>
 
+        {/* YORUMLAR BÖLÜMÜ */}
         <div className="space-y-6">
-          <h2 className="text-lg font-bold flex items-center gap-2 text-white">
-            <MessageCircle size={20} className="text-[#4DA3FF]" /> Anonim Yorumlar ({post.comments.length})
-          </h2>
-          <div className="space-y-4">
+          <div className="flex items-center gap-2 px-1">
+            <MessageCircle size={16} className="text-[#4DA3FF]" />
+            <h2 className="text-[14px] font-bold text-gray-200">
+              Anonim Yorumlar <span className="text-gray-500 font-medium">({post.comments.length})</span>
+            </h2>
+          </div>
+
+          <div className="space-y-3">
             {post.comments.length === 0 ? (
-              <div className="text-center py-10 bg-[#121212] rounded-2xl border border-white/5 text-gray-500 text-sm">Henüz kimse bir şey fısıldamamış. İlk sen ol!</div>
+              <div className="text-center py-10 bg-[#121212]/50 rounded-2xl border border-white/5 text-gray-500 text-[13px]">
+                Bu fısıltıya ilk cevabı sen ver.
+              </div>
             ) : (
               post.comments.map((comment: any, index: number) => {
                 const theme = avatarThemes[index % avatarThemes.length];
                 return (
-                  <div key={comment.id} className="bg-[#121212] border border-white/5 p-4 rounded-2xl flex gap-3">
-                    <div className={`w-9 h-9 shrink-0 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border}`}>
-                      <Ghost size={16} className={theme.text} />
+                  // Yorum kartlarına "slide-in" efekti ve küçültülmüş pading uygulandı
+                  <div key={comment.id} className="bg-[#121212]/80 border border-white/[0.03] hover:border-white/[0.08] p-3.5 rounded-2xl flex gap-3 transition-colors animate-in fade-in slide-in-from-bottom-2 duration-500">
+                    <div className={`w-8 h-8 shrink-0 rounded-full ${theme.bg} flex items-center justify-center border ${theme.border}`}>
+                      <Ghost size={14} className={theme.text} />
                     </div>
-                    <div className="flex-1">
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="font-semibold text-xs text-gray-300">Anonim</span>
-                        <span className="text-[10px] text-gray-500">{getRelativeTime(comment.createdAt)}</span>
+                    <div className="flex-1 mt-0.5">
+                      <div className="flex items-center justify-between mb-1.5">
+                        <span className="font-bold text-[11px] text-gray-300 tracking-wide">ANONİM</span>
+                        <span className="text-[9px] text-gray-500 font-medium">{getRelativeTime(comment.createdAt)}</span>
                       </div>
-                      <p className="text-gray-300 text-sm leading-relaxed">{comment.content}</p>
+                      <p className="text-gray-300 text-[13px] leading-relaxed">{comment.content}</p>
                     </div>
                   </div>
                 )
               })
             )}
           </div>
-          <div className="pt-6 border-t border-white/10">
-            <h3 className="text-sm font-semibold text-gray-300 mb-3">Bırak fısıltını:</h3>
+          
+          {/* Yorum Yapma Formu */}
+          <div className="pt-6 border-t border-white/5 mt-8">
+            <h3 className="text-xs font-bold text-gray-400 mb-3 px-1 uppercase tracking-wider">Sen Ne Düşünüyorsun?</h3>
             <CommentForm postId={post.id} />
           </div>
         </div>
