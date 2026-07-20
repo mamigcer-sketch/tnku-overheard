@@ -24,7 +24,7 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// YENİ: Dinamik & Eğlenceli Anonim Kimlik Oluşturucu 🚀
+// YENİ: Hata Düzeltildi - Güvenli Anonim Kimlik Oluşturucu 🚀
 const getFunIdentity = (id: string) => {
   const adjectives = [
     "Uykulu", "Sinirli", "Gizemli", "Zeki", "Aceleci", "Şaşkın", "Huysuz", 
@@ -47,18 +47,23 @@ const getFunIdentity = (id: string) => {
     { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400' },
   ];
 
-  // Yorumun ID'sini kullanarak sabit bir rastgelelik (hash) üretiyoruz
+  const safeId = String(id || "anonim");
   let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < safeId.length; i++) {
+    hash = safeId.charCodeAt(i) + ((hash << 5) - hash);
   }
-  hash = Math.abs(hash);
+  
+  // Sayfayı çökerten eksi sayıyı tamamen ortadan kaldıran güvenli kalkan
+  const positiveHash = Math.abs(hash);
 
-  const adj = adjectives[hash % adjectives.length];
-  const noun = nouns[(hash >> 2) % nouns.length];
-  const theme = avatarThemes[(hash >> 4) % avatarThemes.length];
+  const adjIndex = positiveHash % adjectives.length;
+  const nounIndex = (positiveHash * 7) % nouns.length; // Eksiye düşmemesi için farklı çarpanlar kullanıldı
+  const themeIndex = (positiveHash * 13) % avatarThemes.length;
 
-  return { name: `${adj} ${noun}`, theme };
+  return { 
+    name: `${adjectives[adjIndex]} ${nouns[nounIndex]}`, 
+    theme: avatarThemes[themeIndex] 
+  };
 };
 
 export default async function PostPage({ params }: any) {
@@ -146,16 +151,14 @@ export default async function PostPage({ params }: any) {
               </div>
             ) : (
               post.comments.map((comment: any) => {
-                const identity = getFunIdentity(comment.id); // Gizli formülümüzü çalıştırıyoruz!
+                const identity = getFunIdentity(comment.id); 
                 return (
                   <div key={comment.id} className="bg-[#121212]/80 border border-white/[0.03] hover:border-white/[0.08] p-3.5 rounded-2xl flex gap-3 transition-colors animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    {/* Artık herkesin kendine has bir rengi var */}
                     <div className={`w-8 h-8 shrink-0 rounded-full ${identity.theme.bg} flex items-center justify-center border ${identity.theme.border}`}>
                       <Ghost size={14} className={identity.theme.text} />
                     </div>
                     <div className="flex-1 mt-0.5">
                       <div className="flex items-center justify-between mb-1.5">
-                        {/* Artık sadece "Anonim" yazmıyor, isimleri renklendirdik */}
                         <span className={`font-bold text-[12px] tracking-wide ${identity.theme.text}`}>
                           {identity.name}
                         </span>
