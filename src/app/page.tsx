@@ -13,16 +13,10 @@ export const dynamic = 'force-dynamic';
 export default async function Home({ searchParams }: any) {
   const cookieStore = await cookies();
 
-  // 🔥 KALICI ANONİM KİMLİK ÇEREZİ (USER UUID) MANTIĞI
+  // 🔥 Çerezden oku, yoksa sunucuyu patlatmadan güvenli UUID oluştur
   let userUuid = cookieStore.get('user_uuid')?.value;
   if (!userUuid) {
     userUuid = 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
-    cookieStore.set('user_uuid', userUuid, {
-      maxAge: 60 * 60 * 24 * 365, // 1 yıl kalıcı
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-    });
   }
 
   async function incrementLike(formData: FormData) {
