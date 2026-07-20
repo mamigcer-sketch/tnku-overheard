@@ -18,24 +18,38 @@ model Post {
   people     String?
   gender     String?
   time       String?
-  authorUuid String?   // Kullanıcının sabit post yazarı kimliği
+  authorUuid String?   
   createdAt  DateTime  @default(now())
+  
   comments   Comment[]
+  reports    Report[]  // 🔥 YENİ: Posta gelen şikayetler
 }
 
 model Comment {
-  id        String    @id @default(cuid())
-  content   String
-  createdAt DateTime  @default(now())
-  postId    String
-  authorId  String?   
-  likes     Int       @default(0) // 🔥 YENİ: Yorum beğenisi veritabanına eklendi
+  id           String        @id @default(cuid())
+  content      String
+  createdAt    DateTime      @default(now())
+  postId       String
+  authorId     String?   
+  likes        Int           @default(0) 
   
-  parentId  String?
-  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies   Comment[] @relation("CommentReplies")
+  parentId     String?
+  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      Comment[]     @relation("CommentReplies")
 
-  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  commentLikes CommentLike[] 
+  reports      Report[]      // 🔥 YENİ: Yoruma gelen şikayetler
+}
+
+model CommentLike {
+  id        String   @id @default(cuid())
+  commentId String
+  userUuid  String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@unique([commentId, userUuid])
 }
 
 model Announcement {
@@ -49,4 +63,16 @@ model BannedUser {
   id        String   @id @default(cuid())
   userUuid  String   @unique
   createdAt DateTime @default(now())
+}
+
+// 🔥 YENİ TABLO: Şikayetler (Admin Paneline Düşecek)
+model Report {
+  id        String   @id @default(cuid())
+  reason    String   // Şikayet Sebebi (Küfür, Spam vs)
+  postId    String?
+  commentId String?
+  createdAt DateTime @default(now())
+
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
 }

@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Heart, Reply } from "lucide-react";
-import { toggleCommentLike } from "@/app/post/actions";
+import { Heart, Reply, Flag } from "lucide-react";
+import { toggleCommentLike, submitReport } from "@/app/post/actions";
 
 const getRelativeTime = (dateString: string | Date) => {
   if (!dateString) return "";
@@ -31,15 +31,10 @@ export default function CommentItem({
   const [localLiked, setLocalLiked] = useState(isInitiallyLiked);
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
+  const [reported, setReported] = useState(false);
 
-  // 🔥 Sunucudan gelen güncel props verilerini state ile senkronize ediyoruz
-  useEffect(() => {
-    setLocalLiked(isInitiallyLiked);
-  }, [isInitiallyLiked]);
-
-  useEffect(() => {
-    setLocalLikesCount(comment.likes || 0);
-  }, [comment.likes]);
+  useEffect(() => { setLocalLiked(isInitiallyLiked); }, [isInitiallyLiked]);
+  useEffect(() => { setLocalLikesCount(comment.likes || 0); }, [comment.likes]);
 
   const triggerHaptic = () => {
     if (typeof window !== "undefined" && window.navigator && window.navigator.vibrate) {
@@ -49,7 +44,6 @@ export default function CommentItem({
 
   const handleLike = async () => {
     triggerHaptic();
-
     const nextLikedState = !localLiked;
     setLocalLiked(nextLikedState);
     setLocalLikesCount((prev: number) => nextLikedState ? prev + 1 : Math.max(0, prev - 1));
@@ -65,6 +59,17 @@ export default function CommentItem({
       console.error("Beğeni güncellenemedi:", err);
       setLocalLiked(!nextLikedState);
       setLocalLikesCount((prev: number) => !nextLikedState ? prev + 1 : Math.max(0, prev - 1));
+    }
+  };
+
+  // 🔥 YENİ: Şikayet Etme Fonksiyonu
+  const handleReport = async () => {
+    if (reported) return;
+    const reason = window.prompt("Bu yorumu neden şikayet ediyorsunuz? (Küfür, Spam vb.)");
+    if (reason && reason.trim()) {
+      await submitReport('COMMENT', comment.id, reason.trim());
+      setReported(true);
+      alert("Şikayetiniz adminlere iletildi. İncelenecektir.");
     }
   };
 
@@ -97,9 +102,7 @@ export default function CommentItem({
         >
           <div className="relative flex items-center justify-center">
             {isLikingAnimation && <span className="absolute w-6 h-6 bg-pink-500 rounded-full animate-ping opacity-60"></span>}
-            <Heart 
-              size={14} 
-              className={`relative z-10 transition-all duration-500 ease-out ${
+            <Heart size={14} className={`relative z-10 transition-all duration-500 ease-out ${
                 isLikingAnimation ? 'fill-pink-500 scale-150 drop-shadow-[0_0_15px_rgba(236,72,153,1)]' 
                 : localLiked ? 'fill-pink-500 scale-110 drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]' : 'active:scale-50'
               }`} 
@@ -117,6 +120,15 @@ export default function CommentItem({
             <span className="text-[11px] font-bold">Yanıtla</span>
           </button>
         )}
+
+        {/* 🔥 YENİ: Şikayet Et Butonu */}
+        <button 
+          onClick={handleReport}
+          className={`ml-auto flex items-center gap-1.5 transition-all duration-300 hover:text-red-400 hover:bg-red-500/10 rounded-lg px-2 py-1 -mr-2 ${reported ? 'text-red-500' : ''}`}
+        >
+          <Flag size={14} />
+          <span className="text-[11px] font-bold hidden sm:inline">{reported ? 'Şikayet Edildi' : 'Şikayet Et'}</span>
+        </button>
       </div>
     </div>
   );

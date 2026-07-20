@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -49,12 +49,13 @@ export default async function AdminDashboard({ searchParams }: any) {
   const params = await searchParams;
   const currentTab = params?.tab || 'Dashboard';
 
-  const [total, pending, approved, rejected, aggregateStats] = await Promise.all([
+  const [total, pending, approved, rejected, aggregateStats, reportsCount] = await Promise.all([
     prisma.post.count(),
     prisma.post.count({ where: { status: 'PENDING' } }),
     prisma.post.count({ where: { status: 'APPROVED' } }),
     prisma.post.count({ where: { status: 'REJECTED' } }),
-    prisma.post.aggregate({ _sum: { likes: true, views: true } })
+    prisma.post.aggregate({ _sum: { likes: true, views: true } }),
+    (prisma as any).report.count()
   ]);
 
   const totalLikes = aggregateStats._sum.likes || 0;
@@ -65,6 +66,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   let displayComments: any[] = [];
   let announcements: any[] = [];
   let bannedUsers: any[] = [];
+  let reports: any[] = [];
 
   if (currentTab === 'Yorumlar') {
     displayComments = await prisma.comment.findMany({ 
@@ -78,6 +80,14 @@ export default async function AdminDashboard({ searchParams }: any) {
   } else if (currentTab === 'Banlar') {
     bannedUsers = await (prisma as any).bannedUser.findMany({
       orderBy: { createdAt: 'desc' },
+    });
+  } else if (currentTab === 'Şikayetler') {
+    reports = await (prisma as any).report.findMany({
+      orderBy: { createdAt: 'desc' },
+      include: { 
+        post: true, 
+        comment: true 
+      }
     });
   } else {
     let queryFilter: any = { status: 'PENDING' };
@@ -114,9 +124,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     if (!userUuid) return;
     try {
       await (prisma as any).bannedUser.create({ data: { userUuid } });
-    } catch (e) {
-      // Zaten banlıysa hata verme
-    }
+    } catch (e) {}
     revalidatePath('/admin');
   }
 
@@ -152,6 +160,13 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/'); 
   }
 
+  // YENİ: Şikayeti Yoksay/Sil
+  async function dismissReport(formData: FormData) {
+    'use server';
+    await (prisma as any).report.delete({ where: { id: formData.get('id') as string } });
+    revalidatePath('/admin');
+  }
+
   async function logout() { 'use server'; (await cookies()).delete('admin_auth'); revalidatePath('/admin'); }
 
   const menuItems = [
@@ -161,6 +176,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Inbox, label: 'Bekleyenler', badge: pending },
     { icon: MessageSquare, label: 'Yorumlar' },
+    { icon: Flag, label: 'Şikayetler', badge: reportsCount },
     { icon: Bell, label: 'Duyurular' },
     { icon: Ban, label: 'Banlar' }
   ];
@@ -177,7 +193,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                 <item.icon size={20} /> <span className="font-medium">{item.label}</span>
               </div>
               {item.badge && item.badge > 0 ? (
-                <span className="bg-[#4DA3FF] text-black text-[10px] font-bold px-2 py-0.5 rounded-full">{item.badge}</span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${item.label === 'Şikayetler' ? 'bg-red-500 text-white' : 'bg-[#4DA3FF] text-black'}`}>{item.badge}</span>
               ) : null}
             </Link>
           ))}
@@ -188,8 +204,11 @@ export default async function AdminDashboard({ searchParams }: any) {
       {/* MOBİL ALT NAVİGASYON */}
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#121212] border-t border-white/10 p-3 flex justify-around z-50 overflow-x-auto gap-2 scrollbar-hide">
         {menuItems.map((item, i) => (
-          <Link href={`/admin?tab=${item.label}`} key={i} className={`flex flex-col items-center gap-1 min-w-[64px] ${currentTab === item.label ? 'text-[#4DA3FF]' : 'text-gray-500'}`}>
+          <Link href={`/admin?tab=${item.label}`} key={i} className={`flex flex-col items-center gap-1 min-w-[64px] relative ${currentTab === item.label ? 'text-[#4DA3FF]' : 'text-gray-500'}`}>
             <item.icon size={20} />
+            {item.badge && item.badge > 0 && (
+              <span className={`absolute -top-1 right-2 w-3 h-3 rounded-full flex items-center justify-center text-[8px] font-bold ${item.label === 'Şikayetler' ? 'bg-red-500 text-white' : 'bg-[#4DA3FF] text-black'}`}>{item.badge}</span>
+            )}
             <span className="text-[10px] font-medium truncate w-full text-center">{item.label.split(' ')[0]}</span>
           </Link>
         ))}
@@ -198,7 +217,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       <main className="flex-1 overflow-y-auto p-4 md:p-10 scrollbar-hide pb-28">
         <header className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
             <h2 className="text-2xl font-bold flex items-center gap-3">
-              {currentTab === 'Yorumlar' ? <MessageSquare className="text-[#4DA3FF]" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF]" /> : currentTab === 'Banlar' ? <Ban className="text-red-400" /> : <BarChart3 className="text-[#4DA3FF]" />} 
+              {currentTab === 'Yorumlar' ? <MessageSquare className="text-[#4DA3FF]" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF]" /> : currentTab === 'Banlar' ? <Ban className="text-red-400" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500" /> : <BarChart3 className="text-[#4DA3FF]" />} 
               {currentTab} Paneli
             </h2>
             <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
@@ -207,7 +226,7 @@ export default async function AdminDashboard({ searchParams }: any) {
         </header>
 
         {/* İSTATİSTİKLER */}
-        {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Banlar' && (
+        {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {[
@@ -244,7 +263,67 @@ export default async function AdminDashboard({ searchParams }: any) {
 
         {/* LİSTELEME ALANI */}
         <div className="max-w-4xl space-y-5">
-          {currentTab === 'Yorumlar' ? (
+          {currentTab === 'Şikayetler' ? (
+            reports.length === 0 ? (
+               <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
+                    <div className="bg-white/5 p-4 rounded-full mb-4"><Flag className="text-gray-500" size={32}/></div>
+                    <p className="text-gray-400 font-medium">Sistemde bekleyen şikayet bulunmuyor. Temiziz!</p>
+               </div>
+            ) : (
+              reports.map((report) => (
+                <article key={report.id} className="bg-[#121212] p-6 rounded-2xl border border-red-500/20 hover:border-red-500/40 transition-all flex flex-col gap-4 shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+                  <div className="flex justify-between items-center border-b border-white/5 pb-3">
+                    <div className="flex items-center gap-2">
+                      <AlertTriangle className="text-red-500" size={18} />
+                      <span className="text-red-400 font-bold text-sm tracking-wide">
+                        {report.postId ? 'Gönderi Şikayeti' : 'Yorum Şikayeti'}
+                      </span>
+                    </div>
+                    <span className="text-[10px] text-gray-500">
+                      {new Date(report.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
+                    </span>
+                  </div>
+
+                  <div className="bg-red-500/5 border border-red-500/10 p-4 rounded-xl space-y-1">
+                    <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Şikayet Sebebi</span>
+                    <p className="text-red-200 text-sm font-medium">"{report.reason}"</p>
+                  </div>
+
+                  <div className="bg-white/5 p-4 rounded-xl">
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Şikayet Edilen İçerik</span>
+                    <p className="text-white text-base">
+                      {report.postId ? report.post?.content : report.comment?.content}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap justify-end gap-2 mt-2 border-t border-white/5 pt-4">
+                    <form action={dismissReport}>
+                      <input type="hidden" name="id" value={report.id} />
+                      <button className="bg-white/5 text-gray-300 px-4 py-2 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center gap-1.5 transition-all">
+                        <CheckCircle size={14}/> Şikayeti Yoksay
+                      </button>
+                    </form>
+
+                    {(report.post?.authorUuid || report.comment?.authorId) && (
+                      <form action={banUser}>
+                        <input type="hidden" name="userUuid" value={report.postId ? report.post.authorUuid : report.comment.authorId} />
+                        <button className="bg-orange-500/10 text-orange-400 px-4 py-2 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center gap-1.5 transition-all">
+                          <Ban size={14}/> Yazarını Banla
+                        </button>
+                      </form>
+                    )}
+
+                    <form action={report.postId ? deletePost : deleteComment}>
+                      <input type="hidden" name="id" value={report.postId || report.commentId} />
+                      <button className="bg-red-500/10 text-red-400 px-4 py-2 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1.5 transition-all">
+                        <Trash2 size={14}/> İçeriği Sil
+                      </button>
+                    </form>
+                  </div>
+                </article>
+              ))
+            )
+          ) : currentTab === 'Yorumlar' ? (
             displayComments.length === 0 ? (
                <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
                     <div className="bg-white/5 p-4 rounded-full mb-4"><MessageSquare className="text-gray-500" size={32}/></div>
@@ -439,7 +518,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                         </>
                       ) : null}
                       
-                      {/* 🔥 Koşul kaldırıldı, artık her postta yazar banlama butonu var */}
                       <form action={banUser} className="min-w-[110px]">
                         <input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmeyen-yazar'} />
                         <button className="w-full bg-red-500/10 text-red-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-1.5 transition-all">

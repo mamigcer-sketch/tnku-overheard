@@ -151,3 +151,11 @@ export async function toggleCommentLike(commentId: string, postId: string) {
     throw new Error("Beğeni veritabanına kaydedilemedi"); // Hatayı fırlat ki ön yüz haberdar olsun!
   }
 }
+// 6. Şikayet Etme (Report) Sistemi
+export async function submitReport(type: 'POST' | 'COMMENT', itemId: string, reason: string) {
+  if (type === 'POST') {
+    await (prisma as any).report.create({ data: { postId: itemId, reason } });
+  } else {
+    await (prisma as any).report.create({ data: { commentId: itemId, reason } });
+  }
+}
