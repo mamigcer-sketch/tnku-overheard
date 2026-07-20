@@ -8,18 +8,19 @@ datasource db {
 }
 
 model Post {
-  id        String    @id @default(cuid())
-  type      String
-  content   String
-  status    String    @default("PENDING")
-  likes     Int       @default(0)
-  views     Int       @default(0)
-  location  String?
-  people    String?
-  gender    String?
-  time      String?
-  createdAt DateTime  @default(now())
-  comments  Comment[]
+  id         String    @id @default(cuid())
+  type       String
+  content    String
+  status     String    @default("PENDING")
+  likes      Int       @default(0)
+  views      Int       @default(0)
+  location   String?
+  people     String?
+  gender     String?
+  time       String?
+  authorUuid String?   // 🔥 İşte bu eklenmeli! Kullanıcının sabit post yazarı kimliği
+  createdAt  DateTime  @default(now())
+  comments   Comment[]
 }
 
 model Comment {

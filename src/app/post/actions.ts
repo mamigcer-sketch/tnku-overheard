@@ -6,6 +6,21 @@ import { cookies } from 'next/headers';
 
 // 1. Post Oluşturma (ModernForm.tsx bunu kullanıyor)
 export async function createPost(formData: FormData) {
+  const cookieStore = await cookies();
+  
+  // 🔥 Kullanıcının sabit kimliğini (çerezini) alıyoruz, yoksa oluşturuyoruz
+  let authorUuid = cookieStore.get('tnku_author_id')?.value;
+
+  if (!authorUuid) {
+    authorUuid = crypto.randomUUID(); 
+    cookieStore.set('tnku_author_id', authorUuid, {
+      maxAge: 60 * 60 * 24 * 365, // 1 yıl kalıcı
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+  }
+
   const type = formData.get("type") as string;
   const content = formData.get("content") as string;
   const location = formData.get("location") as string;
@@ -19,7 +34,8 @@ export async function createPost(formData: FormData) {
       location,
       people,
       gender,
-      status: 'PENDING', // Burayı PENDING yapınca admin onayına düşecek!
+      authorUuid, // 🔥 Artık postu kimin attığı veritabanına sabit olarak kaydediliyor!
+      status: 'PENDING', // Admin onayına düşer
     },
   });
 
@@ -31,28 +47,27 @@ export async function createPost(formData: FormData) {
 export async function addComment(postId: string, comment: string) {
   const cookieStore = await cookies();
   
-  // Kullanıcının daha önceden atanmış bir gizli ID'si var mı diye bakıyoruz
   let authorId = cookieStore.get('tnku_author_id')?.value;
 
-  // Eğer yoksa (siteye ilk defa yorum atıyorsa) ona benzersiz bir ID oluştur ve tarayıcısına kaydet
   if (!authorId) {
     authorId = crypto.randomUUID(); 
     cookieStore.set('tnku_author_id', authorId, {
-      maxAge: 60 * 60 * 24 * 365, // 1 yıl boyunca kimliği silinmez
-      httpOnly: true, // Güvenlik için, başkası çalamaz
+      maxAge: 60 * 60 * 24 * 365, 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
     });
   }
 
-  // Yorumu veritabanına kaydederken bu kimliği de (authorId) yanına ekliyoruz!
   await prisma.comment.create({
     data: {
       postId,
       content: comment,
-      authorId, // 🔥 İşte büyü burada!
+      authorId, 
     },
   });
   
-  revalidatePath(`/post/${postId}`); // Sayfayı yenile ki yorum anında düşsün
+  revalidatePath(`/post/${postId}`); 
   revalidatePath("/");
 }
 
