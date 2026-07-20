@@ -29,12 +29,12 @@ const animals = [
   "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"
 ];
 
-// Metin bazlı (post içeriğine veya id'ye göre) stabil isim türeten fonksiyon
-const getAnonymousName = (seed: string) => {
-  if (!seed) return "Gizemli Yolcu";
+// Verilen ID'ye göre stabil rastgele isim türeten fonksiyon
+const getAnonymousName = (id: string) => {
+  if (!id) return "Gizemli Yolcu";
   let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = seed.charCodeAt(i) + ((hash << 5) - hash);
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
   }
   const positiveHash = Math.abs(hash);
   const adj = adjectives[positiveHash % adjectives.length];
@@ -103,9 +103,9 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     ? 'hover:shadow-[0_0_30px_rgba(168,85,247,0.06)] hover:border-purple-500/20' 
     : 'hover:shadow-[0_0_30px_rgba(77,163,255,0.06)] hover:border-[#4DA3FF]/20';
 
-  // 🔥 Her postun kendi içeriğini veya ID'sini hash'leyerek KENDİNE ÖZGÜ ve SABİT bir nick veriyoruz.
-  // Böylece sayfayı yenilesen de bu postun nicki ASLA değişmez, diğer postlarla da aynı olmaz.
-  const authorNickname = getAnonymousName(post.content || post.id);
+  // 🔥 İŞTE KRİTİK NOKTA: Eğer postun authorUuid'si varsa onu baz al, yoksa post.id'yi kullan!
+  // Böylece senin tarayıcından atılan tüm postlar aynı authorUuid'ye sahip olduğu için TEK BİR NİCK çıkacak.
+  const authorNickname = getAnonymousName(post.authorUuid || post.id);
 
   return (
     <div ref={cardRef} className={`group bg-[#121212]/60 backdrop-blur-2xl border border-white/[0.04] p-5 sm:p-6 rounded-[24px] transition-all duration-500 ${hoverGlow}`}>
