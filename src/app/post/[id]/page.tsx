@@ -151,7 +151,7 @@ export default async function PostPage({ params }: any) {
               </div>
             ) : (
               post.comments.map((comment: any) => {
-                const identity = getFunIdentity(comment.id); 
+                const identity = getFunIdentity(comment.authorId || comment.id);
                 return (
                   <div key={comment.id} className="bg-[#121212]/80 border border-white/[0.03] hover:border-white/[0.08] p-3.5 rounded-2xl flex gap-3 transition-colors animate-in fade-in slide-in-from-bottom-2 duration-500">
                     <div className={`w-8 h-8 shrink-0 rounded-full ${identity.theme.bg} flex items-center justify-center border ${identity.theme.border}`}>

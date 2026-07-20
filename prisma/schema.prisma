@@ -27,5 +27,6 @@ model Comment {
   content   String
   createdAt DateTime @default(now())
   postId    String
+  authorId  String?  // Aynı kişinin yorumlarını eşleştirmek için eklendi
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
-} // 
+}

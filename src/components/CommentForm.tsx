@@ -20,31 +20,32 @@ export default function CommentForm({ postId }: { postId: string }) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3">
-      <div className="relative">
+    <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-3">
+      <div className="relative group">
         <textarea
-          className="w-full resize-none rounded-xl border border-white/10 bg-[#121212] p-4 pb-8 text-sm text-white outline-none focus:ring-2 focus:ring-[#4DA3FF]/40 focus:border-[#4DA3FF] transition-all placeholder:text-gray-500 shadow-inner"
+          className="w-full resize-none rounded-[20px] border border-white/[0.05] bg-white/[0.02] p-4 pb-9 text-[14px] text-gray-200 outline-none focus:bg-white/[0.04] focus:border-white/[0.1] transition-all duration-300 placeholder:text-gray-600 shadow-inner leading-relaxed"
           rows={3}
           maxLength={maxLength}
           placeholder="Anonim bir şeyler fısılda..."
           value={comment}
           onChange={(e) => setComment(e.target.value)}
         />
-        {/* Karakter Sayacı */}
-        <div className={`absolute bottom-3 right-4 text-[11px] font-medium transition-colors ${comment.length >= maxLength ? 'text-red-400' : 'text-gray-500'}`}>
-          {comment.length} / {maxLength}
+        {/* Karakter Sayacı - Daha Zarif */}
+        <div className={`absolute bottom-3 right-4 text-[10px] font-bold tracking-wider transition-colors duration-300 ${comment.length >= maxLength ? 'text-red-400' : 'text-gray-600'}`}>
+          {comment.length} <span className="opacity-50">/ {maxLength}</span>
         </div>
       </div>
       
+      {/* Gönder Butonu - Pill (Hap) Tasarımı */}
       <button
         type="submit"
         disabled={isPending || comment.trim().length === 0}
-        className="self-end rounded-xl bg-[#4DA3FF] px-6 py-2.5 text-sm font-bold text-black transition-all hover:bg-blue-400 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-[0_0_15px_rgba(77,163,255,0.2)] hover:shadow-[0_0_25px_rgba(77,163,255,0.4)] active:scale-95"
+        className="self-end rounded-full bg-[#4DA3FF] px-6 py-2.5 text-[13px] font-bold text-black transition-all hover:bg-blue-400 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 shadow-[0_0_15px_rgba(77,163,255,0.15)] hover:shadow-[0_0_25px_rgba(77,163,255,0.3)] active:scale-95"
       >
         {isPending ? (
-          <><Loader2 size={16} className="animate-spin" /> Fırlatılıyor...</>
+          <><Loader2 size={15} className="animate-spin" /> Fırlatılıyor...</>
         ) : (
-          <>Fırlat <Send size={16} /></>
+          <>Fırlat <Send size={15} /></>
         )}
       </button>
     </form>
