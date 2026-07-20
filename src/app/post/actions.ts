@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from "next/cache";
 import { cookies } from 'next/headers';
 
-// 🔥 Ortak Çerez Yöneticisi: Kullanıcı kimliğini sitede kalıcı ve ortak yapar
+// 🔥 Ortak Çerez Yöneticisi
 async function getOrCreateAuthorId() {
   const cookieStore = await cookies();
   let authorId = cookieStore.get('tnku_author_id')?.value;
@@ -108,50 +108,47 @@ export async function getPostsByIds(ids: string[]) {
   });
 }
 
-// 5. Kesin Çözüm: Yorum Beğenme / Beğeniyi Geri Alma (Find-First / Delete-Many Güvenceli)
+// 5. Kesin Çözüm: Beğeni ve Beğeniyi Geri Alma (Explicit ID ve Hata Yakalama)
 export async function toggleCommentLike(commentId: string, postId: string) {
-  try {
-    const authorId = await getOrCreateAuthorId();
+  const authorId = await getOrCreateAuthorId();
 
-    // Benzersiz anahtar hatası vermemesi için findFirst kullanıyoruz
-    const existingLike = await (prisma as any).commentLike.findFirst({
+  // Daha önce beğenmiş mi kontrol et
+  const existingLike = await (prisma as any).commentLike.findFirst({
+    where: {
+      commentId,
+      userUuid: authorId,
+    },
+  });
+
+  const currentComment = await prisma.comment.findUnique({ where: { id: commentId } });
+  const currentLikes = currentComment?.likes || 0;
+
+  if (existingLike) {
+    // Beğenmişse -> Sil
+    await (prisma as any).commentLike.deleteMany({
       where: {
         commentId,
         userUuid: authorId,
       },
     });
-
-    const currentComment = await prisma.comment.findUnique({ where: { id: commentId } });
-    const currentLikes = currentComment?.likes || 0;
-
-    if (existingLike) {
-      // Beğenmişse -> Güvenli bir şekilde sil
-      await (prisma as any).commentLike.deleteMany({
-        where: {
-          commentId,
-          userUuid: authorId,
-        },
-      });
-      await prisma.comment.update({
-        where: { id: commentId },
-        data: { likes: Math.max(0, currentLikes - 1) },
-      });
-    } else {
-      // Beğenmemişse -> Oluştur
-      await (prisma as any).commentLike.create({
-        data: {
-          commentId,
-          userUuid: authorId,
-        },
-      });
-      await prisma.comment.update({
-        where: { id: commentId },
-        data: { likes: currentLikes + 1 },
-      });
-    }
-
-    revalidatePath(`/post/${postId}`);
-  } catch (err) {
-    console.error("Beğeni işlenirken kritik hata:", err);
+    await prisma.comment.update({
+      where: { id: commentId },
+      data: { likes: Math.max(0, currentLikes - 1) },
+    });
+  } else {
+    // Beğenmemişse -> ID'yi manuel vererek kesin olarak oluştur
+    await (prisma as any).commentLike.create({
+      data: {
+        id: crypto.randomUUID(), 
+        commentId,
+        userUuid: authorId,
+      },
+    });
+    await prisma.comment.update({
+      where: { id: commentId },
+      data: { likes: currentLikes + 1 },
+    });
   }
+
+  revalidatePath(`/post/${postId}`);
 }

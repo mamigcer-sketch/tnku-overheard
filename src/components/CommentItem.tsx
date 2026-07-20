@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Heart, Reply } from "lucide-react";
 import { toggleCommentLike } from "@/app/post/actions";
 
@@ -32,6 +32,15 @@ export default function CommentItem({
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
 
+  // 🔥 Sunucudan gelen güncel props verilerini state ile senkronize ediyoruz
+  useEffect(() => {
+    setLocalLiked(isInitiallyLiked);
+  }, [isInitiallyLiked]);
+
+  useEffect(() => {
+    setLocalLikesCount(comment.likes || 0);
+  }, [comment.likes]);
+
   const triggerHaptic = () => {
     if (typeof window !== "undefined" && window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(50);
@@ -41,7 +50,6 @@ export default function CommentItem({
   const handleLike = async () => {
     triggerHaptic();
 
-    // Toggle (Beğendiyse beğeniyi çek, beğenmediyse beğen)
     const nextLikedState = !localLiked;
     setLocalLiked(nextLikedState);
     setLocalLikesCount((prev: number) => nextLikedState ? prev + 1 : Math.max(0, prev - 1));
@@ -55,7 +63,6 @@ export default function CommentItem({
       await toggleCommentLike(comment.id, comment.postId);
     } catch (err) {
       console.error("Beğeni güncellenemedi:", err);
-      // Hata olursa state'i geri al
       setLocalLiked(!nextLikedState);
       setLocalLikesCount((prev: number) => !nextLikedState ? prev + 1 : Math.max(0, prev - 1));
     }
