@@ -14,7 +14,7 @@ async function getOrCreateAuthorId() {
     cookieStore.set({
       name: 'tnku_author_id',
       value: authorId,
-      maxAge: 60 * 60 * 24 * 365, // 1 yıl kalıcı
+      maxAge: 60 * 60 * 24 * 365, 
       httpOnly: true, 
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
@@ -59,7 +59,7 @@ export async function createPost(formData: FormData) {
   return post; 
 }
 
-// 2. Yorum Ekleme ve Yanıtlama
+// 2. Yorum Ekleme
 export async function addComment(formData: FormData) {
   const authorId = await getOrCreateAuthorId();
 
@@ -108,47 +108,46 @@ export async function getPostsByIds(ids: string[]) {
   });
 }
 
-// 5. Kesin Çözüm: Beğeni ve Beğeniyi Geri Alma (Explicit ID ve Hata Yakalama)
+// 5. 🚀 RAW SQL GOD MODE: Prisma'yı aradan çıkarıp veriyi zorla işliyoruz!
 export async function toggleCommentLike(commentId: string, postId: string) {
   const authorId = await getOrCreateAuthorId();
 
-  // Daha önce beğenmiş mi kontrol et
-  const existingLike = await (prisma as any).commentLike.findFirst({
-    where: {
-      commentId,
-      userUuid: authorId,
-    },
-  });
+  try {
+    // 1. Kullanıcı daha önce beğenmiş mi? (Doğrudan Veritabanına Soruyoruz)
+    const existingLikes: any[] = await prisma.$queryRaw`
+      SELECT "id" FROM "CommentLike" 
+      WHERE "commentId" = ${commentId} AND "userUuid" = ${authorId} 
+      LIMIT 1
+    `;
 
-  const currentComment = await prisma.comment.findUnique({ where: { id: commentId } });
-  const currentLikes = currentComment?.likes || 0;
+    if (existingLikes.length > 0) {
+      // 2. Zaten beğenmişse -> Beğeniyi Sil ve Sayıyı 1 Azalt
+      await prisma.$executeRaw`
+        DELETE FROM "CommentLike" 
+        WHERE "commentId" = ${commentId} AND "userUuid" = ${authorId}
+      `;
+      await prisma.$executeRaw`
+        UPDATE "Comment" 
+        SET "likes" = GREATEST(0, "likes" - 1) 
+        WHERE "id" = ${commentId}
+      `;
+    } else {
+      // 3. Beğenmemişse -> Beğeniyi Ekle ve Sayıyı 1 Artır
+      const newId = crypto.randomUUID();
+      await prisma.$executeRaw`
+        INSERT INTO "CommentLike" ("id", "commentId", "userUuid", "createdAt") 
+        VALUES (${newId}, ${commentId}, ${authorId}, NOW())
+      `;
+      await prisma.$executeRaw`
+        UPDATE "Comment" 
+        SET "likes" = "likes" + 1 
+        WHERE "id" = ${commentId}
+      `;
+    }
 
-  if (existingLike) {
-    // Beğenmişse -> Sil
-    await (prisma as any).commentLike.deleteMany({
-      where: {
-        commentId,
-        userUuid: authorId,
-      },
-    });
-    await prisma.comment.update({
-      where: { id: commentId },
-      data: { likes: Math.max(0, currentLikes - 1) },
-    });
-  } else {
-    // Beğenmemişse -> ID'yi manuel vererek kesin olarak oluştur
-    await (prisma as any).commentLike.create({
-      data: {
-        id: crypto.randomUUID(), 
-        commentId,
-        userUuid: authorId,
-      },
-    });
-    await prisma.comment.update({
-      where: { id: commentId },
-      data: { likes: currentLikes + 1 },
-    });
+    revalidatePath(`/post/${postId}`);
+  } catch (err) {
+    console.error("SQL ile Beğeni İşlenirken Kritik Hata:", err);
+    throw new Error("Beğeni veritabanına kaydedilemedi"); // Hatayı fırlat ki ön yüz haberdar olsun!
   }
-
-  revalidatePath(`/post/${postId}`);
 }

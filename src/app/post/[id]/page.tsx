@@ -57,22 +57,20 @@ export default async function PostPage({ params }: any) {
 
   if (!post) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-gray-500 font-medium">Post bulunamadı...</div>;
 
-  // 🔥 Güvenli Beğeni Kontrolü (Try-Catch ile canlı veritabanı patlamalarına karşı korumalı)
+  // 🔥 RAW SQL ile Beğenileri Çekiyoruz (Prisma bug'larına karşı %100 koruma)
   const cookieStore = await cookies();
   const authorId = cookieStore.get('tnku_author_id')?.value;
   let userLikedCommentIds: string[] = [];
 
   if (authorId && post.comments.length > 0) {
     try {
-      const userLikes = await (prisma as any).commentLike.findMany({
-        where: {
-          userUuid: authorId,
-          commentId: { in: post.comments.map((c: any) => c.id) }
-        }
-      });
+      const userLikes: any[] = await prisma.$queryRaw`
+        SELECT "commentId" FROM "CommentLike" 
+        WHERE "userUuid" = ${authorId}
+      `;
       userLikedCommentIds = userLikes.map((l: any) => l.commentId);
     } catch (err) {
-      console.error("CommentLike tablosu henüz oluşturulmamış olabilir:", err);
+      console.error("CommentLike Raw SQL okuma hatası:", err);
     }
   }
 
@@ -155,7 +153,6 @@ export default async function PostPage({ params }: any) {
           </div>
         </article>
 
-        {/* YORUMLAR BÖLÜMÜ */}
         <CommentSection 
           postId={post.id} 
           comments={post.comments} 
