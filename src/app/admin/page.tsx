@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -88,12 +88,26 @@ export default async function AdminDashboard({ searchParams }: any) {
     displayPosts = await prisma.post.findMany({ where: queryFilter, orderBy: { createdAt: 'desc' } });
   }
 
-  // SERVER ACTIONS (Gönderi, Yorum, Duyuru ve Ban İşlemleri)
+  // SERVER ACTIONS
   async function approvePost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'APPROVED' } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function rejectPost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'REJECTED' } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function deletePost(formData: FormData) { 'use server'; await prisma.post.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function deleteComment(formData: FormData) { 'use server'; await prisma.comment.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
   
+  async function updatePost(formData: FormData) {
+    'use server';
+    const id = formData.get('id') as string;
+    const content = formData.get('content') as string;
+    const type = formData.get('type') as string;
+    if (!id || !content) return;
+    await prisma.post.update({
+      where: { id },
+      data: { content, type }
+    });
+    revalidatePath('/admin');
+    revalidatePath('/');
+  }
+
   async function banUser(formData: FormData) {
     'use server';
     const userUuid = formData.get('userUuid') as string;
@@ -101,7 +115,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     try {
       await (prisma as any).bannedUser.create({ data: { userUuid } });
     } catch (e) {
-      // Zaten banlıysa hata patlatmasın
+      // Zaten banlıysa hata verme
     }
     revalidatePath('/admin');
   }
@@ -153,7 +167,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   return (
     <div className="flex h-screen bg-[#0B0B0B] text-white">
-      {/* SOL MENÜ (Masaüstü) */}
+      {/* SOL MENÜ */}
       <aside className="w-64 bg-[#121212] border-r border-white/5 p-6 hidden md:flex flex-col">
         <h1 className="text-xl font-bold mb-10 tracking-tight">TNKU<span className="text-[#4DA3FF]">ADMIN</span></h1>
         <nav className="space-y-2 flex-1">
@@ -192,7 +206,7 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
         </header>
 
-        {/* İSTATİSTİKLER (Sadece Dashboard ve İtiraf/Akış sekmelerinde görünür) */}
+        {/* İSTATİSTİKLER */}
         {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Banlar' && (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -277,7 +291,6 @@ export default async function AdminDashboard({ searchParams }: any) {
             )
           ) : currentTab === 'Duyurular' ? (
             <div className="space-y-6">
-              {/* Duyuru Ekleme Formu */}
               <form action={createAnnouncement} className="bg-[#121212] border border-white/5 p-6 rounded-[24px] space-y-4">
                 <h3 className="font-bold text-gray-200 text-sm">Yeni Duyuru Oluştur</h3>
                 <textarea 
@@ -291,7 +304,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                 </button>
               </form>
 
-              {/* Duyurular Listesi */}
               <div className="space-y-4">
                 <h3 className="font-bold text-gray-200 text-sm pt-2">Yayınlanan Duyurular</h3>
                 {announcements.length === 0 ? (
@@ -384,8 +396,36 @@ export default async function AdminDashboard({ searchParams }: any) {
                   </div>
  
                   <p className="text-white text-[16px] leading-relaxed py-2">{post.content}</p>
+
+                  {/* DÜZENLEME AKORDEONU */}
+                  <details className="group/edit">
+                    <summary className="list-none cursor-pointer bg-blue-500/10 text-blue-400 py-2 px-4 rounded-xl text-xs font-bold border border-blue-500/20 hover:bg-blue-500/20 inline-flex items-center gap-1.5 transition-all">
+                      <Pencil size={14}/> Yazıyı ve Kategoriyi Düzenle
+                    </summary>
+                    <form action={updatePost} className="mt-3 p-4 bg-black/50 rounded-2xl border border-white/10 space-y-3">
+                      <input type="hidden" name="id" value={post.id} />
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1">Kategori</label>
+                          <select name="type" defaultValue={post.type} className="w-full bg-[#121212] border border-white/15 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#4DA3FF]">
+                            <option value="OVERHEARD">Overheard</option>
+                            <option value="CONFESSION">İtiraf</option>
+                          </select>
+                        </div>
+                        <div className="sm:col-span-2">
+                          <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1">İçerik</label>
+                          <textarea name="content" defaultValue={post.content} rows={2} className="w-full bg-[#121212] border border-white/15 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#4DA3FF] resize-none" required />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <button type="submit" className="bg-[#4DA3FF] text-black px-5 py-2 rounded-xl text-xs font-bold hover:bg-blue-400 transition-all shadow">
+                          Kaydet
+                        </button>
+                      </div>
+                    </form>
+                  </details>
                   
-                  <div className="flex flex-wrap justify-between items-center pt-2 gap-3">
+                  <div className="flex flex-wrap justify-between items-center pt-2 gap-3 border-t border-white/5 mt-2">
                     <div className="flex gap-4 text-gray-500 text-sm font-medium">
                         <span className="flex items-center gap-1.5"><Heart size={16} className={post.likes > 0 ? "text-pink-500" : ""}/> {post.likes}</span>
                         <span className="flex items-center gap-1.5"><Eye size={16} className={post.views > 0 ? "text-blue-500" : ""}/> {post.views}</span>
