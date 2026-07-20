@@ -8,7 +8,6 @@ import { cookies } from 'next/headers';
 export async function createPost(formData: FormData) {
   const cookieStore = await cookies();
   
-  // Kullanıcının sabit kimliğini (çerezini) alıyoruz, yoksa oluşturuyoruz
   let authorUuid = cookieStore.get('tnku_author_id')?.value;
 
   if (!authorUuid) {
@@ -43,8 +42,8 @@ export async function createPost(formData: FormData) {
       location,
       people,
       gender,
-      authorUuid, // Postu kimin attığı veritabanına sabit olarak kaydediliyor
-      status: 'PENDING', // Admin onayına düşer
+      authorUuid, 
+      status: 'PENDING', 
     },
   });
 
@@ -68,7 +67,7 @@ export async function addComment(formData: FormData) {
     });
   }
 
-  // Ban Kontrolü: Yorum atan kullanıcı engellenmiş mi?
+  // Ban Kontrolü
   const isBanned = await (prisma as any).bannedUser.findUnique({
     where: { userUuid: authorId }
   });
@@ -88,7 +87,7 @@ export async function addComment(formData: FormData) {
       postId,
       content: content.trim(),
       authorId, 
-      parentId: parentId || null, // Instagram tarzı yanıt sistemi desteği
+      parentId: parentId || null, 
     },
   });
   
@@ -114,11 +113,53 @@ export async function getPostsByIds(ids: string[]) {
   });
 }
 
-// 5. Yorum Beğenisini Artırma ve Kalıcı Hale Getirme
-export async function likeComment(commentId: string, postId: string) {
-  await prisma.comment.update({
-    where: { id: commentId },
-    data: { likes: { increment: 1 } }
+// 5. Yorum Beğenme / Beğeniyi Geri Alma (Toggle) Sistemi (As Casting ile Tip Hatası Engellendi)
+export async function toggleCommentLike(commentId: string, postId: string) {
+  const cookieStore = await cookies();
+  let authorId = cookieStore.get('tnku_author_id')?.value;
+
+  if (!authorId) {
+    authorId = crypto.randomUUID(); 
+    cookieStore.set('tnku_author_id', authorId, {
+      maxAge: 60 * 60 * 24 * 365, 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+  }
+
+  // Kullanıcı daha önce bu yorumu beğenmiş mi kontrol ediyoruz
+  const existingLike = await (prisma as any).commentLike.findUnique({
+    where: {
+      commentId_userUuid: {
+        commentId,
+        userUuid: authorId,
+      },
+    },
   });
+
+  if (existingLike) {
+    // Beğenmişse -> Kaydı sil ve sayıyı 1 azalt
+    await (prisma as any).commentLike.delete({
+      where: { id: existingLike.id },
+    });
+    await prisma.comment.update({
+      where: { id: commentId },
+      data: { likes: { decrement: 1 } },
+    });
+  } else {
+    // Beğenmemişse -> Yeni beğeni kaydı oluştur ve sayıyı 1 artır
+    await (prisma as any).commentLike.create({
+      data: {
+        commentId,
+        userUuid: authorId,
+      },
+    });
+    await prisma.comment.update({
+      where: { id: commentId },
+      data: { likes: { increment: 1 } },
+    });
+  }
+
   revalidatePath(`/post/${postId}`);
 }

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Heart, Reply } from "lucide-react";
-import { likeComment } from "@/app/post/actions";
+import { toggleCommentLike } from "@/app/post/actions";
 
 const getRelativeTime = (dateString: string | Date) => {
   if (!dateString) return "";
@@ -20,8 +20,15 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-export default function CommentItem({ comment, commentAuthor, isPostAuthor, onReply, isReply = false }: any) {
-  const [localLiked, setLocalLiked] = useState(false);
+export default function CommentItem({ 
+  comment, 
+  commentAuthor, 
+  isPostAuthor, 
+  isInitiallyLiked = false, 
+  onReply, 
+  isReply = false 
+}: any) {
+  const [localLiked, setLocalLiked] = useState(isInitiallyLiked);
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
 
@@ -32,20 +39,25 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor, onRe
   };
 
   const handleLike = async () => {
-    if (localLiked) return;
     triggerHaptic();
-    
-    // Anlık görsel tepki (Optimistic UI)
-    setLocalLiked(true);
-    setLocalLikesCount((prev: number) => prev + 1);
-    setIsLikingAnimation(true);
-    setTimeout(() => setIsLikingAnimation(false), 1000);
+
+    // Toggle (Beğendiyse beğeniyi çek, beğenmediyse beğen)
+    const nextLikedState = !localLiked;
+    setLocalLiked(nextLikedState);
+    setLocalLikesCount((prev: number) => nextLikedState ? prev + 1 : Math.max(0, prev - 1));
+
+    if (nextLikedState) {
+      setIsLikingAnimation(true);
+      setTimeout(() => setIsLikingAnimation(false), 1000);
+    }
 
     try {
-      // 🔥 Veritabanına kalıcı olarak işliyoruz
-      await likeComment(comment.id, comment.postId);
+      await toggleCommentLike(comment.id, comment.postId);
     } catch (err) {
-      console.error("Beğeni kaydedilemedi:", err);
+      console.error("Beğeni güncellenemedi:", err);
+      // Hata olursa state'i geri al
+      setLocalLiked(!nextLikedState);
+      setLocalLikesCount((prev: number) => !nextLikedState ? prev + 1 : Math.max(0, prev - 1));
     }
   };
 
@@ -74,7 +86,6 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor, onRe
       <div className="flex items-center gap-4 pt-3 border-t border-white/[0.02] text-gray-400">
         <button 
           onClick={handleLike}
-          disabled={localLiked}
           className={`flex items-center gap-1.5 transition-all duration-300 rounded-lg px-2 py-1 -ml-2 ${localLiked ? 'text-pink-500' : 'hover:text-pink-400 hover:bg-pink-500/10'}`}
         >
           <div className="relative flex items-center justify-center">

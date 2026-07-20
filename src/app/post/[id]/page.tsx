@@ -1,14 +1,12 @@
 import prisma from '@/lib/prisma';
-import CommentForm from '@/components/CommentForm';
 import BackButton from '@/components/BackButton';
-import CommentItem from '@/components/CommentItem';
-import CommentSection from '@/components/CommentSection'; // 🔥 Hiyerarşik Yanıt Bileşeni Eklendi
+import CommentSection from '@/components/CommentSection';
 import { MessageCircle, Home, MapPin, Clock, Users, User, Heart, Eye, Flame } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
-// Zaman Damgası Fonksiyonu
 const getRelativeTime = (dateString: string | Date) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -26,7 +24,6 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// 🚀 Avatar ve İsim Havuzu
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 const emojis = ["🦊", "🐼", "🦉", "🦝", "🐨", "🦁", "🐸", "🐙", "🦋", "🦖", "🦄", "🐧", "🐱", "🐶", "🐰", "🐯"];
@@ -60,6 +57,21 @@ export default async function PostPage({ params }: any) {
 
   if (!post) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-gray-500 font-medium">Post bulunamadı...</div>;
 
+  // 🔥 Kullanıcının bu posttaki hangi yorumları beğendiğini buluyoruz (As Casting ile)
+  const cookieStore = await cookies();
+  const authorId = cookieStore.get('tnku_author_id')?.value;
+  let userLikedCommentIds: string[] = [];
+
+  if (authorId && post.comments.length > 0) {
+    const userLikes = await (prisma as any).commentLike.findMany({
+      where: {
+        userUuid: authorId,
+        commentId: { in: post.comments.map(c => c.id) }
+      }
+    });
+    userLikedCommentIds = userLikes.map((l: any) => l.commentId);
+  }
+
   const isConfession = post.type === 'CONFESSION';
   const isTrending = post.likes >= 10 && (new Date().getTime() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000);
   const authorData = getAnonymousData((post as any).authorUuid || post.id);
@@ -71,11 +83,9 @@ export default async function PostPage({ params }: any) {
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-24">
       
-      {/* AURORA ARKA PLAN EFEKTLERİ */}
       <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/15 blur-[120px] pointer-events-none -z-10" />
       <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/15 blur-[140px] pointer-events-none -z-10" />
 
-      {/* Camsı Header */}
       <header className="sticky top-0 z-50 bg-[#0B0B0B]/40 backdrop-blur-3xl border-b border-white/[0.03] px-4 py-4 md:px-8 mb-6 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="hover:opacity-80 transition-opacity">
@@ -92,7 +102,6 @@ export default async function PostPage({ params }: any) {
 
       <div className="max-w-2xl mx-auto px-4 pb-12 relative z-10">
         
-        {/* ANA GÖNDERİ KARTI */}
         <article className={`bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-6 rounded-[24px] mb-8 relative overflow-hidden transition-all duration-500 ${glowStyle}`}>
           {isTrending && (
             <div className={`absolute -inset-[1px] opacity-100 blur-xl -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/20 to-pink-500/20' : 'from-[#4DA3FF]/20 to-blue-500/20'}`} />
@@ -142,11 +151,12 @@ export default async function PostPage({ params }: any) {
           </div>
         </article>
 
-        {/* YORUMLAR BÖLÜMÜ (Instagram Hiyerarşik Yapı ve Çalışan Yanıt Tuşu) */}
+        {/* YORUMLAR BÖLÜMÜ */}
         <CommentSection 
           postId={post.id} 
           comments={post.comments} 
           postAuthorUuid={(post as any).authorUuid} 
+          userLikedCommentIds={userLikedCommentIds} 
         />
 
       </div>

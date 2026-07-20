@@ -9,12 +9,8 @@ const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 const emojis = ["🦊", "🐼", "🦉", "🦝", "🐨", "🦁", "🐸", "🐙", "🦋", "🦖", "🦄", "🐧", "🐱", "🐶", "🐰", "🐯"];
 const gradients = [
-  "from-blue-400 to-indigo-600",
-  "from-pink-400 to-rose-600",
-  "from-purple-400 to-fuchsia-600",
-  "from-emerald-400 to-teal-600",
-  "from-amber-400 to-orange-600",
-  "from-cyan-400 to-blue-600"
+  "from-blue-400 to-indigo-600", "from-pink-400 to-rose-600", "from-purple-400 to-fuchsia-600",
+  "from-emerald-400 to-teal-600", "from-amber-400 to-orange-600", "from-cyan-400 to-blue-600"
 ];
 
 const getAnonymousData = (id: string) => {
@@ -29,10 +25,19 @@ const getAnonymousData = (id: string) => {
   };
 };
 
-export default function CommentSection({ postId, comments, postAuthorUuid }: { postId: string; comments: any[]; postAuthorUuid: string }) {
+export default function CommentSection({ 
+  postId, 
+  comments, 
+  postAuthorUuid, 
+  userLikedCommentIds 
+}: { 
+  postId: string; 
+  comments: any[]; 
+  postAuthorUuid: string; 
+  userLikedCommentIds: string[] 
+}) {
   const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
 
-  // Ana yorumlar (istersen onları da en eskiye/en yeniye göre ayarlayabilirsin, ana yorumlar genelde ters sırada kalabilir veya düz)
   const parentComments = comments.filter((c: any) => !c.parentId);
 
   const handleReplyClick = (targetCommentId: string, authorName: string) => {
@@ -70,8 +75,8 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
           parentComments.map((comment: any) => {
             const commentAuthor = getAnonymousData(comment.authorId || comment.id);
             const isPostAuthor = comment.authorId && comment.authorId === postAuthorUuid;
+            const isLiked = userLikedCommentIds.includes(comment.id);
             
-            // 🔥 KRİTİK DÜZELTME: Yanıtları tarihe göre ARTAN (eskiden yeniye) sıralıyoruz. Böylece yeni gelen hep EN ALTA ekleniyor!
             const replies = comments
               .filter((c: any) => c.parentId === comment.id)
               .sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
@@ -82,6 +87,7 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
                   comment={comment}
                   commentAuthor={commentAuthor}
                   isPostAuthor={isPostAuthor}
+                  isInitiallyLiked={isLiked}
                   onReply={handleReplyClick}
                 />
 
@@ -90,6 +96,7 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
                     {replies.map((reply: any) => {
                       const replyAuthor = getAnonymousData(reply.authorId || reply.id);
                       const isReplyAuthorPostAuthor = reply.authorId && reply.authorId === postAuthorUuid;
+                      const isReplyLiked = userLikedCommentIds.includes(reply.id);
 
                       return (
                         <CommentItem 
@@ -97,6 +104,7 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
                           comment={reply}
                           commentAuthor={replyAuthor}
                           isPostAuthor={isReplyAuthorPostAuthor}
+                          isInitiallyLiked={isReplyLiked}
                           isReply={true}
                           onReply={handleReplyClick}
                         />
@@ -110,7 +118,6 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
         )}
       </div>
       
-      {/* YORUM / YANITLAMA FORMU */}
       <div id="comment-form-section" className="pt-6 border-t border-white/[0.05] mt-8 bg-white/[0.01] backdrop-blur-md rounded-[24px] p-3">
         <div className="flex items-center justify-between mb-3 px-2">
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
