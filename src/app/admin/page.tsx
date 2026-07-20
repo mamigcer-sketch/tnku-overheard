@@ -67,7 +67,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   if (currentTab === 'Yorumlar') {
     displayComments = await prisma.comment.findMany({ 
       orderBy: { createdAt: 'desc' },
-      include: { post: { select: { content: true, type: true } } } // Yorumun atıldığı gönderiyi de getir
+      include: { post: { select: { content: true, type: true } } }
     });
   } else {
     let queryFilter: any = { status: 'PENDING' };
@@ -82,7 +82,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   async function approvePost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'APPROVED' } }); revalidatePath('/admin'); }
   async function rejectPost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'REJECTED' } }); revalidatePath('/admin'); }
   async function deletePost(formData: FormData) { 'use server'; await prisma.post.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
-  async function deleteComment(formData: FormData) { 'use server'; await prisma.comment.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); } // Yeni Yorum Silme
+  async function deleteComment(formData: FormData) { 'use server'; await prisma.comment.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
   async function logout() { 'use server'; (await cookies()).delete('admin_auth'); revalidatePath('/admin'); }
 
   const menuItems = [
@@ -91,7 +91,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Inbox, label: 'Bekleyenler', badge: pending },
-    { icon: MessageSquare, label: 'Yorumlar' } // YENİ EKLENEN SEKMEMİZ
+    { icon: MessageSquare, label: 'Yorumlar' }
   ];
 
   return (
@@ -135,7 +135,7 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
         </header>
 
-        {/* İSTATİSTİKLER (Sadece Yorumlar sekmesinde değilsek göster) */}
+        {/* İSTATİSTİKLER */}
         {currentTab !== 'Yorumlar' && (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -174,35 +174,31 @@ export default async function AdminDashboard({ searchParams }: any) {
         {/* LİSTELEME ALANI */}
         <div className="max-w-4xl space-y-5">
           {currentTab === 'Yorumlar' ? (
-            /* ================= YORUMLAR LİSTESİ ================= */
             displayComments.length === 0 ? (
                <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
-                   <div className="bg-white/5 p-4 rounded-full mb-4"><MessageSquare className="text-gray-500" size={32}/></div>
-                   <p className="text-gray-400 font-medium">Sistemde henüz hiç yorum yok.</p>
+                    <div className="bg-white/5 p-4 rounded-full mb-4"><MessageSquare className="text-gray-500" size={32}/></div>
+                    <p className="text-gray-400 font-medium">Sistemde henüz hiç yorum yok.</p>
                </div>
             ) : (
               displayComments.map((comment) => (
                 <article key={comment.id} className="bg-[#121212] p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all flex flex-col gap-4 shadow-lg">
-                  {/* Hangi Posta Atıldığını Gösteren Bilgi Çubuğu */}
                   <div className="bg-white/5 border border-white/5 p-3 rounded-xl flex flex-col gap-1">
                     <span className="text-[10px] text-gray-500 font-bold tracking-wider uppercase">Yanıtlanan Gönderi</span>
                     <p className="text-sm text-gray-400 italic line-clamp-2">"{comment.post?.content || 'Gönderi silinmiş'}"</p>
                   </div>
 
-                  {/* Yorumun Kendisi */}
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-2 mb-2">
                         <span className="text-xs font-bold text-white">Anonim</span>
                         <span className="text-[10px] text-gray-500">
-                          {new Date(comment.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
+                          {new Date(comment.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
                         </span>
                       </div>
                       <p className="text-white text-base leading-relaxed break-words">{comment.content}</p>
                     </div>
                   </div>
                   
-                  {/* Yorum Sil Butonu */}
                   <div className="flex justify-end mt-2 pt-4 border-t border-white/5">
                     <form action={deleteComment} className="w-full sm:w-auto">
                       <input type="hidden" name="id" value={comment.id} />
@@ -215,11 +211,10 @@ export default async function AdminDashboard({ searchParams }: any) {
               ))
             )
           ) : (
-            /* ================= GÖNDERİ LİSTESİ (Eski Hali) ================= */
             displayPosts.length === 0 ? (
                <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
-                   <div className="bg-white/5 p-4 rounded-full mb-4"><Inbox className="text-gray-500" size={32}/></div>
-                   <p className="text-gray-400 font-medium">Bu sekmede gösterilecek gönderi bulunmuyor.</p>
+                    <div className="bg-white/5 p-4 rounded-full mb-4"><Inbox className="text-gray-500" size={32}/></div>
+                    <p className="text-gray-400 font-medium">Bu sekmede gösterilecek gönderi bulunmuyor.</p>
                </div>
             ) : (
               displayPosts.map((post) => (
@@ -230,7 +225,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                               <Tag size={12}/> {post.type === 'CONFESSION' ? 'İtiraf' : 'Overheard'}
                           </span>
                           <span className="text-[11px] font-medium px-2.5 py-1 bg-white/5 rounded-md text-gray-400 flex items-center gap-1">
-                              <Calendar size={12}/> {new Date(post.createdAt).toLocaleDateString('tr-TR', { day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
+                              <Calendar size={12}/> {new Date(post.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
                           </span>
                       </div>
                       <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${post.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : post.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
