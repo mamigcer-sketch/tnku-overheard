@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import CommentForm from '@/components/CommentForm';
 import BackButton from '@/components/BackButton';
+import CommentItem from '@/components/CommentItem'; // 🔥 YENİ KARTIMIZI BURAYA ÇAĞIRDIK
 import { MessageCircle, Home, MapPin, Clock, Users, User, Heart, Eye, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
@@ -97,7 +98,7 @@ export default async function PostPage({ params }: any) {
         {/* ANA GÖNDERİ KARTI - Buzlu Cam */}
         <article className={`bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-6 rounded-[24px] mb-8 relative overflow-hidden transition-all duration-500 ${glowStyle}`}>
           
-          {/* Trend Glow Efekti (24 saati geçmişse bu div hiç render olmaz) */}
+          {/* Trend Glow Efekti */}
           {isTrending && (
             <div className={`absolute -inset-[1px] opacity-100 blur-xl -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/20 to-pink-500/20' : 'from-[#4DA3FF]/20 to-blue-500/20'}`} />
           )}
@@ -105,13 +106,11 @@ export default async function PostPage({ params }: any) {
           <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
             <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
               
-              {/* Kategori Etiketi */}
               <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
                 {isTrending && <Flame size={12} className="animate-pulse" />}
                 {isConfession ? 'İTİRAF' : 'OVERHEARD'}
               </span>
 
-              {/* Yazar Rozeti (Emoji & Renkli Kare) */}
               <span className="flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border border-white/[0.05] shadow-sm hover:bg-white/[0.08] transition-colors">
                 <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
                   {authorData.emoji}
@@ -168,30 +167,16 @@ export default async function PostPage({ params }: any) {
             ) : (
               post.comments.map((comment: any) => {
                 const commentAuthor = getAnonymousData(comment.authorId || comment.id);
-                // Eğer yorumu atan kişi ile postu atan kişi aynıysa "Yazar" etiketi çıkar
                 const isPostAuthor = comment.authorId && comment.authorId === (post as any).authorUuid;
 
                 return (
-                  <div key={comment.id} className="bg-white/[0.02] backdrop-blur-md border border-white/[0.05] p-4 sm:p-5 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.2)] animate-in fade-in slide-in-from-bottom-2 duration-500">
-                    <div className="flex justify-between items-center mb-3">
-                      <div className="flex items-center gap-2">
-                        {/* Yorumcu Avatarı */}
-                        <div className={`w-6 h-6 flex items-center justify-center rounded-md bg-gradient-to-br ${commentAuthor.gradient} text-[12px] shadow-inner`}>
-                          {commentAuthor.emoji}
-                        </div>
-                        <span className="font-bold text-[12px] text-gray-200 tracking-wide">@{commentAuthor.name}</span>
-                        
-                        {/* Yazar Rozeti */}
-                        {isPostAuthor && (
-                          <span className="bg-[#4DA3FF]/10 text-[#4DA3FF] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-[#4DA3FF]/20 shadow-sm">
-                            Yazar
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[10px] text-gray-500 font-medium">{getRelativeTime(comment.createdAt)}</span>
-                    </div>
-                    <p className="text-gray-300 text-[14px] leading-relaxed break-words">{comment.content}</p>
-                  </div>
+                  // 🔥 YENİ KARTIMIZ BURADA ÇALIŞIYOR!
+                  <CommentItem 
+                    key={comment.id}
+                    comment={comment}
+                    commentAuthor={commentAuthor}
+                    isPostAuthor={isPostAuthor}
+                  />
                 );
               })
             )}
