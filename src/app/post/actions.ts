@@ -4,24 +4,30 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from "next/cache";
 import { cookies } from 'next/headers';
 
-// 1. Post Oluşturma (ModernForm.tsx bunu kullanıyor)
-export async function createPost(formData: FormData) {
+// 🔥 Ortak Çerez Yöneticisi: Kullanıcı kimliğini sitede kalıcı ve ortak yapar (path: '/' şart!)
+async function getOrCreateAuthorId() {
   const cookieStore = await cookies();
-  
-  let authorUuid = cookieStore.get('tnku_author_id')?.value;
+  let authorId = cookieStore.get('tnku_author_id')?.value;
 
-  if (!authorUuid) {
-    authorUuid = crypto.randomUUID(); 
+  if (!authorId) {
+    authorId = crypto.randomUUID(); 
     cookieStore.set({
       name: 'tnku_author_id',
-      value: authorUuid,
+      value: authorId,
       maxAge: 60 * 60 * 24 * 365, // 1 yıl kalıcı
       httpOnly: true, 
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      path: '/',
+      path: '/', // 🔥 ÇOK ÖNEMLİ: Çerezin tüm sayfalarda geçerli olmasını sağlar
     });
   }
+
+  return authorId;
+}
+
+// 1. Post Oluşturma (ModernForm.tsx bunu kullanıyor)
+export async function createPost(formData: FormData) {
+  const authorUuid = await getOrCreateAuthorId();
 
   // Ban Kontrolü: Kullanıcı engellenmiş mi?
   const isBanned = await (prisma as any).bannedUser.findUnique({
@@ -56,22 +62,7 @@ export async function createPost(formData: FormData) {
 
 // 2. Yorum Ekleme ve Yanıtlama (CommentForm.tsx bunu kullanıyor)
 export async function addComment(formData: FormData) {
-  const cookieStore = await cookies();
-  
-  let authorId = cookieStore.get('tnku_author_id')?.value;
-
-  if (!authorId) {
-    authorId = crypto.randomUUID(); 
-    cookieStore.set({
-      name: 'tnku_author_id',
-      value: authorId,
-      maxAge: 60 * 60 * 24 * 365, 
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
-  }
+  const authorId = await getOrCreateAuthorId();
 
   // Ban Kontrolü
   const isBanned = await (prisma as any).bannedUser.findUnique({
@@ -119,25 +110,11 @@ export async function getPostsByIds(ids: string[]) {
   });
 }
 
-// 5. Yorum Beğenme / Beğeniyi Geri Alma (Toggle) Sistemi (Güvenleştirilmiş)
+// 5. Yorum Beğenme / Beğeniyi Geri Alma (Toggle) Sistemi
 export async function toggleCommentLike(commentId: string, postId: string) {
-  const cookieStore = await cookies();
-  let authorId = cookieStore.get('tnku_author_id')?.value;
-
-  if (!authorId) {
-    authorId = crypto.randomUUID(); 
-    cookieStore.set({
-      name: 'tnku_author_id',
-      value: authorId,
-      maxAge: 60 * 60 * 24 * 365, 
-      httpOnly: true, 
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      path: '/',
-    });
-  }
-
   try {
+    const authorId = await getOrCreateAuthorId();
+
     // Kullanıcı daha önce bu yorumu beğenmiş mi kontrol ediyoruz
     const existingLike = await (prisma as any).commentLike.findUnique({
       where: {
@@ -148,18 +125,17 @@ export async function toggleCommentLike(commentId: string, postId: string) {
       },
     });
 
+    const currentComment = await prisma.comment.findUnique({ where: { id: commentId } });
+    const currentLikes = currentComment?.likes || 0;
+
     if (existingLike) {
       // Beğenmişse -> Kaydı sil ve sayıyı 1 azalt
       await (prisma as any).commentLike.delete({
         where: { id: existingLike.id },
       });
-      
-      const currentComment = await prisma.comment.findUnique({ where: { id: commentId } });
-      const newLikes = Math.max(0, (currentComment?.likes || 1) - 1);
-
       await prisma.comment.update({
         where: { id: commentId },
-        data: { likes: newLikes },
+        data: { likes: Math.max(0, currentLikes - 1) },
       });
     } else {
       // Beğenmemişse -> Yeni beğeni kaydı oluştur ve sayıyı 1 artır
@@ -169,13 +145,9 @@ export async function toggleCommentLike(commentId: string, postId: string) {
           userUuid: authorId,
         },
       });
-
-      const currentComment = await prisma.comment.findUnique({ where: { id: commentId } });
-      const newLikes = (currentComment?.likes || 0) + 1;
-
       await prisma.comment.update({
         where: { id: commentId },
-        data: { likes: newLikes },
+        data: { likes: currentLikes + 1 },
       });
     }
 
