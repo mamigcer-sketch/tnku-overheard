@@ -438,14 +438,15 @@ export default async function AdminDashboard({ searchParams }: any) {
                           <form action={rejectPost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-orange-500/10 text-orange-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center justify-center gap-1.5 transition-all"><X size={14}/> Reddet</button></form>
                         </>
                       ) : null}
-                      {post.authorUuid && (
-                        <form action={banUser} className="min-w-[110px]">
-                          <input type="hidden" name="userUuid" value={post.authorUuid} />
-                          <button className="w-full bg-red-500/10 text-red-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-1.5 transition-all">
-                            <Ban size={14}/> Yazarını Banla
-                          </button>
-                        </form>
-                      )}
+                      
+                      {/* 🔥 Koşul kaldırıldı, artık her postta yazar banlama butonu var */}
+                      <form action={banUser} className="min-w-[110px]">
+                        <input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmeyen-yazar'} />
+                        <button className="w-full bg-red-500/10 text-red-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-1.5 transition-all">
+                          <Ban size={14}/> Yazarını Banla
+                        </button>
+                      </form>
+
                       <form action={deletePost} className="min-w-[90px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-white/5 text-gray-300 py-2.5 px-4 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center justify-center gap-1.5 transition-all"><Trash2 size={14}/> Sil</button></form>
                     </div>
                   </div>
