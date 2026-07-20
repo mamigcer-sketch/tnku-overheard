@@ -4,7 +4,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from "next/cache";
 import { cookies } from 'next/headers';
 
-// 🔥 Ortak Çerez Yöneticisi: Kullanıcı kimliğini sitede kalıcı ve ortak yapar (path: '/' şart!)
+// 🔥 Ortak Çerez Yöneticisi: Kullanıcı kimliğini sitede kalıcı ve ortak yapar
 async function getOrCreateAuthorId() {
   const cookieStore = await cookies();
   let authorId = cookieStore.get('tnku_author_id')?.value;
@@ -18,18 +18,17 @@ async function getOrCreateAuthorId() {
       httpOnly: true, 
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      path: '/', // 🔥 ÇOK ÖNEMLİ: Çerezin tüm sayfalarda geçerli olmasını sağlar
+      path: '/', 
     });
   }
 
   return authorId;
 }
 
-// 1. Post Oluşturma (ModernForm.tsx bunu kullanıyor)
+// 1. Post Oluşturma
 export async function createPost(formData: FormData) {
   const authorUuid = await getOrCreateAuthorId();
 
-  // Ban Kontrolü: Kullanıcı engellenmiş mi?
   const isBanned = await (prisma as any).bannedUser.findUnique({
     where: { userUuid: authorUuid }
   });
@@ -60,11 +59,10 @@ export async function createPost(formData: FormData) {
   return post; 
 }
 
-// 2. Yorum Ekleme ve Yanıtlama (CommentForm.tsx bunu kullanıyor)
+// 2. Yorum Ekleme ve Yanıtlama
 export async function addComment(formData: FormData) {
   const authorId = await getOrCreateAuthorId();
 
-  // Ban Kontrolü
   const isBanned = await (prisma as any).bannedUser.findUnique({
     where: { userUuid: authorId }
   });
@@ -100,7 +98,7 @@ export async function incrementView(id: string) {
   });
 }
 
-// 4. ID'ye göre Postları Çekme (Paylaşımlarım sayfası için)
+// 4. ID'ye göre Postları Çekme
 export async function getPostsByIds(ids: string[]) {
   return await prisma.post.findMany({
     where: { 
@@ -110,18 +108,16 @@ export async function getPostsByIds(ids: string[]) {
   });
 }
 
-// 5. Yorum Beğenme / Beğeniyi Geri Alma (Toggle) Sistemi
+// 5. Kesin Çözüm: Yorum Beğenme / Beğeniyi Geri Alma (Find-First / Delete-Many Güvenceli)
 export async function toggleCommentLike(commentId: string, postId: string) {
   try {
     const authorId = await getOrCreateAuthorId();
 
-    // Kullanıcı daha önce bu yorumu beğenmiş mi kontrol ediyoruz
-    const existingLike = await (prisma as any).commentLike.findUnique({
+    // Benzersiz anahtar hatası vermemesi için findFirst kullanıyoruz
+    const existingLike = await (prisma as any).commentLike.findFirst({
       where: {
-        commentId_userUuid: {
-          commentId,
-          userUuid: authorId,
-        },
+        commentId,
+        userUuid: authorId,
       },
     });
 
@@ -129,16 +125,19 @@ export async function toggleCommentLike(commentId: string, postId: string) {
     const currentLikes = currentComment?.likes || 0;
 
     if (existingLike) {
-      // Beğenmişse -> Kaydı sil ve sayıyı 1 azalt
-      await (prisma as any).commentLike.delete({
-        where: { id: existingLike.id },
+      // Beğenmişse -> Güvenli bir şekilde sil
+      await (prisma as any).commentLike.deleteMany({
+        where: {
+          commentId,
+          userUuid: authorId,
+        },
       });
       await prisma.comment.update({
         where: { id: commentId },
         data: { likes: Math.max(0, currentLikes - 1) },
       });
     } else {
-      // Beğenmemişse -> Yeni beğeni kaydı oluştur ve sayıyı 1 artır
+      // Beğenmemişse -> Oluştur
       await (prisma as any).commentLike.create({
         data: {
           commentId,
@@ -153,6 +152,6 @@ export async function toggleCommentLike(commentId: string, postId: string) {
 
     revalidatePath(`/post/${postId}`);
   } catch (err) {
-    console.error("Beğeni işlenirken hata oluştu:", err);
+    console.error("Beğeni işlenirken kritik hata:", err);
   }
 }
