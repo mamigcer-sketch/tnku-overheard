@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -64,6 +64,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   let displayPosts: any[] = [];
   let displayComments: any[] = [];
   let announcements: any[] = [];
+  let bannedUsers: any[] = [];
 
   if (currentTab === 'Yorumlar') {
     displayComments = await prisma.comment.findMany({ 
@@ -71,7 +72,11 @@ export default async function AdminDashboard({ searchParams }: any) {
       include: { post: { select: { content: true, type: true } } }
     });
   } else if (currentTab === 'Duyurular') {
-    announcements = await prisma.announcement.findMany({
+    announcements = await (prisma as any).announcement.findMany({
+      orderBy: { createdAt: 'desc' },
+    });
+  } else if (currentTab === 'Banlar') {
+    bannedUsers = await (prisma as any).bannedUser.findMany({
       orderBy: { createdAt: 'desc' },
     });
   } else {
@@ -83,17 +88,36 @@ export default async function AdminDashboard({ searchParams }: any) {
     displayPosts = await prisma.post.findMany({ where: queryFilter, orderBy: { createdAt: 'desc' } });
   }
 
-  // SERVER ACTIONS (Gönderi, Yorum ve Duyuru İşlemleri)
+  // SERVER ACTIONS (Gönderi, Yorum, Duyuru ve Ban İşlemleri)
   async function approvePost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'APPROVED' } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function rejectPost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'REJECTED' } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function deletePost(formData: FormData) { 'use server'; await prisma.post.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function deleteComment(formData: FormData) { 'use server'; await prisma.comment.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
   
+  async function banUser(formData: FormData) {
+    'use server';
+    const userUuid = formData.get('userUuid') as string;
+    if (!userUuid) return;
+    try {
+      await (prisma as any).bannedUser.create({ data: { userUuid } });
+    } catch (e) {
+      // Zaten banlıysa hata patlatmasın
+    }
+    revalidatePath('/admin');
+  }
+
+  async function unbanUser(formData: FormData) {
+    'use server';
+    const id = formData.get('id') as string;
+    await (prisma as any).bannedUser.delete({ where: { id } });
+    revalidatePath('/admin');
+  }
+
   async function createAnnouncement(formData: FormData) { 
     'use server'; 
     const content = formData.get('content') as string;
     if (!content) return;
-    await prisma.announcement.create({ data: { content, isActive: true } }); 
+    await (prisma as any).announcement.create({ data: { content, isActive: true } }); 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
@@ -102,14 +126,14 @@ export default async function AdminDashboard({ searchParams }: any) {
     'use server'; 
     const id = formData.get('id') as string;
     const currentState = formData.get('isActive') === 'true';
-    await prisma.announcement.update({ where: { id }, data: { isActive: !currentState } }); 
+    await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
 
   async function deleteAnnouncement(formData: FormData) { 
     'use server'; 
-    await prisma.announcement.delete({ where: { id: formData.get('id') as string } }); 
+    await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
@@ -123,7 +147,8 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Inbox, label: 'Bekleyenler', badge: pending },
     { icon: MessageSquare, label: 'Yorumlar' },
-    { icon: Bell, label: 'Duyurular' }
+    { icon: Bell, label: 'Duyurular' },
+    { icon: Ban, label: 'Banlar' }
   ];
 
   return (
@@ -159,7 +184,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       <main className="flex-1 overflow-y-auto p-4 md:p-10 scrollbar-hide pb-28">
         <header className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
             <h2 className="text-2xl font-bold flex items-center gap-3">
-              {currentTab === 'Yorumlar' ? <MessageSquare className="text-[#4DA3FF]" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF]" /> : <BarChart3 className="text-[#4DA3FF]" />} 
+              {currentTab === 'Yorumlar' ? <MessageSquare className="text-[#4DA3FF]" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF]" /> : currentTab === 'Banlar' ? <Ban className="text-red-400" /> : <BarChart3 className="text-[#4DA3FF]" />} 
               {currentTab} Paneli
             </h2>
             <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
@@ -168,7 +193,7 @@ export default async function AdminDashboard({ searchParams }: any) {
         </header>
 
         {/* İSTATİSTİKLER (Sadece Dashboard ve İtiraf/Akış sekmelerinde görünür) */}
-        {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && (
+        {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Banlar' && (
           <>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {[
@@ -231,10 +256,18 @@ export default async function AdminDashboard({ searchParams }: any) {
                     </div>
                   </div>
                   
-                  <div className="flex justify-end mt-2 pt-4 border-t border-white/5">
-                    <form action={deleteComment} className="w-full sm:w-auto">
+                  <div className="flex justify-end gap-2 mt-2 pt-4 border-t border-white/5">
+                    {comment.authorId && (
+                      <form action={banUser}>
+                        <input type="hidden" name="userUuid" value={comment.authorId} />
+                        <button className="bg-red-500/10 text-red-400 px-4 py-2.5 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1.5 transition-all">
+                          <Ban size={14}/> Yazarını Banla
+                        </button>
+                      </form>
+                    )}
+                    <form action={deleteComment}>
                       <input type="hidden" name="id" value={comment.id} />
-                      <button className="w-full bg-red-500/10 text-red-400 px-6 py-2.5 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-2 transition-all">
+                      <button className="bg-white/5 text-gray-300 px-6 py-2.5 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center gap-2 transition-all">
                         <Trash2 size={14}/> Yorumu Sil
                       </button>
                     </form>
@@ -298,6 +331,35 @@ export default async function AdminDashboard({ searchParams }: any) {
                 )}
               </div>
             </div>
+          ) : currentTab === 'Banlar' ? (
+            <div className="space-y-4">
+              <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3">
+                <ShieldAlert className="text-red-400 shrink-0" size={24} />
+                <p className="text-xs text-red-200">Burada listelenen kullanıcı kimlikleri (`userUuid`) engellenmiştir. Kaldırmak istediğiniz kullanıcının yanındaki "Banı Kaldır" butonuna basabilirsiniz.</p>
+              </div>
+
+              {bannedUsers.length === 0 ? (
+                <div className="text-center py-12 bg-[#121212] border border-white/5 rounded-2xl text-gray-500 text-sm">
+                  Sistemde banlanmış kullanıcı bulunmuyor.
+                </div>
+              ) : (
+                bannedUsers.map((banned: any) => (
+                  <div key={banned.id} className="bg-[#121212] border border-white/5 p-5 rounded-2xl flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Engellenen Kimlik (UUID)</p>
+                      <p className="text-white text-sm font-mono bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 inline-block">{banned.userUuid}</p>
+                    </div>
+
+                    <form action={unbanUser}>
+                      <input type="hidden" name="id" value={banned.id} />
+                      <button type="submit" className="px-4 py-2 bg-green-500/10 text-green-400 border border-green-500/20 rounded-xl text-xs font-bold hover:bg-green-500/20 transition-all flex items-center gap-1.5">
+                        <CheckCircle size={14} /> Banı Kaldır
+                      </button>
+                    </form>
+                  </div>
+                ))
+              )}
+            </div>
           ) : (
             displayPosts.length === 0 ? (
                <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
@@ -329,14 +391,22 @@ export default async function AdminDashboard({ searchParams }: any) {
                         <span className="flex items-center gap-1.5"><Eye size={16} className={post.views > 0 ? "text-blue-500" : ""}/> {post.views}</span>
                     </div>
                     
-                    <div className="flex gap-2 w-full flex-wrap">
+                    <div className="flex gap-2 w-full flex-wrap justify-end">
                       {post.status === 'PENDING' ? (
                         <>
-                          <form action={approvePost} className="flex-1 min-w-[120px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-green-500/10 text-green-400 py-2.5 rounded-xl text-xs font-bold border border-green-500/20 hover:bg-green-500/20 flex items-center justify-center gap-2 transition-all"><Check size={14}/> Onayla</button></form>
-                          <form action={rejectPost} className="flex-1 min-w-[120px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-orange-500/10 text-orange-400 py-2.5 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center justify-center gap-2 transition-all"><X size={14}/> Reddet</button></form>
+                          <form action={approvePost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-green-500/10 text-green-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-green-500/20 hover:bg-green-500/20 flex items-center justify-center gap-1.5 transition-all"><Check size={14}/> Onayla</button></form>
+                          <form action={rejectPost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-orange-500/10 text-orange-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center justify-center gap-1.5 transition-all"><X size={14}/> Reddet</button></form>
                         </>
                       ) : null}
-                      <form action={deletePost} className="flex-1 min-w-[120px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-red-500/10 text-red-400 py-2.5 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-2 transition-all"><Trash2 size={14}/> Sil</button></form>
+                      {post.authorUuid && (
+                        <form action={banUser} className="min-w-[110px]">
+                          <input type="hidden" name="userUuid" value={post.authorUuid} />
+                          <button className="w-full bg-red-500/10 text-red-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-1.5 transition-all">
+                            <Ban size={14}/> Yazarını Banla
+                          </button>
+                        </form>
+                      )}
+                      <form action={deletePost} className="min-w-[90px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-white/5 text-gray-300 py-2.5 px-4 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center justify-center gap-1.5 transition-all"><Trash2 size={14}/> Sil</button></form>
                     </div>
                   </div>
                 </article>

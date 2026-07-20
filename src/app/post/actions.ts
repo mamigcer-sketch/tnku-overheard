@@ -21,6 +21,15 @@ export async function createPost(formData: FormData) {
     });
   }
 
+  // 🚫 Ban Kontrolü: Kullanıcı engellenmiş mi?
+  const isBanned = await (prisma as any).bannedUser.findUnique({
+    where: { userUuid: authorUuid }
+  });
+
+  if (isBanned) {
+    throw new Error("Bu platformdan engellendiğiniz için paylaşım yapamazsınız.");
+  }
+
   const type = formData.get("type") as string;
   const content = formData.get("content") as string;
   const location = formData.get("location") as string;
@@ -57,6 +66,15 @@ export async function addComment(postId: string, comment: string) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
     });
+  }
+
+  // 🚫 Ban Kontrolü: Yorum atan kullanıcı engellenmiş mi?
+  const isBanned = await (prisma as any).bannedUser.findUnique({
+    where: { userUuid: authorId }
+  });
+
+  if (isBanned) {
+    throw new Error("Bu platformdan engellendiğiniz için yorum yapamazsınız.");
   }
 
   await prisma.comment.create({

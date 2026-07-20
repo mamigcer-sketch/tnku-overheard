@@ -37,3 +37,9 @@ model Comment {
   isActive  Boolean  @default(true)
   createdAt DateTime @default(now())
 }
+
+model BannedUser {
+  id        String   @id @default(cuid())
+  userUuid  String   @unique
+  createdAt DateTime @default(now())
+}
