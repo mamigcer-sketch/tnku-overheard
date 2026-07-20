@@ -29,7 +29,7 @@ const animals = [
   "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"
 ];
 
-// Her postun kendi ID'sine göre stabil ve sabit rastgele isim türeten fonksiyon
+// Verilen ID'ye göre stabil rastgele isim türeten fonksiyon
 const getAnonymousName = (id: string) => {
   if (!id) return "Gizemli Yolcu";
   let hash = 0;
@@ -59,7 +59,7 @@ const getRelativeTime = (dateString: string) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-export default function PostCard({ post, isLiked, incrementLike }: any) {
+export default function PostCard({ post, isLiked, incrementLike, userUuid }: any) {
   const [showComment, setShowComment] = useState(false);
   const cardRef = useRef(null);
   const [hasViewed, setHasViewed] = useState(false);
@@ -103,8 +103,12 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     ? 'hover:shadow-[0_0_30px_rgba(168,85,247,0.06)] hover:border-purple-500/20' 
     : 'hover:shadow-[0_0_30px_rgba(77,163,255,0.06)] hover:border-[#4DA3FF]/20';
 
-  // 🔥 Her post kendi benzersiz ID'sine göre sabit bir lakaba sahip olur
-  const authorNickname = getAnonymousName(post.id);
+  // 🔥 EĞER VERİTABANINDA POSTA ÖZEL BİR YAZAR ID'Sİ TUTULMUYORSA, 
+  // Geçici olarak bu cihazdan atılan postların senin tarayıcı kimliğinle eşleşmesi için 
+  // post.authorUuid veya ortak userUuid kullanabiliriz. 
+  // (Eğer herkesin postu kendi sabit nickine kalsın istiyorsan post.id kalmalı, 
+  // ama "benim attığım tüm postlar aynı nick olsun" diyorsan userUuid baz alınmalıdır.)
+  const authorNickname = getAnonymousName(userUuid || post.id);
 
   return (
     <div ref={cardRef} className={`group bg-[#121212]/60 backdrop-blur-2xl border border-white/[0.04] p-5 sm:p-6 rounded-[24px] transition-all duration-500 ${hoverGlow}`}>
