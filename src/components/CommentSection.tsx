@@ -30,8 +30,13 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
 
   const parentComments = comments.filter((c: any) => !c.parentId);
 
-  const handleReplyClick = (commentId: string, authorName: string) => {
-    setReplyingTo({ id: commentId, name: authorName });
+  const handleReplyClick = (targetCommentId: string, authorName: string) => {
+    // 🔥 AKILLI ÇÖZÜM: Tıklanan yorum bir alt yanıtsa, ana kök ID'sini bulup forma veriyoruz ki yeni dal açılmasın!
+    const targetComment = comments.find((c: any) => c.id === targetCommentId);
+    const rootParentId = targetComment?.parentId ? targetComment.parentId : targetCommentId;
+
+    setReplyingTo({ id: rootParentId, name: authorName });
+    
     const formElement = document.getElementById("comment-form-section");
     if (formElement) {
       formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -81,6 +86,7 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
                           commentAuthor={replyAuthor}
                           isPostAuthor={isReplyAuthorPostAuthor}
                           isReply={true}
+                          onReply={handleReplyClick}
                         />
                       );
                     })}
@@ -92,7 +98,7 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
         )}
       </div>
       
-      {/* YORUM YAPMA / YANITLAMA FORMU */}
+      {/* YORUM / YANITLAMA FORMU */}
       <div id="comment-form-section" className="pt-6 border-t border-white/[0.05] mt-8 bg-white/[0.01] backdrop-blur-md rounded-[24px] p-3">
         <div className="flex items-center justify-between mb-3 px-2">
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
