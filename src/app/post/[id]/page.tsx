@@ -3,6 +3,7 @@ import CommentForm from '@/components/CommentForm';
 import BackButton from '@/components/BackButton';
 import { MessageCircle, Home, MapPin, Clock, Users, User, Heart, Eye, Ghost } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,44 +25,54 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// YENİ: Hata Düzeltildi - Güvenli Anonim Kimlik Oluşturucu 🚀
-const getFunIdentity = (id: string) => {
-  const adjectives = [
-    "Uykulu", "Sinirli", "Gizemli", "Zeki", "Aceleci", "Şaşkın", "Huysuz", 
-    "Neşeli", "Utangaç", "Cesur", "Üşengeç", "Atarlı", "Meraklı", "Sakin", 
-    "Kurnaz", "Çılgın", "Duygusal", "Havalı", "Girişken", "Tripkoli"
-  ];
-  const nouns = [
-    "Baykuş", "Kedi", "Rakun", "Panda", "Tilki", "Koala", "Penguen", "Kirpi", 
-    "Ejderha", "Kurt", "Kartal", "Kertenkele", "Tavşan", "Ayı", "Kaplan", 
-    "Porsuk", "Mirket", "Bukalemun", "Lama", "Fok"
-  ];
-  const avatarThemes = [
-    { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400' },
-    { bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400' },
-    { bg: 'bg-pink-500/10', border: 'border-pink-500/20', text: 'text-pink-400' },
-    { bg: 'bg-teal-500/10', border: 'border-teal-500/20', text: 'text-teal-400' },
-    { bg: 'bg-orange-500/10', border: 'border-orange-500/20', text: 'text-orange-400' },
-    { bg: 'bg-green-500/10', border: 'border-green-500/20', text: 'text-green-400' },
-    { bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', text: 'text-yellow-400' },
-    { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400' },
-  ];
+// 🚀 40x40 (1.600 Kombinasyon) Kısa, Net ve Komik Kampüs Lakap Havuzu
+const adjectives = [
+  "Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", 
+  "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", 
+  "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", 
+  "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", 
+  "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", 
+  "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", 
+  "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", 
+  "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"
+];
 
+const animals = [
+  "Kedi", "Köpek", "Panda", "Rakun", "Baykuş", 
+  "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", 
+  "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", 
+  "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", 
+  "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", 
+  "Şahin", "Karga", "Köstebek", "Koyun", "İnek", 
+  "At", "Eşek", "Fok", "Penguen", "Kirpi", 
+  "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"
+];
+
+const avatarThemes = [
+  { bg: 'bg-blue-500/10', border: 'border-blue-500/20', text: 'text-blue-400' },
+  { bg: 'bg-purple-500/10', border: 'border-purple-500/20', text: 'text-purple-400' },
+  { bg: 'bg-pink-500/10', border: 'border-pink-500/20', text: 'text-pink-400' },
+  { bg: 'bg-teal-500/10', border: 'border-teal-500/20', text: 'text-teal-400' },
+  { bg: 'bg-orange-500/10', border: 'border-orange-500/20', text: 'text-orange-400' },
+  { bg: 'bg-green-500/10', border: 'border-green-500/20', text: 'text-green-400' },
+  { bg: 'bg-yellow-500/10', border: 'border-yellow-500/20', text: 'text-yellow-400' },
+  { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400' },
+];
+
+const getFunIdentity = (id: string) => {
   const safeId = String(id || "anonim");
   let hash = 0;
   for (let i = 0; i < safeId.length; i++) {
     hash = safeId.charCodeAt(i) + ((hash << 5) - hash);
   }
   
-  // Sayfayı çökerten eksi sayıyı tamamen ortadan kaldıran güvenli kalkan
   const positiveHash = Math.abs(hash);
-
   const adjIndex = positiveHash % adjectives.length;
-  const nounIndex = (positiveHash * 7) % nouns.length; // Eksiye düşmemesi için farklı çarpanlar kullanıldı
+  const nounIndex = (positiveHash * 7) % animals.length;
   const themeIndex = (positiveHash * 13) % avatarThemes.length;
 
   return { 
-    name: `${adjectives[adjIndex]} ${nouns[nounIndex]}`, 
+    name: `${adjectives[adjIndex]} ${animals[nounIndex]}`, 
     theme: avatarThemes[themeIndex] 
   };
 };
