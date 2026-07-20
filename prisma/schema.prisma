@@ -21,8 +21,9 @@ model Post {
   authorUuid String?   
   createdAt  DateTime  @default(now())
   
-  comments   Comment[]
-  reports    Report[]  // 🔥 YENİ: Posta gelen şikayetler
+  comments      Comment[]
+  reports       Report[]  
+  notifications Notification[] // 🔥 YENİ: Posta bağlı bildirimler
 }
 
 model Comment {
@@ -39,7 +40,7 @@ model Comment {
 
   post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
   commentLikes CommentLike[] 
-  reports      Report[]      // 🔥 YENİ: Yoruma gelen şikayetler
+  reports      Report[]      
 }
 
 model CommentLike {
@@ -65,14 +66,25 @@ model BannedUser {
   createdAt DateTime @default(now())
 }
 
-// 🔥 YENİ TABLO: Şikayetler (Admin Paneline Düşecek)
 model Report {
   id        String   @id @default(cuid())
-  reason    String   // Şikayet Sebebi (Küfür, Spam vs)
+  reason    String   
   postId    String?
   commentId String?
   createdAt DateTime @default(now())
 
   post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
   comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+}
+
+// 🔥 YENİ TABLO: Bildirimler
+model Notification {
+  id        String   @id @default(cuid())
+  userUuid  String   // Bildirimi alacak kişinin UUID'si
+  message   String   // Bildirim mesajı ("Biri yorumuna yanıt verdi!" vs.)
+  postId    String   // Tıklanınca gidilecek post
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 }

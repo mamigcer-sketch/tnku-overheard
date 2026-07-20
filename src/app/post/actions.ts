@@ -59,7 +59,7 @@ export async function createPost(formData: FormData) {
   return post; 
 }
 
-// 2. Yorum Ekleme
+// 2. Yorum Ekleme ve Yanıtlama (BİLDİRİM SİSTEMİ EKLENDİ)
 export async function addComment(formData: FormData) {
   const authorId = await getOrCreateAuthorId();
 
@@ -85,6 +85,37 @@ export async function addComment(formData: FormData) {
       parentId: parentId || null, 
     },
   });
+
+  // 🔥 BİLDİRİM GÖNDERME MANTIĞI
+  try {
+    if (parentId) {
+      // Bir yoruma yanıt verildiyse o yorumun sahibine bildirim at
+      const parentComment = await prisma.comment.findUnique({ where: { id: parentId } });
+      if (parentComment && parentComment.authorId && parentComment.authorId !== authorId) {
+        await (prisma as any).notification.create({
+          data: {
+            userUuid: parentComment.authorId,
+            message: "💬 Birisi yorumuna yanıt verdi!",
+            postId: postId
+          }
+        });
+      }
+    } else {
+      // Doğrudan posta yorum yapıldıysa post sahibine bildirim at
+      const post = await prisma.post.findUnique({ where: { id: postId } });
+      if (post && post.authorUuid && post.authorUuid !== authorId) {
+        await (prisma as any).notification.create({
+          data: {
+            userUuid: post.authorUuid,
+            message: "🔔 Fısıltına/İtirafına yeni bir yorum geldi!",
+            postId: postId
+          }
+        });
+      }
+    }
+  } catch (err) {
+    console.error("Bildirim oluşturulamadı:", err);
+  }
   
   revalidatePath(`/post/${postId}`); 
   revalidatePath("/");
@@ -148,14 +179,28 @@ export async function toggleCommentLike(commentId: string, postId: string) {
     revalidatePath(`/post/${postId}`);
   } catch (err) {
     console.error("SQL ile Beğeni İşlenirken Kritik Hata:", err);
-    throw new Error("Beğeni veritabanına kaydedilemedi"); // Hatayı fırlat ki ön yüz haberdar olsun!
+    throw new Error("Beğeni veritabanına kaydedilemedi"); 
   }
 }
+
 // 6. Şikayet Etme (Report) Sistemi
 export async function submitReport(type: 'POST' | 'COMMENT', itemId: string, reason: string) {
   if (type === 'POST') {
     await (prisma as any).report.create({ data: { postId: itemId, reason } });
   } else {
     await (prisma as any).report.create({ data: { commentId: itemId, reason } });
+  }
+}
+
+// 🔥 7. Bildirimleri Okundu Olarak İşaretleme
+export async function markNotificationsAsRead() {
+  try {
+    const authorId = await getOrCreateAuthorId();
+    await (prisma as any).notification.updateMany({
+      where: { userUuid: authorId, isRead: false },
+      data: { isRead: true }
+    });
+  } catch (err) {
+    console.error("Bildirimler okundu işaretlenemedi:", err);
   }
 }

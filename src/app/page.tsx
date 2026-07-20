@@ -6,7 +6,8 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
-import { Plus, ChevronDown } from 'lucide-react';
+import NotificationBell from '@/components/NotificationBell'; // 🔥 Bildirim Bileşeni Eklendi
+import { Plus, ChevronDown, MessageSquareHeart } from 'lucide-react'; // 🔥 İkon Eklendi
 
 export const dynamic = 'force-dynamic';
 
@@ -78,6 +79,22 @@ export default async function Home({ searchParams }: any) {
     })
   ]);
 
+  // 🔥 BİLDİRİMLERİ ÇEKME MANTIĞI
+  const authorId = cookieStore.get('tnku_author_id')?.value;
+  let notifications: any[] = [];
+  
+  if (authorId) {
+    try {
+      notifications = await (prisma as any).notification.findMany({
+        where: { userUuid: authorId },
+        orderBy: { createdAt: 'desc' },
+        take: 15 // Son 15 bildirimi getir
+      });
+    } catch (err) {
+      console.error("Bildirimler çekilemedi:", err);
+    }
+  }
+
   const filters = ['Tümü', 'Overheard', 'İtiraf', 'En Yeni', '🔥 Trend'];
 
   return (
@@ -88,7 +105,7 @@ export default async function Home({ searchParams }: any) {
       <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/15 blur-[140px] pointer-events-none -z-10" />
       <div className="fixed top-[40%] left-[50%] w-[300px] h-[300px] rounded-full bg-pink-500/5 blur-[100px] pointer-events-none -z-10" />
 
-      {/* HEADER - Camsı (glass) efekt artırıldı */}
+      {/* HEADER - Camsı (glass) efekt ve Yeni İkonlar */}
       <header className="sticky top-0 z-50 bg-[#0B0B0B]/40 backdrop-blur-3xl border-b border-white/[0.03] px-4 py-4 md:px-8 flex items-center transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
           <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-3 pointer-events-auto hover:opacity-80 transition-opacity">
@@ -96,7 +113,19 @@ export default async function Home({ searchParams }: any) {
             <h1 className="text-xl font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
           </Link>
         </div>
-        <div className="ml-auto z-10"><MobileMenu /></div>
+        <div className="ml-auto z-10 flex items-center gap-2 sm:gap-3 pointer-events-auto">
+          {/* 🔥 Bildirim Çanı */}
+          <NotificationBell notifications={notifications} />
+          
+          <Link 
+            href="/my-likes" 
+            className="hidden sm:flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] px-3.5 py-2 rounded-full transition-colors text-[13px] font-medium border border-white/[0.05] text-pink-400"
+          >
+            <MessageSquareHeart size={15} />
+            <span>Beğendiklerim</span>
+          </Link>
+          <MobileMenu />
+        </div>
       </header>
 
       <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
@@ -110,7 +139,6 @@ export default async function Home({ searchParams }: any) {
 
         <div className="mb-8 relative z-10">
           <details className="group [&_summary::-webkit-details-marker]:hidden">
-            {/* AKORDEON - Buzlu Cam Efekti */}
             <summary className="list-none cursor-pointer flex items-center justify-between bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.04] p-4 sm:p-5 rounded-[24px] transition-all duration-300 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
               <div className="flex items-center gap-4">
                 <div className="bg-[#4DA3FF]/10 p-3 rounded-2xl border border-[#4DA3FF]/10 group-hover:scale-105 transition-transform">
