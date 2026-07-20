@@ -19,7 +19,7 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-export default function CommentItem({ comment, commentAuthor, isPostAuthor }: any) {
+export default function CommentItem({ comment, commentAuthor, isPostAuthor, onReply, isReply = false }: any) {
   const [localLiked, setLocalLiked] = useState(false);
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
@@ -39,37 +39,10 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor }: an
     setTimeout(() => setIsLikingAnimation(false), 1000);
   };
 
-  // 🔥 GARANTİ YANITLAMA FONKSİYONU
-  const handleReply = () => {
-    triggerHaptic();
-    
-    // Sayfadaki tüm textarea'ları tarıyoruz ve doğru olanı buluyoruz
-    const textareas = document.querySelectorAll('textarea');
-    let targetTextarea: HTMLTextAreaElement | null = null;
-    
-    textareas.forEach((el) => {
-      if (el.name === 'content' || el.placeholder?.includes('fısılda')) {
-        targetTextarea = el;
-      }
-    });
-
-    if (targetTextarea) {
-      const textarea = targetTextarea as HTMLTextAreaElement;
-      const mentionText = `@${commentAuthor.name} `;
-      
-      textarea.value = mentionText + textarea.value;
-      textarea.focus();
-      
-      // İmleci metnin en sonuna taşıyoruz
-      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
-      
-      // Formun olduğu yere yumuşakça kaydırıyoruz
-      textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
-
   return (
-    <div className="bg-white/[0.02] backdrop-blur-md border border-white/[0.05] p-4 sm:p-5 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.2)] animate-in fade-in slide-in-from-bottom-2 duration-500 group/comment transition-all hover:border-white/[0.1] hover:bg-white/[0.04]">
+    <div className={`bg-white/[0.02] backdrop-blur-md border border-white/[0.05] p-4 sm:p-5 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all hover:border-white/[0.1] hover:bg-white/[0.04] ${
+      isReply ? 'ml-6 sm:ml-10 border-l-2 border-l-[#4DA3FF]/40 bg-white/[0.01]' : ''
+    }`}>
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
           <div className={`w-6 h-6 flex items-center justify-center rounded-md bg-gradient-to-br ${commentAuthor.gradient} text-[12px] shadow-inner`}>
@@ -100,20 +73,23 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor }: an
               size={14} 
               className={`relative z-10 transition-all duration-500 ease-out ${
                 isLikingAnimation ? 'fill-pink-500 scale-150 drop-shadow-[0_0_15px_rgba(236,72,153,1)]' 
-                : localLiked ? 'fill-pink-500 scale-110 drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]' : 'active:scale-50 group-hover/comment:scale-110'
+                : localLiked ? 'fill-pink-500 scale-110 drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]' : 'active:scale-50'
               }`} 
             />
           </div>
           <span className="text-[11px] font-bold">{localLikesCount}</span>
         </button>
 
-        <button 
-          onClick={handleReply}
-          className="flex items-center gap-1.5 transition-all duration-300 hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10 rounded-lg px-2 py-1 -ml-2 active:scale-90"
-        >
-          <Reply size={14} className="group-hover/comment:-rotate-12 transition-transform duration-300" />
-          <span className="text-[11px] font-bold">Yanıtla</span>
-        </button>
+        {/* Yanıtla Butonu - Sadece ana yorumlarda gösterilir ki sonsuz dallanma olmasın */}
+        {!isReply && (
+          <button 
+            onClick={() => { triggerHaptic(); onReply(comment.id, commentAuthor.name); }}
+            className="flex items-center gap-1.5 transition-all duration-300 hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10 rounded-lg px-2 py-1 -ml-2 active:scale-90"
+          >
+            <Reply size={14} />
+            <span className="text-[11px] font-bold">Yanıtla</span>
+          </button>
+        )}
       </div>
     </div>
   );

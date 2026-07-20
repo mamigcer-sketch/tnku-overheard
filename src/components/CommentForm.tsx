@@ -1,53 +1,64 @@
 "use client";
 
 import { useState } from "react";
+import { Send } from "lucide-react";
 import { addComment } from "@/app/post/actions";
-import { Send, Loader2 } from "lucide-react";
 
-export default function CommentForm({ postId }: { postId: string }) {
-  const [comment, setComment] = useState("");
-  const [isPending, setIsPending] = useState(false);
-  const maxLength = 200; // Yorum karakter sınırı
+export default function CommentForm({ 
+  postId, 
+  parentId, 
+  onReplyDone 
+}: { 
+  postId: string; 
+  parentId?: string; 
+  onReplyDone?: () => void 
+}) {
+  const [content, setContent] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!comment.trim()) return; // Boş yorum atılmasını engelle
-    
-    setIsPending(true);
-    await addComment(postId, comment);
-    setComment(""); // Kutuyu temizle
-    setIsPending(false);
+    if (!content.trim()) return;
+
+    setLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("postId", postId);
+      formData.append("content", content);
+      
+      if (parentId) {
+        formData.append("parentId", parentId);
+      }
+
+      await addComment(formData);
+      setContent("");
+      if (onReplyDone) onReplyDone();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="mt-2 flex flex-col gap-3">
-      <div className="relative group">
+    <form onSubmit={handleSubmit} className="relative">
+      <div className="relative flex items-center">
         <textarea
-          className="w-full resize-none rounded-[20px] border border-white/[0.05] bg-white/[0.02] p-4 pb-9 text-[14px] text-gray-200 outline-none focus:bg-white/[0.04] focus:border-white/[0.1] transition-all duration-300 placeholder:text-gray-600 shadow-inner leading-relaxed"
+          name="content"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          placeholder={parentId ? "Bu yoruma yanıt yaz..." : "Fısıltıya bir cevap yaz..."}
           rows={3}
-          maxLength={maxLength}
-          placeholder="Anonim bir şeyler fısılda..."
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
+          className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-[#4DA3FF]/50 rounded-[20px] px-4 py-3.5 pr-14 text-sm text-gray-100 placeholder-gray-500 focus:outline-none transition-all resize-none shadow-inner"
         />
-        {/* Karakter Sayacı - Daha Zarif */}
-        <div className={`absolute bottom-3 right-4 text-[10px] font-bold tracking-wider transition-colors duration-300 ${comment.length >= maxLength ? 'text-red-400' : 'text-gray-600'}`}>
-          {comment.length} <span className="opacity-50">/ {maxLength}</span>
-        </div>
+        <button
+          type="submit"
+          disabled={loading || !content.trim()}
+          className="absolute right-3 bottom-4 bg-[#4DA3FF] hover:bg-[#3b8fd8] text-black p-2.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(77,163,255,0.4)]"
+        >
+          <Send size={15} />
+        </button>
       </div>
-      
-      {/* Gönder Butonu - Pill (Hap) Tasarımı */}
-      <button
-        type="submit"
-        disabled={isPending || comment.trim().length === 0}
-        className="self-end rounded-full bg-[#4DA3FF] px-6 py-2.5 text-[13px] font-bold text-black transition-all hover:bg-blue-400 disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2 shadow-[0_0_15px_rgba(77,163,255,0.15)] hover:shadow-[0_0_25px_rgba(77,163,255,0.3)] active:scale-95"
-      >
-        {isPending ? (
-          <><Loader2 size={15} className="animate-spin" /> Fırlatılıyor...</>
-        ) : (
-          <>Fırlat <Send size={15} /></>
-        )}
-      </button>
     </form>
   );
 }

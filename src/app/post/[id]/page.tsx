@@ -1,10 +1,9 @@
 import prisma from '@/lib/prisma';
 import CommentForm from '@/components/CommentForm';
 import BackButton from '@/components/BackButton';
-import CommentItem from '@/components/CommentItem'; // 🔥 YENİ KARTIMIZI BURAYA ÇAĞIRDIK
+import CommentItem from '@/components/CommentItem';
 import { MessageCircle, Home, MapPin, Clock, Users, User, Heart, Eye, Flame } from 'lucide-react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +25,7 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// 🚀 Avatar ve İsim Havuzu (Ana sayfadakiyle birebir aynı)
+// 🚀 Avatar ve İsim Havuzu
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 const emojis = ["🦊", "🐼", "🦉", "🦝", "🐨", "🦁", "🐸", "🐙", "🦋", "🦖", "🦄", "🐧", "🐱", "🐶", "🐰", "🐯"];
@@ -61,20 +60,20 @@ export default async function PostPage({ params }: any) {
   if (!post) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-gray-500 font-medium">Post bulunamadı...</div>;
 
   const isConfession = post.type === 'CONFESSION';
-  
-  // 🔥 Alev kuralı (10 Beğeni VE Son 24 Saat İçinde Atılmış Olması)
   const isTrending = post.likes >= 10 && (new Date().getTime() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000);
-
   const authorData = getAnonymousData((post as any).authorUuid || post.id);
 
   const glowStyle = isConfession 
     ? 'shadow-[0_8px_32px_0_rgba(168,85,247,0.15)] border-purple-500/20' 
     : 'shadow-[0_8px_32px_0_rgba(77,163,255,0.15)] border-[#4DA3FF]/20';
 
+  // Sadece ana yorumları filtreliyoruz
+  const parentComments = post.comments.filter((c: any) => !c.parentId);
+
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-24">
       
-      {/* 🔥 AURORA ARKA PLAN EFEKTLERİ */}
+      {/* AURORA ARKA PLAN EFEKTLERİ */}
       <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/15 blur-[120px] pointer-events-none -z-10" />
       <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/15 blur-[140px] pointer-events-none -z-10" />
 
@@ -95,29 +94,25 @@ export default async function PostPage({ params }: any) {
 
       <div className="max-w-2xl mx-auto px-4 pb-12 relative z-10">
         
-        {/* ANA GÖNDERİ KARTI - Buzlu Cam */}
+        {/* ANA GÖNDERİ KARTI */}
         <article className={`bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-6 rounded-[24px] mb-8 relative overflow-hidden transition-all duration-500 ${glowStyle}`}>
-          
-          {/* Trend Glow Efekti */}
           {isTrending && (
             <div className={`absolute -inset-[1px] opacity-100 blur-xl -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/20 to-pink-500/20' : 'from-[#4DA3FF]/20 to-blue-500/20'}`} />
           )}
 
           <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
             <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
-              
               <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
                 {isTrending && <Flame size={12} className="animate-pulse" />}
                 {isConfession ? 'İTİRAF' : 'OVERHEARD'}
               </span>
 
-              <span className="flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border border-white/[0.05] shadow-sm hover:bg-white/[0.08] transition-colors">
+              <span className="flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border border-white/[0.05] shadow-sm">
                 <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
                   {authorData.emoji}
                 </div>
                 <span className="font-semibold text-[11px] tracking-wide">@{authorData.name}</span>
               </span>
-
             </div>
             <span className="text-[10px] text-gray-500 font-medium bg-white/[0.03] px-2.5 py-1 rounded-md border border-white/[0.02]">
               {getRelativeTime(post.createdAt)}
@@ -128,7 +123,6 @@ export default async function PostPage({ params }: any) {
             {post.content}
           </p>
 
-          {/* Etiketler (Mekan, Saat vs.) */}
           {(post.location || post.time || post.people || post.gender) && (
             <div className="flex flex-wrap gap-2 mb-6 border-t border-white/[0.04] pt-4">
               {post.location && <span className="flex items-center gap-1 bg-white/[0.03] px-3 py-1.5 rounded-lg text-xs font-medium text-gray-400 border border-white/[0.02]"><MapPin size={12} /> {post.location}</span>}
@@ -159,30 +153,53 @@ export default async function PostPage({ params }: any) {
             </h2>
           </div>
 
-          <div className="space-y-3">
-            {post.comments.length === 0 ? (
+          <div className="space-y-4">
+            {parentComments.length === 0 ? (
               <div className="text-center py-10 bg-white/[0.02] backdrop-blur-md rounded-[20px] border border-white/[0.05] shadow-inner">
                 <p className="text-gray-500 font-medium text-[13px]">Bu fısıltıya ilk cevabı sen ver.</p>
               </div>
             ) : (
-              post.comments.map((comment: any) => {
+              parentComments.map((comment: any) => {
                 const commentAuthor = getAnonymousData(comment.authorId || comment.id);
                 const isPostAuthor = comment.authorId && comment.authorId === (post as any).authorUuid;
+                
+                // Bu ana yoruma yazılmış yanıtlar
+                const replies = post.comments.filter((c: any) => c.parentId === comment.id);
 
                 return (
-                  // 🔥 YENİ KARTIMIZ BURADA ÇALIŞIYOR!
-                  <CommentItem 
-                    key={comment.id}
-                    comment={comment}
-                    commentAuthor={commentAuthor}
-                    isPostAuthor={isPostAuthor}
-                  />
+                  <div key={comment.id} className="space-y-3">
+                    <CommentItem 
+                      comment={comment}
+                      commentAuthor={commentAuthor}
+                      isPostAuthor={isPostAuthor}
+                    />
+
+                    {/* YANITLAR */}
+                    {replies.length > 0 && (
+                      <div className="space-y-3 pl-6 sm:pl-10 border-l-2 border-[#4DA3FF]/20 ml-3 sm:ml-5">
+                        {replies.map((reply: any) => {
+                          const replyAuthor = getAnonymousData(reply.authorId || reply.id);
+                          const isReplyAuthorPostAuthor = reply.authorId && reply.authorId === (post as any).authorUuid;
+
+                          return (
+                            <CommentItem 
+                              key={reply.id}
+                              comment={reply}
+                              commentAuthor={replyAuthor}
+                              isPostAuthor={isReplyAuthorPostAuthor}
+                              isReply={true}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
               })
             )}
           </div>
           
-          {/* Yorum Yapma Formu Bölümü */}
+          {/* YORUM YAPMA FORMU */}
           <div className="pt-6 border-t border-white/[0.05] mt-8 bg-white/[0.01] backdrop-blur-md rounded-[24px] p-2">
             <h3 className="text-xs font-bold text-gray-400 mb-4 px-2 uppercase tracking-wider">Sen Ne Düşünüyorsun?</h3>
             <div className="shadow-lg rounded-[20px]">

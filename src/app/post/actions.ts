@@ -8,7 +8,6 @@ import { cookies } from 'next/headers';
 export async function createPost(formData: FormData) {
   const cookieStore = await cookies();
   
-  // 🔥 Kullanıcının sabit kimliğini (çerezini) alıyoruz, yoksa oluşturuyoruz
   let authorUuid = cookieStore.get('tnku_author_id')?.value;
 
   if (!authorUuid) {
@@ -21,7 +20,7 @@ export async function createPost(formData: FormData) {
     });
   }
 
-  // 🚫 Ban Kontrolü: Kullanıcı engellenmiş mi?
+  // Ban Kontrolü: Kullanıcı engellenmiş mi?
   const isBanned = await (prisma as any).bannedUser.findUnique({
     where: { userUuid: authorUuid }
   });
@@ -43,8 +42,8 @@ export async function createPost(formData: FormData) {
       location,
       people,
       gender,
-      authorUuid, // 🔥 Artık postu kimin attığı veritabanına sabit olarak kaydediliyor!
-      status: 'PENDING', // Admin onayına düşer
+      authorUuid, 
+      status: 'PENDING', 
     },
   });
 
@@ -52,8 +51,8 @@ export async function createPost(formData: FormData) {
   return post; 
 }
 
-// 2. Yorum Ekleme (CommentForm.tsx bunu kullanıyor)
-export async function addComment(postId: string, comment: string) {
+// 2. Yorum Ekleme ve Yanıtlama (CommentForm.tsx bunu kullanıyor)
+export async function addComment(formData: FormData) {
   const cookieStore = await cookies();
   
   let authorId = cookieStore.get('tnku_author_id')?.value;
@@ -68,7 +67,7 @@ export async function addComment(postId: string, comment: string) {
     });
   }
 
-  // 🚫 Ban Kontrolü: Yorum atan kullanıcı engellenmiş mi?
+  // Ban Kontrolü
   const isBanned = await (prisma as any).bannedUser.findUnique({
     where: { userUuid: authorId }
   });
@@ -77,11 +76,18 @@ export async function addComment(postId: string, comment: string) {
     throw new Error("Bu platformdan engellendiğiniz için yorum yapamazsınız.");
   }
 
+  const postId = formData.get("postId") as string;
+  const content = formData.get("content") as string;
+  const parentId = formData.get("parentId") as string | null;
+
+  if (!postId || !content || !content.trim()) return;
+
   await prisma.comment.create({
     data: {
       postId,
-      content: comment,
+      content: content.trim(),
       authorId, 
+      parentId: parentId || null, // 🔥 Instagram tarzı yanıt sistemi desteği
     },
   });
   

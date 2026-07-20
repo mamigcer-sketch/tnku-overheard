@@ -18,20 +18,27 @@ model Post {
   people     String?
   gender     String?
   time       String?
-  authorUuid String?   // 🔥 İşte bu eklenmeli! Kullanıcının sabit post yazarı kimliği
+  authorUuid String?   // Kullanıcının sabit post yazarı kimliği
   createdAt  DateTime  @default(now())
   comments   Comment[]
 }
 
 model Comment {
-  id        String   @id @default(cuid())
+  id        String    @id @default(cuid())
   content   String
-  createdAt DateTime @default(now())
+  createdAt DateTime  @default(now())
   postId    String
-  authorId  String?  // Aynı kişinin yorumlarını eşleştirmek için eklendi
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  authorId  String?   // Aynı kişinin yorumlarını eşleştirmek için eklendi
+  
+  // 🔥 YENİ: Instagram tarzı yanıt (thread) sistemi için ebeveyn bağlantısı
+  parentId  String?
+  parent    Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
 
-}model Announcement {
+  post      Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
+}
+
+model Announcement {
   id        String   @id @default(cuid())
   content   String
   isActive  Boolean  @default(true)
