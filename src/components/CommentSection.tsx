@@ -9,8 +9,12 @@ const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 const emojis = ["🦊", "🐼", "🦉", "🦝", "🐨", "🦁", "🐸", "🐙", "🦋", "🦖", "🦄", "🐧", "🐱", "🐶", "🐰", "🐯"];
 const gradients = [
-  "from-blue-400 to-indigo-600", "from-pink-400 to-rose-600", "from-purple-400 to-fuchsia-600",
-  "from-emerald-400 to-teal-600", "from-amber-400 to-orange-600", "from-cyan-400 to-blue-600"
+  "from-blue-400 to-indigo-600",
+  "from-pink-400 to-rose-600",
+  "from-purple-400 to-fuchsia-600",
+  "from-emerald-400 to-teal-600",
+  "from-amber-400 to-orange-600",
+  "from-cyan-400 to-blue-600"
 ];
 
 const getAnonymousData = (id: string) => {
@@ -31,16 +35,19 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
   const parentComments = comments.filter((c: any) => !c.parentId);
 
   const handleReplyClick = (targetCommentId: string, authorName: string) => {
-    // 🔥 AKILLI ÇÖZÜM: Tıklanan yorum bir alt yanıtsa, ana kök ID'sini bulup forma veriyoruz ki yeni dal açılmasın!
     const targetComment = comments.find((c: any) => c.id === targetCommentId);
     const rootParentId = targetComment?.parentId ? targetComment.parentId : targetCommentId;
 
     setReplyingTo({ id: rootParentId, name: authorName });
     
-    const formElement = document.getElementById("comment-form-section");
-    if (formElement) {
-      formElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
+    // 🔥 AKILLI ODAKLANMA: Forma kaydırmakla kalmıyor, direkt içine odaklanıp klavyeyi tetikliyoruz!
+    setTimeout(() => {
+      const textarea = document.querySelector('#comment-form-section textarea') as HTMLTextAreaElement;
+      if (textarea) {
+        textarea.focus();
+        textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 50);
   };
 
   return (
