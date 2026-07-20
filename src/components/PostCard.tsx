@@ -3,32 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
 import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame } from "lucide-react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { incrementView } from "@/app/post/actions";
 
-// 🚀 40x40 (1.600 Kombinasyon) Kısa, Net ve Komik Kampüs Lakap Havuzu
-const adjectives = [
-  "Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", 
-  "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", 
-  "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", 
-  "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", 
-  "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", 
-  "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", 
-  "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", 
-  "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"
-];
-
-const animals = [
-  "Kedi", "Köpek", "Panda", "Rakun", "Baykuş", 
-  "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", 
-  "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", 
-  "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", 
-  "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", 
-  "Şahin", "Karga", "Köstebek", "Koyun", "İnek", 
-  "At", "Eşek", "Fok", "Penguen", "Kirpi", 
-  "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"
-];
-
+// 🚀 Avatar ve İsim Havuzu
+const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
+const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 const emojis = ["🦊", "🐼", "🦉", "🦝", "🐨", "🦁", "🐸", "🐙", "🦋", "🦖", "🦄", "🐧", "🐱", "🐶", "🐰", "🐯"];
 const gradients = [
   "from-blue-400 to-indigo-600",
@@ -39,20 +19,13 @@ const gradients = [
   "from-cyan-400 to-blue-600"
 ];
 
-// Verilen ID'ye göre stabil rastgele isim ve avatar türeten fonksiyon
 const getAnonymousData = (id: string) => {
   if (!id) return { name: "Gizemli Yolcu", emoji: "👤", gradient: gradients[0] };
   let hash = 0;
-  for (let i = 0; i < id.length; i++) {
-    hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  }
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   const positiveHash = Math.abs(hash);
-  
-  const adj = adjectives[positiveHash % adjectives.length];
-  const ani = animals[Math.floor(positiveHash / adjectives.length) % animals.length];
-  
   return {
-    name: `${adj} ${ani}`,
+    name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`,
     emoji: emojis[positiveHash % emojis.length],
     gradient: gradients[Math.floor(positiveHash / emojis.length) % gradients.length]
   };
@@ -63,7 +36,6 @@ const getRelativeTime = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-
   if (diffInSeconds < 60) return "Az önce";
   const diffInMinutes = Math.floor(diffInSeconds / 60);
   if (diffInMinutes < 60) return `${diffInMinutes} dk önce`;
@@ -76,79 +48,148 @@ const getRelativeTime = (dateString: string) => {
 };
 
 export default function PostCard({ post, isLiked, incrementLike }: any) {
+  const router = useRouter();
   const [showComment, setShowComment] = useState(false);
   const cardRef = useRef(null);
   const [hasViewed, setHasViewed] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+
+  // MİKRO-ANİMASYON STATE'LERİ
+  const [localLiked, setLocalLiked] = useState(isLiked);
+  const [localLikesCount, setLocalLikesCount] = useState(post.likes);
+  const [isLikingAnimation, setIsLikingAnimation] = useState(false);
+  
+  // ✨ YENİ: Çift Tıklama (Instagram Kalbi) State'i
+  const [showBigHeart, setShowBigHeart] = useState(false);
+  const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  const triggerHaptic = (duration = 50) => {
+    if (typeof window !== "undefined" && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(duration);
+    }
+  };
 
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !hasViewed) {
-          incrementView(post.id);
-          setHasViewed(true);
+        if (entries[0].isIntersecting) {
+          setIsVisible(true);
+          if (!hasViewed) {
+            incrementView(post.id);
+            setHasViewed(true);
+          }
         }
       },
-      { threshold: 0.5 }
+      { threshold: 0.15 }
     );
-
     if (cardRef.current) observer.observe(cardRef.current);
-    return () => observer.disconnect();
+    
+    // Component unmount olduğunda timer'ı temizle (Memory leak olmasın)
+    return () => {
+      observer.disconnect();
+      if (clickTimeout.current) clearTimeout(clickTimeout.current);
+    };
   }, [post.id, hasViewed]);
 
   const handleShare = async () => {
+    triggerHaptic(); 
     const shareData = {
       title: 'TNKU Overheard',
       text: 'Şu paylaşıma bakmalısın!',
       url: `${window.location.origin}/post/${post.id}`,
     };
-
     try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-      } else {
+      if (navigator.share) await navigator.share(shareData);
+      else {
         await navigator.clipboard.writeText(shareData.url);
         alert('Link kopyalandı!');
       }
-    } catch (err) {
-      console.error('Paylaşım hatası:', err);
+    } catch (err) { console.error('Paylaşım hatası:', err); }
+  };
+
+  // Standart butondan beğenme fonksiyonu
+  const handleLikeClick = (e: React.FormEvent) => {
+    if (localLiked) return;
+    triggerHaptic(); 
+    setLocalLiked(true);
+    setLocalLikesCount((prev: number) => prev + 1);
+    setIsLikingAnimation(true);
+    setTimeout(() => setIsLikingAnimation(false), 1000);
+  };
+
+  // ✨ YENİ: Akıllı Tıklama Yöneticisi (Single vs Double Click)
+  const handleCardInteraction = (e: React.MouseEvent) => {
+    // Eğer tıklanan yer alt kısımdaki butonlarsa müdahale etme
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('form')) return;
+
+    if (clickTimeout.current) {
+      // ÇİFT TIKLANDI: Timer'ı iptal et ve beğeni at
+      clearTimeout(clickTimeout.current);
+      clickTimeout.current = null;
+      
+      triggerHaptic(100); // Çift tıkta biraz daha uzun titreşim
+      setShowBigHeart(true); // Dev kalbi göster
+      setTimeout(() => setShowBigHeart(false), 900); // Kalp 0.9sn sonra kaybolsun
+
+      if (!localLiked) {
+        setLocalLiked(true);
+        setLocalLikesCount((prev: number) => prev + 1);
+        setIsLikingAnimation(true);
+        setTimeout(() => setIsLikingAnimation(false), 1000);
+        
+        // Veritabanını güncelle
+        const formData = new FormData();
+        formData.append('id', post.id);
+        incrementLike(formData);
+      }
+    } else {
+      // TEK TIKLANDI: 250ms bekle, ikinci tık gelmezse detay sayfasına git
+      clickTimeout.current = setTimeout(() => {
+        router.push(`/post/${post.id}`);
+        clickTimeout.current = null;
+      }, 250);
     }
   };
 
   const isConfession = post.type === 'CONFESSION';
-  
-  // 🔥 10 beğeni alması VE atıldığı andan itibaren 24 saat (86.400.000 ms) geçmemiş olması şartı eklendi
   const isTrending = post.likes >= 10 && (new Date().getTime() - new Date(post.createdAt).getTime() < 24 * 60 * 60 * 1000); 
 
   const hoverGlow = isConfession 
     ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
     : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
 
-  // Yazar Bilgileri (İsim + Renk + Emoji)
   const authorData = getAnonymousData(post.authorUuid || post.id);
 
   return (
     <div 
       ref={cardRef} 
-      className={`relative group bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-5 sm:p-6 rounded-[24px] transition-all duration-500 overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] ${hoverGlow}`}
+      className={`relative group bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-5 sm:p-6 rounded-[24px] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-all duration-700 ease-out will-change-[opacity,transform] select-none ${hoverGlow} ${
+        isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-[0.98]'
+      }`}
     >
-      {/* 🔥 Trend Olan Gönderiler İçin Arka Plan Yansıması */}
+      {/* Arka Plan Trend Parlaması */}
       {isTrending && (
         <div className={`absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/30 to-pink-500/30' : 'from-[#4DA3FF]/30 to-blue-500/30'}`} />
       )}
 
-      <Link href={`/post/${post.id}`} className="block relative z-10">
-        
-        {/* Üst Bilgi Çubuğu */}
+      {/* ✨ YENİ: İNSTAGRAM ÇİFT TIK DEV KALP EFEKTİ */}
+      <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-500 ease-out ${
+        showBigHeart ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-[0.3] translate-y-8'
+      }`}>
+        <Heart size={100} className="text-pink-500 drop-shadow-[0_0_40px_rgba(236,72,153,0.8)] fill-pink-500" />
+      </div>
+
+      {/* Önceden <Link> olan yeri, Akıllı Tıklama <div'ine> çevirdik */}
+      <div onClick={handleCardInteraction} className="block relative z-10 cursor-pointer">
         <div className="flex justify-between items-start gap-3 mb-4">
           <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
             
-            {/* Kategori Etiketi */}
             <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
               {isTrending && <Flame size={12} className="animate-pulse" />}
               {isConfession ? 'İTİRAF' : 'OVERHEARD'}
             </span>
 
-            {/* 🎨 Rastgele Avatar & İsim Rozeti */}
             <span className="flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border border-white/[0.05] shadow-sm hover:bg-white/[0.08] transition-colors">
               <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
                 {authorData.emoji}
@@ -156,78 +197,64 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
               <span className="font-semibold text-[11px] tracking-wide">@{authorData.name}</span>
             </span>
             
-            {post.location && (
-              <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md">
-                <MapPin className="w-3 h-3" /> {post.location}
-              </span>
-            )}
-
-            {post.time && (
-              <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md">
-                <Clock className="w-3 h-3" /> {post.time}
-              </span>
-            )}
-
-            {post.people && (
-              <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md">
-                <Users className="w-3 h-3" /> {post.people}
-              </span>
-            )}
-
-            {post.gender && (
-              <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md">
-                <User className="w-3 h-3" /> {post.gender}
-              </span>
-            )}
+            {post.location && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><MapPin className="w-3 h-3" /> {post.location}</span>}
+            {post.time && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><Clock className="w-3 h-3" /> {post.time}</span>}
+            {post.people && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><Users className="w-3 h-3" /> {post.people}</span>}
+            {post.gender && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><User className="w-3 h-3" /> {post.gender}</span>}
           </div>
-          
-          <span className="shrink-0 text-[11px] text-gray-500 font-medium">
-            {getRelativeTime(post.createdAt)}
-          </span>
+          <span className="shrink-0 text-[11px] text-gray-500 font-medium">{getRelativeTime(post.createdAt)}</span>
         </div>
         
-        {/* İçerik */}
         <p className="text-gray-100 text-[15px] sm:text-[16px] leading-relaxed mb-4 sm:mb-5 font-medium break-words tracking-wide">
           {post.content}
         </p>
-      </Link>
+      </div>
 
-      {/* Modern Alt Etkileşim Çubuğu */}
+      {/* Alt Etkileşim Butonları */}
       <div className="flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400 relative z-10">
         <div className="flex items-center gap-6">
-          {/* Beğeni Butonu */}
-          <form action={incrementLike}>
+          <form action={incrementLike} onSubmit={handleLikeClick}>
             <input type="hidden" name="id" value={post.id} />
-            <button type="submit" disabled={isLiked} className={`flex items-center gap-1.5 transition-all group-button ${isLiked ? 'text-pink-500' : 'hover:text-pink-400'}`}>
-              <Heart size={18} className={`transition-all duration-300 ${isLiked ? 'fill-pink-500 scale-110 drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]' : 'active:scale-75'}`} /> 
-              <span className="text-[13px] font-bold">{post.likes}</span>
+            <button 
+              type="submit" 
+              disabled={localLiked} 
+              className={`group/like relative flex items-center gap-2 transition-all duration-300 rounded-xl px-2 py-1 -ml-2 ${
+                localLiked ? 'text-pink-500' : 'hover:text-pink-400 hover:bg-pink-500/10'
+              }`}
+            >
+              <div className="relative flex items-center justify-center">
+                {isLikingAnimation && <span className="absolute w-8 h-8 bg-pink-500 rounded-full animate-ping opacity-60"></span>}
+                <Heart 
+                  size={18} 
+                  className={`relative z-10 transition-all duration-500 ease-out ${
+                    isLikingAnimation 
+                      ? 'fill-pink-500 scale-150 drop-shadow-[0_0_20px_rgba(236,72,153,1)]' 
+                      : localLiked ? 'fill-pink-500 scale-110 drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]' : 'active:scale-50 group-hover/like:scale-110'
+                  }`} 
+                /> 
+              </div>
+              <span className={`text-[13px] font-bold transition-all duration-300 ${isLikingAnimation ? 'scale-125 text-pink-400' : ''}`}>
+                {localLikesCount}
+              </span>
             </button>
           </form>
           
-          {/* Yorum Butonu */}
-          <button 
-            onClick={() => setShowComment(!showComment)}
-            className={`flex items-center gap-1.5 transition-colors ${showComment ? 'text-[#4DA3FF]' : 'hover:text-[#4DA3FF]'}`}
-          >
+          <button onClick={() => { triggerHaptic(); setShowComment(!showComment); }} className={`flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-xl transition-all duration-300 ${showComment ? 'text-[#4DA3FF] bg-[#4DA3FF]/10' : 'hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10 active:scale-90'}`}>
             <MessageCircle size={18} className={`${showComment ? 'fill-[#4DA3FF]/20' : ''}`} /> 
             <span className="text-[13px] font-bold">{post.comments?.length || 0}</span>
           </button>
 
-          {/* Görüntülenme */}
-          <div className="flex items-center gap-1.5 opacity-70">
+          <div className="flex items-center gap-1.5 opacity-70 cursor-default">
             <Eye size={18} /> 
             <span className="text-[13px] font-bold">{post.views}</span>
           </div>
         </div>
-
-        {/* Paylaş Butonu */}
-        <button onClick={handleShare} className="hover:text-white transition-all duration-300 bg-white/[0.03] p-2 rounded-full hover:bg-white/[0.08] hover:scale-110 active:scale-95">
+        <button onClick={handleShare} className="hover:text-white transition-all duration-300 bg-white/[0.03] p-2.5 rounded-full hover:bg-white/[0.08] hover:scale-110 active:scale-75 shadow-sm">
           <Share2 size={16} />
         </button>
       </div>
 
-      {/* Yorum Formu (Açılır/Kapanır Akordeon) */}
-      <div className={`grid transition-all duration-300 ease-in-out relative z-10 ${showComment ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
+      <div className={`grid transition-all duration-500 ease-in-out relative z-10 ${showComment ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
         <div className="overflow-hidden">
           <div className="border-t border-white/[0.04] pt-4">
             <CommentForm postId={post.id} />
