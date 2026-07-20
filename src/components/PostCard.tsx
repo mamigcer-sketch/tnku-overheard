@@ -170,7 +170,7 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   };
 
   const isConfession = post.type === 'CONFESSION';
-  const isTrending = post.likes >= 10; // 🔥 Hydration hatasını önlemek için basitleştirildi
+  const isTrending = post.likes >= 10; 
 
   const hoverGlow = isConfession 
     ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
@@ -226,7 +226,8 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
           onClick={(e) => e.stopPropagation()} 
           className="interactive-zone flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400 relative z-10 cursor-default"
         >
-          <div className="flex items-center gap-6">
+          {/* 🔥 gap-4 ile araları mobilde biraz daralttık ve hidden sm:flex sınıfını kaldırdık */}
+          <div className="flex items-center gap-4 sm:gap-6">
             <form action={incrementLike} onSubmit={handleLikeClick}>
               <input type="hidden" name="id" value={post.id} />
               <button 
@@ -249,7 +250,8 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
               <span className="text-[13px] font-bold">{post.comments?.length || 0}</span>
             </button>
 
-            <div className="flex items-center gap-1.5 opacity-70 cursor-default hidden sm:flex">
+            {/* 🔥 YENİ: Mobilde de gözükecek şekilde "hidden sm:flex" silindi! */}
+            <div className="flex items-center gap-1.5 opacity-70 cursor-default">
               <Eye size={18} /> 
               <span className="text-[13px] font-bold">{post.views}</span>
             </div>
