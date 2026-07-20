@@ -7,7 +7,6 @@ import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
 import { Plus, ChevronDown } from 'lucide-react';
-import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +16,7 @@ export default async function Home({ searchParams }: any) {
   // 🔥 KALICI ANONİM KİMLİK ÇEREZİ (USER UUID) MANTIĞI
   let userUuid = cookieStore.get('user_uuid')?.value;
   if (!userUuid) {
-    userUuid = crypto.randomUUID();
+    userUuid = 'user_' + Math.random().toString(36).substring(2) + Date.now().toString(36);
     cookieStore.set('user_uuid', userUuid, {
       maxAge: 60 * 60 * 24 * 365, // 1 yıl kalıcı
       httpOnly: true,
