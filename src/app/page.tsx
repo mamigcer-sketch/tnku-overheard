@@ -7,15 +7,30 @@ import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
 import { Plus, ChevronDown } from 'lucide-react';
+import crypto from 'crypto';
 
 export const dynamic = 'force-dynamic';
 
 export default async function Home({ searchParams }: any) {
+  const cookieStore = await cookies();
+
+  // 🔥 KALICI ANONİM KİMLİK ÇEREZİ (USER UUID) MANTIĞI
+  let userUuid = cookieStore.get('user_uuid')?.value;
+  if (!userUuid) {
+    userUuid = crypto.randomUUID();
+    cookieStore.set('user_uuid', userUuid, {
+      maxAge: 60 * 60 * 24 * 365, // 1 yıl kalıcı
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+    });
+  }
+
   async function incrementLike(formData: FormData) {
     'use server';
     const id = formData.get('id') as string;
-    const cookieStore = await cookies();
-    const likedPostsCookie = cookieStore.get('liked_posts')?.value || '';
+    const currentCookieStore = await cookies();
+    const likedPostsCookie = currentCookieStore.get('liked_posts')?.value || '';
     const likedPosts = likedPostsCookie.split(',');
 
     if (!likedPosts.includes(id)) {
@@ -23,7 +38,7 @@ export default async function Home({ searchParams }: any) {
         where: { id },
         data: { likes: { increment: 1 } }
       });
-      cookieStore.set('liked_posts', [...likedPosts, id].join(','), { 
+      currentCookieStore.set('liked_posts', [...likedPosts, id].join(','), { 
         maxAge: 60 * 60 * 24 * 365,
         httpOnly: true 
       });
@@ -31,17 +46,15 @@ export default async function Home({ searchParams }: any) {
     }
   }
 
-  const cookieStore = await cookies();
   const likedPosts = cookieStore.get('liked_posts')?.value?.split(',') || [];
   
   const params = await searchParams;
   const currentFilter = params?.f || 'Tümü';
   const searchQuery = params?.q || '';
   
-  // 🔥 SONSUZ AKIŞ (LOAD MORE) MANTIĞI: 1. sayfadan basılan sayfaya kadar HEPSİNİ birden getirir
   const page = parseInt(params?.page || '1');
   const pageSize = 10;
-  const totalTake = page * pageSize; // Kaç tane post gösterileceğini hesaplar (1. sayfa: 10, 2. sayfa: 20 vb.)
+  const totalTake = page * pageSize; 
 
   let whereQuery: any = { status: 'APPROVED' };
   let orderQuery: any = { createdAt: 'desc' };
@@ -51,7 +64,6 @@ export default async function Home({ searchParams }: any) {
   }
   if (currentFilter === 'İtiraf') whereQuery.type = 'CONFESSION';
   
-  // 🔥 TREND MANTIĞI (Son 7 günün en çok beğenilenleri)
   if (currentFilter === '🔥 Trend') {
     orderQuery = { likes: 'desc' };
     const oneWeekAgo = new Date();
@@ -63,7 +75,6 @@ export default async function Home({ searchParams }: any) {
     whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
   }
 
-  // Veritabanından o anki sayfa derinliğine göre postları çekiyoruz
   const posts = await prisma.post.findMany({
     where: whereQuery,
     orderBy: orderQuery,
@@ -71,7 +82,6 @@ export default async function Home({ searchParams }: any) {
     include: { comments: { select: { id: true } } }
   });
 
-  // Toplam post sayısını buluyoruz ki daha fazla post kalıp kalmadığını anlayalım
   const totalPostsCount = await prisma.post.count({ where: whereQuery });
 
   const filters = ['Tümü', 'Overheard', 'İtiraf', 'En Yeni', '🔥 Trend'];
@@ -153,10 +163,10 @@ export default async function Home({ searchParams }: any) {
                   post={post} 
                   isLiked={likedPosts.includes(post.id)} 
                   incrementLike={incrementLike}
+                  userUuid={userUuid}
                 />
               ))}
               
-              {/* Eğer gösterilen post sayısı veritabanındaki toplam post sayısından azsa butonu göster */}
               {posts.length < totalPostsCount && (
                 <div className="flex justify-center pt-6">
                   <Link 
