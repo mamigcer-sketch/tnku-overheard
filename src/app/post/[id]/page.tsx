@@ -59,6 +59,18 @@ const avatarThemes = [
   { bg: 'bg-red-500/10', border: 'border-red-500/20', text: 'text-red-400' },
 ];
 
+const getAnonymousName = (id: string) => {
+  if (!id) return "Gizemli Yolcu";
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const positiveHash = Math.abs(hash);
+  const adj = adjectives[positiveHash % adjectives.length];
+  const ani = animals[Math.floor(positiveHash / adjectives.length) % animals.length];
+  return `${adj} ${ani}`;
+};
+
 const getFunIdentity = (id: string) => {
   const safeId = String(id || "anonim");
   let hash = 0;
@@ -67,12 +79,10 @@ const getFunIdentity = (id: string) => {
   }
   
   const positiveHash = Math.abs(hash);
-  const adjIndex = positiveHash % adjectives.length;
-  const nounIndex = (positiveHash * 7) % animals.length;
   const themeIndex = (positiveHash * 13) % avatarThemes.length;
 
   return { 
-    name: `${adjectives[adjIndex]} ${animals[nounIndex]}`, 
+    name: getAnonymousName(safeId), 
     theme: avatarThemes[themeIndex] 
   };
 };
@@ -95,6 +105,9 @@ export default async function PostPage({ params }: any) {
     ? 'shadow-[0_0_40px_rgba(168,85,247,0.07)] border-purple-500/20' 
     : 'shadow-[0_0_40px_rgba(77,163,255,0.07)] border-[#4DA3FF]/20';
 
+  // 🔥 (post as any) eklenerek TS hatası tamamen engellendi
+  const authorNickname = getAnonymousName((post as any).authorUuid || post.id);
+
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white">
       <header className="sticky top-0 z-50 bg-[#0B0B0B]/70 backdrop-blur-xl border-b border-white/5 px-4 py-4 md:px-8 mb-6">
@@ -112,14 +125,18 @@ export default async function PostPage({ params }: any) {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 pb-12">
-        {/* ANA GÖNDERİ KARTI */}
         <article className={`bg-[#121212]/80 backdrop-blur-xl border p-6 rounded-[24px] mb-8 relative overflow-hidden transition-all duration-500 ${glowStyle}`}>
           
           <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
-            <div className="flex flex-wrap gap-1.5 text-[10px] font-bold tracking-wide">
+            <div className="flex flex-wrap gap-1.5 text-[10px] font-bold tracking-wide items-center">
               <span className={`px-2.5 py-1 rounded-md uppercase ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
                 {isConfession ? 'İTİRAF' : 'OVERHEARD'}
               </span>
+
+              <span className="bg-white/[0.05] text-gray-300 px-2.5 py-1 rounded-md border border-white/[0.05]">
+                @{authorNickname}
+              </span>
+
               {post.location && <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-md text-gray-400"><MapPin size={10} /> {post.location}</span>}
               {post.time && <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-md text-gray-400"><Clock size={10} /> {post.time}</span>}
               {post.people && <span className="flex items-center gap-1 bg-white/5 px-2.5 py-1 rounded-md text-gray-400"><Users size={10} /> {post.people}</span>}
@@ -146,7 +163,6 @@ export default async function PostPage({ params }: any) {
           </div>
         </article>
 
-        {/* YORUMLAR BÖLÜMÜ */}
         <div className="space-y-6">
           <div className="flex items-center gap-2 px-1">
             <MessageCircle size={16} className="text-[#4DA3FF]" />
