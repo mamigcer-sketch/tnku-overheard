@@ -38,16 +38,20 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
     const targetComment = comments.find((c: any) => c.id === targetCommentId);
     const rootParentId = targetComment?.parentId ? targetComment.parentId : targetCommentId;
 
+    // Kök ebeveyn ID'sini korurken, ekrana yazılacak ismi güncelliyoruz
     setReplyingTo({ id: rootParentId, name: authorName });
     
-    // 🔥 AKILLI ODAKLANMA: Forma kaydırmakla kalmıyor, direkt içine odaklanıp klavyeyi tetikliyoruz!
+    // 🔥 AKILLI ODAKLANMA VE İMLEÇ AYARI: 
+    // Yazı kutuya yerleştikten hemen sonra imleci @etiket'in tam arkasına atıp klavyeyi açıyoruz
     setTimeout(() => {
       const textarea = document.querySelector('#comment-form-section textarea') as HTMLTextAreaElement;
       if (textarea) {
         textarea.focus();
+        const textLength = textarea.value.length;
+        textarea.setSelectionRange(textLength, textLength); // İmleci en sona taşır
         textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-    }, 50);
+    }, 100);
   };
 
   return (
@@ -124,6 +128,7 @@ export default function CommentSection({ postId, comments, postAuthorUuid }: { p
         <CommentForm 
           postId={postId} 
           parentId={replyingTo?.id} 
+          replyingToName={replyingTo?.name}
           onReplyDone={() => setReplyingTo(null)} 
         />
       </div>

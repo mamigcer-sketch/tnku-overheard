@@ -1,20 +1,32 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Send } from "lucide-react";
 import { addComment } from "@/app/post/actions";
 
 export default function CommentForm({ 
   postId, 
   parentId, 
+  replyingToName,
   onReplyDone 
 }: { 
   postId: string; 
   parentId?: string; 
+  replyingToName?: string;
   onReplyDone?: () => void 
 }) {
   const [content, setContent] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // 🔥 Yanıtla butonuna basıldığında metin kutusunun başına otomatik olarak @etiket ekler
+  useEffect(() => {
+    if (replyingToName) {
+      setContent(prev => {
+        if (prev.trim().startsWith(`@${replyingToName}`)) return prev;
+        return `@${replyingToName} ${prev}`;
+      });
+    }
+  }, [replyingToName]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
