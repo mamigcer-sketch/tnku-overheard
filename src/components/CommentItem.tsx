@@ -80,8 +80,7 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor, onRe
           <span className="text-[11px] font-bold">{localLikesCount}</span>
         </button>
 
-        {/* Yanıtla Butonu - Sadece ana yorumlarda gösterilir ki sonsuz dallanma olmasın */}
-        {!isReply && (
+        {!isReply && onReply && (
           <button 
             onClick={() => { triggerHaptic(); onReply(comment.id, commentAuthor.name); }}
             className="flex items-center gap-1.5 transition-all duration-300 hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10 rounded-lg px-2 py-1 -ml-2 active:scale-90"

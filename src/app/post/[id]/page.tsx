@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import CommentForm from '@/components/CommentForm';
 import BackButton from '@/components/BackButton';
 import CommentItem from '@/components/CommentItem';
+import CommentSection from '@/components/CommentSection'; // 🔥 Hiyerarşik Yanıt Bileşeni Eklendi
 import { MessageCircle, Home, MapPin, Clock, Users, User, Heart, Eye, Flame } from 'lucide-react';
 import Link from 'next/link';
 
@@ -66,9 +67,6 @@ export default async function PostPage({ params }: any) {
   const glowStyle = isConfession 
     ? 'shadow-[0_8px_32px_0_rgba(168,85,247,0.15)] border-purple-500/20' 
     : 'shadow-[0_8px_32px_0_rgba(77,163,255,0.15)] border-[#4DA3FF]/20';
-
-  // Sadece ana yorumları filtreliyoruz
-  const parentComments = post.comments.filter((c: any) => !c.parentId);
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-24">
@@ -144,69 +142,12 @@ export default async function PostPage({ params }: any) {
           </div>
         </article>
 
-        {/* YORUMLAR BÖLÜMÜ */}
-        <div className="space-y-6">
-          <div className="flex items-center gap-2 px-1 text-gray-300">
-            <MessageCircle size={18} className="text-[#4DA3FF]" />
-            <h2 className="text-[16px] font-bold">
-              Yorumlar <span className="text-gray-500 font-medium text-sm">({post.comments.length})</span>
-            </h2>
-          </div>
-
-          <div className="space-y-4">
-            {parentComments.length === 0 ? (
-              <div className="text-center py-10 bg-white/[0.02] backdrop-blur-md rounded-[20px] border border-white/[0.05] shadow-inner">
-                <p className="text-gray-500 font-medium text-[13px]">Bu fısıltıya ilk cevabı sen ver.</p>
-              </div>
-            ) : (
-              parentComments.map((comment: any) => {
-                const commentAuthor = getAnonymousData(comment.authorId || comment.id);
-                const isPostAuthor = comment.authorId && comment.authorId === (post as any).authorUuid;
-                
-                // Bu ana yoruma yazılmış yanıtlar
-                const replies = post.comments.filter((c: any) => c.parentId === comment.id);
-
-                return (
-                  <div key={comment.id} className="space-y-3">
-                    <CommentItem 
-                      comment={comment}
-                      commentAuthor={commentAuthor}
-                      isPostAuthor={isPostAuthor}
-                    />
-
-                    {/* YANITLAR */}
-                    {replies.length > 0 && (
-                      <div className="space-y-3 pl-6 sm:pl-10 border-l-2 border-[#4DA3FF]/20 ml-3 sm:ml-5">
-                        {replies.map((reply: any) => {
-                          const replyAuthor = getAnonymousData(reply.authorId || reply.id);
-                          const isReplyAuthorPostAuthor = reply.authorId && reply.authorId === (post as any).authorUuid;
-
-                          return (
-                            <CommentItem 
-                              key={reply.id}
-                              comment={reply}
-                              commentAuthor={replyAuthor}
-                              isPostAuthor={isReplyAuthorPostAuthor}
-                              isReply={true}
-                            />
-                          );
-                        })}
-                      </div>
-                    )}
-                  </div>
-                );
-              })
-            )}
-          </div>
-          
-          {/* YORUM YAPMA FORMU */}
-          <div className="pt-6 border-t border-white/[0.05] mt-8 bg-white/[0.01] backdrop-blur-md rounded-[24px] p-2">
-            <h3 className="text-xs font-bold text-gray-400 mb-4 px-2 uppercase tracking-wider">Sen Ne Düşünüyorsun?</h3>
-            <div className="shadow-lg rounded-[20px]">
-              <CommentForm postId={post.id} />
-            </div>
-          </div>
-        </div>
+        {/* YORUMLAR BÖLÜMÜ (Instagram Hiyerarşik Yapı ve Çalışan Yanıt Tuşu) */}
+        <CommentSection 
+          postId={post.id} 
+          comments={post.comments} 
+          postAuthorUuid={(post as any).authorUuid} 
+        />
 
       </div>
     </main>
