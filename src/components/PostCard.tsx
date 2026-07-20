@@ -6,6 +6,42 @@ import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2 } from "l
 import Link from "next/link";
 import { incrementView } from "@/app/post/actions";
 
+// 🚀 40x40 (1.600 Kombinasyon) Kısa, Net ve Komik Kampüs Lakap Havuzu
+const adjectives = [
+  "Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", 
+  "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", 
+  "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", 
+  "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", 
+  "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", 
+  "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", 
+  "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", 
+  "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"
+];
+
+const animals = [
+  "Kedi", "Köpek", "Panda", "Rakun", "Baykuş", 
+  "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", 
+  "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", 
+  "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", 
+  "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", 
+  "Şahin", "Karga", "Köstebek", "Koyun", "İnek", 
+  "At", "Eşek", "Fok", "Penguen", "Kirpi", 
+  "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"
+];
+
+// ID'ye göre stabil rastgele isim türeten fonksiyon
+const getAnonymousName = (id: string) => {
+  if (!id) return "Gizemli Yolcu";
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) {
+    hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const positiveHash = Math.abs(hash);
+  const adj = adjectives[positiveHash % adjectives.length];
+  const ani = animals[Math.floor(positiveHash / adjectives.length) % animals.length];
+  return `${adj} ${ani}`;
+};
+
 const getRelativeTime = (dateString: string) => {
   if (!dateString) return "";
   const date = new Date(dateString);
@@ -67,15 +103,22 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     ? 'hover:shadow-[0_0_30px_rgba(168,85,247,0.06)] hover:border-purple-500/20' 
     : 'hover:shadow-[0_0_30px_rgba(77,163,255,0.06)] hover:border-[#4DA3FF]/20';
 
+  const authorNickname = getAnonymousName(post.id);
+
   return (
     <div ref={cardRef} className={`group bg-[#121212]/60 backdrop-blur-2xl border border-white/[0.04] p-5 sm:p-6 rounded-[24px] transition-all duration-500 ${hoverGlow}`}>
       <Link href={`/post/${post.id}`} className="block">
         
         {/* Üst Bilgi Çubuğu */}
         <div className="flex justify-between items-start gap-3 mb-4">
-          <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider">
+          <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
             <span className={`px-2.5 py-1 rounded-md uppercase ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
               {isConfession ? 'İTİRAF' : 'OVERHEARD'}
+            </span>
+
+            {/* 🔥 Komik Anonim Yazar Rozeti */}
+            <span className="bg-white/[0.05] text-gray-300 px-2.5 py-1 rounded-md border border-white/[0.05]">
+              @{authorNickname}
             </span>
             
             {post.location && (
@@ -114,7 +157,7 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
         </p>
       </Link>
 
-      {/* Modern Alt Etkileşim Çubuğu (Büyük butonlar yok, sadece zarif ikonlar) */}
+      {/* Modern Alt Etkileşim Çubuğu */}
       <div className="flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400">
         <div className="flex items-center gap-6">
           {/* Beğeni Butonu */}
@@ -126,7 +169,7 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
             </button>
           </form>
           
-          {/* Yorum Butonu (Artık form açıp kapatıyor) */}
+          {/* Yorum Butonu */}
           <button 
             onClick={() => setShowComment(!showComment)}
             className={`flex items-center gap-1.5 transition-colors ${showComment ? 'text-[#4DA3FF]' : 'hover:text-[#4DA3FF]'}`}
