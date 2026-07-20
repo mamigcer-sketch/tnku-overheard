@@ -29,7 +29,7 @@ const animals = [
   "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"
 ];
 
-// Verilen ID'ye (Çerez UUID'sine veya Post ID'ye) göre stabil rastgele isim türeten fonksiyon
+// Her postun kendi ID'sine göre stabil ve sabit rastgele isim türeten fonksiyon
 const getAnonymousName = (id: string) => {
   if (!id) return "Gizemli Yolcu";
   let hash = 0;
@@ -59,7 +59,7 @@ const getRelativeTime = (dateString: string) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-export default function PostCard({ post, isLiked, incrementLike, userUuid }: any) {
+export default function PostCard({ post, isLiked, incrementLike }: any) {
   const [showComment, setShowComment] = useState(false);
   const cardRef = useRef(null);
   const [hasViewed, setHasViewed] = useState(false);
@@ -103,9 +103,8 @@ export default function PostCard({ post, isLiked, incrementLike, userUuid }: any
     ? 'hover:shadow-[0_0_30px_rgba(168,85,247,0.06)] hover:border-purple-500/20' 
     : 'hover:shadow-[0_0_30px_rgba(77,163,255,0.06)] hover:border-[#4DA3FF]/20';
 
-  // 🔥 Eğer postu bu kullanıcı attıysa çerezdeki ID'yi, başkası attıysa postun kendi ID'sini baz alır
-  // (Not: Post modelinde yazar UUID'si tutuluyorsa post.authorUuid kullanılabilir, şu an stabil olması için post.id bazlı veya ortak UUID bazlı akıyor)
-  const authorNickname = getAnonymousName(userUuid || post.id);
+  // 🔥 Her post kendi benzersiz ID'sine göre sabit bir lakaba sahip olur
+  const authorNickname = getAnonymousName(post.id);
 
   return (
     <div ref={cardRef} className={`group bg-[#121212]/60 backdrop-blur-2xl border border-white/[0.04] p-5 sm:p-6 rounded-[24px] transition-all duration-500 ${hoverGlow}`}>
