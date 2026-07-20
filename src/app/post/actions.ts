@@ -12,11 +12,14 @@ export async function createPost(formData: FormData) {
 
   if (!authorUuid) {
     authorUuid = crypto.randomUUID(); 
-    cookieStore.set('tnku_author_id', authorUuid, {
+    cookieStore.set({
+      name: 'tnku_author_id',
+      value: authorUuid,
       maxAge: 60 * 60 * 24 * 365, // 1 yıl kalıcı
       httpOnly: true, 
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      path: '/',
     });
   }
 
@@ -59,11 +62,14 @@ export async function addComment(formData: FormData) {
 
   if (!authorId) {
     authorId = crypto.randomUUID(); 
-    cookieStore.set('tnku_author_id', authorId, {
+    cookieStore.set({
+      name: 'tnku_author_id',
+      value: authorId,
       maxAge: 60 * 60 * 24 * 365, 
       httpOnly: true, 
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      path: '/',
     });
   }
 
@@ -113,53 +119,68 @@ export async function getPostsByIds(ids: string[]) {
   });
 }
 
-// 5. Yorum Beğenme / Beğeniyi Geri Alma (Toggle) Sistemi (As Casting ile Tip Hatası Engellendi)
+// 5. Yorum Beğenme / Beğeniyi Geri Alma (Toggle) Sistemi (Güvenleştirilmiş)
 export async function toggleCommentLike(commentId: string, postId: string) {
   const cookieStore = await cookies();
   let authorId = cookieStore.get('tnku_author_id')?.value;
 
   if (!authorId) {
     authorId = crypto.randomUUID(); 
-    cookieStore.set('tnku_author_id', authorId, {
+    cookieStore.set({
+      name: 'tnku_author_id',
+      value: authorId,
       maxAge: 60 * 60 * 24 * 365, 
       httpOnly: true, 
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
+      path: '/',
     });
   }
 
-  // Kullanıcı daha önce bu yorumu beğenmiş mi kontrol ediyoruz
-  const existingLike = await (prisma as any).commentLike.findUnique({
-    where: {
-      commentId_userUuid: {
-        commentId,
-        userUuid: authorId,
+  try {
+    // Kullanıcı daha önce bu yorumu beğenmiş mi kontrol ediyoruz
+    const existingLike = await (prisma as any).commentLike.findUnique({
+      where: {
+        commentId_userUuid: {
+          commentId,
+          userUuid: authorId,
+        },
       },
-    },
-  });
+    });
 
-  if (existingLike) {
-    // Beğenmişse -> Kaydı sil ve sayıyı 1 azalt
-    await (prisma as any).commentLike.delete({
-      where: { id: existingLike.id },
-    });
-    await prisma.comment.update({
-      where: { id: commentId },
-      data: { likes: { decrement: 1 } },
-    });
-  } else {
-    // Beğenmemişse -> Yeni beğeni kaydı oluştur ve sayıyı 1 artır
-    await (prisma as any).commentLike.create({
-      data: {
-        commentId,
-        userUuid: authorId,
-      },
-    });
-    await prisma.comment.update({
-      where: { id: commentId },
-      data: { likes: { increment: 1 } },
-    });
+    if (existingLike) {
+      // Beğenmişse -> Kaydı sil ve sayıyı 1 azalt
+      await (prisma as any).commentLike.delete({
+        where: { id: existingLike.id },
+      });
+      
+      const currentComment = await prisma.comment.findUnique({ where: { id: commentId } });
+      const newLikes = Math.max(0, (currentComment?.likes || 1) - 1);
+
+      await prisma.comment.update({
+        where: { id: commentId },
+        data: { likes: newLikes },
+      });
+    } else {
+      // Beğenmemişse -> Yeni beğeni kaydı oluştur ve sayıyı 1 artır
+      await (prisma as any).commentLike.create({
+        data: {
+          commentId,
+          userUuid: authorId,
+        },
+      });
+
+      const currentComment = await prisma.comment.findUnique({ where: { id: commentId } });
+      const newLikes = (currentComment?.likes || 0) + 1;
+
+      await prisma.comment.update({
+        where: { id: commentId },
+        data: { likes: newLikes },
+      });
+    }
+
+    revalidatePath(`/post/${postId}`);
+  } catch (err) {
+    console.error("Beğeni işlenirken hata oluştu:", err);
   }
-
-  revalidatePath(`/post/${postId}`);
 }
