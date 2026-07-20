@@ -20,9 +20,8 @@ const getRelativeTime = (dateString: string | Date) => {
 };
 
 export default function CommentItem({ comment, commentAuthor, isPostAuthor }: any) {
-  // Beğeni ve Animasyon State'leri
   const [localLiked, setLocalLiked] = useState(false);
-  const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0); // Yorumların veritabanında likes sütunu yoksa 0'dan başlar
+  const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
 
   const triggerHaptic = () => {
@@ -34,28 +33,37 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor }: an
   const handleLike = () => {
     if (localLiked) return;
     triggerHaptic();
-    
     setLocalLiked(true);
     setLocalLikesCount((prev: number) => prev + 1);
     setIsLikingAnimation(true);
     setTimeout(() => setIsLikingAnimation(false), 1000);
   };
 
+  // 🔥 GARANTİ YANITLAMA FONKSİYONU
   const handleReply = () => {
     triggerHaptic();
-    // Sayfadaki yorum textarea'sını buluyoruz
-    const textarea = document.querySelector('textarea[name="content"]') as HTMLTextAreaElement;
     
-    if (textarea) {
+    // Sayfadaki tüm textarea'ları tarıyoruz ve doğru olanı buluyoruz
+    const textareas = document.querySelectorAll('textarea');
+    let targetTextarea: HTMLTextAreaElement | null = null;
+    
+    textareas.forEach((el) => {
+      if (el.name === 'content' || el.placeholder?.includes('fısılda')) {
+        targetTextarea = el;
+      }
+    });
+
+    if (targetTextarea) {
+      const textarea = targetTextarea as HTMLTextAreaElement;
       const mentionText = `@${commentAuthor.name} `;
       
-      // React'in input sistemini dışarıdan kandırıp (bypass edip) yazıyı zorla içine sokuyoruz!
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(window.HTMLTextAreaElement.prototype, "value")?.set;
-      nativeInputValueSetter?.call(textarea, mentionText + textarea.value);
-      textarea.dispatchEvent(new Event('input', { bubbles: true }));
-      
+      textarea.value = mentionText + textarea.value;
       textarea.focus();
-      // Formu yavaşça ekranın ortasına kaydırıyoruz
+      
+      // İmleci metnin en sonuna taşıyoruz
+      textarea.setSelectionRange(textarea.value.length, textarea.value.length);
+      
+      // Formun olduğu yere yumuşakça kaydırıyoruz
       textarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   };
@@ -64,13 +72,11 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor }: an
     <div className="bg-white/[0.02] backdrop-blur-md border border-white/[0.05] p-4 sm:p-5 rounded-[20px] shadow-[0_4px_20px_rgba(0,0,0,0.2)] animate-in fade-in slide-in-from-bottom-2 duration-500 group/comment transition-all hover:border-white/[0.1] hover:bg-white/[0.04]">
       <div className="flex justify-between items-center mb-3">
         <div className="flex items-center gap-2">
-          {/* Yorumcu Avatarı */}
           <div className={`w-6 h-6 flex items-center justify-center rounded-md bg-gradient-to-br ${commentAuthor.gradient} text-[12px] shadow-inner`}>
             {commentAuthor.emoji}
           </div>
           <span className="font-bold text-[12px] text-gray-200 tracking-wide">@{commentAuthor.name}</span>
           
-          {/* Yazar Rozeti */}
           {isPostAuthor && (
             <span className="bg-[#4DA3FF]/10 text-[#4DA3FF] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-[#4DA3FF]/20 shadow-sm">
               Yazar
@@ -82,7 +88,6 @@ export default function CommentItem({ comment, commentAuthor, isPostAuthor }: an
       
       <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-4">{comment.content}</p>
       
-      {/* ALT ETKİLEŞİM ÇUBUĞU (Beğen ve Yanıtla) */}
       <div className="flex items-center gap-4 pt-3 border-t border-white/[0.02] text-gray-400">
         <button 
           onClick={handleLike}
