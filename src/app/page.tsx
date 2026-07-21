@@ -52,7 +52,6 @@ export default async function Home({ searchParams }: any) {
   const pageSize = 10;
   const totalTake = page * pageSize; 
 
-  // Süresi dolan postları filtreleyen sistem
   let whereQuery: any = { 
     status: 'APPROVED',
     OR: [
@@ -66,16 +65,16 @@ export default async function Home({ searchParams }: any) {
   if (currentFilter === 'Overheard') whereQuery.type = { in: ['OVERHEARD', 'OVERHED'] };
   if (currentFilter === 'İtiraf') whereQuery.type = 'CONFESSION';
   
+  // 🔥 GÜNCELLENDİ: Trend artık sadece son 24 saati baz alıyor
   if (currentFilter === '🔥 Trend') {
     orderQuery = { likes: 'desc' };
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    whereQuery.createdAt = { gte: oneWeekAgo };
+    const oneDayAgo = new Date();
+    oneDayAgo.setHours(oneDayAgo.getHours() - 24); // 7 gün yerine 24 saat yapıldı
+    whereQuery.createdAt = { gte: oneDayAgo };
   }
 
   if (searchQuery) whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
 
-  // 🔥 YENİ: CustomNickname ve UserBadge tablolarını birlikte çekiyoruz!
   const [posts, totalPostsCount, activeAnnouncement, activeCountdown, customNicknamesDb, userBadgesDb] = await Promise.all([
     prisma.post.findMany({
       where: whereQuery,
@@ -92,17 +91,15 @@ export default async function Home({ searchParams }: any) {
       where: { isActive: true },
       orderBy: { createdAt: 'desc' }
     }),
-    (prisma as any).customNickname.findMany().catch(() => []), // Tablo yoksa hata vermesin diye önlem
-    (prisma as any).userBadge.findMany().catch(() => []) // 🔥 ROZETLER ÇEKİLİYOR
+    (prisma as any).customNickname.findMany().catch(() => []),
+    (prisma as any).userBadge.findMany().catch(() => [])
   ]);
 
-  // Çekilen nickleri hızlı erişim için haritalıyoruz
   const customNicknamesMap = (customNicknamesDb || []).reduce((acc: any, curr: any) => {
     acc[curr.userUuid] = curr.nickname;
     return acc;
   }, {});
 
-  // 🔥 Çekilen rozetleri hızlı erişim için haritalıyoruz
   const userBadgesMap = (userBadgesDb || []).reduce((acc: any, curr: any) => {
     acc[curr.userUuid] = curr.badgeName;
     return acc;
@@ -202,7 +199,7 @@ export default async function Home({ searchParams }: any) {
             <div className="text-center py-20 bg-white/[0.02] backdrop-blur-2xl rounded-[24px] border border-white/[0.05] flex flex-col items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
               <p className="text-gray-400 font-medium text-[14px]">
                 {currentFilter === '🔥 Trend' 
-                  ? 'Bu hafta henüz popülerleşen bir fısıltı yok.' 
+                  ? 'Son 24 saatte henüz popülerleşen bir fısıltı yok.' // GÜNCELLENDİ
                   : 'Aradığın kriterlerde gönderi bulunamadı.'}
               </p>
             </div>
@@ -216,7 +213,7 @@ export default async function Home({ searchParams }: any) {
                   incrementLike={incrementLike}
                   userUuid={userUuid}
                   customNickname={customNicknamesMap[post.authorUuid]} 
-                  userBadge={userBadgesMap[post.authorUuid]} // 🔥 YENİ EKLENDİ (Rozet Post Kartına Paslanıyor)
+                  userBadge={userBadgesMap[post.authorUuid]}
                 />
               ))}
               
