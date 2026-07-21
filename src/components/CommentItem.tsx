@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Heart, Reply, Flag, ShieldAlert } from "lucide-react";
+import { Heart, Reply, Flag, ShieldAlert, BadgeCheck } from "lucide-react";
 import { toggleCommentLike, submitReport } from "@/app/post/actions";
 
 const getRelativeTime = (dateString: string | Date) => {
@@ -20,11 +20,9 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// 🔥 YENİ: Etiketi kutudan çıkarıp neon mavi yazıya dönüştürdük
 const formatCommentText = (text: string) => {
   if (!text) return null;
   
-  // İki kelimelik anonim isimleri (Örn: @Avare Kunduz) yakalayan Türkçe destekli regex
   const mentionRegex = /(@[a-zA-ZçğıöşüÇĞİÖŞÜ]+\s[a-zA-ZçğıöşüÇĞİÖŞÜ]+)/g;
   const parts = text.split(mentionRegex);
   
@@ -46,7 +44,8 @@ export default function CommentItem({
   isPostAuthor, 
   isInitiallyLiked = false, 
   onReply, 
-  isReply = false 
+  isReply = false,
+  hasCustomNick = false // 🔥 YENİ EKLENDİ
 }: any) {
   const [localLiked, setLocalLiked] = useState(isInitiallyLiked);
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
@@ -117,7 +116,12 @@ export default function CommentItem({
             <div className={`w-6 h-6 flex items-center justify-center rounded-md bg-gradient-to-br ${commentAuthor.gradient} text-[12px] shadow-inner`}>
               {commentAuthor.emoji}
             </div>
-            <span className="font-bold text-[12px] text-gray-200 tracking-wide">@{commentAuthor.name}</span>
+            
+            {/* 🔥 İSİM ALANI VE SARI TİK GÜNCELLENDİ */}
+            <span className={`font-bold text-[12px] tracking-wide flex items-center gap-1 ${hasCustomNick ? 'text-yellow-50 drop-shadow-sm' : 'text-gray-200'}`}>
+              @{commentAuthor.name}
+              {hasCustomNick && <BadgeCheck size={14} className="text-yellow-400" />}
+            </span>
             
             {isPostAuthor && (
               <span className="bg-[#4DA3FF]/10 text-[#4DA3FF] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-[#4DA3FF]/20 shadow-sm">

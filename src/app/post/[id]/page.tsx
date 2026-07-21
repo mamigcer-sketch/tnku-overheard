@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 import BackButton from '@/components/BackButton';
 import CommentSection from '@/components/CommentSection';
-import { Home, MapPin, Clock, Users, User, Heart, Eye, Flame } from 'lucide-react';
+import { Home, MapPin, Clock, Users, User, Heart, Eye, Flame, BadgeCheck } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 
@@ -32,11 +32,21 @@ const gradients = [
   "from-emerald-400 to-teal-600", "from-amber-400 to-orange-600", "from-cyan-400 to-blue-600"
 ];
 
-const getAnonymousData = (id: string) => {
+// 🔥 YENİ: customNickname parametresi eklendi
+const getAnonymousData = (id: string, customNickname?: string) => {
   if (!id) return { name: "Gizemli Yolcu", emoji: "👤", gradient: gradients[0] };
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   const positiveHash = Math.abs(hash);
+  
+  if (customNickname) {
+    return {
+      name: customNickname,
+      emoji: emojis[positiveHash % emojis.length],
+      gradient: gradients[Math.floor(positiveHash / emojis.length) % gradients.length]
+    };
+  }
+
   return {
     name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`,
     emoji: emojis[positiveHash % emojis.length],
@@ -57,6 +67,17 @@ export default async function PostPage({ params }: any) {
 
   if (!post) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-gray-500 font-medium">Post bulunamadı...</div>;
 
+  // 🔥 Özel Nickleri Veritabanından Çekiyoruz
+  let customNicknamesDb: any[] = [];
+  try {
+    customNicknamesDb = await (prisma as any).customNickname.findMany();
+  } catch (e) {}
+
+  const customNicknamesMap = customNicknamesDb.reduce((acc: any, curr: any) => {
+    acc[curr.userUuid] = curr.nickname;
+    return acc;
+  }, {});
+
   const cookieStore = await cookies();
   const authorId = cookieStore.get('tnku_author_id')?.value;
   let userLikedCommentIds: string[] = [];
@@ -75,10 +96,13 @@ export default async function PostPage({ params }: any) {
 
   const isConfession = post.type === 'CONFESSION';
   const isTrending = post.likes >= 10; 
-  const isEphemeral = !!post.expiresAt; // 🔥 Süreli post kontrolü
-  const authorData = getAnonymousData((post as any).authorUuid || post.id);
+  const isEphemeral = !!post.expiresAt; 
+  
+  const postAuthorUuid = (post as any).authorUuid;
+  const hasCustomNick = !!customNicknamesMap[postAuthorUuid];
+  // 🔥 Yazar datasına özel nicki yolluyoruz
+  const authorData = getAnonymousData(postAuthorUuid || post.id, customNicknamesMap[postAuthorUuid]);
 
-  // 🔥 Süreli post ise turuncu/amber ateşli glow, değilse normal confession/overheard glow
   const glowStyle = isEphemeral
     ? 'shadow-[0_8px_32px_0_rgba(245,158,11,0.2)] border-amber-500/40 bg-amber-500/[0.01]'
     : isConfession 
@@ -119,7 +143,6 @@ export default async function PostPage({ params }: any) {
           <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
             <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
               
-              {/* 🔥 Dinamik Süreli Etiket */}
               {isEphemeral ? (
                 <span className="px-2.5 py-1 rounded-md uppercase flex items-center gap-1 bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
                   <Clock size={12} /> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
@@ -131,12 +154,17 @@ export default async function PostPage({ params }: any) {
                 </span>
               )}
 
-              <span className="flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border border-white/[0.05] shadow-sm">
+              {/* 🔥 Post Sahibi Nick Alanı Güncellendi */}
+              <span className={`flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
                 <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
                   {authorData.emoji}
                 </div>
-                <span className="font-semibold text-[11px] tracking-wide">@{authorData.name}</span>
+                <span className="font-semibold text-[11px] tracking-wide flex items-center gap-1">
+                  @{authorData.name}
+                  {hasCustomNick && <BadgeCheck size={12} className="text-yellow-400" />}
+                </span>
               </span>
+
             </div>
             <span className="text-[10px] text-gray-500 font-medium bg-white/[0.03] px-2.5 py-1 rounded-md border border-white/[0.02]">
               {getRelativeTime(post.createdAt)}
@@ -168,11 +196,13 @@ export default async function PostPage({ params }: any) {
           </div>
         </article>
 
+        {/* 🔥 customNicknamesMap'i Yorumlara Aktarıyoruz! */}
         <CommentSection 
           postId={post.id} 
           comments={post.comments} 
-          postAuthorUuid={(post as any).authorUuid} 
+          postAuthorUuid={postAuthorUuid} 
           userLikedCommentIds={userLikedCommentIds} 
+          customNicknamesMap={customNicknamesMap}
         />
       </div>
     </main>

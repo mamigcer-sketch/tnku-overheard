@@ -99,3 +99,10 @@ model Countdown {
   isActive   Boolean  @default(true)
   createdAt  DateTime @default(now())
 }
+
+model CustomNickname {
+  id        String   @id @default(cuid())
+  userUuid  String   @unique
+  nickname  String
+  createdAt DateTime @default(now())
+}

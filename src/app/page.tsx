@@ -75,8 +75,8 @@ export default async function Home({ searchParams }: any) {
 
   if (searchQuery) whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
 
-  // 🔥 YENİ: activeCountdown eklendi!
-  const [posts, totalPostsCount, activeAnnouncement, activeCountdown] = await Promise.all([
+  // 🔥 YENİ: CustomNickname tablosunu da çekiyoruz!
+  const [posts, totalPostsCount, activeAnnouncement, activeCountdown, customNicknamesDb] = await Promise.all([
     prisma.post.findMany({
       where: whereQuery,
       orderBy: orderQuery,
@@ -91,8 +91,15 @@ export default async function Home({ searchParams }: any) {
     (prisma as any).countdown.findFirst({
       where: { isActive: true },
       orderBy: { createdAt: 'desc' }
-    })
+    }),
+    (prisma as any).customNickname.findMany().catch(() => []) // Tablo yoksa hata vermesin diye önlem
   ]);
+
+  // 🔥 Çekilen nickleri hızlı erişim için haritalıyoruz
+  const customNicknamesMap = (customNicknamesDb || []).reduce((acc: any, curr: any) => {
+    acc[curr.userUuid] = curr.nickname;
+    return acc;
+  }, {});
 
   const authorId = cookieStore.get('tnku_author_id')?.value;
   let notifications: any[] = [];
@@ -150,7 +157,6 @@ export default async function Home({ searchParams }: any) {
           </div>
         )}
 
-        {/* 🔥 YENİ: Geri Sayım (Countdown) Widget'ı */}
         <div className="relative z-10">
           <CountdownWidget countdown={activeCountdown} />
         </div>
@@ -202,6 +208,7 @@ export default async function Home({ searchParams }: any) {
                   isLiked={likedPosts.includes(post.id)} 
                   incrementLike={incrementLike}
                   userUuid={userUuid}
+                  customNickname={customNicknamesMap[post.authorUuid]} // 🔥 YENİ EKLENDİ (Özel Nick Post Kartına Paslanıyor)
                 />
               ))}
               

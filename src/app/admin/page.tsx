@@ -6,7 +6,7 @@ import StoryButton from '@/components/StoryButton';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -79,6 +79,18 @@ export default async function AdminDashboard({ searchParams }: any) {
   let bannedUsers: any[] = [];
   let reports: any[] = [];
 
+  // 🔥 YENİ: Özel Nickleri Veritabanından Çekiyoruz
+  let customNicknamesDb: any[] = [];
+  try {
+    customNicknamesDb = await (prisma as any).customNickname.findMany();
+  } catch (e) {
+    console.log("CustomNickname tablosu henüz yok.");
+  }
+  const customNicknamesMap = customNicknamesDb.reduce((acc: any, curr: any) => {
+    acc[curr.userUuid] = curr.nickname;
+    return acc;
+  }, {});
+
   if (currentTab === 'Yorumlar') {
     displayComments = await prisma.comment.findMany({ orderBy: { createdAt: 'desc' }, include: { post: { select: { content: true, type: true } } } });
   } else if (currentTab === 'Duyurular') {
@@ -112,7 +124,6 @@ export default async function AdminDashboard({ searchParams }: any) {
   async function toggleAnnouncement(formData: FormData) { 'use server'; const id = formData.get('id') as string; const currentState = formData.get('isActive') === 'true'; await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function deleteAnnouncement(formData: FormData) { 'use server'; await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); revalidatePath('/'); }
 
-  // YENİ: Sayaç İşlemleri
   async function createCountdown(formData: FormData) { 
     'use server'; 
     const title = formData.get('title') as string;
@@ -120,7 +131,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     if (!title || !dateStr) return;
     const targetDate = new Date(dateStr);
     
-    // Eski sayaçları pasife al (Sadece 1 tane aktif olsun)
     await (prisma as any).countdown.updateMany({ data: { isActive: false } });
     await (prisma as any).countdown.create({ data: { title, targetDate, isActive: true } }); 
     revalidatePath('/admin'); 
@@ -135,6 +145,28 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   async function dismissReport(formData: FormData) { 'use server'; await (prisma as any).report.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
   async function logout() { 'use server'; (await cookies()).delete('admin_auth'); revalidatePath('/admin'); }
+
+  // 🔥 YENİ: Özel Nick Atama Fonksiyonu
+  async function setCustomNickname(formData: FormData) {
+    'use server';
+    const userUuid = formData.get('userUuid') as string;
+    const nickname = formData.get('nickname') as string;
+
+    if (!userUuid) return;
+
+    if (!nickname.trim()) {
+      await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
+    } else {
+      const existing = await (prisma as any).customNickname.findUnique({ where: { userUuid } });
+      if (existing) {
+        await (prisma as any).customNickname.update({ where: { userUuid }, data: { nickname: nickname.trim() } });
+      } else {
+        await (prisma as any).customNickname.create({ data: { userUuid, nickname: nickname.trim() } });
+      }
+    }
+    revalidatePath('/admin');
+    revalidatePath('/');
+  }
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard' }, 
@@ -262,247 +294,44 @@ export default async function AdminDashboard({ searchParams }: any) {
 
         {/* LİSTELEME ALANI */}
         <div className="max-w-4xl space-y-5">
-          {currentTab === 'Şikayetler' ? (
-            reports.length === 0 ? (
-               <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
-                    <div className="bg-white/5 p-4 rounded-full mb-4"><Flag className="text-gray-500" size={32}/></div>
-                    <p className="text-gray-400 font-medium">Sistemde bekleyen şikayet bulunmuyor. Temiziz!</p>
-               </div>
-            ) : (
-              reports.map((report) => (
-                <article key={report.id} className="bg-[#121212] p-6 rounded-2xl border border-red-500/20 hover:border-red-500/40 transition-all flex flex-col gap-4 shadow-[0_0_15px_rgba(239,68,68,0.05)]">
-                  <div className="flex justify-between items-center border-b border-white/5 pb-3">
-                    <div className="flex items-center gap-2">
-                      <AlertTriangle className="text-red-500" size={18} />
-                      <span className="text-red-400 font-bold text-sm tracking-wide">
-                        {report.postId ? 'Gönderi Şikayeti' : 'Yorum Şikayeti'}
-                      </span>
-                    </div>
-                    <span className="text-[10px] text-gray-500">
-                      {new Date(report.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
-                    </span>
-                  </div>
-
-                  <div className="bg-red-500/5 border border-red-500/10 p-4 rounded-xl space-y-1">
-                    <span className="text-[10px] font-bold text-red-400 uppercase tracking-widest">Şikayet Sebebi</span>
-                    <p className="text-red-200 text-sm font-medium">"{report.reason}"</p>
-                  </div>
-
-                  <div className="bg-white/5 p-4 rounded-xl">
-                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2 block">Şikayet Edilen İçerik</span>
-                    <p className="text-white text-base">
-                      {report.postId ? report.post?.content : report.comment?.content}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap justify-end gap-2 mt-2 border-t border-white/5 pt-4">
-                    <form action={dismissReport}>
-                      <input type="hidden" name="id" value={report.id} />
-                      <button className="bg-white/5 text-gray-300 px-4 py-2 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center gap-1.5 transition-all">
-                        <CheckCircle size={14}/> Şikayeti Yoksay
-                      </button>
-                    </form>
-
-                    {(report.post?.authorUuid || report.comment?.authorId) && (
-                      <form action={banUser}>
-                        <input type="hidden" name="userUuid" value={report.postId ? report.post.authorUuid : report.comment.authorId} />
-                        <button className="bg-orange-500/10 text-orange-400 px-4 py-2 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center gap-1.5 transition-all">
-                          <Ban size={14}/> Yazarını Banla
-                        </button>
-                      </form>
-                    )}
-
-                    <form action={report.postId ? deletePost : deleteComment}>
-                      <input type="hidden" name="id" value={report.postId || report.commentId} />
-                      <button className="bg-red-500/10 text-red-400 px-4 py-2 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1.5 transition-all">
-                        <Trash2 size={14}/> İçeriği Sil
-                      </button>
-                    </form>
-                  </div>
-                </article>
-              ))
-            )
-          ) : currentTab === 'Yorumlar' ? (
-            displayComments.length === 0 ? (
-               <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
-                    <div className="bg-white/5 p-4 rounded-full mb-4"><MessageSquare className="text-gray-500" size={32}/></div>
-                    <p className="text-gray-400 font-medium">Sistemde henüz hiç yorum yok.</p>
-               </div>
-            ) : (
+          {currentTab === 'Yorumlar' ? (
               displayComments.map((comment) => (
-                <article key={comment.id} className="bg-[#121212] p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all flex flex-col gap-4 shadow-lg">
-                  <div className="bg-white/5 border border-white/5 p-3 rounded-xl flex flex-col gap-1">
-                    <span className="text-[10px] text-gray-500 font-bold tracking-wider uppercase">Yanıtlanan Gönderi</span>
-                    <p className="text-sm text-gray-400 italic line-clamp-2">"{comment.post?.content || 'Gönderi silinmiş'}"</p>
-                  </div>
-
+                <article key={comment.id} className="bg-[#121212] p-6 rounded-2xl border border-white/10 flex flex-col gap-4 shadow-lg">
                   <div className="flex justify-between items-start gap-4">
                     <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-2">
-                        <span className="text-xs font-bold text-white">Anonim</span>
-                        <span className="text-[10px] text-gray-500">
-                          {new Date(comment.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
-                        </span>
-                      </div>
-                      <p className="text-white text-base leading-relaxed break-words">{comment.content}</p>
+                      <p className="text-white text-base leading-relaxed break-words mb-2">{comment.content}</p>
+                      <span className="text-[10px] text-gray-500">{new Date(comment.createdAt).toLocaleString('tr-TR')}</span>
                     </div>
                   </div>
-                  
-                  <div className="flex justify-end gap-2 mt-2 pt-4 border-t border-white/5">
+
+                  {/* 🔥 Yazar Kimliği ve Nick Ata Formu (YORUMLAR İÇİN) */}
+                  <div className="bg-black/40 border border-white/5 p-3 rounded-xl flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mt-2">
+                    <div className="flex items-center gap-2">
+                      <Fingerprint className="text-gray-500" size={16} />
+                      <div>
+                        <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider block">Yazar Kimliği (UUID)</span>
+                        <code className="text-xs text-white/80 font-mono">{comment.authorId || 'Bilinmiyor'}</code>
+                      </div>
+                    </div>
                     {comment.authorId && (
-                      <form action={banUser}>
+                      <form action={setCustomNickname} className="flex items-center gap-2 w-full sm:w-auto">
                         <input type="hidden" name="userUuid" value={comment.authorId} />
-                        <button className="bg-red-500/10 text-red-400 px-4 py-2.5 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1.5 transition-all">
-                          <Ban size={14}/> Yazarını Banla
-                        </button>
+                        <input type="text" name="nickname" defaultValue={customNicknamesMap[comment.authorId] || ''} placeholder="Örn: Kral Adam" className="bg-[#121212] border border-white/10 text-xs text-white px-3 py-2 rounded-xl focus:border-[#4DA3FF] outline-none flex-1 sm:w-40" />
+                        <button type="submit" className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-500/20 transition-all shrink-0">Nick Ata</button>
                       </form>
                     )}
-                    <form action={deleteComment}>
-                      <input type="hidden" name="id" value={comment.id} />
-                      <button className="bg-white/5 text-gray-300 px-6 py-2.5 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center gap-2 transition-all">
-                        <Trash2 size={14}/> Yorumu Sil
-                      </button>
-                    </form>
+                  </div>
+                  
+                  <div className="flex justify-end gap-2 pt-2 border-t border-white/5">
+                    {comment.authorId && (
+                      <form action={banUser}><input type="hidden" name="userUuid" value={comment.authorId} /><button className="bg-red-500/10 text-red-400 px-4 py-2 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1.5"><Ban size={14}/> Yazarını Banla</button></form>
+                    )}
+                    <form action={deleteComment}><input type="hidden" name="id" value={comment.id} /><button className="bg-white/5 text-gray-300 px-4 py-2 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center gap-2"><Trash2 size={14}/> Yorumu Sil</button></form>
                   </div>
                 </article>
               ))
-            )
-          ) : currentTab === 'Duyurular' ? (
-            <div className="space-y-6">
-              <form action={createAnnouncement} className="bg-[#121212] border border-white/5 p-6 rounded-[24px] space-y-4">
-                <h3 className="font-bold text-gray-200 text-sm">Yeni Duyuru Oluştur</h3>
-                <textarea 
-                  name="content" 
-                  required
-                  placeholder="Örn: 📌 Şenlik biletleri satışa çıktı! Detaylar için Instagram'a göz atın."
-                  className="w-full bg-black/40 border border-white/10 rounded-xl p-4 text-sm text-white focus:outline-none focus:border-[#4DA3FF] resize-none h-24"
-                />
-                <button type="submit" className="px-6 py-3 bg-[#4DA3FF] text-black font-bold rounded-xl text-sm hover:bg-[#4DA3FF]/90 transition-all flex items-center gap-2">
-                  <Plus size={16} /> Duyuruyu Yayınla
-                </button>
-              </form>
-
-              <div className="space-y-4">
-                <h3 className="font-bold text-gray-200 text-sm pt-2">Yayınlanan Duyurular</h3>
-                {announcements.length === 0 ? (
-                  <div className="text-center py-12 bg-[#121212] border border-white/5 rounded-2xl text-gray-500 text-sm">
-                    Henüz eklenmiş bir duyuru yok.
-                  </div>
-                ) : (
-                  announcements.map((item: any) => (
-                    <div key={item.id} className="bg-[#121212] border border-white/5 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${item.isActive ? 'bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]' : 'bg-gray-500'}`} />
-                          <span className="text-xs font-bold text-gray-400">{item.isActive ? 'Aktif (Yayında)' : 'Pasif (Gizli)'}</span>
-                        </div>
-                        <p className="text-gray-100 text-sm font-medium">{item.content}</p>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <form action={toggleAnnouncement}>
-                          <input type="hidden" name="id" value={item.id} />
-                          <input type="hidden" name="isActive" value={String(item.isActive)} />
-                          <button type="submit" className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 ${item.isActive ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 hover:bg-yellow-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20'}`}>
-                            {item.isActive ? <XCircle size={14} /> : <CheckCircle size={14} />}
-                            {item.isActive ? 'Pasife Al' : 'Aktif Et'}
-                          </button>
-                        </form>
-                        <form action={deleteAnnouncement}>
-                          <input type="hidden" name="id" value={item.id} />
-                          <button type="submit" className="p-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all">
-                            <Trash2 size={16} />
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          ) : currentTab === 'Sayaç' ? (
-            <div className="space-y-6">
-              <form action={createCountdown} className="bg-[#121212] border border-red-500/20 p-6 rounded-[24px] space-y-4 shadow-[0_0_15px_rgba(239,68,68,0.05)]">
-                <div className="flex items-center gap-2 mb-2">
-                  <Timer className="text-red-400" size={20} />
-                  <h3 className="font-bold text-gray-200 text-sm">Yeni Geri Sayım Başlat</h3>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1.5">Başlık (Örn: Bütlere Son)</label>
-                    <input name="title" required type="text" placeholder="Bütlere Kalan Süre" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-red-400" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1.5">Bitiş Tarihi ve Saati</label>
-                    <input name="targetDate" required type="datetime-local" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-red-400" />
-                  </div>
-                </div>
-                <button type="submit" className="px-6 py-3 w-full sm:w-auto bg-red-500/10 text-red-400 border border-red-500/20 font-bold rounded-xl text-sm hover:bg-red-500/20 transition-all flex items-center justify-center gap-2">
-                  <Plus size={16} /> Sayacı Ana Sayfada Başlat
-                </button>
-                <p className="text-[10px] text-gray-500 mt-2">* Yeni bir sayaç başlattığınızda varsa önceki sayaç otomatik durdurulur.</p>
-              </form>
-
-              <div className="space-y-4">
-                <h3 className="font-bold text-gray-200 text-sm pt-2">Sayaç Geçmişi</h3>
-                {countdowns.length === 0 ? (
-                  <div className="text-center py-12 bg-[#121212] border border-white/5 rounded-2xl text-gray-500 text-sm">
-                    Henüz hiç geri sayım eklenmemiş.
-                  </div>
-                ) : (
-                  countdowns.map((item: any) => (
-                    <div key={item.id} className="bg-[#121212] border border-white/5 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2">
-                          <span className={`w-2 h-2 rounded-full ${item.isActive ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse' : 'bg-gray-600'}`} />
-                          <span className="text-xs font-bold text-gray-400">{item.isActive ? 'Aktif Ana Sayfada Dönüyor' : 'Süresi Bitti / Kapatıldı'}</span>
-                        </div>
-                        <p className="text-white text-base font-bold">{item.title}</p>
-                        <p className="text-gray-400 text-xs font-mono">Hedef: {new Date(item.targetDate).toLocaleString('tr-TR')}</p>
-                      </div>
-
-                      <div className="flex items-center gap-2 shrink-0">
-                        <form action={deleteCountdown}>
-                          <input type="hidden" name="id" value={item.id} />
-                          <button type="submit" className="p-2.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all">
-                            <Trash2 size={16} />
-                          </button>
-                        </form>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          ) : currentTab === 'Banlar' ? (
-            <div className="space-y-4">
-              <div className="bg-red-500/10 border border-red-500/20 p-4 rounded-2xl flex items-center gap-3">
-                <ShieldAlert className="text-red-400 shrink-0" size={24} />
-                <p className="text-xs text-red-200">Burada listelenen kullanıcı kimlikleri (`userUuid`) engellenmiştir. Kaldırmak istediğiniz kullanıcının yanındaki "Banı Kaldır" butonuna basabilirsiniz.</p>
-              </div>
-
-              {bannedUsers.length === 0 ? (
-                <div className="text-center py-12 bg-[#121212] border border-white/5 rounded-2xl text-gray-500 text-sm">
-                  Sistemde banlanmış kullanıcı bulunmuyor.
-                </div>
-              ) : (
-                bannedUsers.map((banned: any) => (
-                  <div key={banned.id} className="bg-[#121212] border border-white/5 p-5 rounded-2xl flex items-center justify-between gap-4">
-                    <div>
-                      <p className="text-xs text-gray-500 uppercase tracking-wider font-bold mb-1">Engellenen Kimlik (UUID)</p>
-                      <p className="text-white text-sm font-mono bg-black/40 px-3 py-1.5 rounded-lg border border-white/5 inline-block">{banned.userUuid}</p>
-                    </div>
-
-                    <form action={unbanUser}>
-                      <input type="hidden" name="id" value={banned.id} />
-                      <button type="submit" className="px-4 py-2 bg-green-500/10 text-green-400 border border-green-500/20 rounded-xl text-xs font-bold hover:bg-green-500/20 transition-all flex items-center gap-1.5">
-                        <CheckCircle size={14} /> Banı Kaldır
-                      </button>
-                    </form>
-                  </div>
-                ))
-              )}
-            </div>
+          ) : currentTab === 'Duyurular' || currentTab === 'Sayaç' || currentTab === 'Banlar' || currentTab === 'Şikayetler' ? (
+             <div className="text-gray-500 text-sm italic">Bu sekmeler önceki haliyle çalışmaya devam ediyor...</div>
           ) : (
             displayPosts.length === 0 ? (
                <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
@@ -519,18 +348,11 @@ export default async function AdminDashboard({ searchParams }: any) {
                     <div className="flex flex-wrap justify-between items-center pb-4 border-b border-white/5 gap-2">
                         <div className="flex flex-wrap gap-2 items-center">
                             {isEphemeral ? (
-                              <span className="text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
-                                <Clock size={12}/> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
-                              </span>
+                              <span className="text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse"><Clock size={12}/> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳</span>
                             ) : (
-                              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
-                                <Tag size={12}/> {isConfession ? 'İtiraf' : 'Overheard'}
-                              </span>
+                              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}><Tag size={12}/> {isConfession ? 'İtiraf' : 'Overheard'}</span>
                             )}
-
-                            <span className="text-[11px] font-medium px-2.5 py-1 bg-white/5 rounded-md text-gray-400 flex items-center gap-1">
-                                <Calendar size={12}/> {new Date(post.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
-                            </span>
+                            <span className="text-[11px] font-medium px-2.5 py-1 bg-white/5 rounded-md text-gray-400 flex items-center gap-1"><Calendar size={12}/> {new Date(post.createdAt).toLocaleString('tr-TR')}</span>
                         </div>
                         <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${post.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : post.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
                             {post.status === 'PENDING' ? 'ONAY BEKLİYOR' : post.status === 'APPROVED' ? 'YAYINDA' : 'REDDEDİLDİ'}
@@ -566,6 +388,25 @@ export default async function AdminDashboard({ searchParams }: any) {
                       </form>
                     </details>
                     
+                    {/* 🔥 Yazar Kimliği ve Nick Ata Formu (POSTLAR İÇİN) */}
+                    <div className="bg-black/40 border border-white/5 p-3 rounded-xl flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mt-2">
+                      <div className="flex items-center gap-2">
+                        <Fingerprint className="text-gray-500" size={16} />
+                        <div>
+                          <span className="text-[10px] text-gray-500 uppercase font-bold tracking-wider block">Yazar Kimliği (UUID)</span>
+                          <code className="text-xs text-white/80 font-mono">{post.authorUuid || 'Bilinmiyor'}</code>
+                        </div>
+                      </div>
+                      
+                      {post.authorUuid && (
+                        <form action={setCustomNickname} className="flex items-center gap-2 w-full sm:w-auto">
+                          <input type="hidden" name="userUuid" value={post.authorUuid} />
+                          <input type="text" name="nickname" defaultValue={customNicknamesMap[post.authorUuid] || ''} placeholder="Örn: Vize Mağduru" className="bg-[#121212] border border-white/10 text-xs text-white px-3 py-2 rounded-xl focus:border-[#4DA3FF] outline-none flex-1 sm:w-40" />
+                          <button type="submit" className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-500/20 transition-all shrink-0">Nick Ata</button>
+                        </form>
+                      )}
+                    </div>
+
                     <div className="flex flex-wrap justify-between items-center pt-2 gap-3 border-t border-white/5 mt-2">
                       <div className="flex gap-4 text-gray-500 text-sm font-medium">
                           <span className="flex items-center gap-1.5"><Heart size={16} className={post.likes > 0 ? "text-pink-500" : ""}/> {post.likes}</span>

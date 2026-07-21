@@ -13,11 +13,22 @@ const gradients = [
   "from-emerald-400 to-teal-600", "from-amber-400 to-orange-600", "from-cyan-400 to-blue-600"
 ];
 
-const getAnonymousData = (id: string) => {
+// 🔥 YENİ: customNickname parametresi eklendi
+const getAnonymousData = (id: string, customNickname?: string) => {
   if (!id) return { name: "Gizemli Yolcu", emoji: "👤", gradient: gradients[0] };
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   const positiveHash = Math.abs(hash);
+  
+  // Eğer admin atanmış özel nick varsa onu kullan
+  if (customNickname) {
+    return {
+      name: customNickname,
+      emoji: emojis[positiveHash % emojis.length],
+      gradient: gradients[Math.floor(positiveHash / emojis.length) % gradients.length]
+    };
+  }
+
   return {
     name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`,
     emoji: emojis[positiveHash % emojis.length],
@@ -29,12 +40,14 @@ export default function CommentSection({
   postId, 
   comments, 
   postAuthorUuid, 
-  userLikedCommentIds 
+  userLikedCommentIds,
+  customNicknamesMap = {} // 🔥 YENİ: Haritayı prop olarak aldık
 }: { 
   postId: string; 
   comments: any[]; 
   postAuthorUuid: string; 
-  userLikedCommentIds: string[] 
+  userLikedCommentIds: string[];
+  customNicknamesMap?: Record<string, string>; // 🔥 YENİ: Tip tanımı
 }) {
   const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
 
@@ -73,9 +86,12 @@ export default function CommentSection({
           </div>
         ) : (
           parentComments.map((comment: any) => {
-            const commentAuthor = getAnonymousData(comment.authorId || comment.id);
+            const authorUuid = comment.authorId || comment.id;
+            // 🔥 YENİ: Özel nicki fonksiyona yolluyoruz
+            const commentAuthor = getAnonymousData(authorUuid, customNicknamesMap[authorUuid]);
             const isPostAuthor = comment.authorId && comment.authorId === postAuthorUuid;
             const isLiked = userLikedCommentIds.includes(comment.id);
+            const hasCustomNick = !!customNicknamesMap[authorUuid]; // 🔥 TİK İŞARETİ İÇİN
             
             const replies = comments
               .filter((c: any) => c.parentId === comment.id)
@@ -89,14 +105,18 @@ export default function CommentSection({
                   isPostAuthor={isPostAuthor}
                   isInitiallyLiked={isLiked}
                   onReply={handleReplyClick}
+                  hasCustomNick={hasCustomNick} // 🔥 YENİ: Yorum kartına bu kişi özel mi bilgisini yolladık
                 />
 
                 {replies.length > 0 && (
                   <div className="space-y-3 pl-6 sm:pl-10 border-l-2 border-[#4DA3FF]/20 ml-3 sm:ml-5">
                     {replies.map((reply: any) => {
-                      const replyAuthor = getAnonymousData(reply.authorId || reply.id);
+                      const replyAuthorUuid = reply.authorId || reply.id;
+                      // 🔥 YENİ: Yanıtlayan kişinin özel nickini de yolluyoruz
+                      const replyAuthor = getAnonymousData(replyAuthorUuid, customNicknamesMap[replyAuthorUuid]);
                       const isReplyAuthorPostAuthor = reply.authorId && reply.authorId === postAuthorUuid;
                       const isReplyLiked = userLikedCommentIds.includes(reply.id);
+                      const isReplyHasCustomNick = !!customNicknamesMap[replyAuthorUuid];
 
                       return (
                         <CommentItem 
@@ -107,6 +127,7 @@ export default function CommentSection({
                           isInitiallyLiked={isReplyLiked}
                           isReply={true}
                           onReply={handleReplyClick}
+                          hasCustomNick={isReplyHasCustomNick} // 🔥 YENİ
                         />
                       );
                     })}
