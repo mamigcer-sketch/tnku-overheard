@@ -8,7 +8,7 @@ import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import ShareAccordion from '@/components/ShareAccordion';
-import RefreshButton from '@/components/RefreshButton'; // 🔥 YENİLE BUTONU EKLENDİ
+import RefreshButton from '@/components/RefreshButton';
 import { MessageSquareHeart } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -95,7 +95,8 @@ export default async function Home({ searchParams }: any) {
     }
   }
 
-  const filters = ['Tümü', 'Overheard', 'İtiraf', 'En Yeni', '🔥 Trend'];
+  // 🔥 "En Yeni" buradaki array'den kaldırıldı!
+  const filters = ['Tümü', 'Overheard', 'İtiraf', '🔥 Trend'];
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden">
@@ -112,7 +113,6 @@ export default async function Home({ searchParams }: any) {
         </Link>
         
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-          {/* 🔥 YENİLE BUTONU BURAYA GELDİ */}
           <RefreshButton />
           
           <NotificationBell notifications={notifications} />

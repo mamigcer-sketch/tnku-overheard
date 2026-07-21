@@ -53,6 +53,10 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   const [hasViewed, setHasViewed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
+  // 🔥 YENİ: Yazı uzunluğu ve Devamını Oku State'i
+  const [isExpanded, setIsExpanded] = useState(false);
+  const isLongText = post.content.length > 250; 
+
   const [localLiked, setLocalLiked] = useState(isLiked);
   const [localLikesCount, setLocalLikesCount] = useState(post.likes);
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
@@ -92,7 +96,8 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     };
   }, [post.id, hasViewed]);
 
-  const handleShare = async () => {
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
     triggerHaptic(); 
     const shareData = {
       title: 'TNKU Overheard',
@@ -217,16 +222,31 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
             </div>
             <span className="shrink-0 text-[11px] text-gray-500 font-medium">{getRelativeTime(post.createdAt)}</span>
           </div>
-          <p className="text-gray-100 text-[15px] sm:text-[16px] leading-relaxed mb-4 sm:mb-5 font-medium break-words tracking-wide">
-            {post.content}
-          </p>
+
+          {/* 🔥 YENİ: Devamını Oku (Line Clamp) Mantığı */}
+          <div className="mb-4 sm:mb-5 relative z-10 transition-all duration-300">
+            <p className={`text-gray-100 text-[15px] sm:text-[16px] leading-relaxed font-medium break-words tracking-wide ${!isExpanded && isLongText ? 'line-clamp-4' : ''}`}>
+              {post.content}
+            </p>
+            {!isExpanded && isLongText && (
+              <button
+                onClick={(e) => { 
+                  e.stopPropagation(); // Karta tıklanıp detay sayfasına gitmesini engeller
+                  triggerHaptic(30);
+                  setIsExpanded(true); 
+                }}
+                className="text-[#4DA3FF] font-bold text-[13px] sm:text-[14px] mt-1 hover:text-blue-400 transition-colors active:scale-95 inline-block"
+              >
+                Devamını Oku...
+              </button>
+            )}
+          </div>
         </div>
 
         <div 
           onClick={(e) => e.stopPropagation()} 
           className="interactive-zone flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400 relative z-10 cursor-default"
         >
-          {/* 🔥 gap-4 ile araları mobilde biraz daralttık ve hidden sm:flex sınıfını kaldırdık */}
           <div className="flex items-center gap-4 sm:gap-6">
             <form action={incrementLike} onSubmit={handleLikeClick}>
               <input type="hidden" name="id" value={post.id} />
@@ -250,7 +270,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
               <span className="text-[13px] font-bold">{post.comments?.length || 0}</span>
             </button>
 
-            {/* 🔥 YENİ: Mobilde de gözükecek şekilde "hidden sm:flex" silindi! */}
             <div className="flex items-center gap-1.5 opacity-70 cursor-default">
               <Eye size={18} /> 
               <span className="text-[13px] font-bold">{post.views}</span>
@@ -266,8 +285,12 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
               <span className="text-[11px] font-bold hidden sm:inline">{reported ? 'İletildi' : 'Şikayet Et'}</span>
             </button>
 
-            <button onClick={handleShare} className="text-gray-400 hover:text-white transition-all duration-300 bg-white/[0.03] p-2.5 rounded-full hover:bg-white/[0.08] hover:scale-110 active:scale-75 shadow-sm">
-              <Share2 size={16} />
+            {/* 🔥 YENİ: Paylaş butonu neon yeşil parlamalı WhatsApp vibes */}
+            <button 
+              onClick={handleShare} 
+              className="group/share flex items-center justify-center text-gray-400 transition-all duration-300 bg-white/[0.03] p-2.5 rounded-full border border-transparent hover:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:scale-110 active:scale-75 shadow-sm"
+            >
+              <Share2 size={16} className="transition-transform duration-300 group-hover/share:-rotate-12" />
             </button>
           </div>
         </div>

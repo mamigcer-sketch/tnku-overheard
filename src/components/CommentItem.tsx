@@ -20,6 +20,26 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
+// 🔥 YENİ: Metin içindeki "@Avare Kunduz" gibi etiketleri bulup şık bir komponente çeviren fonksiyon
+const formatCommentText = (text: string) => {
+  if (!text) return null;
+  
+  // İki kelimelik anonim isimleri (Örn: @Avare Kunduz) yakalayan Türkçe destekli regex
+  const mentionRegex = /(@[a-zA-ZçğıöşüÇĞİÖŞÜ]+\s[a-zA-ZçğıöşüÇĞİÖŞÜ]+)/g;
+  const parts = text.split(mentionRegex);
+  
+  return parts.map((part, i) => {
+    if (part.match(/^@[a-zA-ZçğıöşüÇĞİÖŞÜ]+\s[a-zA-ZçğıöşüÇĞİÖŞÜ]+$/)) {
+      return (
+        <span key={i} className="inline-block bg-[#4DA3FF]/15 text-[#4DA3FF] font-bold px-1.5 py-0.5 rounded-md border border-[#4DA3FF]/20 shadow-sm mr-0.5">
+          {part}
+        </span>
+      );
+    }
+    return <span key={i}>{part}</span>;
+  });
+};
+
 export default function CommentItem({ 
   comment, 
   commentAuthor, 
@@ -108,7 +128,10 @@ export default function CommentItem({
           <span className="text-[10px] text-gray-500 font-medium">{getRelativeTime(comment.createdAt)}</span>
         </div>
         
-        <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-4">{comment.content}</p>
+        {/* 🔥 YENİ: Düz metin yerine, etiketleri parlatacak formatlanmış metni basıyoruz */}
+        <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-4">
+          {formatCommentText(comment.content)}
+        </p>
         
         <div className="flex items-center gap-4 pt-3 border-t border-white/[0.02] text-gray-400">
           <button 
