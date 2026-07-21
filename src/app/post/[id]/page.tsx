@@ -74,12 +74,16 @@ export default async function PostPage({ params }: any) {
   }
 
   const isConfession = post.type === 'CONFESSION';
-  const isTrending = post.likes >= 10; // 🔥 Hydration hatasını önlemek için basitleştirildi
+  const isTrending = post.likes >= 10; 
+  const isEphemeral = !!post.expiresAt; // 🔥 Süreli post kontrolü
   const authorData = getAnonymousData((post as any).authorUuid || post.id);
 
-  const glowStyle = isConfession 
-    ? 'shadow-[0_8px_32px_0_rgba(168,85,247,0.15)] border-purple-500/20' 
-    : 'shadow-[0_8px_32px_0_rgba(77,163,255,0.15)] border-[#4DA3FF]/20';
+  // 🔥 Süreli post ise turuncu/amber ateşli glow, değilse normal confession/overheard glow
+  const glowStyle = isEphemeral
+    ? 'shadow-[0_8px_32px_0_rgba(245,158,11,0.2)] border-amber-500/40 bg-amber-500/[0.01]'
+    : isConfession 
+      ? 'shadow-[0_8px_32px_0_rgba(168,85,247,0.15)] border-purple-500/20' 
+      : 'shadow-[0_8px_32px_0_rgba(77,163,255,0.15)] border-[#4DA3FF]/20';
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-24">
@@ -102,17 +106,30 @@ export default async function PostPage({ params }: any) {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 pb-12 relative z-10">
-        <article className={`bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-6 rounded-[24px] mb-8 relative overflow-hidden transition-all duration-500 ${glowStyle}`}>
-          {isTrending && (
+        <article className={`backdrop-blur-2xl border p-6 rounded-[24px] mb-8 relative overflow-hidden transition-all duration-500 ${glowStyle} ${!isEphemeral ? 'bg-white/[0.02] border-white/[0.05]' : ''}`}>
+          
+          {isEphemeral && (
+            <div className="absolute -inset-[1px] opacity-30 blur-xl -z-10 bg-gradient-to-r from-amber-500/40 to-orange-500/40" />
+          )}
+
+          {isTrending && !isEphemeral && (
             <div className={`absolute -inset-[1px] opacity-100 blur-xl -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/20 to-pink-500/20' : 'from-[#4DA3FF]/20 to-blue-500/20'}`} />
           )}
 
           <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
             <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
-              <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
-                {isTrending && <Flame size={12} className="animate-pulse" />}
-                {isConfession ? 'İTİRAF' : 'OVERHEARD'}
-              </span>
+              
+              {/* 🔥 Dinamik Süreli Etiket */}
+              {isEphemeral ? (
+                <span className="px-2.5 py-1 rounded-md uppercase flex items-center gap-1 bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
+                  <Clock size={12} /> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
+                </span>
+              ) : (
+                <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
+                  {isTrending && <Flame size={12} className="animate-pulse" />}
+                  {isConfession ? 'İTİRAF' : 'OVERHEARD'}
+                </span>
+              )}
 
               <span className="flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border border-white/[0.05] shadow-sm">
                 <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>

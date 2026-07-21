@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -160,7 +160,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/'); 
   }
 
-  // YENİ: Şikayeti Yoksay/Sil
   async function dismissReport(formData: FormData) {
     'use server';
     await (prisma as any).report.delete({ where: { id: formData.get('id') as string } });
@@ -458,78 +457,91 @@ export default async function AdminDashboard({ searchParams }: any) {
                     <p className="text-gray-400 font-medium">Bu sekmede gösterilecek gönderi bulunmuyor.</p>
                </div>
             ) : (
-              displayPosts.map((post) => (
-                <article key={post.id} className="bg-[#121212] p-6 rounded-2xl border border-white/10 hover:border-white/20 transition-all flex flex-col gap-4 shadow-lg">
-                  <div className="flex flex-wrap justify-between items-center pb-4 border-b border-white/5 gap-2">
-                      <div className="flex gap-2">
-                          <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider ${post.type === 'CONFESSION' ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
-                              <Tag size={12}/> {post.type === 'CONFESSION' ? 'İtiraf' : 'Overheard'}
-                          </span>
-                          <span className="text-[11px] font-medium px-2.5 py-1 bg-white/5 rounded-md text-gray-400 flex items-center gap-1">
-                              <Calendar size={12}/> {new Date(post.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
-                          </span>
-                      </div>
-                      <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${post.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : post.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
-                          {post.status === 'PENDING' ? 'ONAY BEKLİYOR' : post.status === 'APPROVED' ? 'YAYINDA' : 'REDDEDİLDİ'}
-                      </span>
-                  </div>
+              displayPosts.map((post) => {
+                const isEphemeral = !!post.expiresAt;
+                const isConfession = post.type === 'CONFESSION';
+
+                return (
+                  <article key={post.id} className={`bg-[#121212] p-6 rounded-2xl border transition-all flex flex-col gap-4 shadow-lg ${isEphemeral ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)]' : 'border-white/10 hover:border-white/20'}`}>
+                    <div className="flex flex-wrap justify-between items-center pb-4 border-b border-white/5 gap-2">
+                        <div className="flex flex-wrap gap-2 items-center">
+                            {/* 🔥 Süreli post ise Amber rozet, değilse normal */}
+                            {isEphemeral ? (
+                              <span className="text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
+                                <Clock size={12}/> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
+                              </span>
+                            ) : (
+                              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
+                                <Tag size={12}/> {isConfession ? 'İtiraf' : 'Overheard'}
+                              </span>
+                            )}
+
+                            <span className="text-[11px] font-medium px-2.5 py-1 bg-white/5 rounded-md text-gray-400 flex items-center gap-1">
+                                <Calendar size={12}/> {new Date(post.createdAt).toLocaleString('tr-TR', { timeZone: 'Europe/Istanbul', day: 'numeric', month: 'long', hour: '2-digit', minute:'2-digit' })}
+                            </span>
+                        </div>
+                        <span className={`text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider ${post.status === 'PENDING' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20' : post.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border border-green-500/20' : 'bg-red-500/10 text-red-400 border border-red-500/20'}`}>
+                            {post.status === 'PENDING' ? 'ONAY BEKLİYOR' : post.status === 'APPROVED' ? 'YAYINDA' : 'REDDEDİLDİ'}
+                        </span>
+                    </div>
  
-                  <p className="text-white text-[16px] leading-relaxed py-2">{post.content}</p>
+                    <p className="text-white text-[16px] leading-relaxed py-2">{post.content}</p>
 
-                  {/* DÜZENLEME AKORDEONU */}
-                  <details className="group/edit">
-                    <summary className="list-none cursor-pointer bg-blue-500/10 text-blue-400 py-2 px-4 rounded-xl text-xs font-bold border border-blue-500/20 hover:bg-blue-500/20 inline-flex items-center gap-1.5 transition-all">
-                      <Pencil size={14}/> Yazıyı ve Kategoriyi Düzenle
-                    </summary>
-                    <form action={updatePost} className="mt-3 p-4 bg-black/50 rounded-2xl border border-white/10 space-y-3">
-                      <input type="hidden" name="id" value={post.id} />
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                          <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1">Kategori</label>
-                          <select name="type" defaultValue={post.type} className="w-full bg-[#121212] border border-white/15 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#4DA3FF]">
-                            <option value="OVERHEARD">Overheard</option>
-                            <option value="CONFESSION">İtiraf</option>
-                          </select>
+                    {/* DÜZENLEME AKORDEONU */}
+                    <details className="group/edit">
+                      <summary className="list-none cursor-pointer bg-blue-500/10 text-blue-400 py-2 px-4 rounded-xl text-xs font-bold border border-blue-500/20 hover:bg-blue-500/20 inline-flex items-center gap-1.5 transition-all">
+                        <Pencil size={14}/> Yazıyı ve Kategoriyi Düzenle
+                      </summary>
+                      <form action={updatePost} className="mt-3 p-4 bg-black/50 rounded-2xl border border-white/10 space-y-3">
+                        <input type="hidden" name="id" value={post.id} />
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          <div>
+                            <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1">Kategori</label>
+                            <select name="type" defaultValue={post.type} className="w-full bg-[#121212] border border-white/15 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#4DA3FF]">
+                              <option value="OVERHEARD">Overheard</option>
+                              <option value="CONFESSION">İtiraf</option>
+                            </select>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1">İçerik</label>
+                            <textarea name="content" defaultValue={post.content} rows={2} className="w-full bg-[#121212] border border-white/15 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#4DA3FF] resize-none" required />
+                          </div>
                         </div>
-                        <div className="sm:col-span-2">
-                          <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1">İçerik</label>
-                          <textarea name="content" defaultValue={post.content} rows={2} className="w-full bg-[#121212] border border-white/15 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#4DA3FF] resize-none" required />
+                        <div className="flex justify-end">
+                          <button type="submit" className="bg-[#4DA3FF] text-black px-5 py-2 rounded-xl text-xs font-bold hover:bg-blue-400 transition-all shadow">
+                            Kaydet
+                          </button>
                         </div>
-                      </div>
-                      <div className="flex justify-end">
-                        <button type="submit" className="bg-[#4DA3FF] text-black px-5 py-2 rounded-xl text-xs font-bold hover:bg-blue-400 transition-all shadow">
-                          Kaydet
-                        </button>
-                      </div>
-                    </form>
-                  </details>
-                  
-                  <div className="flex flex-wrap justify-between items-center pt-2 gap-3 border-t border-white/5 mt-2">
-                    <div className="flex gap-4 text-gray-500 text-sm font-medium">
-                        <span className="flex items-center gap-1.5"><Heart size={16} className={post.likes > 0 ? "text-pink-500" : ""}/> {post.likes}</span>
-                        <span className="flex items-center gap-1.5"><Eye size={16} className={post.views > 0 ? "text-blue-500" : ""}/> {post.views}</span>
-                    </div>
-                    
-                    <div className="flex gap-2 w-full flex-wrap justify-end">
-                      {post.status === 'PENDING' ? (
-                        <>
-                          <form action={approvePost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-green-500/10 text-green-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-green-500/20 hover:bg-green-500/20 flex items-center justify-center gap-1.5 transition-all"><Check size={14}/> Onayla</button></form>
-                          <form action={rejectPost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-orange-500/10 text-orange-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center justify-center gap-1.5 transition-all"><X size={14}/> Reddet</button></form>
-                        </>
-                      ) : null}
-                      
-                      <form action={banUser} className="min-w-[110px]">
-                        <input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmeyen-yazar'} />
-                        <button className="w-full bg-red-500/10 text-red-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-1.5 transition-all">
-                          <Ban size={14}/> Yazarını Banla
-                        </button>
                       </form>
+                    </details>
+                    
+                    <div className="flex flex-wrap justify-between items-center pt-2 gap-3 border-t border-white/5 mt-2">
+                      <div className="flex gap-4 text-gray-500 text-sm font-medium">
+                          <span className="flex items-center gap-1.5"><Heart size={16} className={post.likes > 0 ? "text-pink-500" : ""}/> {post.likes}</span>
+                          <span className="flex items-center gap-1.5"><Eye size={16} className={post.views > 0 ? "text-blue-500" : ""}/> {post.views}</span>
+                      </div>
+                      
+                      <div className="flex gap-2 w-full flex-wrap justify-end">
+                        {post.status === 'PENDING' ? (
+                          <>
+                            <form action={approvePost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-green-500/10 text-green-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-green-500/20 hover:bg-green-500/20 flex items-center justify-center gap-1.5 transition-all"><Check size={14}/> Onayla</button></form>
+                            <form action={rejectPost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-orange-500/10 text-orange-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center justify-center gap-1.5 transition-all"><X size={14}/> Reddet</button></form>
+                          </>
+                        ) : null}
+                        
+                        <form action={banUser} className="min-w-[110px]">
+                          <input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmeyen-yazar'} />
+                          <button className="w-full bg-red-500/10 text-red-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-1.5 transition-all">
+                            <Ban size={14}/> Yazarını Banla
+                          </button>
+                        </form>
 
-                      <form action={deletePost} className="min-w-[90px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-white/5 text-gray-300 py-2.5 px-4 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center justify-center gap-1.5 transition-all"><Trash2 size={14}/> Sil</button></form>
+                        <form action={deletePost} className="min-w-[90px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-white/5 text-gray-300 py-2.5 px-4 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center justify-center gap-1.5 transition-all"><Trash2 size={14}/> Sil</button></form>
+                      </div>
                     </div>
-                  </div>
-                </article>
-              ))
+                  </article>
+                );
+              })
             )
           )}
         </div>

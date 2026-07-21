@@ -68,8 +68,8 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   const [showBigHeart, setShowBigHeart] = useState(false);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
 
-  // 🔥 24 Saat Sonra Yok Olacak Post Kontrolü
   const isEphemeral = !!post.expiresAt;
+  const isConfession = post.type === 'CONFESSION';
 
   const triggerHaptic = (duration = 50) => {
     if (typeof window !== "undefined" && window.navigator && window.navigator.vibrate) {
@@ -176,10 +176,8 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
     }
   };
 
-  const isConfession = post.type === 'CONFESSION';
   const isTrending = post.likes >= 10; 
 
-  // 🔥 Süreli postlar için turuncu/amber ateşli hover ve çerçeve efekti
   const hoverGlow = isEphemeral
     ? 'hover:shadow-[0_0_40px_rgba(245,158,11,0.2)] hover:border-amber-500/40 border-amber-500/20 bg-amber-500/[0.01]'
     : isConfession 
@@ -215,10 +213,10 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
           <div className="flex justify-between items-start gap-3 mb-4">
             <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
               
-              {/* 🔥 Süreli post ise turuncu etiket, değilse normal */}
+              {/* 🔥 Dinamik Etiket: İtirafsa 24 Saatlik İtiraf, Değilse 24 Saatlik Fısıltı */}
               {isEphemeral ? (
                 <span className="px-2.5 py-1 rounded-md uppercase flex items-center gap-1 bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
-                  <Clock size={12} /> 24 Saatlik Fısıltı ⏳
+                  <Clock size={12} /> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
                 </span>
               ) : (
                 <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>

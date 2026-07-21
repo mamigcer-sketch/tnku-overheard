@@ -31,7 +31,8 @@ export default function ModernForm() {
       formData.append('people', people);
       formData.append('gender', gender);
       formData.append('time', time);
-      formData.append('isEphemeral', isEphemeral ? 'true' : 'false');
+      // Overheard ise 24 saatlik seçeneği kesinlikle false gönderiyoruz
+      formData.append('isEphemeral', (type === 'CONFESSION' && isEphemeral) ? 'true' : 'false');
 
       const res = await createPost(formData);
 
@@ -60,16 +61,16 @@ export default function ModernForm() {
 
   return (
     <div className={`relative bg-white/[0.02] backdrop-blur-2xl border transition-all duration-500 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-3 sm:p-6 rounded-[20px] sm:rounded-[24px] mb-2 overflow-hidden group/form ${
-      isEphemeral ? 'border-amber-500/40 shadow-[0_8px_32px_0_rgba(245,158,11,0.15)]' : 'border-white/[0.05]'
+      (type === 'CONFESSION' && isEphemeral) ? 'border-amber-500/40 shadow-[0_8px_32px_0_rgba(245,158,11,0.15)]' : 'border-white/[0.05]'
     }`}>
       
-      <div className={`absolute -inset-[1px] opacity-0 group-hover/form:opacity-100 transition-opacity duration-1000 blur-2xl -z-10 bg-gradient-to-b ${isEphemeral ? 'from-amber-500/20' : 'from-white/[0.02]'} to-transparent pointer-events-none`} />
+      <div className={`absolute -inset-[1px] opacity-0 group-hover/form:opacity-100 transition-opacity duration-1000 blur-2xl -z-10 bg-gradient-to-b ${type === 'CONFESSION' && isEphemeral ? 'from-amber-500/20' : 'from-white/[0.02]'} to-transparent pointer-events-none`} />
 
       {/* Üst Sekmeler */}
       <div className="flex gap-1.5 sm:gap-3 mb-4 sm:mb-6 p-1 bg-white/[0.02] backdrop-blur-md rounded-[14px] sm:rounded-[16px] border border-white/[0.03] shadow-inner">
         <button 
           type="button"
-          onClick={() => setType('OVERHEARD')} 
+          onClick={() => { setType('OVERHEARD'); setIsEphemeral(false); }} 
           className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 rounded-xl text-[12px] sm:text-base transition-all duration-300 ${
             type === 'OVERHEARD' 
               ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_20px_rgba(77,163,255,0.3)] scale-100' 
@@ -182,34 +183,36 @@ export default function ModernForm() {
             </div>
         </div>
 
-        {/* 24 Saat Sonra Yok Olma Toggle Kutusu */}
-        <div 
-          onClick={() => setIsEphemeral(!isEphemeral)}
-          className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border backdrop-blur-md cursor-pointer transition-all duration-300 ${
-            isEphemeral 
-              ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)]' 
-              : 'bg-white/[0.02] border-white/[0.05] text-gray-400 hover:border-white/[0.1] hover:text-gray-200'
-          }`}
-        >
-          <div className="flex items-center gap-2.5">
-            <Clock size={18} className={isEphemeral ? 'text-amber-400 animate-spin-slow' : 'text-gray-500'} />
-            <div>
-              <div className="text-[12px] sm:text-[13px] font-bold">24 Saat Sonra Kendini İmha Etsin ⏳</div>
-              <div className="text-[10px] text-gray-500 font-medium">Bu seçenek açılırsa {labelTerm.toLowerCase()} tam 24 saat sonra sistemden silinir.</div>
+        {/* 🔥 SADECE İTİRAF SEKMESİNDE GÖZÜKEN 24 Saat Sonra Yok Olma Toggle Kutusu */}
+        {type === 'CONFESSION' && (
+          <div 
+            onClick={() => setIsEphemeral(!isEphemeral)}
+            className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border backdrop-blur-md cursor-pointer transition-all duration-300 animate-in fade-in duration-300 ${
+              isEphemeral 
+                ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)]' 
+                : 'bg-white/[0.02] border-white/[0.05] text-gray-400 hover:border-white/[0.1] hover:text-gray-200'
+            }`}
+          >
+            <div className="flex items-center gap-2.5">
+              <Clock size={18} className={isEphemeral ? 'text-amber-400 animate-spin-slow' : 'text-gray-500'} />
+              <div>
+                <div className="text-[12px] sm:text-[13px] font-bold">24 Saat Sonra Kendini İmha Etsin ⏳</div>
+                <div className="text-[10px] text-gray-500 font-medium">Bu seçenek açılırsa itiraf tam 24 saat sonra sistemden silinir.</div>
+              </div>
+            </div>
+            <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
+              isEphemeral ? 'bg-amber-500 border-amber-400 text-black font-black' : 'border-white/20 bg-transparent'
+            }`}>
+              {isEphemeral && '✓'}
             </div>
           </div>
-          <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
-            isEphemeral ? 'bg-amber-500 border-amber-400 text-black font-black' : 'border-white/20 bg-transparent'
-          }`}>
-            {isEphemeral && '✓'}
-          </div>
-        </div>
+        )}
 
         <button 
           type="submit" 
           disabled={loading} 
           className={`w-full py-2.5 sm:py-4 rounded-xl text-[13px] sm:text-base font-bold text-white flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_20px_rgba(0,0,0,0.2)] active:scale-95 ${
-            isEphemeral
+            (type === 'CONFESSION' && isEphemeral)
               ? 'bg-amber-600 hover:bg-amber-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] text-black'
               : type === 'CONFESSION' 
                 ? 'bg-purple-600 hover:bg-purple-500 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]' 
@@ -220,9 +223,9 @@ export default function ModernForm() {
             <span className="flex items-center gap-2">
               <Loader2 size={16} className="animate-spin sm:w-[20px] sm:h-[20px]" /> Kapsüle Yükleniyor...
             </span>
-          ) : isEphemeral ? (
+          ) : (type === 'CONFESSION' && isEphemeral) ? (
             <span className="flex items-center gap-2">
-              <Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> Süreli {labelTerm}yı Fırlat ⏳
+              <Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> Süreli İtirafı Fırlat ⏳
             </span>
           ) : type === 'CONFESSION' ? (
             <span className="flex items-center gap-2">
