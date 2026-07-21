@@ -32,35 +32,35 @@ export default function StoryButton({ postContent, postType, postId }: { postCon
     ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
     ctx.lineWidth = 4;
     ctx.beginPath();
-    ctx.roundRect(90, 460, 900, 1000, 40);
+    ctx.roundRect(90, 420, 900, 1040, 40);
     ctx.fill();
     ctx.stroke();
 
     // 3. Başlık / Marka
     ctx.fillStyle = '#4DA3FF';
     ctx.font = 'bold 36px sans-serif';
-    ctx.fillText('TNKU OVERHEARD', 140, 560);
+    ctx.fillText('TNKU OVERHEARD', 140, 520);
 
     ctx.fillStyle = '#888888';
     ctx.font = '28px sans-serif';
-    ctx.fillText('@Kampüs Sakini', 140, 610);
+    ctx.fillText('@Kampüs Sakini', 140, 570);
 
     // Kategori Rozeti
     const isConfession = postType === 'CONFESSION';
     ctx.fillStyle = isConfession ? 'rgba(168, 85, 247, 0.2)' : 'rgba(77, 163, 255, 0.2)';
     ctx.beginPath();
-    ctx.roundRect(740, 530, 210, 50, 16);
+    ctx.roundRect(740, 490, 210, 50, 16);
     ctx.fill();
     ctx.fillStyle = isConfession ? '#c084fc' : '#4DA3FF';
     ctx.font = 'bold 24px sans-serif';
-    ctx.fillText(isConfession ? 'İTİRAF' : 'OVERHEARD', 775, 565);
+    ctx.fillText(isConfession ? 'İTİRAF' : 'OVERHEARD', 775, 525);
 
     // 4. Post Metni (Otomatik Satır Sarma / Word Wrap)
     ctx.fillStyle = '#FFFFFF';
     ctx.font = '44px sans-serif';
     const words = postContent.split(' ');
     let line = '';
-    let y = 740;
+    let y = 700;
     const maxWidth = 780;
     const lineHeight = 65;
 
@@ -77,11 +77,24 @@ export default function StoryButton({ postContent, postType, postId }: { postCon
     }
     ctx.fillText(line, 140, y);
 
-    // 5. Alt Bilgilendirme / Footer
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+    // 5. 🔥 Siteyi Öne Çıkaran Alt Yönlendirme Alanı (Footer)
+    // Şık bir buton kutusu efekti
+    ctx.fillStyle = 'rgba(77, 163, 255, 0.12)';
+    ctx.strokeStyle = 'rgba(77, 163, 255, 0.3)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.roundRect(140, 1530, 800, 140, 24);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.fillStyle = '#4DA3FF';
     ctx.font = 'bold 28px sans-serif';
     ctx.textAlign = 'center';
-    ctx.fillText('instagram.com/tnkuoverheard', 540, 1780);
+    ctx.fillText('DAHA FAZLASI VE İTİRAFLAR İÇİN', 540, 1585);
+
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = 'bold 36px sans-serif';
+    ctx.fillText('www.tnkuoverheard.com.tr', 540, 1635);
 
     // Görseli İndir
     const link = document.createElement('a');
