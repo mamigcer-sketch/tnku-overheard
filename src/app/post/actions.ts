@@ -206,3 +206,34 @@ export async function markNotificationsAsRead() {
     console.error("Bildirimler okundu işaretlenemedi:", err);
   }
 }
+
+export async function toggleCommentReaction(commentId: string, emoji: string, postId: string) {
+  'use server';
+  const { cookies } = await import('next/headers');
+  const cookieStore = await cookies();
+  
+  let userUuid = cookieStore.get('tnku_author_id')?.value;
+  if (!userUuid) {
+    userUuid = cookieStore.get('user_uuid')?.value;
+  }
+  if (!userUuid) return;
+
+  const { PrismaClient } = await import('@prisma/client');
+  const prisma = new PrismaClient();
+
+  // Önce bu kişi bu yoruma bu emojiyi atmış mı ona bakıyoruz
+  const existing = await prisma.commentReaction.findUnique({
+    where: {
+      commentId_userUuid_emoji: { commentId, userUuid, emoji }
+    }
+  });
+
+  if (existing) {
+    await prisma.commentReaction.delete({ where: { id: existing.id } }); // Varsa geri al
+  } else {
+    await prisma.commentReaction.create({ data: { commentId, userUuid, emoji } }); // Yoksa ekle
+  }
+
+  const { revalidatePath } = await import('next/cache');
+  revalidatePath(`/post/${postId}`); // Sayfayı yenile ki emoji sayısı güncellensin
+}

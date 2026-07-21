@@ -3,6 +3,8 @@
 import { useState, useEffect } from "react";
 import { Heart, Reply, Flag, ShieldAlert, BadgeCheck } from "lucide-react";
 import { toggleCommentLike, submitReport } from "@/app/post/actions";
+import { toggleCommentReaction } from "@/app/post/actions"; // 🔥 YENİ EKLENDİ
+import { playPopSound, playClickSound } from "@/utils/sounds"; // 🔥 SESLER EKLENDİ
 
 const getRelativeTime = (dateString: string | Date) => {
   if (!dateString) return "";
@@ -22,10 +24,8 @@ const getRelativeTime = (dateString: string | Date) => {
 
 const formatCommentText = (text: string) => {
   if (!text) return null;
-  
   const mentionRegex = /(@[a-zA-ZçğıöşüÇĞİÖŞÜ]+\s[a-zA-ZçğıöşüÇĞİÖŞÜ]+)/g;
   const parts = text.split(mentionRegex);
-  
   return parts.map((part, i) => {
     if (part.match(/^@[a-zA-ZçğıöşüÇĞİÖŞÜ]+\s[a-zA-ZçğıöşüÇĞİÖŞÜ]+$/)) {
       return (
@@ -38,15 +38,10 @@ const formatCommentText = (text: string) => {
   });
 };
 
+const AVAILABLE_EMOJIS = ["🔥", "💀", "😂", "🤡"];
+
 export default function CommentItem({ 
-  comment, 
-  commentAuthor, 
-  isPostAuthor, 
-  isInitiallyLiked = false, 
-  onReply, 
-  isReply = false,
-  hasCustomNick = false,
-  userBadge // 🔥 YENİ: Rozeti prop olarak karşıladık
+  comment, commentAuthor, isPostAuthor, isInitiallyLiked = false, onReply, isReply = false, hasCustomNick = false, userBadge 
 }: any) {
   const [localLiked, setLocalLiked] = useState(isInitiallyLiked);
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
@@ -57,17 +52,25 @@ export default function CommentItem({
   const [reportReason, setReportReason] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
 
+  // 🔥 Reaksiyonlar için anlık (optimistic) state
+  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({});
+
   useEffect(() => { setLocalLiked(isInitiallyLiked); }, [isInitiallyLiked]);
   useEffect(() => { setLocalLikesCount(comment.likes || 0); }, [comment.likes]);
 
-  const triggerHaptic = () => {
-    if (typeof window !== "undefined" && window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(50);
+  // Sayfa yüklendiğinde veritabanından gelen emojileri say ve state'e at
+  useEffect(() => {
+    if (comment.reactions) {
+      const counts: Record<string, number> = {};
+      comment.reactions.forEach((r: any) => {
+        counts[r.emoji] = (counts[r.emoji] || 0) + 1;
+      });
+      setReactionCounts(counts);
     }
-  };
+  }, [comment.reactions]);
 
   const handleLike = async () => {
-    triggerHaptic();
+    playPopSound(); // 🔥 Ses Motoru Kullanıldı!
     const nextLikedState = !localLiked;
     setLocalLiked(nextLikedState);
     setLocalLikesCount((prev: number) => nextLikedState ? prev + 1 : Math.max(0, prev - 1));
@@ -80,15 +83,26 @@ export default function CommentItem({
     try {
       await toggleCommentLike(comment.id, comment.postId);
     } catch (err) {
-      console.error("Beğeni güncellenemedi:", err);
       setLocalLiked(!nextLikedState);
       setLocalLikesCount((prev: number) => !nextLikedState ? prev + 1 : Math.max(0, prev - 1));
     }
   };
 
+  const handleEmojiClick = async (emoji: string) => {
+    playPopSound(); // 🔥 Emojiye basınca da tatlı bir POP sesi!
+    // Anlık olarak UI'da sayıyı arttır (hızlı hissettirsin diye)
+    setReactionCounts(prev => ({...prev, [emoji]: (prev[emoji] || 0) + 1}));
+    try {
+      await toggleCommentReaction(comment.id, emoji, comment.postId);
+    } catch (e) {
+      // Hata olursa geri al
+      setReactionCounts(prev => ({...prev, [emoji]: Math.max(0, (prev[emoji] || 1) - 1)}));
+    }
+  };
+
   const handleReportClick = () => {
     if (reported) return;
-    triggerHaptic();
+    playClickSound(); // 🔥 Tık Sesi!
     setShowReportModal(true);
   };
 
@@ -100,9 +114,7 @@ export default function CommentItem({
       setReported(true);
       setShowReportModal(false);
       setReportReason("");
-    } catch (err) {
-      console.error(err);
-    } finally {
+    } catch (err) {} finally {
       setIsSubmittingReport(false);
     }
   };
@@ -114,22 +126,18 @@ export default function CommentItem({
       }`}>
         <div className="flex justify-between items-center mb-3">
           <div className="flex flex-wrap items-center gap-2">
-            {/* 🔥 ROZET BURAYA EKLENDİ */}
             {userBadge && (
               <span className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 text-yellow-400 border border-yellow-500/30 px-1.5 py-0.5 rounded-md shadow-[0_0_10px_rgba(245,158,11,0.15)] flex items-center text-[9px] font-black uppercase tracking-wider">
                 {userBadge}
               </span>
             )}
-            
             <div className={`w-6 h-6 flex items-center justify-center rounded-md bg-gradient-to-br ${commentAuthor.gradient} text-[12px] shadow-inner`}>
               {commentAuthor.emoji}
             </div>
-            
             <span className={`font-bold text-[12px] tracking-wide flex items-center gap-1 ${hasCustomNick ? 'text-yellow-50 drop-shadow-sm' : 'text-gray-200'}`}>
               @{commentAuthor.name}
               {hasCustomNick && <BadgeCheck size={14} className="text-yellow-400" />}
             </span>
-            
             {isPostAuthor && (
               <span className="bg-[#4DA3FF]/10 text-[#4DA3FF] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md border border-[#4DA3FF]/20 shadow-sm">
                 Yazar
@@ -139,9 +147,26 @@ export default function CommentItem({
           <span className="text-[10px] text-gray-500 font-medium shrink-0 ml-2">{getRelativeTime(comment.createdAt)}</span>
         </div>
         
-        <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-4 mt-1">
+        <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-3 mt-1">
           {formatCommentText(comment.content)}
         </p>
+        
+        {/* 🔥 YENİ: Reaksiyon (Emoji) Kutucukları */}
+        <div className="flex flex-wrap gap-2 mb-3">
+          {AVAILABLE_EMOJIS.map(emoji => {
+            const count = reactionCounts[emoji] || 0;
+            return (
+              <button 
+                key={emoji} 
+                onClick={() => handleEmojiClick(emoji)}
+                className="flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] px-2.5 py-1 rounded-xl transition-all active:scale-90"
+              >
+                <span className="text-[14px]">{emoji}</span>
+                {count > 0 && <span className="text-[11px] font-bold text-gray-400">{count}</span>}
+              </button>
+            );
+          })}
+        </div>
         
         <div className="flex items-center gap-4 pt-3 border-t border-white/[0.02] text-gray-400">
           <button 
@@ -157,7 +182,7 @@ export default function CommentItem({
 
           {onReply && (
             <button 
-              onClick={() => { triggerHaptic(); onReply(comment.id, commentAuthor.name); }}
+              onClick={() => { playClickSound(); onReply(comment.id, commentAuthor.name); }}
               className="flex items-center gap-1.5 transition-all duration-300 hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10 rounded-lg px-2 py-1 -ml-2 active:scale-90"
             >
               <Reply size={14} />
@@ -176,49 +201,20 @@ export default function CommentItem({
       </div>
 
       {showReportModal && (
-        <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={(e) => { e.stopPropagation(); setShowReportModal(false); }}
-        >
-          <div 
-            className="bg-[#121212] border border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all"
-            onClick={(e) => e.stopPropagation()}
-          >
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); setShowReportModal(false); }}>
+          <div className="bg-[#121212] border border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
-              <div className="bg-red-500/10 p-3 rounded-2xl border border-red-500/20">
-                <ShieldAlert className="text-red-500 w-6 h-6" />
-              </div>
+              <div className="bg-red-500/10 p-3 rounded-2xl border border-red-500/20"><ShieldAlert className="text-red-500 w-6 h-6" /></div>
               <div>
                 <h3 className="text-white font-bold text-lg leading-tight">Yorumu Şikayet Et</h3>
                 <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider">Gizli & Güvenli</p>
               </div>
             </div>
-            
-            <p className="text-gray-300 text-sm mb-4 leading-relaxed">
-              Bu yorumu neden şikayet ediyorsunuz? Lütfen kısaca belirtin. (Spam, Hakaret, vb.)
-            </p>
-            
-            <textarea
-              value={reportReason}
-              onChange={(e) => setReportReason(e.target.value)}
-              placeholder="Şikayet sebebiniz..."
-              className="w-full bg-[#0B0B0B] border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-red-500/50 resize-none h-28 mb-5"
-            />
-            
+            <p className="text-gray-300 text-sm mb-4 leading-relaxed">Bu yorumu neden şikayet ediyorsunuz? Lütfen kısaca belirtin. (Spam, Hakaret, vb.)</p>
+            <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Şikayet sebebiniz..." className="w-full bg-[#0B0B0B] border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-red-500/50 resize-none h-28 mb-5" />
             <div className="flex gap-3">
-              <button 
-                onClick={() => setShowReportModal(false)}
-                className="flex-1 py-3 rounded-2xl font-bold text-sm bg-white/5 text-gray-300 hover:bg-white/10 transition-colors"
-              >
-                İptal
-              </button>
-              <button 
-                onClick={submitReportAction}
-                disabled={!reportReason.trim() || isSubmittingReport}
-                className="flex-1 py-3 rounded-2xl font-bold text-sm bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isSubmittingReport ? 'İletiliyor...' : 'Gönder'}
-              </button>
+              <button onClick={() => setShowReportModal(false)} className="flex-1 py-3 rounded-2xl font-bold text-sm bg-white/5 text-gray-300 hover:bg-white/10 transition-colors">İptal</button>
+              <button onClick={submitReportAction} disabled={!reportReason.trim() || isSubmittingReport} className="flex-1 py-3 rounded-2xl font-bold text-sm bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">{isSubmittingReport ? 'İletiliyor...' : 'Gönder'}</button>
             </div>
           </div>
         </div>

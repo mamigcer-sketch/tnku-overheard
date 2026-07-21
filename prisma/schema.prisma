@@ -43,6 +43,7 @@ model Comment {
   replies      Comment[]     @relation("CommentReplies")
 
   post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  reactions CommentReaction[]
   commentLikes CommentLike[]  
   reports      Report[]      
 }
@@ -112,4 +113,16 @@ model UserBadge {
   userUuid  String   @unique
   badgeName String
   createdAt DateTime @default(now())
+}
+
+model CommentReaction {
+  id        String   @id @default(cuid())
+  commentId String
+  comment   Comment  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  emoji     String   
+  userUuid  String   
+  createdAt DateTime @default(now())
+
+  // Bir kişi aynı yoruma aynı emojiyi sadece 1 kez atabilsin diye:
+  @@unique([commentId, userUuid, emoji])
 }
