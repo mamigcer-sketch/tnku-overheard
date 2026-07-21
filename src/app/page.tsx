@@ -7,7 +7,8 @@ import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
-import ShareAccordion from '@/components/ShareAccordion'; // 🔥 YENİ ANİMASYONLU BİLEŞEN EKLENDİ
+import ShareAccordion from '@/components/ShareAccordion';
+import RefreshButton from '@/components/RefreshButton'; // 🔥 YENİLE BUTONU EKLENDİ
 import { MessageSquareHeart } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -111,6 +112,9 @@ export default async function Home({ searchParams }: any) {
         </Link>
         
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+          {/* 🔥 YENİLE BUTONU BURAYA GELDİ */}
+          <RefreshButton />
+          
           <NotificationBell notifications={notifications} />
           
           <Link 
@@ -134,7 +138,6 @@ export default async function Home({ searchParams }: any) {
         )}
 
         <div className="mb-8 relative z-10">
-          {/* 🔥 İŞTE BURASI! Çirkin details etiketi yerine yağ gibi akan ShareAccordion kullanıyoruz */}
           <ShareAccordion>
             <ModernForm />
           </ShareAccordion>
