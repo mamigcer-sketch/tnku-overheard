@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import { Heart, Reply, Flag, ShieldAlert, BadgeCheck } from "lucide-react";
 import { toggleCommentLike, submitReport } from "@/app/post/actions";
-import { toggleCommentReaction } from "@/app/post/actions"; // 🔥 YENİ EKLENDİ
-import { playPopSound, playClickSound } from "@/utils/sounds"; // 🔥 SESLER EKLENDİ
+import { playPopSound, playClickSound } from "@/utils/sounds";
 
 const getRelativeTime = (dateString: string | Date) => {
   if (!dateString) return "";
@@ -38,8 +37,6 @@ const formatCommentText = (text: string) => {
   });
 };
 
-const AVAILABLE_EMOJIS = ["🔥", "💀", "😂", "🤡"];
-
 export default function CommentItem({ 
   comment, commentAuthor, isPostAuthor, isInitiallyLiked = false, onReply, isReply = false, hasCustomNick = false, userBadge 
 }: any) {
@@ -52,25 +49,11 @@ export default function CommentItem({
   const [reportReason, setReportReason] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
 
-  // 🔥 Reaksiyonlar için anlık (optimistic) state
-  const [reactionCounts, setReactionCounts] = useState<Record<string, number>>({});
-
   useEffect(() => { setLocalLiked(isInitiallyLiked); }, [isInitiallyLiked]);
   useEffect(() => { setLocalLikesCount(comment.likes || 0); }, [comment.likes]);
 
-  // Sayfa yüklendiğinde veritabanından gelen emojileri say ve state'e at
-  useEffect(() => {
-    if (comment.reactions) {
-      const counts: Record<string, number> = {};
-      comment.reactions.forEach((r: any) => {
-        counts[r.emoji] = (counts[r.emoji] || 0) + 1;
-      });
-      setReactionCounts(counts);
-    }
-  }, [comment.reactions]);
-
   const handleLike = async () => {
-    playPopSound(); // 🔥 Ses Motoru Kullanıldı!
+    playPopSound();
     const nextLikedState = !localLiked;
     setLocalLiked(nextLikedState);
     setLocalLikesCount((prev: number) => nextLikedState ? prev + 1 : Math.max(0, prev - 1));
@@ -88,21 +71,9 @@ export default function CommentItem({
     }
   };
 
-  const handleEmojiClick = async (emoji: string) => {
-    playPopSound(); // 🔥 Emojiye basınca da tatlı bir POP sesi!
-    // Anlık olarak UI'da sayıyı arttır (hızlı hissettirsin diye)
-    setReactionCounts(prev => ({...prev, [emoji]: (prev[emoji] || 0) + 1}));
-    try {
-      await toggleCommentReaction(comment.id, emoji, comment.postId);
-    } catch (e) {
-      // Hata olursa geri al
-      setReactionCounts(prev => ({...prev, [emoji]: Math.max(0, (prev[emoji] || 1) - 1)}));
-    }
-  };
-
   const handleReportClick = () => {
     if (reported) return;
-    playClickSound(); // 🔥 Tık Sesi!
+    playClickSound();
     setShowReportModal(true);
   };
 
@@ -147,26 +118,9 @@ export default function CommentItem({
           <span className="text-[10px] text-gray-500 font-medium shrink-0 ml-2">{getRelativeTime(comment.createdAt)}</span>
         </div>
         
-        <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-3 mt-1">
+        <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-4 mt-1">
           {formatCommentText(comment.content)}
         </p>
-        
-        {/* 🔥 YENİ: Reaksiyon (Emoji) Kutucukları */}
-        <div className="flex flex-wrap gap-2 mb-3">
-          {AVAILABLE_EMOJIS.map(emoji => {
-            const count = reactionCounts[emoji] || 0;
-            return (
-              <button 
-                key={emoji} 
-                onClick={() => handleEmojiClick(emoji)}
-                className="flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] border border-white/[0.05] px-2.5 py-1 rounded-xl transition-all active:scale-90"
-              >
-                <span className="text-[14px]">{emoji}</span>
-                {count > 0 && <span className="text-[11px] font-bold text-gray-400">{count}</span>}
-              </button>
-            );
-          })}
-        </div>
         
         <div className="flex items-center gap-4 pt-3 border-t border-white/[0.02] text-gray-400">
           <button 
