@@ -25,7 +25,7 @@ async function getOrCreateAuthorId() {
   return authorId;
 }
 
-// 1. Post Oluşturma (🔥 24 Saat Sonra Yok Olma Desteği Eklendi)
+// 1. Post Oluşturma (🔥 24 Saat Sonra Yok Olma Desteği)
 export async function createPost(formData: FormData) {
   const authorUuid = await getOrCreateAuthorId();
 
@@ -42,7 +42,7 @@ export async function createPost(formData: FormData) {
   const location = formData.get("location") as string;
   const people = formData.get("people") as string;
   const gender = formData.get("gender") as string;
-  const isEphemeral = formData.get("isEphemeral") === "true"; // 🔥 Süreli mi kontrolü
+  const isEphemeral = formData.get("isEphemeral") === "true";
 
   // Eğer 24 saat sonra kaybolması seçildiyse, bitiş zamanını şimdiden 24 saat sonrasına ayarla
   const expiresAt = isEphemeral ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null;
@@ -56,7 +56,7 @@ export async function createPost(formData: FormData) {
       gender,
       authorUuid, 
       status: 'PENDING', 
-      expiresAt, // 🔥 Veritabanına kaydediliyor
+      expiresAt,
     },
   });
 
@@ -64,7 +64,7 @@ export async function createPost(formData: FormData) {
   return post; 
 }
 
-// 2. Yorum Ekleme ve Yanıtlama (BİLDİRİM SİSTEMİ EKLENDİ)
+// 2. Yorum Ekleme ve Yanıtlama (BİLDİRİM SİSTEMİ)
 export async function addComment(formData: FormData) {
   const authorId = await getOrCreateAuthorId();
 
@@ -94,7 +94,6 @@ export async function addComment(formData: FormData) {
   // 🔥 BİLDİRİM GÖNDERME MANTIĞI
   try {
     if (parentId) {
-      // Bir yoruma yanıt verildiyse o yorumun sahibine bildirim at
       const parentComment = await prisma.comment.findUnique({ where: { id: parentId } });
       if (parentComment && parentComment.authorId && parentComment.authorId !== authorId) {
         await (prisma as any).notification.create({
@@ -106,7 +105,6 @@ export async function addComment(formData: FormData) {
         });
       }
     } else {
-      // Doğrudan posta yorum yapıldıysa post sahibine bildirim at
       const post = await prisma.post.findUnique({ where: { id: postId } });
       if (post && post.authorUuid && post.authorUuid !== authorId) {
         await (prisma as any).notification.create({
@@ -134,22 +132,23 @@ export async function incrementView(id: string) {
   });
 }
 
-// 4. ID'ye göre Postları Çekme
+// 4. ID'ye göre Postları Çekme (Yorum sayımı için include eklendi)
 export async function getPostsByIds(ids: string[]) {
+  if (!ids || ids.length === 0) return [];
   return await prisma.post.findMany({
     where: { 
       id: { in: ids } 
     },
+    include: { comments: { select: { id: true } } },
     orderBy: { createdAt: 'desc' }
   });
 }
 
-// 5. 🚀 RAW SQL GOD MODE: Prisma'yı aradan çıkarıp veriyi zorla işliyoruz!
+// 5. RAW SQL: Beğeni İşlemi
 export async function toggleCommentLike(commentId: string, postId: string) {
   const authorId = await getOrCreateAuthorId();
 
   try {
-    // 1. Kullanıcı daha önce beğenmiş mi? (Doğrudan Veritabanına Soruyoruz)
     const existingLikes: any[] = await prisma.$queryRaw`
       SELECT "id" FROM "CommentLike" 
       WHERE "commentId" = ${commentId} AND "userUuid" = ${authorId} 
@@ -157,7 +156,6 @@ export async function toggleCommentLike(commentId: string, postId: string) {
     `;
 
     if (existingLikes.length > 0) {
-      // 2. Zaten beğenmişse -> Beğeniyi Sil ve Sayıyı 1 Azalt
       await prisma.$executeRaw`
         DELETE FROM "CommentLike" 
         WHERE "commentId" = ${commentId} AND "userUuid" = ${authorId}
@@ -168,7 +166,6 @@ export async function toggleCommentLike(commentId: string, postId: string) {
         WHERE "id" = ${commentId}
       `;
     } else {
-      // 3. Beğenmemişse -> Beğeniyi Ekle ve Sayıyı 1 Artır
       const newId = crypto.randomUUID();
       await prisma.$executeRaw`
         INSERT INTO "CommentLike" ("id", "commentId", "userUuid", "createdAt") 
@@ -197,7 +194,7 @@ export async function submitReport(type: 'POST' | 'COMMENT', itemId: string, rea
   }
 }
 
-// 🔥 7. Bildirimleri Okundu Olarak İşaretleme
+// 7. Bildirimleri Okundu Olarak İşaretleme
 export async function markNotificationsAsRead() {
   try {
     const authorId = await getOrCreateAuthorId();
