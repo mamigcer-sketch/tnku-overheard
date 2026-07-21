@@ -51,7 +51,15 @@ export default async function Home({ searchParams }: any) {
   const pageSize = 10;
   const totalTake = page * pageSize; 
 
-  let whereQuery: any = { status: 'APPROVED' };
+  // 🔥 YENİ: Süresi dolan (expiresAt < now) postları filtreleyen sistem
+  let whereQuery: any = { 
+    status: 'APPROVED',
+    OR: [
+      { expiresAt: null },
+      { expiresAt: { gt: new Date() } }
+    ]
+  };
+
   let orderQuery: any = { createdAt: 'desc' };
 
   if (currentFilter === 'Overheard') whereQuery.type = { in: ['OVERHEARD', 'OVERHED'] };
@@ -95,7 +103,6 @@ export default async function Home({ searchParams }: any) {
     }
   }
 
-  // 🔥 "En Yeni" buradaki array'den kaldırıldı!
   const filters = ['Tümü', 'Overheard', 'İtiraf', '🔥 Trend'];
 
   return (

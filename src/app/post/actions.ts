@@ -25,7 +25,7 @@ async function getOrCreateAuthorId() {
   return authorId;
 }
 
-// 1. Post Oluşturma
+// 1. Post Oluşturma (🔥 24 Saat Sonra Yok Olma Desteği Eklendi)
 export async function createPost(formData: FormData) {
   const authorUuid = await getOrCreateAuthorId();
 
@@ -42,6 +42,10 @@ export async function createPost(formData: FormData) {
   const location = formData.get("location") as string;
   const people = formData.get("people") as string;
   const gender = formData.get("gender") as string;
+  const isEphemeral = formData.get("isEphemeral") === "true"; // 🔥 Süreli mi kontrolü
+
+  // Eğer 24 saat sonra kaybolması seçildiyse, bitiş zamanını şimdiden 24 saat sonrasına ayarla
+  const expiresAt = isEphemeral ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null;
 
   const post = await prisma.post.create({
     data: {
@@ -52,6 +56,7 @@ export async function createPost(formData: FormData) {
       gender,
       authorUuid, 
       status: 'PENDING', 
+      expiresAt, // 🔥 Veritabanına kaydediliyor
     },
   });
 

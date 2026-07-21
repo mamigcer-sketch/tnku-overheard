@@ -53,7 +53,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   const [hasViewed, setHasViewed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
-  // 🔥 YENİ: Yazı uzunluğu ve Devamını Oku State'i
   const [isExpanded, setIsExpanded] = useState(false);
   const isLongText = post.content.length > 250; 
 
@@ -68,6 +67,9 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   
   const [showBigHeart, setShowBigHeart] = useState(false);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
+
+  // 🔥 24 Saat Sonra Yok Olacak Post Kontrolü
+  const isEphemeral = !!post.expiresAt;
 
   const triggerHaptic = (duration = 50) => {
     if (typeof window !== "undefined" && window.navigator && window.navigator.vibrate) {
@@ -177,9 +179,12 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
   const isConfession = post.type === 'CONFESSION';
   const isTrending = post.likes >= 10; 
 
-  const hoverGlow = isConfession 
-    ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
-    : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
+  // 🔥 Süreli postlar için turuncu/amber ateşli hover ve çerçeve efekti
+  const hoverGlow = isEphemeral
+    ? 'hover:shadow-[0_0_40px_rgba(245,158,11,0.2)] hover:border-amber-500/40 border-amber-500/20 bg-amber-500/[0.01]'
+    : isConfession 
+      ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
+      : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
 
   const authorData = getAnonymousData(post.authorUuid || post.id);
 
@@ -188,12 +193,16 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
       <div 
         ref={cardRef} 
         onClick={handleCardInteraction} 
-        className={`relative group bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] p-5 sm:p-6 rounded-[24px] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-all duration-700 ease-out will-change-[opacity,transform] select-none cursor-pointer ${hoverGlow} ${
+        className={`relative group backdrop-blur-2xl border p-5 sm:p-6 rounded-[24px] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-all duration-700 ease-out will-change-[opacity,transform] select-none cursor-pointer ${hoverGlow} ${
           isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-[0.98]'
-        }`}
+        } ${!isEphemeral ? 'bg-white/[0.02] border-white/[0.05]' : ''}`}
       >
-        {isTrending && (
+        {isTrending && !isEphemeral && (
           <div className={`absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/30 to-pink-500/30' : 'from-[#4DA3FF]/30 to-blue-500/30'}`} />
+        )}
+
+        {isEphemeral && (
+          <div className="absolute -inset-[1px] opacity-20 group-hover:opacity-40 transition-opacity duration-700 blur-md -z-10 bg-gradient-to-r from-amber-500/40 to-orange-500/40" />
         )}
 
         <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-500 ease-out ${
@@ -205,10 +214,19 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
         <div className="block relative z-10">
           <div className="flex justify-between items-start gap-3 mb-4">
             <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
-              <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
-                {isTrending && <Flame size={12} className="animate-pulse" />}
-                {isConfession ? 'İTİRAF' : 'OVERHEARD'}
-              </span>
+              
+              {/* 🔥 Süreli post ise turuncu etiket, değilse normal */}
+              {isEphemeral ? (
+                <span className="px-2.5 py-1 rounded-md uppercase flex items-center gap-1 bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
+                  <Clock size={12} /> 24 Saatlik Fısıltı ⏳
+                </span>
+              ) : (
+                <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
+                  {isTrending && <Flame size={12} className="animate-pulse" />}
+                  {isConfession ? 'İTİRAF' : 'OVERHEARD'}
+                </span>
+              )}
+
               <span className="flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border border-white/[0.05] shadow-sm hover:bg-white/[0.08] transition-colors">
                 <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
                   {authorData.emoji}
@@ -223,7 +241,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
             <span className="shrink-0 text-[11px] text-gray-500 font-medium">{getRelativeTime(post.createdAt)}</span>
           </div>
 
-          {/* 🔥 YENİ: Devamını Oku (Line Clamp) Mantığı */}
           <div className="mb-4 sm:mb-5 relative z-10 transition-all duration-300">
             <p className={`text-gray-100 text-[15px] sm:text-[16px] leading-relaxed font-medium break-words tracking-wide ${!isExpanded && isLongText ? 'line-clamp-4' : ''}`}>
               {post.content}
@@ -231,11 +248,13 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
             {!isExpanded && isLongText && (
               <button
                 onClick={(e) => { 
-                  e.stopPropagation(); // Karta tıklanıp detay sayfasına gitmesini engeller
+                  e.stopPropagation(); 
                   triggerHaptic(30);
                   setIsExpanded(true); 
                 }}
-                className="text-[#4DA3FF] font-bold text-[13px] sm:text-[14px] mt-1 hover:text-blue-400 transition-colors active:scale-95 inline-block"
+                className={`font-bold text-[13px] sm:text-[14px] mt-1 transition-colors active:scale-95 inline-block ${
+                  isEphemeral ? 'text-amber-400 hover:text-amber-300' : 'text-[#4DA3FF] hover:text-blue-400'
+                }`}
               >
                 Devamını Oku...
               </button>
@@ -265,8 +284,8 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
               </button>
             </form>
             
-            <button onClick={() => { triggerHaptic(); setShowComment(!showComment); }} className={`flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-xl transition-all duration-300 ${showComment ? 'text-[#4DA3FF] bg-[#4DA3FF]/10' : 'hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10 active:scale-90'}`}>
-              <MessageCircle size={18} className={`${showComment ? 'fill-[#4DA3FF]/20' : ''}`} /> 
+            <button onClick={() => { triggerHaptic(); setShowComment(!showComment); }} className={`flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-xl transition-all duration-300 ${showComment ? (isEphemeral ? 'text-amber-400 bg-amber-500/10' : 'text-[#4DA3FF] bg-[#4DA3FF]/10') : (isEphemeral ? 'hover:text-amber-400 hover:bg-amber-500/10' : 'hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10')} active:scale-90`}>
+              <MessageCircle size={18} className={`${showComment ? (isEphemeral ? 'fill-amber-400/20' : 'fill-[#4DA3FF]/20') : ''}`} /> 
               <span className="text-[13px] font-bold">{post.comments?.length || 0}</span>
             </button>
 
@@ -285,7 +304,6 @@ export default function PostCard({ post, isLiked, incrementLike }: any) {
               <span className="text-[11px] font-bold hidden sm:inline">{reported ? 'İletildi' : 'Şikayet Et'}</span>
             </button>
 
-            {/* 🔥 YENİ: Paylaş butonu neon yeşil parlamalı WhatsApp vibes */}
             <button 
               onClick={handleShare} 
               className="group/share flex items-center justify-center text-gray-400 transition-all duration-300 bg-white/[0.03] p-2.5 rounded-full border border-transparent hover:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:scale-110 active:scale-75 shadow-sm"
