@@ -20,7 +20,7 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// 🔥 YENİ: Metin içindeki "@Avare Kunduz" gibi etiketleri bulup şık bir komponente çeviren fonksiyon
+// 🔥 YENİ: Etiketi kutudan çıkarıp neon mavi yazıya dönüştürdük
 const formatCommentText = (text: string) => {
   if (!text) return null;
   
@@ -31,7 +31,7 @@ const formatCommentText = (text: string) => {
   return parts.map((part, i) => {
     if (part.match(/^@[a-zA-ZçğıöşüÇĞİÖŞÜ]+\s[a-zA-ZçğıöşüÇĞİÖŞÜ]+$/)) {
       return (
-        <span key={i} className="inline-block bg-[#4DA3FF]/15 text-[#4DA3FF] font-bold px-1.5 py-0.5 rounded-md border border-[#4DA3FF]/20 shadow-sm mr-0.5">
+        <span key={i} className="text-[#4DA3FF] font-bold drop-shadow-[0_0_8px_rgba(77,163,255,0.6)]">
           {part}
         </span>
       );
@@ -128,7 +128,6 @@ export default function CommentItem({
           <span className="text-[10px] text-gray-500 font-medium">{getRelativeTime(comment.createdAt)}</span>
         </div>
         
-        {/* 🔥 YENİ: Düz metin yerine, etiketleri parlatacak formatlanmış metni basıyoruz */}
         <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-4">
           {formatCommentText(comment.content)}
         </p>
