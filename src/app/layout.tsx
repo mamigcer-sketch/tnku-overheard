@@ -1,42 +1,31 @@
-import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
+import './globals.css';
+import ScrollToTop from '@/components/ScrollToTop'; // 🔥 YENİ BUTON BİLEŞENİ EKLENDİ
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: "TNKU Overheard",
-  description: "Kampüsün anonim sesleri.",
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: "black-translucent",
-    title: "TNKU Overheard",
+  title: 'TNKU Overheard',
+  description: 'Namık Kemal Üniversitesi - Kampüste olan biteni anonim fısılda.',
+  icons: {
+    icon: '/icon.jpg', 
   },
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
-    <html
-      lang="tr"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <head>
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/logo.jpg" />
-      </head>
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="tr">
+      <body className={inter.className}>
+        {children}
+        
+        {/* 🔥 YUKARI ÇIK BUTONU: Tüm sayfalarda en altta, sağda duracak! */}
+        <ScrollToTop />
+      </body>
     </html>
   );
 }
