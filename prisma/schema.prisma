@@ -106,3 +106,10 @@ model CustomNickname {
   nickname  String
   createdAt DateTime @default(now())
 }
+
+model UserBadge {
+  id        String   @id @default(cuid())
+  userUuid  String   @unique
+  badgeName String
+  createdAt DateTime @default(now())
+}

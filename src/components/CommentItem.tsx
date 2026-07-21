@@ -45,7 +45,8 @@ export default function CommentItem({
   isInitiallyLiked = false, 
   onReply, 
   isReply = false,
-  hasCustomNick = false // 🔥 YENİ EKLENDİ
+  hasCustomNick = false,
+  userBadge // 🔥 YENİ: Rozeti prop olarak karşıladık
 }: any) {
   const [localLiked, setLocalLiked] = useState(isInitiallyLiked);
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
@@ -112,12 +113,18 @@ export default function CommentItem({
         isReply ? 'ml-6 sm:ml-10 border-l-2 border-l-[#4DA3FF]/40 bg-white/[0.01]' : ''
       }`}>
         <div className="flex justify-between items-center mb-3">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            {/* 🔥 ROZET BURAYA EKLENDİ */}
+            {userBadge && (
+              <span className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 text-yellow-400 border border-yellow-500/30 px-1.5 py-0.5 rounded-md shadow-[0_0_10px_rgba(245,158,11,0.15)] flex items-center text-[9px] font-black uppercase tracking-wider">
+                {userBadge}
+              </span>
+            )}
+            
             <div className={`w-6 h-6 flex items-center justify-center rounded-md bg-gradient-to-br ${commentAuthor.gradient} text-[12px] shadow-inner`}>
               {commentAuthor.emoji}
             </div>
             
-            {/* 🔥 İSİM ALANI VE SARI TİK GÜNCELLENDİ */}
             <span className={`font-bold text-[12px] tracking-wide flex items-center gap-1 ${hasCustomNick ? 'text-yellow-50 drop-shadow-sm' : 'text-gray-200'}`}>
               @{commentAuthor.name}
               {hasCustomNick && <BadgeCheck size={14} className="text-yellow-400" />}
@@ -129,10 +136,10 @@ export default function CommentItem({
               </span>
             )}
           </div>
-          <span className="text-[10px] text-gray-500 font-medium">{getRelativeTime(comment.createdAt)}</span>
+          <span className="text-[10px] text-gray-500 font-medium shrink-0 ml-2">{getRelativeTime(comment.createdAt)}</span>
         </div>
         
-        <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-4">
+        <p className="text-gray-300 text-[14px] leading-relaxed break-words mb-4 mt-1">
           {formatCommentText(comment.content)}
         </p>
         

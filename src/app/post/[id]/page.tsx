@@ -32,7 +32,6 @@ const gradients = [
   "from-emerald-400 to-teal-600", "from-amber-400 to-orange-600", "from-cyan-400 to-blue-600"
 ];
 
-// 🔥 YENİ: customNickname parametresi eklendi
 const getAnonymousData = (id: string, customNickname?: string) => {
   if (!id) return { name: "Gizemli Yolcu", emoji: "👤", gradient: gradients[0] };
   let hash = 0;
@@ -67,14 +66,25 @@ export default async function PostPage({ params }: any) {
 
   if (!post) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-gray-500 font-medium">Post bulunamadı...</div>;
 
-  // 🔥 Özel Nickleri Veritabanından Çekiyoruz
+  // 🔥 Özel Nickleri ve Rozetleri Veritabanından Çekiyoruz
   let customNicknamesDb: any[] = [];
+  let userBadgesDb: any[] = [];
   try {
-    customNicknamesDb = await (prisma as any).customNickname.findMany();
+    const [nicks, badges] = await Promise.all([
+      (prisma as any).customNickname.findMany(),
+      (prisma as any).userBadge.findMany()
+    ]);
+    customNicknamesDb = nicks;
+    userBadgesDb = badges;
   } catch (e) {}
 
   const customNicknamesMap = customNicknamesDb.reduce((acc: any, curr: any) => {
     acc[curr.userUuid] = curr.nickname;
+    return acc;
+  }, {});
+
+  const userBadgesMap = userBadgesDb.reduce((acc: any, curr: any) => {
+    acc[curr.userUuid] = curr.badgeName;
     return acc;
   }, {});
 
@@ -100,7 +110,7 @@ export default async function PostPage({ params }: any) {
   
   const postAuthorUuid = (post as any).authorUuid;
   const hasCustomNick = !!customNicknamesMap[postAuthorUuid];
-  // 🔥 Yazar datasına özel nicki yolluyoruz
+  const postUserBadge = userBadgesMap[postAuthorUuid]; // 🔥 Yazarın rozeti
   const authorData = getAnonymousData(postAuthorUuid || post.id, customNicknamesMap[postAuthorUuid]);
 
   const glowStyle = isEphemeral
@@ -154,16 +164,23 @@ export default async function PostPage({ params }: any) {
                 </span>
               )}
 
-              {/* 🔥 Post Sahibi Nick Alanı Güncellendi */}
-              <span className={`flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
-                <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
-                  {authorData.emoji}
-                </div>
-                <span className="font-semibold text-[11px] tracking-wide flex items-center gap-1">
-                  @{authorData.name}
-                  {hasCustomNick && <BadgeCheck size={12} className="text-yellow-400" />}
+              {/* 🔥 ROZET VE NICK ALANI */}
+              <div className="flex items-center gap-2">
+                {postUserBadge && (
+                  <span className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 text-yellow-400 border border-yellow-500/30 px-2 py-1 rounded-lg shadow-[0_0_10px_rgba(245,158,11,0.15)] flex items-center">
+                    {postUserBadge}
+                  </span>
+                )}
+                <span className={`flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
+                  <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
+                    {authorData.emoji}
+                  </div>
+                  <span className="font-semibold text-[11px] tracking-wide flex items-center gap-1">
+                    @{authorData.name}
+                    {hasCustomNick && <BadgeCheck size={12} className="text-yellow-400" />}
+                  </span>
                 </span>
-              </span>
+              </div>
 
             </div>
             <span className="text-[10px] text-gray-500 font-medium bg-white/[0.03] px-2.5 py-1 rounded-md border border-white/[0.02]">
@@ -196,13 +213,14 @@ export default async function PostPage({ params }: any) {
           </div>
         </article>
 
-        {/* 🔥 customNicknamesMap'i Yorumlara Aktarıyoruz! */}
+        {/* 🔥 YENİ: userBadgesMap'i yorumlara iletiyoruz */}
         <CommentSection 
           postId={post.id} 
           comments={post.comments} 
           postAuthorUuid={postAuthorUuid} 
           userLikedCommentIds={userLikedCommentIds} 
           customNicknamesMap={customNicknamesMap}
+          userBadgesMap={userBadgesMap} 
         />
       </div>
     </main>

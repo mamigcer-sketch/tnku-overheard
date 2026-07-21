@@ -75,8 +75,8 @@ export default async function Home({ searchParams }: any) {
 
   if (searchQuery) whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
 
-  // 🔥 YENİ: CustomNickname tablosunu da çekiyoruz!
-  const [posts, totalPostsCount, activeAnnouncement, activeCountdown, customNicknamesDb] = await Promise.all([
+  // 🔥 YENİ: CustomNickname ve UserBadge tablolarını birlikte çekiyoruz!
+  const [posts, totalPostsCount, activeAnnouncement, activeCountdown, customNicknamesDb, userBadgesDb] = await Promise.all([
     prisma.post.findMany({
       where: whereQuery,
       orderBy: orderQuery,
@@ -92,12 +92,19 @@ export default async function Home({ searchParams }: any) {
       where: { isActive: true },
       orderBy: { createdAt: 'desc' }
     }),
-    (prisma as any).customNickname.findMany().catch(() => []) // Tablo yoksa hata vermesin diye önlem
+    (prisma as any).customNickname.findMany().catch(() => []), // Tablo yoksa hata vermesin diye önlem
+    (prisma as any).userBadge.findMany().catch(() => []) // 🔥 ROZETLER ÇEKİLİYOR
   ]);
 
-  // 🔥 Çekilen nickleri hızlı erişim için haritalıyoruz
+  // Çekilen nickleri hızlı erişim için haritalıyoruz
   const customNicknamesMap = (customNicknamesDb || []).reduce((acc: any, curr: any) => {
     acc[curr.userUuid] = curr.nickname;
+    return acc;
+  }, {});
+
+  // 🔥 Çekilen rozetleri hızlı erişim için haritalıyoruz
+  const userBadgesMap = (userBadgesDb || []).reduce((acc: any, curr: any) => {
+    acc[curr.userUuid] = curr.badgeName;
     return acc;
   }, {});
 
@@ -208,7 +215,8 @@ export default async function Home({ searchParams }: any) {
                   isLiked={likedPosts.includes(post.id)} 
                   incrementLike={incrementLike}
                   userUuid={userUuid}
-                  customNickname={customNicknamesMap[post.authorUuid]} // 🔥 YENİ EKLENDİ (Özel Nick Post Kartına Paslanıyor)
+                  customNickname={customNicknamesMap[post.authorUuid]} 
+                  userBadge={userBadgesMap[post.authorUuid]} // 🔥 YENİ EKLENDİ (Rozet Post Kartına Paslanıyor)
                 />
               ))}
               

@@ -79,15 +79,19 @@ export default async function AdminDashboard({ searchParams }: any) {
   let bannedUsers: any[] = [];
   let reports: any[] = [];
 
-  // 🔥 YENİ: Özel Nickleri Veritabanından Çekiyoruz
+  // Nick Verilerini Çekiyoruz
   let customNicknamesDb: any[] = [];
-  try {
-    customNicknamesDb = await (prisma as any).customNickname.findMany();
-  } catch (e) {
-    console.log("CustomNickname tablosu henüz yok.");
-  }
+  try { customNicknamesDb = await (prisma as any).customNickname.findMany(); } catch (e) {}
   const customNicknamesMap = customNicknamesDb.reduce((acc: any, curr: any) => {
     acc[curr.userUuid] = curr.nickname;
+    return acc;
+  }, {});
+
+  // 🔥 YENİ: Rozet Verilerini Çekiyoruz
+  let userBadgesDb: any[] = [];
+  try { userBadgesDb = await (prisma as any).userBadge.findMany(); } catch (e) {}
+  const userBadgesMap = userBadgesDb.reduce((acc: any, curr: any) => {
+    acc[curr.userUuid] = curr.badgeName;
     return acc;
   }, {});
 
@@ -146,24 +150,39 @@ export default async function AdminDashboard({ searchParams }: any) {
   async function dismissReport(formData: FormData) { 'use server'; await (prisma as any).report.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
   async function logout() { 'use server'; (await cookies()).delete('admin_auth'); revalidatePath('/admin'); }
 
-  // 🔥 YENİ: Özel Nick Atama Fonksiyonu
-  async function setCustomNickname(formData: FormData) {
+  // 🔥 YENİ: Hem Nick Hem Rozet Atama Fonksiyonu
+  async function updateUserMeta(formData: FormData) {
     'use server';
     const userUuid = formData.get('userUuid') as string;
     const nickname = formData.get('nickname') as string;
+    const badge = formData.get('badge') as string;
 
     if (!userUuid) return;
 
+    // Nick İşlemleri
     if (!nickname.trim()) {
       await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
     } else {
-      const existing = await (prisma as any).customNickname.findUnique({ where: { userUuid } });
-      if (existing) {
+      const existingNick = await (prisma as any).customNickname.findUnique({ where: { userUuid } });
+      if (existingNick) {
         await (prisma as any).customNickname.update({ where: { userUuid }, data: { nickname: nickname.trim() } });
       } else {
         await (prisma as any).customNickname.create({ data: { userUuid, nickname: nickname.trim() } });
       }
     }
+
+    // Rozet İşlemleri
+    if (!badge.trim()) {
+      await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
+    } else {
+      const existingBadge = await (prisma as any).userBadge.findUnique({ where: { userUuid } });
+      if (existingBadge) {
+        await (prisma as any).userBadge.update({ where: { userUuid }, data: { badgeName: badge.trim() } });
+      } else {
+        await (prisma as any).userBadge.create({ data: { userUuid, badgeName: badge.trim() } });
+      }
+    }
+    
     revalidatePath('/admin');
     revalidatePath('/');
   }
@@ -304,8 +323,8 @@ export default async function AdminDashboard({ searchParams }: any) {
                     </div>
                   </div>
 
-                  {/* 🔥 Yazar Kimliği ve Nick Ata Formu (YORUMLAR İÇİN) */}
-                  <div className="bg-black/40 border border-white/5 p-3 rounded-xl flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mt-2">
+                  {/* 🔥 Yazar Kimliği, Nick ve Rozet Formu (YORUMLAR) */}
+                  <div className="bg-black/40 border border-white/5 p-3 rounded-xl flex flex-col xl:flex-row gap-3 items-start xl:items-center justify-between mt-2">
                     <div className="flex items-center gap-2">
                       <Fingerprint className="text-gray-500" size={16} />
                       <div>
@@ -314,10 +333,11 @@ export default async function AdminDashboard({ searchParams }: any) {
                       </div>
                     </div>
                     {comment.authorId && (
-                      <form action={setCustomNickname} className="flex items-center gap-2 w-full sm:w-auto">
+                      <form action={updateUserMeta} className="flex flex-col sm:flex-row items-center gap-2 w-full xl:w-auto">
                         <input type="hidden" name="userUuid" value={comment.authorId} />
-                        <input type="text" name="nickname" defaultValue={customNicknamesMap[comment.authorId] || ''} placeholder="Örn: Kral Adam" className="bg-[#121212] border border-white/10 text-xs text-white px-3 py-2 rounded-xl focus:border-[#4DA3FF] outline-none flex-1 sm:w-40" />
-                        <button type="submit" className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-500/20 transition-all shrink-0">Nick Ata</button>
+                        <input type="text" name="nickname" defaultValue={customNicknamesMap[comment.authorId] || ''} placeholder="Nick (Örn: Kral)" className="bg-[#121212] border border-white/10 text-xs text-white px-3 py-2 rounded-xl focus:border-[#4DA3FF] outline-none w-full sm:w-32" />
+                        <input type="text" name="badge" defaultValue={userBadgesMap[comment.authorId] || ''} placeholder="Rozet (Örn: 👑 VIP)" className="bg-[#121212] border border-yellow-500/20 text-xs text-yellow-400 placeholder-yellow-700/50 px-3 py-2 rounded-xl focus:border-yellow-500 outline-none w-full sm:w-36" />
+                        <button type="submit" className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-purple-500/20 transition-all shrink-0 w-full sm:w-auto">Kaydet</button>
                       </form>
                     )}
                   </div>
@@ -361,35 +381,8 @@ export default async function AdminDashboard({ searchParams }: any) {
  
                     <p className="text-white text-[16px] leading-relaxed py-2">{post.content}</p>
 
-                    <details className="group/edit">
-                      <summary className="list-none cursor-pointer bg-blue-500/10 text-blue-400 py-2 px-4 rounded-xl text-xs font-bold border border-blue-500/20 hover:bg-blue-500/20 inline-flex items-center gap-1.5 transition-all">
-                        <Pencil size={14}/> Yazıyı ve Kategoriyi Düzenle
-                      </summary>
-                      <form action={updatePost} className="mt-3 p-4 bg-black/50 rounded-2xl border border-white/10 space-y-3">
-                        <input type="hidden" name="id" value={post.id} />
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                          <div>
-                            <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1">Kategori</label>
-                            <select name="type" defaultValue={post.type} className="w-full bg-[#121212] border border-white/15 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#4DA3FF]">
-                              <option value="OVERHEARD">Overheard</option>
-                              <option value="CONFESSION">İtiraf</option>
-                            </select>
-                          </div>
-                          <div className="sm:col-span-2">
-                            <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1">İçerik</label>
-                            <textarea name="content" defaultValue={post.content} rows={2} className="w-full bg-[#121212] border border-white/15 rounded-xl p-2.5 text-xs text-white outline-none focus:border-[#4DA3FF] resize-none" required />
-                          </div>
-                        </div>
-                        <div className="flex justify-end">
-                          <button type="submit" className="bg-[#4DA3FF] text-black px-5 py-2 rounded-xl text-xs font-bold hover:bg-blue-400 transition-all shadow">
-                            Kaydet
-                          </button>
-                        </div>
-                      </form>
-                    </details>
-                    
-                    {/* 🔥 Yazar Kimliği ve Nick Ata Formu (POSTLAR İÇİN) */}
-                    <div className="bg-black/40 border border-white/5 p-3 rounded-xl flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mt-2">
+                    {/* 🔥 Yazar Kimliği, Nick ve Rozet Formu (POSTLAR) */}
+                    <div className="bg-black/40 border border-white/5 p-3 rounded-xl flex flex-col xl:flex-row gap-3 items-start xl:items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Fingerprint className="text-gray-500" size={16} />
                         <div>
@@ -399,39 +392,24 @@ export default async function AdminDashboard({ searchParams }: any) {
                       </div>
                       
                       {post.authorUuid && (
-                        <form action={setCustomNickname} className="flex items-center gap-2 w-full sm:w-auto">
+                        <form action={updateUserMeta} className="flex flex-col sm:flex-row items-center gap-2 w-full xl:w-auto">
                           <input type="hidden" name="userUuid" value={post.authorUuid} />
-                          <input type="text" name="nickname" defaultValue={customNicknamesMap[post.authorUuid] || ''} placeholder="Örn: Vize Mağduru" className="bg-[#121212] border border-white/10 text-xs text-white px-3 py-2 rounded-xl focus:border-[#4DA3FF] outline-none flex-1 sm:w-40" />
-                          <button type="submit" className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-3 py-2 rounded-xl text-xs font-bold hover:bg-purple-500/20 transition-all shrink-0">Nick Ata</button>
+                          <input type="text" name="nickname" defaultValue={customNicknamesMap[post.authorUuid] || ''} placeholder="Nick (Örn: Kral)" className="bg-[#121212] border border-white/10 text-xs text-white px-3 py-2 rounded-xl focus:border-[#4DA3FF] outline-none w-full sm:w-32" />
+                          <input type="text" name="badge" defaultValue={userBadgesMap[post.authorUuid] || ''} placeholder="Rozet (Örn: 👑 VIP)" className="bg-[#121212] border border-yellow-500/20 text-xs text-yellow-400 placeholder-yellow-700/50 px-3 py-2 rounded-xl focus:border-yellow-500 outline-none w-full sm:w-36" />
+                          <button type="submit" className="bg-purple-500/10 text-purple-400 border border-purple-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-purple-500/20 transition-all shrink-0 w-full sm:w-auto">Kaydet</button>
                         </form>
                       )}
                     </div>
-
-                    <div className="flex flex-wrap justify-between items-center pt-2 gap-3 border-t border-white/5 mt-2">
-                      <div className="flex gap-4 text-gray-500 text-sm font-medium">
-                          <span className="flex items-center gap-1.5"><Heart size={16} className={post.likes > 0 ? "text-pink-500" : ""}/> {post.likes}</span>
-                          <span className="flex items-center gap-1.5"><Eye size={16} className={post.views > 0 ? "text-blue-500" : ""}/> {post.views}</span>
-                      </div>
-                      
-                      <div className="flex gap-2 w-full flex-wrap justify-end">
-                        <StoryButton postContent={post.content} postType={post.type} postId={post.id} authorUuid={post.authorUuid} />
-
+                    
+                    <div className="flex gap-2 w-full flex-wrap justify-end pt-3 border-t border-white/5 mt-2">
                         {post.status === 'PENDING' ? (
                           <>
-                            <form action={approvePost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-green-500/10 text-green-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-green-500/20 hover:bg-green-500/20 flex items-center justify-center gap-1.5 transition-all"><Check size={14}/> Onayla</button></form>
-                            <form action={rejectPost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-orange-500/10 text-orange-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-orange-500/20 hover:bg-orange-500/20 flex items-center justify-center gap-1.5 transition-all"><X size={14}/> Reddet</button></form>
+                            <form action={approvePost}><input type="hidden" name="id" value={post.id} /><button className="bg-green-500/10 text-green-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-green-500/20 flex gap-1.5"><Check size={14}/> Onayla</button></form>
+                            <form action={rejectPost}><input type="hidden" name="id" value={post.id} /><button className="bg-orange-500/10 text-orange-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-orange-500/20 flex gap-1.5"><X size={14}/> Reddet</button></form>
                           </>
                         ) : null}
-                        
-                        <form action={banUser} className="min-w-[110px]">
-                          <input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmeyen-yazar'} />
-                          <button className="w-full bg-red-500/10 text-red-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center justify-center gap-1.5 transition-all">
-                            <Ban size={14}/> Yazarını Banla
-                          </button>
-                        </form>
-
-                        <form action={deletePost} className="min-w-[90px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-white/5 text-gray-300 py-2.5 px-4 rounded-xl text-xs font-bold border border-white/10 hover:bg-white/10 flex items-center justify-center gap-1.5 transition-all"><Trash2 size={14}/> Sil</button></form>
-                      </div>
+                        <form action={banUser}><input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmiyor'} /><button className="bg-red-500/10 text-red-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-red-500/20 flex gap-1.5"><Ban size={14}/> Banla</button></form>
+                        <form action={deletePost}><input type="hidden" name="id" value={post.id} /><button className="bg-white/5 text-gray-300 py-2.5 px-4 rounded-xl text-xs font-bold border border-white/10 flex gap-1.5"><Trash2 size={14}/> Sil</button></form>
                     </div>
                   </article>
                 );

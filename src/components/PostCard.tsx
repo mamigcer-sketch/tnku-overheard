@@ -18,18 +18,16 @@ const gradients = [
   "from-cyan-400 to-blue-600"
 ];
 
-// 🔥 YENİ: customNickname parametresi eklendi
 const getAnonymousData = (id: string, customNickname?: string) => {
   if (!id) return { name: "Gizemli Yolcu", emoji: "👤", gradient: gradients[0] };
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   const positiveHash = Math.abs(hash);
   
-  // Eğer admin tarafından atanmış bir nick varsa onu döndür!
   if (customNickname) {
     return {
       name: customNickname,
-      emoji: emojis[positiveHash % emojis.length], // Emojisi ve rengi aynı kalsın (kişilik korunur)
+      emoji: emojis[positiveHash % emojis.length], 
       gradient: gradients[Math.floor(positiveHash / emojis.length) % gradients.length]
     };
   }
@@ -57,8 +55,8 @@ const getRelativeTime = (dateString: string) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// 🔥 YENİ: customNickname prop'u PostCard'a dahil edildi
-export default function PostCard({ post, isLiked, incrementLike, customNickname }: any) {
+// 🔥 YENİ: userBadge prop'u eklendi
+export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge }: any) {
   const router = useRouter();
   const [showComment, setShowComment] = useState(false);
   const cardRef = useRef(null);
@@ -196,7 +194,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname 
       ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
       : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
 
-  // 🔥 Özel Nick buraya gönderiliyor!
   const authorData = getAnonymousData(post.authorUuid || post.id, customNickname);
 
   return (
@@ -237,17 +234,24 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname 
                 </span>
               )}
 
-              {/* 🔥 Dinamik Nick Gösterimi */}
-              <span className={`flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.08] transition-colors ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
-                <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
-                  {authorData.emoji}
-                </div>
-                <span className="font-semibold text-[11px] tracking-wide flex items-center gap-1">
-                  @{authorData.name}
-                  {/* Eğer özel atanmış nick ise yanına havalı bir onay tiki koy */}
-                  {customNickname && <BadgeCheck size={12} className="text-yellow-400" />}
+              {/* 🔥 ROZET BURAYA EKLENDİ */}
+              <div className="flex items-center gap-2">
+                {userBadge && (
+                  <span className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 text-yellow-400 border border-yellow-500/30 px-2 py-1 rounded-lg shadow-[0_0_10px_rgba(245,158,11,0.15)] flex items-center">
+                    {userBadge}
+                  </span>
+                )}
+                
+                <span className={`flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.08] transition-colors ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
+                  <div className={`w-5 h-5 flex items-center justify-center rounded-md bg-gradient-to-br ${authorData.gradient} text-[10px] shadow-inner`}>
+                    {authorData.emoji}
+                  </div>
+                  <span className="font-semibold text-[11px] tracking-wide flex items-center gap-1">
+                    @{authorData.name}
+                    {customNickname && <BadgeCheck size={12} className="text-yellow-400" />}
+                  </span>
                 </span>
-              </span>
+              </div>
               
               {post.location && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><MapPin className="w-3 h-3" /> {post.location}</span>}
               {post.time && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><Clock className="w-3 h-3" /> {post.time}</span>}
