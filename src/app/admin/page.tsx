@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -49,17 +49,28 @@ export default async function AdminDashboard({ searchParams }: any) {
   const params = await searchParams;
   const currentTab = params?.tab || 'Dashboard';
 
-  const [total, pending, approved, rejected, aggregateStats, reportsCount] = await Promise.all([
+  // 🔥 Son 1 saatlik canlı aktiflik verileri hesaplanıyor
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+
+  const [total, pending, approved, rejected, aggregateStats, reportsCount, recentPostsCount, recentCommentsCount, recentAuthors] = await Promise.all([
     prisma.post.count(),
     prisma.post.count({ where: { status: 'PENDING' } }),
     prisma.post.count({ where: { status: 'APPROVED' } }),
     prisma.post.count({ where: { status: 'REJECTED' } }),
     prisma.post.aggregate({ _sum: { likes: true, views: true } }),
-    (prisma as any).report.count()
+    (prisma as any).report.count(),
+    prisma.post.count({ where: { createdAt: { gte: oneHourAgo } } }),
+    prisma.comment.count({ where: { createdAt: { gte: oneHourAgo } } }),
+    prisma.post.findMany({
+      where: { createdAt: { gte: oneHourAgo } },
+      select: { authorUuid: true },
+      distinct: ['authorUuid']
+    })
   ]);
 
   const totalLikes = aggregateStats._sum.likes || 0;
   const totalViews = aggregateStats._sum.views || 0;
+  const activeAuthorsCount = recentAuthors.length;
 
   // VERİ ÇEKME MANTIĞI
   let displayPosts: any[] = [];
@@ -224,9 +235,41 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
         </header>
 
-        {/* İSTATİSTİKLER */}
+        {/* İSTATİSTİKLER & CANLI KAMPÜS NABZI */}
         {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
           <>
+            {/* 🔥 Canlı Kampüs Nabzı / Okuyucu Sayacı Widget'ı */}
+            <div className="mb-6 bg-gradient-to-r from-green-500/10 via-[#121212] to-blue-500/10 p-6 rounded-2xl border border-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.05)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="relative flex items-center justify-center p-3 bg-green-500/20 rounded-2xl border border-green-500/30">
+                  <span className="absolute w-3 h-3 bg-green-500 rounded-full animate-ping opacity-75"></span>
+                  <Radio className="text-green-400 relative z-10" size={24} />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-white font-bold text-base">Canlı Kampüs Nabzı</h3>
+                    <span className="text-[9px] font-extrabold uppercase bg-green-500/20 text-green-400 px-2 py-0.5 rounded-full border border-green-500/30">Son 1 Saat</span>
+                  </div>
+                  <p className="text-gray-400 text-xs">Değirmenaltı'nda anlık hareketlilik ve okuyucu aktivitesi.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 w-full md:w-auto">
+                <div className="bg-black/40 px-4 py-2.5 rounded-xl border border-white/5 text-center">
+                  <p className="text-[9px] text-gray-400 font-bold uppercase">Yeni Post</p>
+                  <p className="text-lg font-black text-green-400">{recentPostsCount}</p>
+                </div>
+                <div className="bg-black/40 px-4 py-2.5 rounded-xl border border-white/5 text-center">
+                  <p className="text-[9px] text-gray-400 font-bold uppercase">Yeni Yorum</p>
+                  <p className="text-lg font-black text-[#4DA3FF]">{recentCommentsCount}</p>
+                </div>
+                <div className="bg-black/40 px-4 py-2.5 rounded-xl border border-white/5 text-center">
+                  <p className="text-[9px] text-gray-400 font-bold uppercase">Aktif Yazar</p>
+                  <p className="text-lg font-black text-purple-400">{activeAuthorsCount}</p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {[
                     { label: 'TOPLAM GÖNDERİ', val: total, color: 'text-white', bg: 'bg-[#121212]' },
@@ -465,7 +508,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                   <article key={post.id} className={`bg-[#121212] p-6 rounded-2xl border transition-all flex flex-col gap-4 shadow-lg ${isEphemeral ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)]' : 'border-white/10 hover:border-white/20'}`}>
                     <div className="flex flex-wrap justify-between items-center pb-4 border-b border-white/5 gap-2">
                         <div className="flex flex-wrap gap-2 items-center">
-                            {/* 🔥 Süreli post ise Amber rozet, değilse normal */}
                             {isEphemeral ? (
                               <span className="text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
                                 <Clock size={12}/> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
