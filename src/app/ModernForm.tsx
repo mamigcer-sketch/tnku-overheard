@@ -19,6 +19,18 @@ export default function ModernForm() {
   const router = useRouter();
   const maxChars = 500;
 
+  // 🔥 Kritik Çözüm: Sekme değiştirildiğinde İtiraf seçilirse Overheard alanlarını tamamen sıfırla!
+  const handleTabChange = (newType: 'OVERHEARD' | 'CONFESSION') => {
+    setType(newType);
+    if (newType === 'CONFESSION') {
+      setLocation('');
+      setPeople('');
+      setGender('');
+      setTime('');
+      setIsEphemeral(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -27,11 +39,11 @@ export default function ModernForm() {
       const formData = new FormData();
       formData.append('type', type);
       formData.append('content', content);
-      formData.append('location', location || '');
-      formData.append('people', people);
-      formData.append('gender', gender);
-      formData.append('time', time);
-      // Overheard ise 24 saatlik seçeneği kesinlikle false gönderiyoruz
+      // Eğer itiraf modundaysak bu alanları boş yolla ki backend'e yanlışlıkla gitmesin
+      formData.append('location', type === 'OVERHEARD' ? (location || '') : '');
+      formData.append('people', type === 'OVERHEARD' ? people : '');
+      formData.append('gender', type === 'OVERHEARD' ? gender : '');
+      formData.append('time', type === 'OVERHEARD' ? time : '');
       formData.append('isEphemeral', (type === 'CONFESSION' && isEphemeral) ? 'true' : 'false');
 
       const res = await createPost(formData);
@@ -70,7 +82,7 @@ export default function ModernForm() {
       <div className="flex gap-1.5 sm:gap-3 mb-4 sm:mb-6 p-1 bg-white/[0.02] backdrop-blur-md rounded-[14px] sm:rounded-[16px] border border-white/[0.03] shadow-inner">
         <button 
           type="button"
-          onClick={() => { setType('OVERHEARD'); setIsEphemeral(false); }} 
+          onClick={() => handleTabChange('OVERHEARD')} 
           className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 rounded-xl text-[12px] sm:text-base transition-all duration-300 ${
             type === 'OVERHEARD' 
               ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_20px_rgba(77,163,255,0.3)] scale-100' 
@@ -81,7 +93,7 @@ export default function ModernForm() {
         </button>
         <button 
           type="button"
-          onClick={() => setType('CONFESSION')} 
+          onClick={() => handleTabChange('CONFESSION')} 
           className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 rounded-xl text-[12px] sm:text-base transition-all duration-300 ${
             type === 'CONFESSION' 
               ? 'bg-purple-500 text-white font-bold shadow-[0_0_20px_rgba(168,85,247,0.4)] scale-100' 
