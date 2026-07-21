@@ -221,19 +221,25 @@ export async function toggleCommentReaction(commentId: string, emoji: string, po
   const { PrismaClient } = await import('@prisma/client');
   const prisma = new PrismaClient();
 
-  // Önce bu kişi bu yoruma bu emojiyi atmış mı ona bakıyoruz
-  const existing = await prisma.commentReaction.findUnique({
-    where: {
-      commentId_userUuid_emoji: { commentId, userUuid, emoji }
-    }
-  });
+  try {
+    // Daha önce bu emojiyi atmış mı kontrol et
+    const existing = await prisma.commentReaction.findFirst({
+      where: { commentId, userUuid, emoji }
+    });
 
-  if (existing) {
-    await prisma.commentReaction.delete({ where: { id: existing.id } }); // Varsa geri al
-  } else {
-    await prisma.commentReaction.create({ data: { commentId, userUuid, emoji } }); // Yoksa ekle
+    if (existing) {
+      // Varsa sil (geri al)
+      await prisma.commentReaction.delete({ where: { id: existing.id } });
+    } else {
+      // Yoksa oluştur
+      await prisma.commentReaction.create({ 
+        data: { commentId, userUuid, emoji } 
+      });
+    }
+  } catch (err) {
+    console.error("Reaksiyon kayıt hatası:", err);
   }
 
   const { revalidatePath } = await import('next/cache');
-  revalidatePath(`/post/${postId}`); // Sayfayı yenile ki emoji sayısı güncellensin
+  revalidatePath(`/post/${postId}`);
 }
