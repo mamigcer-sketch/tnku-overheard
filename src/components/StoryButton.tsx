@@ -2,7 +2,20 @@
 
 import { Camera } from "lucide-react";
 
-export default function StoryButton({ postContent, postType, postId }: { postContent: string, postType: string, postId: string }) {
+const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
+const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
+
+const getAnonymousName = (id: string) => {
+  if (!id) return "Gizemli Yolcu";
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  const positiveHash = Math.abs(hash);
+  return `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`;
+};
+
+export default function StoryButton({ postContent, postType, postId, authorUuid }: { postContent: string, postType: string, postId: string, authorUuid?: string }) {
+  const authorName = getAnonymousName(authorUuid || postId);
+
   const handleDownload = () => {
     const canvas = document.createElement('canvas');
     canvas.width = 1080;
@@ -41,9 +54,10 @@ export default function StoryButton({ postContent, postType, postId }: { postCon
     ctx.font = 'bold 36px sans-serif';
     ctx.fillText('TNKU OVERHEARD', 140, 520);
 
+    // Dinamik Kullanıcı Adı (Örn: @Sarhoş Kurt)
     ctx.fillStyle = '#888888';
     ctx.font = '28px sans-serif';
-    ctx.fillText('@Kampüs Sakini', 140, 570);
+    ctx.fillText(`@${authorName}`, 140, 570);
 
     // Kategori Rozeti
     const isConfession = postType === 'CONFESSION';
@@ -78,7 +92,6 @@ export default function StoryButton({ postContent, postType, postId }: { postCon
     ctx.fillText(line, 140, y);
 
     // 5. 🔥 Siteyi Öne Çıkaran Alt Yönlendirme Alanı (Footer)
-    // Şık bir buton kutusu efekti
     ctx.fillStyle = 'rgba(77, 163, 255, 0.12)';
     ctx.strokeStyle = 'rgba(77, 163, 255, 0.3)';
     ctx.lineWidth = 2;

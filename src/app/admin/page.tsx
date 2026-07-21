@@ -564,8 +564,8 @@ export default async function AdminDashboard({ searchParams }: any) {
                       </div>
                       
                       <div className="flex gap-2 w-full flex-wrap justify-end">
-                        {/* 🔥 Instagram Story Kartı Üretme Butonu */}
-                        <StoryButton postContent={post.content} postType={post.type} postId={post.id} />
+                        {/* 🔥 Instagram Story Kartı Üretme Butonu (Dinamik Yazar Adı Eklendi) */}
+                        <StoryButton postContent={post.content} postType={post.type} postId={post.id} authorUuid={post.authorUuid} />
 
                         {post.status === 'PENDING' ? (
                           <>
