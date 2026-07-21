@@ -7,7 +7,8 @@ import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
-import { Plus, ChevronDown, MessageSquareHeart } from 'lucide-react';
+import ShareAccordion from '@/components/ShareAccordion'; // 🔥 YENİ ANİMASYONLU BİLEŞEN EKLENDİ
+import { MessageSquareHeart } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -102,16 +103,13 @@ export default async function Home({ searchParams }: any) {
       <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/15 blur-[140px] pointer-events-none -z-10" />
       <div className="fixed top-[40%] left-[50%] w-[300px] h-[300px] rounded-full bg-pink-500/5 blur-[100px] pointer-events-none -z-10" />
 
-      {/* 🔥 ONARILAN HEADER KISMI */}
       <header className="sticky top-0 z-50 bg-[#0B0B0B]/40 backdrop-blur-3xl border-b border-white/[0.03] px-4 py-4 md:px-8 flex items-center justify-between transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)] gap-2">
         
-        {/* LOGO (Sola dayalı, mobilde daha kibar) */}
         <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity shrink-0">
           <img src="/logo.jpg" alt="Logo" className="w-8 h-8 sm:w-9 sm:h-9 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
           <h1 className="text-base sm:text-xl font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
         </Link>
         
-        {/* İKONLAR (Sağa dayalı) */}
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <NotificationBell notifications={notifications} />
           
@@ -136,25 +134,10 @@ export default async function Home({ searchParams }: any) {
         )}
 
         <div className="mb-8 relative z-10">
-          <details className="group [&_summary::-webkit-details-marker]:hidden">
-            <summary className="list-none cursor-pointer flex items-center justify-between bg-white/[0.02] backdrop-blur-2xl border border-white/[0.05] hover:border-white/[0.1] hover:bg-white/[0.04] p-4 sm:p-5 rounded-[24px] transition-all duration-300 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
-              <div className="flex items-center gap-4">
-                <div className="bg-[#4DA3FF]/10 p-3 rounded-2xl border border-[#4DA3FF]/10 group-hover:scale-105 transition-transform">
-                  <Plus className="text-[#4DA3FF]" size={20} />
-                </div>
-                <div>
-                  <h3 className="font-bold text-gray-100 text-[15px]">Anonim paylaşım yapmak ister misin?</h3>
-                  <p className="text-[12px] text-gray-500 font-medium mt-0.5">Kampüste olan biteni anonim fısılda.</p>
-                </div>
-              </div>
-              <div className="bg-white/5 w-8 h-8 flex items-center justify-center rounded-full group-open:rotate-180 transition-transform duration-500">
-                <ChevronDown size={16} className="text-gray-400" />
-              </div>
-            </summary>
-            <div className="pt-4 animate-in fade-in slide-in-from-top-2 duration-500 relative z-10">
-              <ModernForm />
-            </div>
-          </details>
+          {/* 🔥 İŞTE BURASI! Çirkin details etiketi yerine yağ gibi akan ShareAccordion kullanıyoruz */}
+          <ShareAccordion>
+            <ModernForm />
+          </ShareAccordion>
         </div>
         
         <div className="mb-6 relative z-10">
