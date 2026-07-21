@@ -12,7 +12,7 @@ export default function ModernForm() {
   const [people, setPeople] = useState(''); 
   const [gender, setGender] = useState(''); 
   const [time, setTime] = useState('');
-  const [isEphemeral, setIsEphemeral] = useState(false); // 🔥 YENİ: 24 saat sonra kaybolma state'i
+  const [isEphemeral, setIsEphemeral] = useState(false);
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
   
@@ -31,7 +31,7 @@ export default function ModernForm() {
       formData.append('people', people);
       formData.append('gender', gender);
       formData.append('time', time);
-      formData.append('isEphemeral', isEphemeral ? 'true' : 'false'); // 🔥 YENİ: Süreli olma durumunu action'a yolluyoruz
+      formData.append('isEphemeral', isEphemeral ? 'true' : 'false');
 
       const res = await createPost(formData);
 
@@ -55,6 +55,8 @@ export default function ModernForm() {
       setLoading(false);
     }
   };
+
+  const labelTerm = type === 'CONFESSION' ? 'İtiraf' : 'Fısıltı';
 
   return (
     <div className={`relative bg-white/[0.02] backdrop-blur-2xl border transition-all duration-500 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-3 sm:p-6 rounded-[20px] sm:rounded-[24px] mb-2 overflow-hidden group/form ${
@@ -180,7 +182,7 @@ export default function ModernForm() {
             </div>
         </div>
 
-        {/* 🔥 YENİ: 24 Saat Sonra Yok Olma (Ephemeral) Toggle Kutusu */}
+        {/* 24 Saat Sonra Yok Olma Toggle Kutusu */}
         <div 
           onClick={() => setIsEphemeral(!isEphemeral)}
           className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border backdrop-blur-md cursor-pointer transition-all duration-300 ${
@@ -193,7 +195,7 @@ export default function ModernForm() {
             <Clock size={18} className={isEphemeral ? 'text-amber-400 animate-spin-slow' : 'text-gray-500'} />
             <div>
               <div className="text-[12px] sm:text-[13px] font-bold">24 Saat Sonra Kendini İmha Etsin ⏳</div>
-              <div className="text-[10px] text-gray-500 font-medium">Bu seçenek açılırsa fısıltı tam 24 saat sonra sistemden silinir.</div>
+              <div className="text-[10px] text-gray-500 font-medium">Bu seçenek açılırsa {labelTerm.toLowerCase()} tam 24 saat sonra sistemden silinir.</div>
             </div>
           </div>
           <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
@@ -215,9 +217,21 @@ export default function ModernForm() {
           }`}
         >
           {loading ? (
-            <><Loader2 size={16} className="animate-spin sm:w-[20px] sm:h-[20px]" /> Kapsüle Yükleniyor...</>
+            <span className="flex items-center gap-2">
+              <Loader2 size={16} className="animate-spin sm:w-[20px] sm:h-[20px]" /> Kapsüle Yükleniyor...
+            </span>
+          ) : isEphemeral ? (
+            <span className="flex items-center gap-2">
+              <Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> Süreli {labelTerm}yı Fırlat ⏳
+            </span>
+          ) : type === 'CONFESSION' ? (
+            <span className="flex items-center gap-2">
+              <Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> İtirafı Gönder
+            </span>
           ) : (
-            <><Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> {isEphemeral ? 'Süreli Fısıltıyı Fırlat ⏳' : type === 'CONFESSION' ? 'İtirafı Gönder' : 'Fısıltıyı Gönder'}</>
+            <span className="flex items-center gap-2">
+              <Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> Fısıltıyı Gönder
+            </span>
           )}
         </button>
       </form>
