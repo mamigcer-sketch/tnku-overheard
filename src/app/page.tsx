@@ -9,6 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import ShareAccordion from '@/components/ShareAccordion';
 import RefreshButton from '@/components/RefreshButton';
+import CountdownWidget from '@/components/CountdownWidget';
 import { MessageSquareHeart } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -51,7 +52,7 @@ export default async function Home({ searchParams }: any) {
   const pageSize = 10;
   const totalTake = page * pageSize; 
 
-  // 🔥 YENİ: Süresi dolan (expiresAt < now) postları filtreleyen sistem
+  // Süresi dolan postları filtreleyen sistem
   let whereQuery: any = { 
     status: 'APPROVED',
     OR: [
@@ -74,7 +75,8 @@ export default async function Home({ searchParams }: any) {
 
   if (searchQuery) whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
 
-  const [posts, totalPostsCount, activeAnnouncement] = await Promise.all([
+  // 🔥 YENİ: activeCountdown eklendi!
+  const [posts, totalPostsCount, activeAnnouncement, activeCountdown] = await Promise.all([
     prisma.post.findMany({
       where: whereQuery,
       orderBy: orderQuery,
@@ -83,6 +85,10 @@ export default async function Home({ searchParams }: any) {
     }),
     prisma.post.count({ where: whereQuery }),
     (prisma as any).announcement.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'desc' }
+    }),
+    (prisma as any).countdown.findFirst({
       where: { isActive: true },
       orderBy: { createdAt: 'desc' }
     })
@@ -143,6 +149,11 @@ export default async function Home({ searchParams }: any) {
             <p className="text-gray-200 text-[13px] sm:text-[14px] font-medium leading-relaxed">{activeAnnouncement.content}</p>
           </div>
         )}
+
+        {/* 🔥 YENİ: Geri Sayım (Countdown) Widget'ı */}
+        <div className="relative z-10">
+          <CountdownWidget countdown={activeCountdown} />
+        </div>
 
         <div className="mb-8 relative z-10">
           <ShareAccordion>

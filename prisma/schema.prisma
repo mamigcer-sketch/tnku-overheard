@@ -91,3 +91,11 @@ model Notification {
 
   post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
+
+model Countdown {
+  id         String   @id @default(cuid())
+  title      String
+  targetDate DateTime
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+}

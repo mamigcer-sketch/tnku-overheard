@@ -6,7 +6,7 @@ import StoryButton from '@/components/StoryButton';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -50,7 +50,6 @@ export default async function AdminDashboard({ searchParams }: any) {
   const params = await searchParams;
   const currentTab = params?.tab || 'Dashboard';
 
-  // Son 1 saatlik canlı aktiflik verileri hesaplanıyor
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
   const [total, pending, approved, rejected, aggregateStats, reportsCount, recentPostsCount, recentCommentsCount, recentAuthors] = await Promise.all([
@@ -73,34 +72,23 @@ export default async function AdminDashboard({ searchParams }: any) {
   const totalViews = aggregateStats._sum.views || 0;
   const activeAuthorsCount = recentAuthors.length;
 
-  // VERİ ÇEKME MANTIĞI
   let displayPosts: any[] = [];
   let displayComments: any[] = [];
   let announcements: any[] = [];
+  let countdowns: any[] = [];
   let bannedUsers: any[] = [];
   let reports: any[] = [];
 
   if (currentTab === 'Yorumlar') {
-    displayComments = await prisma.comment.findMany({ 
-      orderBy: { createdAt: 'desc' },
-      include: { post: { select: { content: true, type: true } } }
-    });
+    displayComments = await prisma.comment.findMany({ orderBy: { createdAt: 'desc' }, include: { post: { select: { content: true, type: true } } } });
   } else if (currentTab === 'Duyurular') {
-    announcements = await (prisma as any).announcement.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    announcements = await (prisma as any).announcement.findMany({ orderBy: { createdAt: 'desc' } });
+  } else if (currentTab === 'Sayaç') {
+    countdowns = await (prisma as any).countdown.findMany({ orderBy: { createdAt: 'desc' } });
   } else if (currentTab === 'Banlar') {
-    bannedUsers = await (prisma as any).bannedUser.findMany({
-      orderBy: { createdAt: 'desc' },
-    });
+    bannedUsers = await (prisma as any).bannedUser.findMany({ orderBy: { createdAt: 'desc' } });
   } else if (currentTab === 'Şikayetler') {
-    reports = await (prisma as any).report.findMany({
-      orderBy: { createdAt: 'desc' },
-      include: { 
-        post: true, 
-        comment: true 
-      }
-    });
+    reports = await (prisma as any).report.findMany({ orderBy: { createdAt: 'desc' }, include: { post: true, comment: true } });
   } else {
     let queryFilter: any = { status: 'PENDING' };
     if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
@@ -115,69 +103,37 @@ export default async function AdminDashboard({ searchParams }: any) {
   async function rejectPost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'REJECTED' } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function deletePost(formData: FormData) { 'use server'; await prisma.post.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function deleteComment(formData: FormData) { 'use server'; await prisma.comment.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
+  async function banUser(formData: FormData) { 'use server'; const userUuid = formData.get('userUuid') as string; if (!userUuid) return; try { await (prisma as any).bannedUser.create({ data: { userUuid } }); } catch (e) {} revalidatePath('/admin'); }
+  async function unbanUser(formData: FormData) { 'use server'; const id = formData.get('id') as string; await (prisma as any).bannedUser.delete({ where: { id } }); revalidatePath('/admin'); }
   
-  async function updatePost(formData: FormData) {
-    'use server';
-    const id = formData.get('id') as string;
-    const content = formData.get('content') as string;
-    const type = formData.get('type') as string;
-    if (!id || !content) return;
-    await prisma.post.update({
-      where: { id },
-      data: { content, type }
-    });
-    revalidatePath('/admin');
-    revalidatePath('/');
-  }
-
-  async function banUser(formData: FormData) {
-    'use server';
-    const userUuid = formData.get('userUuid') as string;
-    if (!userUuid) return;
-    try {
-      await (prisma as any).bannedUser.create({ data: { userUuid } });
-    } catch (e) {}
-    revalidatePath('/admin');
-  }
-
-  async function unbanUser(formData: FormData) {
-    'use server';
-    const id = formData.get('id') as string;
-    await (prisma as any).bannedUser.delete({ where: { id } });
-    revalidatePath('/admin');
-  }
-
-  async function createAnnouncement(formData: FormData) { 
-    'use server'; 
-    const content = formData.get('content') as string;
-    if (!content) return;
-    await (prisma as any).announcement.create({ data: { content, isActive: true } }); 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
-  }
+  async function updatePost(formData: FormData) { 'use server'; const id = formData.get('id') as string; const content = formData.get('content') as string; const type = formData.get('type') as string; if (!id || !content) return; await prisma.post.update({ where: { id }, data: { content, type } }); revalidatePath('/admin'); revalidatePath('/'); }
   
-  async function toggleAnnouncement(formData: FormData) { 
+  async function createAnnouncement(formData: FormData) { 'use server'; const content = formData.get('content') as string; if (!content) return; await (prisma as any).announcement.create({ data: { content, isActive: true } }); revalidatePath('/admin'); revalidatePath('/'); }
+  async function toggleAnnouncement(formData: FormData) { 'use server'; const id = formData.get('id') as string; const currentState = formData.get('isActive') === 'true'; await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); revalidatePath('/admin'); revalidatePath('/'); }
+  async function deleteAnnouncement(formData: FormData) { 'use server'; await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); revalidatePath('/'); }
+
+  // YENİ: Sayaç İşlemleri
+  async function createCountdown(formData: FormData) { 
     'use server'; 
-    const id = formData.get('id') as string;
-    const currentState = formData.get('isActive') === 'true';
-    await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); 
+    const title = formData.get('title') as string;
+    const dateStr = formData.get('targetDate') as string;
+    if (!title || !dateStr) return;
+    const targetDate = new Date(dateStr);
+    
+    // Eski sayaçları pasife al (Sadece 1 tane aktif olsun)
+    await (prisma as any).countdown.updateMany({ data: { isActive: false } });
+    await (prisma as any).countdown.create({ data: { title, targetDate, isActive: true } }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
+  async function deleteCountdown(formData: FormData) { 
+    'use server'; 
+    await (prisma as any).countdown.delete({ where: { id: formData.get('id') as string } }); 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
 
-  async function deleteAnnouncement(formData: FormData) { 
-    'use server'; 
-    await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
-  }
-
-  async function dismissReport(formData: FormData) {
-    'use server';
-    await (prisma as any).report.delete({ where: { id: formData.get('id') as string } });
-    revalidatePath('/admin');
-  }
-
+  async function dismissReport(formData: FormData) { 'use server'; await (prisma as any).report.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
   async function logout() { 'use server'; (await cookies()).delete('admin_auth'); revalidatePath('/admin'); }
 
   const menuItems = [
@@ -189,6 +145,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: MessageSquare, label: 'Yorumlar' },
     { icon: Flag, label: 'Şikayetler', badge: reportsCount },
     { icon: Bell, label: 'Duyurular' },
+    { icon: Timer, label: 'Sayaç' },
     { icon: Ban, label: 'Banlar' }
   ];
 
@@ -228,7 +185,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       <main className="flex-1 overflow-y-auto p-4 md:p-10 scrollbar-hide pb-28">
         <header className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
             <h2 className="text-2xl font-bold flex items-center gap-3">
-              {currentTab === 'Yorumlar' ? <MessageSquare className="text-[#4DA3FF]" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF]" /> : currentTab === 'Banlar' ? <Ban className="text-red-400" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500" /> : <BarChart3 className="text-[#4DA3FF]" />} 
+              {currentTab === 'Yorumlar' ? <MessageSquare className="text-[#4DA3FF]" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF]" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400" /> : currentTab === 'Banlar' ? <Ban className="text-red-400" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500" /> : <BarChart3 className="text-[#4DA3FF]" />} 
               {currentTab} Paneli
             </h2>
             <div className="hidden md:flex items-center gap-2 text-sm text-gray-500 bg-white/5 px-4 py-2 rounded-full border border-white/5">
@@ -237,7 +194,7 @@ export default async function AdminDashboard({ searchParams }: any) {
         </header>
 
         {/* İSTATİSTİKLER & CANLI KAMPÜS NABZI */}
-        {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
+        {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
           <>
             <div className="mb-6 bg-gradient-to-r from-green-500/10 via-[#121212] to-blue-500/10 p-6 rounded-2xl border border-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.05)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
@@ -451,10 +408,63 @@ export default async function AdminDashboard({ searchParams }: any) {
                             {item.isActive ? 'Pasife Al' : 'Aktif Et'}
                           </button>
                         </form>
-
                         <form action={deleteAnnouncement}>
                           <input type="hidden" name="id" value={item.id} />
                           <button type="submit" className="p-2 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all">
+                            <Trash2 size={16} />
+                          </button>
+                        </form>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : currentTab === 'Sayaç' ? (
+            <div className="space-y-6">
+              <form action={createCountdown} className="bg-[#121212] border border-red-500/20 p-6 rounded-[24px] space-y-4 shadow-[0_0_15px_rgba(239,68,68,0.05)]">
+                <div className="flex items-center gap-2 mb-2">
+                  <Timer className="text-red-400" size={20} />
+                  <h3 className="font-bold text-gray-200 text-sm">Yeni Geri Sayım Başlat</h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1.5">Başlık (Örn: Bütlere Son)</label>
+                    <input name="title" required type="text" placeholder="Bütlere Kalan Süre" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-red-400" />
+                  </div>
+                  <div>
+                    <label className="text-[10px] text-gray-400 font-bold uppercase block mb-1.5">Bitiş Tarihi ve Saati</label>
+                    <input name="targetDate" required type="datetime-local" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-white focus:outline-none focus:border-red-400" />
+                  </div>
+                </div>
+                <button type="submit" className="px-6 py-3 w-full sm:w-auto bg-red-500/10 text-red-400 border border-red-500/20 font-bold rounded-xl text-sm hover:bg-red-500/20 transition-all flex items-center justify-center gap-2">
+                  <Plus size={16} /> Sayacı Ana Sayfada Başlat
+                </button>
+                <p className="text-[10px] text-gray-500 mt-2">* Yeni bir sayaç başlattığınızda varsa önceki sayaç otomatik durdurulur.</p>
+              </form>
+
+              <div className="space-y-4">
+                <h3 className="font-bold text-gray-200 text-sm pt-2">Sayaç Geçmişi</h3>
+                {countdowns.length === 0 ? (
+                  <div className="text-center py-12 bg-[#121212] border border-white/5 rounded-2xl text-gray-500 text-sm">
+                    Henüz hiç geri sayım eklenmemiş.
+                  </div>
+                ) : (
+                  countdowns.map((item: any) => (
+                    <div key={item.id} className="bg-[#121212] border border-white/5 p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className={`w-2 h-2 rounded-full ${item.isActive ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)] animate-pulse' : 'bg-gray-600'}`} />
+                          <span className="text-xs font-bold text-gray-400">{item.isActive ? 'Aktif Ana Sayfada Dönüyor' : 'Süresi Bitti / Kapatıldı'}</span>
+                        </div>
+                        <p className="text-white text-base font-bold">{item.title}</p>
+                        <p className="text-gray-400 text-xs font-mono">Hedef: {new Date(item.targetDate).toLocaleString('tr-TR')}</p>
+                      </div>
+
+                      <div className="flex items-center gap-2 shrink-0">
+                        <form action={deleteCountdown}>
+                          <input type="hidden" name="id" value={item.id} />
+                          <button type="submit" className="p-2.5 bg-red-500/10 text-red-400 border border-red-500/20 rounded-xl hover:bg-red-500/20 transition-all">
                             <Trash2 size={16} />
                           </button>
                         </form>
@@ -529,7 +539,6 @@ export default async function AdminDashboard({ searchParams }: any) {
  
                     <p className="text-white text-[16px] leading-relaxed py-2">{post.content}</p>
 
-                    {/* DÜZENLEME AKORDEONU */}
                     <details className="group/edit">
                       <summary className="list-none cursor-pointer bg-blue-500/10 text-blue-400 py-2 px-4 rounded-xl text-xs font-bold border border-blue-500/20 hover:bg-blue-500/20 inline-flex items-center gap-1.5 transition-all">
                         <Pencil size={14}/> Yazıyı ve Kategoriyi Düzenle
@@ -564,7 +573,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                       </div>
                       
                       <div className="flex gap-2 w-full flex-wrap justify-end">
-                        {/* 🔥 Instagram Story Kartı Üretme Butonu (Dinamik Yazar Adı Eklendi) */}
                         <StoryButton postContent={post.content} postType={post.type} postId={post.id} authorUuid={post.authorUuid} />
 
                         {post.status === 'PENDING' ? (
