@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
+import StoryButton from '@/components/StoryButton';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
@@ -49,7 +50,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   const params = await searchParams;
   const currentTab = params?.tab || 'Dashboard';
 
-  // 🔥 Son 1 saatlik canlı aktiflik verileri hesaplanıyor
+  // Son 1 saatlik canlı aktiflik verileri hesaplanıyor
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
   const [total, pending, approved, rejected, aggregateStats, reportsCount, recentPostsCount, recentCommentsCount, recentAuthors] = await Promise.all([
@@ -238,7 +239,6 @@ export default async function AdminDashboard({ searchParams }: any) {
         {/* İSTATİSTİKLER & CANLI KAMPÜS NABZI */}
         {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
           <>
-            {/* 🔥 Canlı Kampüs Nabzı / Okuyucu Sayacı Widget'ı */}
             <div className="mb-6 bg-gradient-to-r from-green-500/10 via-[#121212] to-blue-500/10 p-6 rounded-2xl border border-green-500/20 shadow-[0_0_30px_rgba(34,197,94,0.05)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
               <div className="flex items-center gap-3">
                 <div className="relative flex items-center justify-center p-3 bg-green-500/20 rounded-2xl border border-green-500/30">
@@ -564,6 +564,9 @@ export default async function AdminDashboard({ searchParams }: any) {
                       </div>
                       
                       <div className="flex gap-2 w-full flex-wrap justify-end">
+                        {/* 🔥 Instagram Story Kartı Üretme Butonu */}
+                        <StoryButton postContent={post.content} postType={post.type} postId={post.id} />
+
                         {post.status === 'PENDING' ? (
                           <>
                             <form action={approvePost} className="min-w-[100px]"><input type="hidden" name="id" value={post.id} /><button className="w-full bg-green-500/10 text-green-400 py-2.5 px-4 rounded-xl text-xs font-bold border border-green-500/20 hover:bg-green-500/20 flex items-center justify-center gap-1.5 transition-all"><Check size={14}/> Onayla</button></form>
