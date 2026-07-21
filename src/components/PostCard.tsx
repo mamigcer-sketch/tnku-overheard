@@ -5,6 +5,7 @@ import CommentForm from "./CommentForm";
 import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, BadgeCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { incrementView, submitReport } from "@/app/post/actions";
+import { playPopSound, playClickSound } from "@/utils/sounds"; // 🔥 SES MOTORU EKLENDİ
 
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
@@ -55,7 +56,6 @@ const getRelativeTime = (dateString: string) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// 🔥 YENİ: userBadge prop'u eklendi
 export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge }: any) {
   const router = useRouter();
   const [showComment, setShowComment] = useState(false);
@@ -81,12 +81,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const isEphemeral = !!post.expiresAt;
   const isConfession = post.type === 'CONFESSION';
 
-  const triggerHaptic = (duration = 50) => {
-    if (typeof window !== "undefined" && window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(duration);
-    }
-  };
-
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -110,7 +104,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    triggerHaptic(); 
+    playClickSound(); // 🔥 Tık Sesi
     const shareData = {
       title: 'TNKU Overheard',
       text: 'Şu paylaşıma bakmalısın!',
@@ -127,7 +121,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const handleLikeClick = (e: React.FormEvent) => {
     if (localLiked) return;
-    triggerHaptic(); 
+    playPopSound(); // 🔥 Kalbe basınca POP Sesi!
     setLocalLiked(true);
     setLocalLikesCount((prev: number) => prev + 1);
     setIsLikingAnimation(true);
@@ -137,7 +131,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const handleReportClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (reported) return;
-    triggerHaptic();
+    playClickSound();
     setShowReportModal(true);
   };
 
@@ -164,7 +158,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
       clearTimeout(clickTimeout.current);
       clickTimeout.current = null;
       
-      triggerHaptic(100); 
+      playPopSound(); // 🔥 Çift tıkla beğenince POP Sesi!
       setShowBigHeart(true); 
       setTimeout(() => setShowBigHeart(false), 900); 
 
@@ -234,7 +228,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                 </span>
               )}
 
-              {/* 🔥 ROZET BURAYA EKLENDİ */}
               <div className="flex items-center gap-2">
                 {userBadge && (
                   <span className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 text-yellow-400 border border-yellow-500/30 px-2 py-1 rounded-lg shadow-[0_0_10px_rgba(245,158,11,0.15)] flex items-center">
@@ -269,7 +262,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
               <button
                 onClick={(e) => { 
                   e.stopPropagation(); 
-                  triggerHaptic(30);
+                  playClickSound();
                   setIsExpanded(true); 
                 }}
                 className={`font-bold text-[13px] sm:text-[14px] mt-1 transition-colors active:scale-95 inline-block ${
@@ -304,7 +297,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
               </button>
             </form>
             
-            <button onClick={() => { triggerHaptic(); setShowComment(!showComment); }} className={`flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-xl transition-all duration-300 ${showComment ? (isEphemeral ? 'text-amber-400 bg-amber-500/10' : 'text-[#4DA3FF] bg-[#4DA3FF]/10') : (isEphemeral ? 'hover:text-amber-400 hover:bg-amber-500/10' : 'hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10')} active:scale-90`}>
+            <button onClick={() => { playClickSound(); setShowComment(!showComment); }} className={`flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-xl transition-all duration-300 ${showComment ? (isEphemeral ? 'text-amber-400 bg-amber-500/10' : 'text-[#4DA3FF] bg-[#4DA3FF]/10') : (isEphemeral ? 'hover:text-amber-400 hover:bg-amber-500/10' : 'hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10')} active:scale-90`}>
               <MessageCircle size={18} className={`${showComment ? (isEphemeral ? 'fill-amber-400/20' : 'fill-[#4DA3FF]/20') : ''}`} /> 
               <span className="text-[13px] font-bold">{post.comments?.length || 0}</span>
             </button>
