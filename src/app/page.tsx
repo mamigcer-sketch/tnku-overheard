@@ -228,6 +228,8 @@ export default async function Home({ searchParams }: any) {
                   userUuid={userUuid}
                   customNickname={customNicknamesMap[post.authorUuid]} 
                   userBadge={userBadgesMap[post.authorUuid]}
+                  customNicknamesMap={customNicknamesMap}
+                  userBadgesMap={userBadgesMap}
                 />
               ))}
               

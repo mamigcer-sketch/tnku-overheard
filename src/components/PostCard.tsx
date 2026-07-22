@@ -56,7 +56,7 @@ const getRelativeTime = (dateString: string) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge }: any) {
+export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge, customNicknamesMap = {}, userBadgesMap = {} }: any) {
   const router = useRouter();
   const [showComment, setShowComment] = useState(false);
   const cardRef = useRef(null);
@@ -191,8 +191,13 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
         ? 'hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] hover:border-emerald-500/30'
         : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
 
-  // 🔥 Özel nick burada işleme alınıyor
   const authorData = getAnonymousData(post.authorUuid || post.id, customNickname);
+
+  // Yorum önizlemesi için yazar verisi
+  const firstComment = post.comments && post.comments.length > 0 ? post.comments[0] : null;
+  const commentAuthorUuid = firstComment ? (firstComment.authorId || firstComment.id) : null;
+  const commentCustomNick = commentAuthorUuid ? customNicknamesMap[commentAuthorUuid] : undefined;
+  const commentAuthorData = commentAuthorUuid ? getAnonymousData(commentAuthorUuid, commentCustomNick) : null;
 
   return (
     <>
@@ -292,7 +297,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </div>
         </div>
 
-        {post.comments && post.comments.length > 0 && post.comments[0].content && (
+        {firstComment && firstComment.content && commentAuthorData && (
           <div 
             onClick={(e) => {
               e.stopPropagation();
@@ -304,9 +309,9 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             <span className="text-[13px] opacity-60 mt-0.5">💬</span>
             <div className="text-[13px] text-gray-400 line-clamp-2 leading-relaxed">
               <span className="font-bold text-gray-200 mr-1.5">
-                @{getAnonymousData(post.comments[0].authorId || post.comments[0].id).name}:
+                @{commentAuthorData.name}:
               </span>
-              {post.comments[0].content}
+              {firstComment.content}
             </div>
           </div>
         )}
