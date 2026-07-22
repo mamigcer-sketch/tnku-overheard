@@ -11,6 +11,7 @@ import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
 import { MessageSquareHeart } from 'lucide-react';
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
+import ScrollToTopV2 from '@/components/ScrollToTopV2';
 
 export const dynamic = 'force-dynamic';
 
@@ -247,7 +248,10 @@ export default async function Home({ searchParams }: any) {
         </div>
       </div>
 
-      {/* Kesinlikle kapalı başlayan güvenli istemci paylaşım widget'ı */}
+      {/* Yukarı Çık Butonu */}
+      <ScrollToTopV2 />
+
+      {/* Paylaş Widget'ı */}
       <ClientShareWidgetV2>
         <ModernForm />
       </ClientShareWidgetV2>
