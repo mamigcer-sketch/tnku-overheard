@@ -37,8 +37,8 @@ export default function ScrollToTopV2() {
       onClick={scrollToTop}
       style={{
         position: 'fixed',
-        bottom: '96px', // Sağdaki paylaş butonuyla milimetrik aynı yükseklik (bottom-24 karşılığı)
-        left: '24px',
+        bottom: '96px', // Paylaş butonuyla birebir aynı yükseklik
+        right: '150px', // Paylaş butonunun hemen soluna denk gelecek mesafe (ekran genişliğine göre yan yana duracaklar)
         zIndex: 40,
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.8)',
