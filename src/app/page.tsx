@@ -7,10 +7,10 @@ import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
-import ShareBottomSheet from '@/components/ShareBottomSheet';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
 import { MessageSquareHeart } from 'lucide-react';
+import ClientShareWidget from '@/components/ClientShareWidget'; // Aşağıda oluşturacağız
 
 export const dynamic = 'force-dynamic';
 
@@ -247,10 +247,10 @@ export default async function Home({ searchParams }: any) {
         </div>
       </div>
 
-      {/* 🔥 Sağ altta süzülen yüzen neon artı butonu (FAB Bottom Sheet) */}
-      <ShareBottomSheet>
+      {/* Kesinlikle kapalı başlayan güvenli istemci paylaşım widget'ı */}
+      <ClientShareWidget>
         <ModernForm />
-      </ShareBottomSheet>
+      </ClientShareWidget>
     </main>
   );
 }
