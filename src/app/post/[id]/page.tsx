@@ -104,6 +104,7 @@ export default async function PostPage({ params }: any) {
   }
 
   const isConfession = post.type === 'CONFESSION';
+  const isBosYap = post.type === 'BOSYAP'; // 🔥 EKLENDİ
   const isTrending = post.likes >= 10; 
   const isEphemeral = !!post.expiresAt; 
   
@@ -116,7 +117,9 @@ export default async function PostPage({ params }: any) {
     ? 'shadow-[0_8px_32px_0_rgba(245,158,11,0.2)] border-amber-500/40 bg-amber-500/[0.01]'
     : isConfession 
       ? 'shadow-[0_8px_32px_0_rgba(168,85,247,0.15)] border-purple-500/20' 
-      : 'shadow-[0_8px_32px_0_rgba(77,163,255,0.15)] border-[#4DA3FF]/20';
+      : isBosYap
+        ? 'shadow-[0_8px_32px_0_rgba(16,185,129,0.15)] border-emerald-500/20' // 🔥 EKLENDİ
+        : 'shadow-[0_8px_32px_0_rgba(77,163,255,0.15)] border-[#4DA3FF]/20';
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-24">
@@ -146,7 +149,7 @@ export default async function PostPage({ params }: any) {
           )}
 
           {isTrending && !isEphemeral && (
-            <div className={`absolute -inset-[1px] opacity-100 blur-xl -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/20 to-pink-500/20' : 'from-[#4DA3FF]/20 to-blue-500/20'}`} />
+            <div className={`absolute -inset-[1px] opacity-100 blur-xl -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/20 to-pink-500/20' : isBosYap ? 'from-emerald-500/20 to-teal-500/20' : 'from-[#4DA3FF]/20 to-blue-500/20'}`} />
           )}
 
           <div className="flex flex-wrap justify-between items-start gap-2 mb-4">
@@ -157,13 +160,18 @@ export default async function PostPage({ params }: any) {
                   <Clock size={12} /> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
                 </span>
               ) : (
-                <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
+                <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${
+                  isConfession ? 'bg-purple-500/10 text-purple-400' 
+                  : isBosYap ? 'bg-emerald-500/10 text-emerald-400' 
+                  : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'
+                }`}>
                   {isTrending && <Flame size={12} className="animate-pulse" />}
-                  {isConfession ? 'İTİRAF' : 'OVERHEARD'}
+                  {/* 🔥 DÜZELTME BURADA YAPILDI: Boş yap rozeti artık detayda da doğru çıkıyor */}
+                  {isConfession ? 'İTİRAF' : isBosYap ? 'BOŞ YAP' : 'OVERHEARD'}
                 </span>
               )}
 
-              {/* 🔥 ROZET VE NICK ALANI (Instagram Logolu & Hayvan Yerine Logo) */}
+              {/* ROZET VE NICK ALANI */}
               <div className="flex items-center gap-2">
                 {postUserBadge && (
                   <span className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 text-yellow-400 border border-yellow-500/30 px-2 py-1 rounded-lg shadow-[0_0_10px_rgba(245,158,11,0.15)] flex items-center">
@@ -190,6 +198,7 @@ export default async function PostPage({ params }: any) {
             <span className="text-[10px] text-gray-500 font-medium bg-white/[0.03] px-2.5 py-1 rounded-md border border-white/[0.02]">
               {getRelativeTime(post.createdAt)}
             </span>
+
           </div>
 
           <p className="text-[15px] sm:text-[17px] leading-relaxed font-medium text-gray-100 mb-6 break-words tracking-wide">
