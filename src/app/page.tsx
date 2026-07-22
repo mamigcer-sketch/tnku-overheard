@@ -7,7 +7,7 @@ import { cookies } from 'next/headers';
 import MobileMenu from '@/components/MobileMenu';
 import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
-import ShareAccordion from '@/components/ShareAccordion';
+import ShareBottomSheet from '@/components/ShareBottomSheet';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
 import { MessageSquareHeart } from 'lucide-react';
@@ -175,17 +175,17 @@ export default async function Home({ searchParams }: any) {
           <CountdownWidget countdown={activeCountdown} />
         </div>
 
+        {/* 🔥 GÜNCELLENDİ: Eski Accordion yerine parmak dostu Bottom Sheet bağlandı */}
         <div className="mb-8 relative z-10">
-          <ShareAccordion>
+          <ShareBottomSheet>
             <ModernForm />
-          </ShareAccordion>
+          </ShareBottomSheet>
         </div>
         
         <div className="mb-6 relative z-10">
           <SearchBar />
         </div>
 
-        {/* 🔥 GÜNCELLENDİ: Siyahlık tamamen kaldırıldı, tamamen şeffaf ve akışkan cam efektine çevrildi */}
         <div className="flex gap-2.5 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-transparent backdrop-blur-md pt-3 -mx-4 px-4 sm:mx-0 sm:px-0">
           {filters.map((filter) => {
             const isActive = currentFilter === filter;
