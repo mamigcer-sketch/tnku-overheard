@@ -6,7 +6,7 @@ import AdminStoryExporter from '@/components/AdminStoryExporter';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, Coffee,
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles, ExternalLink
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles, ExternalLink, Crown, Award, UserMinus
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -99,6 +99,14 @@ export default async function AdminDashboard({ searchParams }: any) {
     return acc;
   }, {});
 
+  // VIP Listesini Oluştur (Nickname veya Rozeti olan herkes)
+  const vipUserUuids = Array.from(new Set([...customNicknamesDb.map(n => n.userUuid), ...userBadgesDb.map(b => b.userUuid)]));
+  const vipUsers = vipUserUuids.map(uuid => ({
+    uuid,
+    nickname: customNicknamesMap[uuid] || '',
+    badge: userBadgesMap[uuid] || ''
+  }));
+
   if (currentTab === 'Yorumlar') {
     displayComments = await prisma.comment.findMany({ orderBy: { createdAt: 'desc' }, include: { post: { select: { content: true, type: true } } } });
   } else if (currentTab === 'Duyurular') {
@@ -109,7 +117,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     bannedUsers = await (prisma as any).bannedUser.findMany({ orderBy: { createdAt: 'desc' } });
   } else if (currentTab === 'Şikayetler') {
     reports = await (prisma as any).report.findMany({ orderBy: { createdAt: 'desc' }, include: { post: true, comment: true } });
-  } else { 
+  } else if (currentTab !== 'VIP Üyeler') { 
     let queryFilter: any = { status: 'PENDING' };
     if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
     if (currentTab === 'Overheard') queryFilter = { status: 'APPROVED', type: { in: ['OVERHEARD', 'OVERHED'] } };
@@ -161,6 +169,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
     if (!userUuid) return;
 
+    // Nickname işlemleri
     if (!nickname.trim()) {
       await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
     } else {
@@ -172,6 +181,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       }
     }
 
+    // Rozet işlemleri
     if (!badge.trim()) {
       await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
     } else {
@@ -190,6 +200,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard' }, 
     { icon: Rss, label: 'Akış' }, 
+    { icon: Crown, label: 'VIP Üyeler' }, // 🔥 YENİ VIP SEKMESİ
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Coffee, label: 'Boş Yap' }, 
@@ -200,6 +211,21 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: Timer, label: 'Sayaç' },
     { icon: Ban, label: 'Banlar' }
   ];
+
+  // Adjective & Animals generator for Story
+  const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
+  const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
+
+  const getAuthorName = (id: string, customNickname?: string) => {
+    if (customNickname) return customNickname;
+    if (!id) return "Gizemli Yolcu";
+    
+    let hash = 0;
+    for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+    const positiveHash = Math.abs(hash);
+    
+    return `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`;
+  };
 
   return (
     <div className="flex h-screen bg-[#050505] text-white relative z-0 overflow-hidden">
@@ -214,7 +240,7 @@ export default async function AdminDashboard({ searchParams }: any) {
           {menuItems.map((item, i) => (
             <Link href={`/admin?tab=${item.label}`} key={i} className={`flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${currentTab === item.label ? 'bg-white/[0.06] text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.02)]' : 'text-gray-400 border border-transparent hover:text-white hover:bg-white/[0.03]'}`}>
               <div className="flex items-center gap-3.5">
-                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? 'text-[#4DA3FF]' : 'text-gray-500 group-hover:text-gray-300'}`} /> 
+                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? (item.label === 'VIP Üyeler' ? 'text-yellow-400' : 'text-[#4DA3FF]') : 'text-gray-500 group-hover:text-gray-300'}`} /> 
                 <span className={`font-semibold tracking-wide text-sm ${currentTab === item.label ? 'opacity-100' : 'opacity-80'}`}>{item.label}</span>
               </div>
               {item.badge !== undefined && item.badge > 0 ? (
@@ -234,7 +260,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0B0B0B]/90 backdrop-blur-3xl border-t border-white/10 px-2 py-2 flex justify-start z-50 overflow-x-auto gap-1 sm:gap-2 scrollbar-hide shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {menuItems.map((item, i) => (
           <Link href={`/admin?tab=${item.label}`} key={i} className={`flex flex-col items-center justify-center gap-1 min-w-[64px] sm:min-w-[72px] px-1 py-2 rounded-2xl transition-all relative ${currentTab === item.label ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
-            <item.icon size={18} className={currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
+            <item.icon size={18} className={currentTab === item.label && item.label === 'VIP Üyeler' ? 'text-yellow-400' : currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
             {item.badge !== undefined && item.badge > 0 && (
               <span className={`absolute top-0 right-2 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-black ${item.label === 'Şikayetler' ? 'bg-red-500 text-white' : 'bg-[#4DA3FF] text-black'}`}>{item.badge}</span>
             )}
@@ -248,8 +274,8 @@ export default async function AdminDashboard({ searchParams }: any) {
         
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-10 pb-4 sm:pb-6 border-b border-white/5 gap-3 sm:gap-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold flex items-center gap-3 sm:gap-4 tracking-tight">
-              <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border ${currentTab === 'Yorumlar' ? 'bg-blue-500/10 border-blue-500/20' : currentTab === 'Duyurular' ? 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20' : currentTab === 'Sayaç' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Banlar' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Şikayetler' ? 'bg-red-500/10 border-red-500/20' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20'}`}>
-                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
+              <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border ${currentTab === 'Yorumlar' ? 'bg-blue-500/10 border-blue-500/20' : currentTab === 'VIP Üyeler' ? 'bg-yellow-500/10 border-yellow-500/20' : currentTab === 'Duyurular' ? 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20' : currentTab === 'Sayaç' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Banlar' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Şikayetler' ? 'bg-red-500/10 border-red-500/20' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20'}`}>
+                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'VIP Üyeler' ? <Crown className="text-yellow-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
               </div>
               {currentTab} Paneli
             </h2>
@@ -265,7 +291,7 @@ export default async function AdminDashboard({ searchParams }: any) {
         <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           
           {/* İSTATİSTİKLER & CANLI KAMPÜS NABZI */}
-          {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
+          {currentTab !== 'Yorumlar' && currentTab !== 'VIP Üyeler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
             <>
               {/* Canlı Nabız Paneli */}
               <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 sm:gap-8 mb-6 sm:mb-8 relative overflow-hidden group">
@@ -338,7 +364,81 @@ export default async function AdminDashboard({ searchParams }: any) {
           {/* DİNAMİK SEKME İÇERİKLERİ */}
           <div className="space-y-4 sm:space-y-6">
             
-            {currentTab === 'Yorumlar' ? (
+            {/* 🔥 YENİ EKLENEN: VIP ÜYELER SEKMESİ */}
+            {currentTab === 'VIP Üyeler' ? (
+              <div className="space-y-6 sm:space-y-8">
+                
+                {/* Manuel VIP Ekleme Formu */}
+                <form action={updateUserMeta} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-yellow-500/20 space-y-4 sm:space-y-5 shadow-[0_10px_40px_rgba(234,179,8,0.05)] relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-yellow-500/10 blur-3xl rounded-full -z-10 group-hover:bg-yellow-500/20 transition-colors duration-700" />
+                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-yellow-500/10 rounded-lg sm:rounded-xl border border-yellow-500/30"><Award className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni VIP Ekle / Rozet Ver</h3>
+                  <p className="text-gray-400 text-xs sm:text-sm font-medium mb-2">Kullanıcının UUID'sini buraya yapıştırıp ona doğrudan özel nick ve rozet atayabilirsin.</p>
+                  
+                  <div className="grid lg:grid-cols-3 gap-4 sm:gap-5">
+                    <div className="lg:col-span-3">
+                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Kullanıcı UUID (Kimlik)</label>
+                      <input type="text" name="userUuid" required placeholder="Örn: clxj12345..." className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner font-mono" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Özel Nickname</label>
+                      <input type="text" name="nickname" placeholder="Örn: Sitenin Sahibi" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Rozet</label>
+                      <input type="text" name="badge" placeholder="Örn: 👑 Yönetici" className="w-full bg-black/40 border border-yellow-500/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner" />
+                    </div>
+                    <div className="flex items-end">
+                      <button type="submit" className="w-full justify-center bg-gradient-to-r from-yellow-500 to-amber-500 hover:to-amber-400 text-black font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-[10px] sm:text-xs transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(234,179,8,0.4)]"><Crown size={16}/> Ayrıcalık Tanımla</button>
+                    </div>
+                  </div>
+                </form>
+
+                {/* VIP Listesi */}
+                <div>
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">Mevcut VIP Üyeler <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-md text-xs border border-yellow-500/30">{vipUsers.length}</span></h3>
+                  </div>
+
+                  {vipUsers.length === 0 ? (
+                    <div className="text-center py-12 sm:py-16 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Sistemde henüz hiç VIP üye yok. Çok fakiriz!</div>
+                  ) : (
+                    <div className="grid gap-4 sm:gap-6">
+                      {vipUsers.map((user, idx) => (
+                        <div key={idx} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-col md:flex-row gap-4 sm:gap-6 md:items-center justify-between shadow-lg">
+                          
+                          <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
+                            <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 p-[2px] shrink-0">
+                              <div className="w-full h-full bg-[#050505] rounded-full flex items-center justify-center">
+                                <Crown className="text-yellow-400 w-5 h-5 sm:w-6 sm:h-6" />
+                              </div>
+                            </div>
+                            <div className="overflow-hidden">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                {user.nickname ? <span className="font-extrabold text-white text-sm sm:text-base">{user.nickname}</span> : <span className="font-extrabold text-gray-500 italic text-sm sm:text-base">Nick Yok</span>}
+                                {user.badge && <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-[10px] sm:text-xs font-black px-2 py-0.5 rounded-full">{user.badge}</span>}
+                              </div>
+                              <code className="text-[10px] sm:text-xs text-gray-500 font-mono mt-1 block truncate">UUID: {user.uuid}</code>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full md:w-auto">
+                            <form action={updateUserMeta} className="flex gap-2 w-full sm:w-auto">
+                              <input type="hidden" name="userUuid" value={user.uuid} />
+                              <input type="hidden" name="nickname" value="" />
+                              <input type="hidden" name="badge" value="" />
+                              <button type="submit" className="w-full sm:w-auto justify-center bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"><UserMinus size={14}/> Yetkileri Al</button>
+                            </form>
+                          </div>
+
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+              </div>
+
+            ) : currentTab === 'Yorumlar' ? (
                 displayComments.map((comment) => (
                   <article key={comment.id} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-col gap-4 sm:gap-5 shadow-xl hover:border-white/10 transition-colors">
                     <div className="flex justify-between items-start gap-3 sm:gap-4">
@@ -547,6 +647,8 @@ export default async function AdminDashboard({ searchParams }: any) {
                       : isBosYap ? 'border-emerald-500/20 hover:border-emerald-500/40 bg-white/[0.02]'
                       : 'border-white/10 hover:border-white/20 bg-white/[0.02]';
 
+                    const finalAuthorName = getAuthorName(post.authorUuid || post.id, customNicknamesMap[post.authorUuid]);
+
                     return (
                       <article key={post.id} className={`${cardGlow} p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border backdrop-blur-xl transition-all duration-300 flex flex-col gap-4 sm:gap-5 hover:shadow-2xl relative overflow-hidden group/post`}>
                         {isEphemeral && <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-amber-500/10 blur-3xl rounded-full -z-10" />}
@@ -596,7 +698,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                             <AdminStoryExporter 
                               postContent={post.content} 
                               postType={post.type} 
-                              authorName={customNicknamesMap[post.authorUuid] || "Gizemli Yolcu"} 
+                              authorName={finalAuthorName} 
                             />
 
                             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-wrap sm:justify-end w-full sm:w-auto">
