@@ -16,16 +16,19 @@ export default function ShareBottomSheet({ children }: { children: React.ReactNo
 
   return (
     <>
-      {/* 🔥 Sitenin tarzına uygun, şık cam efektli ve net "Paylaş" butonu */}
-      <div className="fixed bottom-6 right-6 z-40">
+      {/* 🔥 Liquid Glass (Sıvı Cam) Efektli Paylaş Butonu (Tarayıcı barının üstünde kalması için bottom-20) */}
+      <div className="fixed bottom-20 sm:bottom-6 right-6 z-40">
         <button
           onClick={() => setIsOpen(true)}
-          className="group flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-[#121212]/90 backdrop-blur-xl border border-white/15 text-white font-bold text-sm shadow-[0_8px_32px_rgba(0,0,0,0.6)] hover:border-[#4DA3FF]/50 hover:shadow-[0_0_25px_rgba(77,163,255,0.25)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+          className="group relative overflow-hidden flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-white/[0.07] backdrop-blur-[24px] border border-white/20 text-white font-bold text-sm shadow-[0_8px_32px_0_rgba(0,0,0,0.5),inset_0_1px_1px_0_rgba(255,255,255,0.25)] hover:bg-white/[0.12] hover:border-white/40 hover:shadow-[0_0_30px_rgba(77,163,255,0.3),inset_0_1px_2px_0_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
         >
-          <div className="w-6 h-6 rounded-xl bg-[#4DA3FF]/20 border border-[#4DA3FF]/40 flex items-center justify-center text-[#4DA3FF] group-hover:rotate-90 transition-transform duration-300">
+          {/* Cam Üstünden Geçen Yumuşak Işık Süzmesi */}
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform pointer-events-none" />
+
+          <div className="w-6 h-6 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-[#4DA3FF] group-hover:rotate-90 transition-transform duration-300 shadow-inner">
             <Plus size={16} />
           </div>
-          <span className="tracking-wide text-gray-200 group-hover:text-white">Paylaş</span>
+          <span className="tracking-wide text-gray-100 group-hover:text-white drop-shadow">Paylaş</span>
         </button>
       </div>
 
@@ -38,7 +41,7 @@ export default function ShareBottomSheet({ children }: { children: React.ReactNo
       )}
 
       {/* Bottom Sheet Paneli */}
-      <div className={`fixed inset-x-0 bottom-0 z-[100] transform transition-transform duration-300 ease-out max-h-[92vh] overflow-y-auto rounded-t-[32px] bg-[#121212] border-t border-white/10 p-5 sm:p-8 shadow-[0_-10px_50px_rgba(0,0,0,0.9)] scrollbar-hide ${
+      <div className={`fixed inset-x-0 bottom-0 z-[100] transform transition-transform duration-300 ease-out max-h-[92vh] overflow-y-auto rounded-t-[32px] bg-[#121212]/95 backdrop-blur-3xl border-t border-white/15 p-5 sm:p-8 shadow-[0_-10px_50px_rgba(0,0,0,0.9)] scrollbar-hide ${
         isOpen ? 'translate-y-0' : 'translate-y-full'
       }`}>
         
