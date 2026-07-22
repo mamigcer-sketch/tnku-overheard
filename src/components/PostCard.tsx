@@ -275,7 +275,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </div>
         </div>
 
-        {/* 🔥 YENİ EKLENEN YORUM ÖNİZLEMESİ (PEEK) KISMI */}
+      {/* 🔥 SADELEŞTİRİLMİŞ YORUM ÖNİZLEMESİ (PEEK) KISMI */}
         {post.comments && post.comments.length > 0 && post.comments[0].content && (
           <div 
             onClick={(e) => {
@@ -287,8 +287,8 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           >
             <span className="text-[13px] opacity-60 mt-0.5">💬</span>
             <div className="text-[13px] text-gray-400 line-clamp-2 leading-relaxed">
-              <span className="font-bold text-gray-300 mr-1.5 bg-white/[0.05] px-1.5 py-0.5 rounded-md">
-                @{getAnonymousData(post.comments[0].authorId || post.comments[0].id).name}
+              <span className="font-bold text-gray-200 mr-1.5">
+                @{getAnonymousData(post.comments[0].authorId || post.comments[0].id).name}:
               </span>
               {post.comments[0].content}
             </div>
