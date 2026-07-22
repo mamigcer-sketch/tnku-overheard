@@ -130,7 +130,6 @@ export default async function Home({ searchParams }: any) {
     }
   }
 
-  // 🔥 GÜNCELLENDİ: Filtre sırası form ile birebir aynı yapıldı (İtiraf -> Boş Yap -> Overheard)
   const filters = ['Tümü', 'İtiraf', 'Boş Yap', 'Overheard', '🔥 Trend'];
 
   return (
@@ -186,20 +185,21 @@ export default async function Home({ searchParams }: any) {
           <SearchBar />
         </div>
 
-        {/* Filtreler */}
-        <div className="flex gap-2.5 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/60 backdrop-blur-2xl pt-3 -mx-4 px-4 sm:mx-0 sm:px-0 sm:rounded-b-2xl border-b border-white/[0.02] sm:border-b-0 shadow-sm">
+        {/* 🔥 GÜNCELLENDİ: Güçlü Neon Renkli ve Canlı Filtre Sekmeleri */}
+        <div className="flex gap-2.5 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/80 backdrop-blur-2xl pt-3 -mx-4 px-4 sm:mx-0 sm:px-0 sm:rounded-b-2xl border-b border-white/[0.02] sm:border-b-0 shadow-sm">
           {filters.map((filter) => {
             const isActive = currentFilter === filter;
             
-            let activeClass = 'bg-white/10 border-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.15)] border';
+            // Seçili olan kategoriye göre göz alıcı neon renkler ve dolgun zemin
+            let activeClass = 'bg-white text-black font-extrabold shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105';
             if (isActive) {
-              if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF]/15 border-[#4DA3FF]/40 text-[#4DA3FF] shadow-[0_0_15px_rgba(77,163,255,0.2)] border';
-              else if (filter === 'İtiraf') activeClass = 'bg-purple-500/15 border-purple-500/40 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.2)] border';
-              else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)] border';
-              else if (filter === '🔥 Trend') activeClass = 'bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)] border';
+              if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF] text-black font-extrabold shadow-[0_0_25px_rgba(77,163,255,0.5)] scale-105';
+              else if (filter === 'İtiraf') activeClass = 'bg-purple-600 text-white font-extrabold shadow-[0_0_25px_rgba(168,85,247,0.5)] scale-105';
+              else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500 text-black font-extrabold shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-105';
+              else if (filter === '🔥 Trend') activeClass = 'bg-amber-500 text-black font-extrabold shadow-[0_0_25px_rgba(245,158,11,0.5)] scale-105';
             }
 
-            const inactiveClass = 'bg-white/[0.02] border border-white/[0.05] text-gray-400 hover:text-gray-200 hover:bg-white/[0.06] hover:border-white/[0.1]';
+            const inactiveClass = 'bg-white/[0.03] border border-white/[0.08] text-gray-400 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.15]';
 
             return (
               <Link 
