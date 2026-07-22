@@ -3,7 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import { 
-  LayoutDashboard, Rss, Headphones, VenetianMask, 
+  LayoutDashboard, Rss, Headphones, VenetianMask, Coffee,
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
   BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint
 } from 'lucide-react';
@@ -107,6 +107,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
     if (currentTab === 'Overheard') queryFilter = { status: 'APPROVED', type: { in: ['OVERHEARD', 'OVERHED'] } };
     if (currentTab === 'İtiraflar') queryFilter = { status: 'APPROVED', type: 'CONFESSION' };
+    if (currentTab === 'Boş Yap') queryFilter = { status: 'APPROVED', type: 'BOSYAP' }; // 🔥 Eklendi
     if (currentTab === 'Dashboard') queryFilter = { status: 'PENDING' };
     displayPosts = await prisma.post.findMany({ where: queryFilter, orderBy: { createdAt: 'desc' } });
   }
@@ -184,6 +185,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: Rss, label: 'Akış' }, 
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
+    { icon: Coffee, label: 'Boş Yap' }, // 🔥 Admin menüsüne eklendi
     { icon: Inbox, label: 'Bekleyenler', badge: pending },
     { icon: MessageSquare, label: 'Yorumlar' },
     { icon: Flag, label: 'Şikayetler', badge: reportsCount },
@@ -343,14 +345,12 @@ export default async function AdminDashboard({ searchParams }: any) {
               ))
           ) : currentTab === 'Duyurular' ? (
             <div className="space-y-6">
-              {/* Duyuru Ekleme Formu */}
               <form action={createAnnouncement} className="bg-[#121212] p-6 rounded-2xl border border-white/10 space-y-4">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2"><Bell className="text-[#4DA3FF]" size={20}/> Yeni Duyuru Yayınla</h3>
                 <textarea name="content" required placeholder="Kampüse duyurulacak metin..." className="w-full bg-[#0B0B0B] border border-white/10 rounded-xl p-4 text-sm text-white outline-none focus:border-[#4DA3FF] resize-none h-24"></textarea>
                 <button type="submit" className="bg-[#4DA3FF] text-black font-bold px-6 py-3 rounded-xl text-sm hover:bg-[#3b8ce0] transition-all flex items-center gap-2"><Plus size={16}/> Duyuru Ekle</button>
               </form>
 
-              {/* Duyurular Listesi */}
               <div className="space-y-4">
                 {announcements.length === 0 ? (
                   <div className="text-center py-12 bg-[#121212] rounded-2xl border border-white/5 text-gray-500">Aktif duyuru bulunmuyor.</div>
@@ -381,7 +381,6 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
           ) : currentTab === 'Sayaç' ? (
             <div className="space-y-6">
-              {/* Sayaç Ekleme Formu */}
               <form action={createCountdown} className="bg-[#121212] p-6 rounded-2xl border border-white/10 space-y-4">
                 <h3 className="text-lg font-bold text-white flex items-center gap-2"><Timer className="text-red-400" size={20}/> Yeni Geri Sayım Kur</h3>
                 <div>
@@ -395,7 +394,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                 <button type="submit" className="bg-red-500 text-black font-bold px-6 py-3 rounded-xl text-sm hover:bg-red-400 transition-all flex items-center gap-2"><Plus size={16}/> Sayacı Başlat</button>
               </form>
 
-              {/* Sayaçlar Listesi */}
               <div className="space-y-4">
                 {countdowns.length === 0 ? (
                   <div className="text-center py-12 bg-[#121212] rounded-2xl border border-white/5 text-gray-500">Kayıtlı geri sayım bulunmuyor.</div>
@@ -495,6 +493,7 @@ export default async function AdminDashboard({ searchParams }: any) {
               displayPosts.map((post) => {
                 const isEphemeral = !!post.expiresAt;
                 const isConfession = post.type === 'CONFESSION';
+                const isBosYap = post.type === 'BOSYAP'; // 🔥 Eklendi
 
                 return (
                   <article key={post.id} className={`bg-[#121212] p-6 rounded-2xl border transition-all flex flex-col gap-4 shadow-lg ${isEphemeral ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)]' : 'border-white/10 hover:border-white/20'}`}>
@@ -503,7 +502,13 @@ export default async function AdminDashboard({ searchParams }: any) {
                             {isEphemeral ? (
                               <span className="text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse"><Clock size={12}/> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳</span>
                             ) : (
-                              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}><Tag size={12}/> {isConfession ? 'İtiraf' : 'Overheard'}</span>
+                              <span className={`text-[11px] font-bold px-2.5 py-1 rounded-md flex items-center gap-1 uppercase tracking-wider ${
+                                isConfession ? 'bg-purple-500/10 text-purple-400' 
+                                : isBosYap ? 'bg-emerald-500/10 text-emerald-400' 
+                                : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'
+                              }`}>
+                                <Tag size={12}/> {isConfession ? 'İtiraf' : isBosYap ? 'Boş Yap' : 'Overheard'}
+                              </span>
                             )}
                             <span className="text-[11px] font-medium px-2.5 py-1 bg-white/5 rounded-md text-gray-400 flex items-center gap-1"><Calendar size={12}/> {new Date(post.createdAt).toLocaleString('tr-TR')}</span>
                         </div>
