@@ -19,7 +19,6 @@ export default function ModernForm() {
   const router = useRouter();
   const maxChars = 500;
 
-  // 🔥 Her butonun kendi içinde tam tıklanan noktada neon dalga yaratan nokta atışı fonksiyonu
   const triggerRipple = (e: React.MouseEvent<HTMLElement>, bgClass: string) => {
     const button = e.currentTarget;
     const existingRipple = button.querySelector('.absolute.pointer-events-none.animate-ripple');
@@ -161,9 +160,10 @@ export default function ModernForm() {
         </span>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5 relative z-10">
+      {/* 🔥 Form Alanı: Sekme değişimlerinde küt diye atmasın diye yumuşak geçiş (transition-all duration-300) eklendi */}
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5 relative z-10 transition-all duration-300 ease-out">
         {type === 'OVERHEARD' && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 animate-in fade-in zoom-in-95 duration-300">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
             <div className="col-span-2 md:col-span-1">
                 <input 
                   required 
@@ -246,7 +246,7 @@ export default function ModernForm() {
         {type === 'CONFESSION' && (
           <div 
             onClick={() => setIsEphemeral(!isEphemeral)}
-            className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border backdrop-blur-md cursor-pointer transition-all duration-300 animate-in fade-in duration-300 ${
+            className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border backdrop-blur-md cursor-pointer transition-all duration-300 animate-in fade-in slide-in-from-top-2 duration-300 ${
               isEphemeral ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)]' : 'bg-white/[0.02] border-white/[0.05] text-gray-400 hover:border-white/[0.1] hover:text-gray-200'
             }`}
           >
