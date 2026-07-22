@@ -1,7 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import ScrollToTop from '@/components/ScrollToTop'; // 🔥 YENİ BUTON BİLEŞENİ EKLENDİ
+import ScrollToTop from '@/components/ScrollToTop';
+import InstallModal from '@/components/InstallModal';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,6 +26,9 @@ export default function RootLayout({
         
         {/* 🔥 YUKARI ÇIK BUTONU: Tüm sayfalarda en altta, sağda duracak! */}
         <ScrollToTop />
+
+        {/* 🔥 UYGULAMAYI YÜKLE MODALI: Tüm sayfalarda gizlice bekler, menüden tıklanınca fırlar! */}
+        <InstallModal />
       </body>
     </html>
   );

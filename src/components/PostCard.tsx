@@ -5,7 +5,7 @@ import CommentForm from "./CommentForm";
 import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, BadgeCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { incrementView, submitReport } from "@/app/post/actions";
-import { playPopSound, playClickSound } from "@/utils/sounds"; // 🔥 SES MOTORU EKLENDİ
+import { playPopSound, playClickSound } from "@/utils/sounds";
 
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
@@ -104,7 +104,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const handleShare = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    playClickSound(); // 🔥 Tık Sesi
+    playClickSound();
     const shareData = {
       title: 'TNKU Overheard',
       text: 'Şu paylaşıma bakmalısın!',
@@ -121,7 +121,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const handleLikeClick = (e: React.FormEvent) => {
     if (localLiked) return;
-    playPopSound(); // 🔥 Kalbe basınca POP Sesi!
+    playPopSound();
     setLocalLiked(true);
     setLocalLikesCount((prev: number) => prev + 1);
     setIsLikingAnimation(true);
@@ -158,7 +158,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
       clearTimeout(clickTimeout.current);
       clickTimeout.current = null;
       
-      playPopSound(); // 🔥 Çift tıkla beğenince POP Sesi!
+      playPopSound();
       setShowBigHeart(true); 
       setTimeout(() => setShowBigHeart(false), 900); 
 
@@ -275,6 +275,26 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </div>
         </div>
 
+        {/* 🔥 YENİ EKLENEN YORUM ÖNİZLEMESİ (PEEK) KISMI */}
+        {post.comments && post.comments.length > 0 && post.comments[0].content && (
+          <div 
+            onClick={(e) => {
+              e.stopPropagation();
+              playClickSound();
+              router.push(`/post/${post.id}`);
+            }}
+            className="mt-3 mb-2 bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 flex gap-2.5 items-start cursor-pointer hover:bg-white/[0.05] transition-colors shadow-inner relative z-10"
+          >
+            <span className="text-[13px] opacity-60 mt-0.5">💬</span>
+            <div className="text-[13px] text-gray-400 line-clamp-2 leading-relaxed">
+              <span className="font-bold text-gray-300 mr-1.5 bg-white/[0.05] px-1.5 py-0.5 rounded-md">
+                @{getAnonymousData(post.comments[0].authorId || post.comments[0].id).name}
+              </span>
+              {post.comments[0].content}
+            </div>
+          </div>
+        )}
+
         <div 
           onClick={(e) => e.stopPropagation()} 
           className="interactive-zone flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400 relative z-10 cursor-default"
@@ -299,7 +319,8 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             
             <button onClick={() => { playClickSound(); setShowComment(!showComment); }} className={`flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-xl transition-all duration-300 ${showComment ? (isEphemeral ? 'text-amber-400 bg-amber-500/10' : 'text-[#4DA3FF] bg-[#4DA3FF]/10') : (isEphemeral ? 'hover:text-amber-400 hover:bg-amber-500/10' : 'hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10')} active:scale-90`}>
               <MessageCircle size={18} className={`${showComment ? (isEphemeral ? 'fill-amber-400/20' : 'fill-[#4DA3FF]/20') : ''}`} /> 
-              <span className="text-[13px] font-bold">{post.comments?.length || 0}</span>
+              {/* 🔥 GÜNCELLENDİ: Gerçek yorum sayısı (_count) buradan okunacak */}
+              <span className="text-[13px] font-bold">{post._count?.comments || post.comments?.length || 0}</span>
             </button>
 
             <div className="flex items-center gap-1.5 opacity-70 cursor-default">

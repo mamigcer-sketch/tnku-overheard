@@ -80,7 +80,15 @@ export default async function Home({ searchParams }: any) {
       where: whereQuery,
       orderBy: orderQuery,
       take: totalTake,
-      include: { comments: { select: { id: true } } }
+      // 🔥 YENİ: Yorum önizlemesi ve gerçek sayı için sorguyu güncelledik!
+      include: { 
+        _count: { select: { comments: true } }, 
+        comments: { 
+          orderBy: { createdAt: 'desc' }, 
+          take: 1, 
+          select: { id: true, content: true, authorId: true } 
+        } 
+      }
     }),
     prisma.post.count({ where: whereQuery }),
     (prisma as any).announcement.findFirst({
@@ -175,7 +183,8 @@ export default async function Home({ searchParams }: any) {
           <SearchBar />
         </div>
 
-        <div className="flex gap-2.5 overflow-x-auto pb-6 mb-2 scrollbar-hide snap-x relative z-10">
+        {/* 🔥 YENİ: Filtreler de scroll yaparken yukarı yapışsın diye sticky ve z-index eklendi */}
+        <div className="flex gap-2.5 overflow-x-auto pb-6 mb-2 scrollbar-hide snap-x relative z-40 sticky top-[80px] bg-[#0B0B0B]/80 backdrop-blur-md pt-2 -mx-4 px-4 sm:mx-0 sm:px-0 rounded-b-2xl">
           {filters.map((filter) => {
             return (
               <Link 
@@ -199,7 +208,7 @@ export default async function Home({ searchParams }: any) {
             <div className="text-center py-20 bg-white/[0.02] backdrop-blur-2xl rounded-[24px] border border-white/[0.05] flex flex-col items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
               <p className="text-gray-400 font-medium text-[14px]">
                 {currentFilter === '🔥 Trend' 
-                  ? 'Son 24 saatte henüz popülerleşen bir fısıltı yok.' // GÜNCELLENDİ
+                  ? 'Son 24 saatte henüz popülerleşen bir fısıltı yok.' 
                   : 'Aradığın kriterlerde gönderi bulunamadı.'}
               </p>
             </div>

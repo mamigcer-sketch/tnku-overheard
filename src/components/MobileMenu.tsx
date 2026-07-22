@@ -7,9 +7,10 @@ import Link from 'next/link';
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
 
+  // 🔥 "Beğendiklerim" için hideOnDesktop özelliği ekledik ki masaüstünde 2 kere gözükmesin
   const menuItems = [
     { name: 'Paylaşımlarım', icon: <FileText size={18} />, href: '/my-posts', isExternal: false },
-    { name: 'Beğendiklerim', icon: <Heart size={18} />, href: '/my-likes', isExternal: false },
+    { name: 'Beğendiklerim', icon: <Heart size={18} />, href: '/my-likes', isExternal: false, hideOnDesktop: true },
     { name: 'Topluluk Kuralları', icon: <BookOpen size={18} />, href: '/rules', isExternal: false },
     { name: 'Instagram', icon: <ExternalLink size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
     { name: 'Bildir / Şikayet', icon: <ShieldAlert size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
@@ -39,7 +40,7 @@ export default function MobileMenu() {
                     target="_blank"
                     rel="noopener noreferrer"
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 p-3.5 rounded-xl hover:bg-white/5 text-gray-300 hover:text-[#4DA3FF] transition-all font-medium text-sm"
+                    className={`flex items-center gap-3 p-3.5 rounded-xl hover:bg-white/5 text-gray-300 hover:text-[#4DA3FF] transition-all font-medium text-sm ${item.hideOnDesktop ? 'sm:hidden' : ''}`}
                   >
                     {item.icon} {item.name}
                   </a>
@@ -48,18 +49,18 @@ export default function MobileMenu() {
                     key={item.name} 
                     href={item.href} 
                     onClick={() => setIsOpen(false)}
-                    className="flex items-center gap-3 p-3.5 rounded-xl hover:bg-white/5 text-gray-300 hover:text-[#4DA3FF] transition-all font-medium text-sm"
+                    className={`flex items-center gap-3 p-3.5 rounded-xl hover:bg-white/5 text-gray-300 hover:text-[#4DA3FF] transition-all font-medium text-sm ${item.hideOnDesktop ? 'sm:hidden' : ''}`}
                   >
                     {item.icon} {item.name}
                   </Link>
                 )
               ))}
 
-              {/* Uygulamayı Yükle Butonu */}
+              {/* 🔥 GÜNCELLENDİ: Uygulamayı Yükle Butonu (Özel Modal Tetikleyici) */}
               <button 
                 onClick={() => {
                   setIsOpen(false);
-                  alert("Kanka, iPhone kullanıyorsan 'Paylaş' simgesine basıp 'Ana Ekrana Ekle' de. Android'de ise tarayıcı menüsünden 'Uygulamayı Yükle' seçeneğini kullan!");
+                  window.dispatchEvent(new Event('trigger-install-modal'));
                 }}
                 className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#4DA3FF]/10 text-[#4DA3FF] font-medium text-sm transition-all border-t border-white/5 mt-2"
               >
