@@ -2,7 +2,6 @@ import { PrismaClient } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import StoryButton from '@/components/StoryButton';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, 
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
@@ -79,7 +78,6 @@ export default async function AdminDashboard({ searchParams }: any) {
   let bannedUsers: any[] = [];
   let reports: any[] = [];
 
-  // Nick Verilerini Çekiyoruz
   let customNicknamesDb: any[] = [];
   try { customNicknamesDb = await (prisma as any).customNickname.findMany(); } catch (e) {}
   const customNicknamesMap = customNicknamesDb.reduce((acc: any, curr: any) => {
@@ -87,7 +85,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     return acc;
   }, {});
 
-  // 🔥 YENİ: Rozet Verilerini Çekiyoruz
   let userBadgesDb: any[] = [];
   try { userBadgesDb = await (prisma as any).userBadge.findMany(); } catch (e) {}
   const userBadgesMap = userBadgesDb.reduce((acc: any, curr: any) => {
@@ -122,8 +119,6 @@ export default async function AdminDashboard({ searchParams }: any) {
   async function banUser(formData: FormData) { 'use server'; const userUuid = formData.get('userUuid') as string; if (!userUuid) return; try { await (prisma as any).bannedUser.create({ data: { userUuid } }); } catch (e) {} revalidatePath('/admin'); }
   async function unbanUser(formData: FormData) { 'use server'; const id = formData.get('id') as string; await (prisma as any).bannedUser.delete({ where: { id } }); revalidatePath('/admin'); }
   
-  async function updatePost(formData: FormData) { 'use server'; const id = formData.get('id') as string; const content = formData.get('content') as string; const type = formData.get('type') as string; if (!id || !content) return; await prisma.post.update({ where: { id }, data: { content, type } }); revalidatePath('/admin'); revalidatePath('/'); }
-  
   async function createAnnouncement(formData: FormData) { 'use server'; const content = formData.get('content') as string; if (!content) return; await (prisma as any).announcement.create({ data: { content, isActive: true } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function toggleAnnouncement(formData: FormData) { 'use server'; const id = formData.get('id') as string; const currentState = formData.get('isActive') === 'true'; await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); revalidatePath('/admin'); revalidatePath('/'); }
   async function deleteAnnouncement(formData: FormData) { 'use server'; await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); revalidatePath('/'); }
@@ -150,7 +145,6 @@ export default async function AdminDashboard({ searchParams }: any) {
   async function dismissReport(formData: FormData) { 'use server'; await (prisma as any).report.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
   async function logout() { 'use server'; (await cookies()).delete('admin_auth'); revalidatePath('/admin'); }
 
-  // 🔥 YENİ: Hem Nick Hem Rozet Atama Fonksiyonu
   async function updateUserMeta(formData: FormData) {
     'use server';
     const userUuid = formData.get('userUuid') as string;
@@ -159,7 +153,6 @@ export default async function AdminDashboard({ searchParams }: any) {
 
     if (!userUuid) return;
 
-    // Nick İşlemleri
     if (!nickname.trim()) {
       await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
     } else {
@@ -171,7 +164,6 @@ export default async function AdminDashboard({ searchParams }: any) {
       }
     }
 
-    // Rozet İşlemleri
     if (!badge.trim()) {
       await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
     } else {
@@ -281,7 +273,7 @@ export default async function AdminDashboard({ searchParams }: any) {
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                 {[
                     { label: 'TOPLAM GÖNDERİ', val: total, color: 'text-white', bg: 'bg-[#121212]' },
-                    { label: 'ONAY BEKLEYEN', val: pending, color: 'text-yellow-400', bg: 'bg-yellow-500/5 border-yellow-500/20' },
+                    { label: 'ONAY BEKLİYOR', val: pending, color: 'text-yellow-400', bg: 'bg-yellow-500/5 border-yellow-500/20' },
                     { label: 'YAYINDA OLAN', val: approved, color: 'text-green-400', bg: 'bg-green-500/5 border-green-500/20' },
                     { label: 'REDDEDİLEN', val: rejected, color: 'text-red-400', bg: 'bg-red-500/5 border-red-500/20' },
                 ].map((stat, i) => (
@@ -323,7 +315,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                     </div>
                   </div>
 
-                  {/* 🔥 Yazar Kimliği, Nick ve Rozet Formu (YORUMLAR) */}
                   <div className="bg-black/40 border border-white/5 p-3 rounded-xl flex flex-col xl:flex-row gap-3 items-start xl:items-center justify-between mt-2">
                     <div className="flex items-center gap-2">
                       <Fingerprint className="text-gray-500" size={16} />
@@ -350,8 +341,150 @@ export default async function AdminDashboard({ searchParams }: any) {
                   </div>
                 </article>
               ))
-          ) : currentTab === 'Duyurular' || currentTab === 'Sayaç' || currentTab === 'Banlar' || currentTab === 'Şikayetler' ? (
-             <div className="text-gray-500 text-sm italic">Bu sekmeler önceki haliyle çalışmaya devam ediyor...</div>
+          ) : currentTab === 'Duyurular' ? (
+            <div className="space-y-6">
+              {/* Duyuru Ekleme Formu */}
+              <form action={createAnnouncement} className="bg-[#121212] p-6 rounded-2xl border border-white/10 space-y-4">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2"><Bell className="text-[#4DA3FF]" size={20}/> Yeni Duyuru Yayınla</h3>
+                <textarea name="content" required placeholder="Kampüse duyurulacak metin..." className="w-full bg-[#0B0B0B] border border-white/10 rounded-xl p-4 text-sm text-white outline-none focus:border-[#4DA3FF] resize-none h-24"></textarea>
+                <button type="submit" className="bg-[#4DA3FF] text-black font-bold px-6 py-3 rounded-xl text-sm hover:bg-[#3b8ce0] transition-all flex items-center gap-2"><Plus size={16}/> Duyuru Ekle</button>
+              </form>
+
+              {/* Duyurular Listesi */}
+              <div className="space-y-4">
+                {announcements.length === 0 ? (
+                  <div className="text-center py-12 bg-[#121212] rounded-2xl border border-white/5 text-gray-500">Aktif duyuru bulunmuyor.</div>
+                ) : (
+                  announcements.map((item: any) => (
+                    <div key={item.id} className="bg-[#121212] p-5 rounded-2xl border border-white/10 flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-white text-sm mb-1">{item.content}</p>
+                        <span className="text-[10px] text-gray-500">{new Date(item.createdAt).toLocaleString('tr-TR')}</span>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <form action={toggleAnnouncement}>
+                          <input type="hidden" name="id" value={item.id} />
+                          <input type="hidden" name="isActive" value={item.isActive.toString()} />
+                          <button className={`px-3 py-1.5 rounded-xl text-xs font-bold border ${item.isActive ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                            {item.isActive ? 'Aktif' : 'Pasif'}
+                          </button>
+                        </form>
+                        <form action={deleteAnnouncement}>
+                          <input type="hidden" name="id" value={item.id} />
+                          <button className="bg-red-500/10 text-red-400 p-2 rounded-xl border border-red-500/20 hover:bg-red-500/20"><Trash2 size={16}/></button>
+                        </form>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : currentTab === 'Sayaç' ? (
+            <div className="space-y-6">
+              {/* Sayaç Ekleme Formu */}
+              <form action={createCountdown} className="bg-[#121212] p-6 rounded-2xl border border-white/10 space-y-4">
+                <h3 className="text-lg font-bold text-white flex items-center gap-2"><Timer className="text-red-400" size={20}/> Yeni Geri Sayım Kur</h3>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1 font-bold">Başlık / Sınav Adı</label>
+                  <input type="text" name="title" required placeholder="Örn: Vize Haftası Başlıyor 📚" className="w-full bg-[#0B0B0B] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-red-400" />
+                </div>
+                <div>
+                  <label className="text-xs text-gray-400 block mb-1 font-bold">Hedef Tarih ve Saat</label>
+                  <input type="datetime-local" name="targetDate" required className="w-full bg-[#0B0B0B] border border-white/10 rounded-xl p-3 text-sm text-white outline-none focus:border-red-400 [color-scheme:dark]" />
+                </div>
+                <button type="submit" className="bg-red-500 text-black font-bold px-6 py-3 rounded-xl text-sm hover:bg-red-400 transition-all flex items-center gap-2"><Plus size={16}/> Sayacı Başlat</button>
+              </form>
+
+              {/* Sayaçlar Listesi */}
+              <div className="space-y-4">
+                {countdowns.length === 0 ? (
+                  <div className="text-center py-12 bg-[#121212] rounded-2xl border border-white/5 text-gray-500">Kayıtlı geri sayım bulunmuyor.</div>
+                ) : (
+                  countdowns.map((item: any) => (
+                    <div key={item.id} className="bg-[#121212] p-5 rounded-2xl border border-white/10 flex items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <h4 className="text-white font-bold">{item.title}</h4>
+                          {item.isActive && <span className="bg-red-500/20 text-red-400 border border-red-500/30 text-[9px] font-bold px-2 py-0.5 rounded-full uppercase">Yayında</span>}
+                        </div>
+                        <p className="text-xs text-gray-400">Hedef: {new Date(item.targetDate).toLocaleString('tr-TR')}</p>
+                      </div>
+                      <form action={deleteCountdown}>
+                        <input type="hidden" name="id" value={item.id} />
+                        <button className="bg-red-500/10 text-red-400 p-2 rounded-xl border border-red-500/20 hover:bg-red-500/20"><Trash2 size={16}/></button>
+                      </form>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          ) : currentTab === 'Banlar' ? (
+            <div className="space-y-4">
+              <div className="bg-[#121212] p-6 rounded-2xl border border-white/10">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2"><Ban className="text-red-400" size={20}/> Engellenen Yazarlar ({bannedUsers.length})</h3>
+                {bannedUsers.length === 0 ? (
+                  <p className="text-gray-500 text-sm italic">Sistemde banlı kullanıcı bulunmuyor.</p>
+                ) : (
+                  <div className="space-y-3">
+                    {bannedUsers.map((item: any) => (
+                      <div key={item.id} className="bg-black/40 border border-white/5 p-4 rounded-xl flex items-center justify-between gap-4">
+                        <div>
+                          <span className="text-[10px] text-gray-500 uppercase font-bold block">Yazar UUID</span>
+                          <code className="text-xs text-red-400 font-mono">{item.userUuid}</code>
+                          <span className="text-[10px] text-gray-600 block mt-1">Ban Tarihi: {new Date(item.createdAt).toLocaleString('tr-TR')}</span>
+                        </div>
+                        <form action={unbanUser}>
+                          <input type="hidden" name="id" value={item.id} />
+                          <button className="bg-green-500/10 text-green-400 border border-green-500/20 px-4 py-2 rounded-xl text-xs font-bold hover:bg-green-500/20 transition-all">Banı Kaldır</button>
+                        </form>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : currentTab === 'Şikayetler' ? (
+            <div className="space-y-4">
+              <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2"><Flag className="text-red-500" size={20}/> Bildirilen İçerikler ({reports.length})</h3>
+              {reports.length === 0 ? (
+                <div className="text-center py-12 bg-[#121212] rounded-2xl border border-white/5 text-gray-500">Şikayet edilen içerik bulunmuyor. Temiz! 🎉</div>
+              ) : (
+                reports.map((report: any) => (
+                  <div key={report.id} className="bg-[#121212] p-6 rounded-2xl border border-red-500/20 space-y-4">
+                    <div className="flex justify-between items-start gap-4">
+                      <div>
+                        <span className="bg-red-500/10 text-red-400 border border-red-500/20 px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider">Sebep: {report.reason}</span>
+                        <span className="text-xs text-gray-500 ml-3">{new Date(report.createdAt).toLocaleString('tr-TR')}</span>
+                      </div>
+                      <form action={dismissReport}>
+                        <input type="hidden" name="id" value={report.id} />
+                        <button className="bg-white/5 text-gray-300 hover:bg-white/10 px-3 py-1.5 rounded-xl text-xs font-bold border border-white/10">Şikayeti Kaldır</button>
+                      </form>
+                    </div>
+
+                    {report.post && (
+                      <div className="bg-black/40 border border-white/5 p-4 rounded-xl">
+                        <span className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Şikayet Edilen Gönderi</span>
+                        <p className="text-white text-sm">{report.post.content}</p>
+                        <div className="flex gap-2 mt-3">
+                          <form action={deletePost}><input type="hidden" name="id" value={report.post.id} /><button className="bg-red-500/10 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1"><Trash2 size={12}/> Postu Sil</button></form>
+                        </div>
+                      </div>
+                    )}
+
+                    {report.comment && (
+                      <div className="bg-black/40 border border-white/5 p-4 rounded-xl">
+                        <span className="text-[10px] text-gray-500 uppercase font-bold block mb-1">Şikayet Edilen Yorum</span>
+                        <p className="text-white text-sm">{report.comment.content}</p>
+                        <div className="flex gap-2 mt-3">
+                          <form action={deleteComment}><input type="hidden" name="id" value={report.comment.id} /><button className="bg-red-500/10 text-red-400 px-3 py-1.5 rounded-xl text-xs font-bold border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1"><Trash2 size={12}/> Yorumu Sil</button></form>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))
+              )}
+            </div>
           ) : (
             displayPosts.length === 0 ? (
                <div className="text-center py-20 bg-[#121212] rounded-3xl border border-white/5 flex flex-col items-center justify-center">
@@ -381,7 +514,6 @@ export default async function AdminDashboard({ searchParams }: any) {
  
                     <p className="text-white text-[16px] leading-relaxed py-2">{post.content}</p>
 
-                    {/* 🔥 Yazar Kimliği, Nick ve Rozet Formu (POSTLAR) */}
                     <div className="bg-black/40 border border-white/5 p-3 rounded-xl flex flex-col xl:flex-row gap-3 items-start xl:items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Fingerprint className="text-gray-500" size={16} />
