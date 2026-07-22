@@ -16,11 +16,11 @@ export default function ShareBottomSheet({ children }: { children: React.ReactNo
 
   return (
     <>
-      {/* 🔥 Liquid Glass (Sıvı Cam) Efektli Paylaş Butonu (Tarayıcı barının üstünde kalması için bottom-20) */}
-      <div className="fixed bottom-20 sm:bottom-6 right-6 z-40">
+      {/* 🔥 Tarayıcı barının üstünde ve güvenli bölgede süzülen Likit Cam Paylaş Butonu */}
+      <div className="fixed bottom-24 sm:bottom-6 right-6 z-40">
         <button
           onClick={() => setIsOpen(true)}
-          className="group relative overflow-hidden flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-white/[0.07] backdrop-blur-[24px] border border-white/20 text-white font-bold text-sm shadow-[0_8px_32px_0_rgba(0,0,0,0.5),inset_0_1px_1px_0_rgba(255,255,255,0.25)] hover:bg-white/[0.12] hover:border-white/40 hover:shadow-[0_0_30px_rgba(77,163,255,0.3),inset_0_1px_2px_0_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+          className="group relative overflow-hidden flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-white/[0.07] backdrop-blur-[24px] border border-white/20 text-white font-bold text-sm shadow-[0_8px_32px_0_rgba(0,0,0,0.5),inset_0_1px_1px_0_rgba(255,255,255,0.25)] hover:bg-white/[0.12] hover:border-white/45 hover:shadow-[0_0_30px_rgba(77,163,255,0.3),inset_0_1px_2px_0_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
         >
           {/* Cam Üstünden Geçen Yumuşak Işık Süzmesi */}
           <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform pointer-events-none" />
@@ -32,7 +32,7 @@ export default function ShareBottomSheet({ children }: { children: React.ReactNo
         </button>
       </div>
 
-      {/* Arka Plan Karartma */}
+      {/* Arka Plan Karartma (Sadece tetiklendiğinde render olur) */}
       {isOpen && (
         <div 
           onClick={() => setIsOpen(false)}
@@ -40,9 +40,9 @@ export default function ShareBottomSheet({ children }: { children: React.ReactNo
         />
       )}
 
-      {/* Bottom Sheet Paneli */}
+      {/* Bottom Sheet Paneli (Kapalıyken pointer-events-none ile tamamen etkisizleştirildi) */}
       <div className={`fixed inset-x-0 bottom-0 z-[100] transform transition-transform duration-300 ease-out max-h-[92vh] overflow-y-auto rounded-t-[32px] bg-[#121212]/95 backdrop-blur-3xl border-t border-white/15 p-5 sm:p-8 shadow-[0_-10px_50px_rgba(0,0,0,0.9)] scrollbar-hide ${
-        isOpen ? 'translate-y-0' : 'translate-y-full'
+        isOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'
       }`}>
         
         {/* Mobil Tutamaç */}
