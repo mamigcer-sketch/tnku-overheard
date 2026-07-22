@@ -98,12 +98,6 @@ export default function ModernForm() {
       : 'border-white/[0.05]'
     }`}>
       
-      <div className={`absolute -inset-[1px] opacity-0 group-hover/form:opacity-100 transition-opacity duration-1000 blur-2xl -z-10 bg-gradient-to-b ${
-        type === 'CONFESSION' && isEphemeral ? 'from-amber-500/20' 
-        : type === 'BOSYAP' ? 'from-emerald-500/10' 
-        : 'from-white/[0.02]'
-      } to-transparent pointer-events-none`} />
-
       {/* 🔥 ÜÇLÜ SEKMELER */}
       <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6 p-1 bg-white/[0.02] backdrop-blur-md rounded-[14px] sm:rounded-[16px] border border-white/[0.03] shadow-inner">
         <button 
@@ -160,10 +154,10 @@ export default function ModernForm() {
         </span>
       </div>
 
-      {/* 🔥 Form Alanı: Sekme değişimlerinde küt diye atmasın diye yumuşak geçiş (transition-all duration-300) eklendi */}
-      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5 relative z-10 transition-all duration-300 ease-out">
+      {/* 🔥 Sekme değişimlerinde akıcı animasyon için key={type} eklendi */}
+      <form onSubmit={handleSubmit} key={type} className="space-y-3 sm:space-y-5 relative z-10 animate-in fade-in duration-300">
         {type === 'OVERHEARD' && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 animate-in fade-in slide-in-from-top-2 duration-300">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4">
             <div className="col-span-2 md:col-span-1">
                 <input 
                   required 
@@ -246,7 +240,7 @@ export default function ModernForm() {
         {type === 'CONFESSION' && (
           <div 
             onClick={() => setIsEphemeral(!isEphemeral)}
-            className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border backdrop-blur-md cursor-pointer transition-all duration-300 animate-in fade-in slide-in-from-top-2 duration-300 ${
+            className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border backdrop-blur-md cursor-pointer transition-all duration-300 ${
               isEphemeral ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)]' : 'bg-white/[0.02] border-white/[0.05] text-gray-400 hover:border-white/[0.1] hover:text-gray-200'
             }`}
           >

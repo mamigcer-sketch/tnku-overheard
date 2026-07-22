@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Plus, X, Sparkles } from 'lucide-react';
+import { Plus, X } from 'lucide-react';
 
 export default function ShareBottomSheet({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -16,17 +16,16 @@ export default function ShareBottomSheet({ children }: { children: React.ReactNo
 
   return (
     <>
-      {/* 🔥 Sağ Altta Dikkat Çeken, Yazılı ve Neon Parıltılı Yüzen Paylaşım Butonu */}
+      {/* 🔥 Sitenin tarzına uygun, şık cam efektli ve net "Paylaş" butonu */}
       <div className="fixed bottom-6 right-6 z-40">
         <button
           onClick={() => setIsOpen(true)}
-          className="group flex items-center gap-2.5 py-3 px-5 rounded-full bg-gradient-to-r from-[#4DA3FF] via-purple-600 to-pink-500 text-white font-extrabold text-sm shadow-[0_0_35px_rgba(77,163,255,0.6)] hover:shadow-[0_0_50px_rgba(168,85,247,0.8)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer border border-white/30 backdrop-blur-md"
-          title="Fısıltı Paylaş"
+          className="group flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-[#121212]/90 backdrop-blur-xl border border-white/15 text-white font-bold text-sm shadow-[0_8px_32px_rgba(0,0,0,0.6)] hover:border-[#4DA3FF]/50 hover:shadow-[0_0_25px_rgba(77,163,255,0.25)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
         >
-          <div className="w-7 h-7 rounded-full bg-black/30 flex items-center justify-center group-hover:rotate-90 transition-transform duration-300">
-            <Plus size={18} className="text-white drop-shadow" />
+          <div className="w-6 h-6 rounded-xl bg-[#4DA3FF]/20 border border-[#4DA3FF]/40 flex items-center justify-center text-[#4DA3FF] group-hover:rotate-90 transition-transform duration-300">
+            <Plus size={16} />
           </div>
-          <span className="tracking-wide drop-shadow-md">Fısılda 🤫</span>
+          <span className="tracking-wide text-gray-200 group-hover:text-white">Paylaş</span>
         </button>
       </div>
 
