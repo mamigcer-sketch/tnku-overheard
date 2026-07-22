@@ -16,27 +16,34 @@ export default function ModernForm() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
   
-  // 🔥 Ripple (Dalga) Efekti İçin State
-  const [ripples, setRipples] = useState<{ id: number; x: number; y: number; color: string }[]>([]);
-
   const router = useRouter();
   const maxChars = 500;
 
-  // 🔥 Tıklanan Yerde Neon Dalga Yaratan Fonksiyon
-  const triggerRipple = (e: React.MouseEvent<HTMLElement>, color: string) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const newRipple = { id: Date.now(), x, y, color };
+  // 🔥 Her butonun kendi içinde tam tıklanan noktada neon dalga yaratan nokta atışı fonksiyonu
+  const triggerRipple = (e: React.MouseEvent<HTMLElement>, bgClass: string) => {
+    const button = e.currentTarget;
+    const existingRipple = button.querySelector('.absolute.pointer-events-none.animate-ripple');
+    if (existingRipple) existingRipple.remove();
 
-    setRipples((prev) => [...prev, newRipple]);
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+
+    const circle = document.createElement('span');
+    circle.style.width = circle.style.height = `${size}px`;
+    circle.style.left = `${x}px`;
+    circle.style.top = `${y}px`;
+    circle.className = `absolute rounded-full pointer-events-none animate-ripple ${bgClass}`;
+
+    button.appendChild(circle);
+
     setTimeout(() => {
-      setRipples((prev) => prev.filter((r) => r.id !== newRipple.id));
-    }, 600); // 600ms sonra dalga kaybolur
+      circle.remove();
+    }, 600);
   };
 
-  const handleTabChange = (e: React.MouseEvent<HTMLButtonElement>, newType: 'CONFESSION' | 'BOSYAP' | 'OVERHEARD', color: string) => {
-    triggerRipple(e, color);
+  const handleTabChange = (newType: 'CONFESSION' | 'BOSYAP' | 'OVERHEARD') => {
     setType(newType);
     if (newType === 'CONFESSION' || newType === 'BOSYAP') {
       setLocation('');
@@ -98,21 +105,14 @@ export default function ModernForm() {
         : 'from-white/[0.02]'
       } to-transparent pointer-events-none`} />
 
-      {/* 🔥 ÜÇLÜ SEKMELER (Ripple Efekti Entegre Edildi) */}
-      <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6 p-1 bg-white/[0.02] backdrop-blur-md rounded-[14px] sm:rounded-[16px] border border-white/[0.03] shadow-inner relative overflow-hidden">
-        
-        {/* Ortak Ripple Çizici */}
-        {ripples.map((r) => (
-          <span
-            key={r.id}
-            style={{ left: r.x, top: r.y }}
-            className={`absolute w-0 h-0 rounded-full pointer-events-none animate-ripple z-30 ${r.color}`}
-          />
-        ))}
-
+      {/* 🔥 ÜÇLÜ SEKMELER */}
+      <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6 p-1 bg-white/[0.02] backdrop-blur-md rounded-[14px] sm:rounded-[16px] border border-white/[0.03] shadow-inner">
         <button 
           type="button"
-          onClick={(e) => handleTabChange(e, 'CONFESSION', 'bg-purple-400/40 shadow-[0_0_25px_rgba(168,85,247,0.8)]')} 
+          onClick={(e) => {
+            triggerRipple(e, 'bg-purple-400/50 shadow-[0_0_25px_rgba(168,85,247,0.8)]');
+            handleTabChange('CONFESSION');
+          }} 
           className={`relative overflow-hidden flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-xl text-[11px] sm:text-[13px] transition-all duration-300 ${
             type === 'CONFESSION' 
               ? 'bg-purple-500 text-white font-bold shadow-[0_0_20px_rgba(168,85,247,0.4)] scale-100' 
@@ -124,7 +124,10 @@ export default function ModernForm() {
 
         <button 
           type="button"
-          onClick={(e) => handleTabChange(e, 'BOSYAP', 'bg-emerald-400/40 shadow-[0_0_25px_rgba(16,185,129,0.8)]')} 
+          onClick={(e) => {
+            triggerRipple(e, 'bg-emerald-400/50 shadow-[0_0_25px_rgba(16,185,129,0.8)]');
+            handleTabChange('BOSYAP');
+          }} 
           className={`relative overflow-hidden flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-xl text-[11px] sm:text-[13px] transition-all duration-300 ${
             type === 'BOSYAP' 
               ? 'bg-emerald-500 text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] scale-100' 
@@ -136,7 +139,10 @@ export default function ModernForm() {
 
         <button 
           type="button"
-          onClick={(e) => handleTabChange(e, 'OVERHEARD', 'bg-[#4DA3FF]/40 shadow-[0_0_25px_rgba(77,163,255,0.8)]')} 
+          onClick={(e) => {
+            triggerRipple(e, 'bg-[#4DA3FF]/50 shadow-[0_0_25px_rgba(77,163,255,0.8)]');
+            handleTabChange('OVERHEARD');
+          }} 
           className={`relative overflow-hidden flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-xl text-[11px] sm:text-[13px] transition-all duration-300 ${
             type === 'OVERHEARD' 
               ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_20px_rgba(77,163,255,0.3)] scale-100' 
@@ -262,7 +268,7 @@ export default function ModernForm() {
         <button 
           type="submit" 
           disabled={loading} 
-          onClick={(e) => triggerRipple(e, 'bg-white/40 shadow-[0_0_30px_rgba(255,255,255,0.8)]')}
+          onClick={(e) => triggerRipple(e, 'bg-white/50 shadow-[0_0_30px_rgba(255,255,255,0.9)]')}
           className={`relative overflow-hidden w-full py-2.5 sm:py-4 rounded-xl text-[13px] sm:text-base font-bold text-white flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_20px_rgba(0,0,0,0.2)] active:scale-95 ${
             (type === 'CONFESSION' && isEphemeral) ? 'bg-amber-600 hover:bg-amber-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] text-black'
             : type === 'CONFESSION' ? 'bg-purple-600 hover:bg-purple-500 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]' 
@@ -270,15 +276,6 @@ export default function ModernForm() {
             : 'bg-[#4DA3FF] text-black hover:bg-blue-400 hover:shadow-[0_0_30px_rgba(77,163,255,0.4)]'
           }`}
         >
-          {/* Ortak Ripple Çizici (Buton İçin) */}
-          {ripples.map((r) => (
-            <span
-              key={r.id}
-              style={{ left: r.x, top: r.y }}
-              className={`absolute w-0 h-0 rounded-full pointer-events-none animate-ripple z-30 ${r.color}`}
-            />
-          ))}
-
           {loading ? (
             <span className="flex items-center gap-2">
               <Loader2 size={16} className="animate-spin sm:w-[20px] sm:h-[20px]" /> Kapsüle Yükleniyor...

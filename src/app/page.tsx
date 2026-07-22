@@ -185,12 +185,11 @@ export default async function Home({ searchParams }: any) {
           <SearchBar />
         </div>
 
-        {/* 🔥 GÜNCELLENDİ: Güçlü Neon Renkli ve Canlı Filtre Sekmeleri */}
-        <div className="flex gap-2.5 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/80 backdrop-blur-2xl pt-3 -mx-4 px-4 sm:mx-0 sm:px-0 sm:rounded-b-2xl border-b border-white/[0.02] sm:border-b-0 shadow-sm">
+        {/* 🔥 GÜNCELLENDİ: Siyahlık tamamen kaldırıldı, tamamen şeffaf ve akışkan cam efektine çevrildi */}
+        <div className="flex gap-2.5 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-transparent backdrop-blur-md pt-3 -mx-4 px-4 sm:mx-0 sm:px-0">
           {filters.map((filter) => {
             const isActive = currentFilter === filter;
             
-            // Seçili olan kategoriye göre göz alıcı neon renkler ve dolgun zemin
             let activeClass = 'bg-white text-black font-extrabold shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105';
             if (isActive) {
               if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF] text-black font-extrabold shadow-[0_0_25px_rgba(77,163,255,0.5)] scale-105';
