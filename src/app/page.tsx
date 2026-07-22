@@ -11,6 +11,7 @@ import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
 import { MessageSquareHeart } from 'lucide-react';
 import ClientShareWidget from '@/components/ClientShareWidget'; // Aşağıda oluşturacağız
+import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
 
@@ -248,9 +249,9 @@ export default async function Home({ searchParams }: any) {
       </div>
 
       {/* Kesinlikle kapalı başlayan güvenli istemci paylaşım widget'ı */}
-      <ClientShareWidget>
+      <ClientShareWidgetV2>
         <ModernForm />
-      </ClientShareWidget>
+      </ClientShareWidgetV2>
     </main>
   );
 }
