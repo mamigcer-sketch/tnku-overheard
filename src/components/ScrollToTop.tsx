@@ -8,6 +8,7 @@ export default function ScrollToTop() {
 
   useEffect(() => {
     const toggleVisibility = () => {
+      // 300 pikselden fazla aşağı kaydırıldıysa göster, en üstteyken gizle
       if (window.scrollY > 300) {
         setIsVisible(true);
       } else {
@@ -15,7 +16,10 @@ export default function ScrollToTop() {
       }
     };
 
-    window.addEventListener("scroll", toggleVisibility);
+    window.addEventListener("scroll", toggleVisibility, { passive: true });
+    // Sayfa ilk açıldığında da pozisyonu kontrol et
+    toggleVisibility();
+
     return () => window.removeEventListener("scroll", toggleVisibility);
   }, []);
 
