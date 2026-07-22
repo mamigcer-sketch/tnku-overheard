@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CommentItem from "./CommentItem";
 import CommentForm from "./CommentForm";
 import { MessageCircle } from "lucide-react";
@@ -40,14 +40,14 @@ export default function CommentSection({
   postAuthorUuid, 
   userLikedCommentIds,
   customNicknamesMap = {},
-  userBadgesMap = {} // 🔥 YENİ: Rozet haritasını prop olarak aldık
+  userBadgesMap = {} 
 }: { 
   postId: string; 
   comments: any[]; 
   postAuthorUuid: string; 
   userLikedCommentIds: string[];
   customNicknamesMap?: Record<string, string>;
-  userBadgesMap?: Record<string, string>; // 🔥 YENİ: Tip tanımı
+  userBadgesMap?: Record<string, string>; 
 }) {
   const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
 
@@ -91,7 +91,7 @@ export default function CommentSection({
             const isPostAuthor = comment.authorId && comment.authorId === postAuthorUuid;
             const isLiked = userLikedCommentIds.includes(comment.id);
             const hasCustomNick = !!customNicknamesMap[authorUuid];
-            const badge = userBadgesMap[authorUuid]; // 🔥 YENİ: Yorum sahibinin rozeti
+            const badge = userBadgesMap[authorUuid]; 
             
             const replies = comments
               .filter((c: any) => c.parentId === comment.id)
@@ -106,7 +106,7 @@ export default function CommentSection({
                   isInitiallyLiked={isLiked}
                   onReply={handleReplyClick}
                   hasCustomNick={hasCustomNick} 
-                  userBadge={badge} // 🔥 YENİ: Yorum kartına rozeti gönderdik
+                  userBadge={badge} 
                 />
 
                 {replies.length > 0 && (
@@ -117,7 +117,7 @@ export default function CommentSection({
                       const isReplyAuthorPostAuthor = reply.authorId && reply.authorId === postAuthorUuid;
                       const isReplyLiked = userLikedCommentIds.includes(reply.id);
                       const isReplyHasCustomNick = !!customNicknamesMap[replyAuthorUuid];
-                      const replyBadge = userBadgesMap[replyAuthorUuid]; // 🔥 YENİ: Yanıtlayanın rozeti
+                      const replyBadge = userBadgesMap[replyAuthorUuid]; 
 
                       return (
                         <CommentItem 
@@ -129,7 +129,7 @@ export default function CommentSection({
                           isReply={true}
                           onReply={handleReplyClick}
                           hasCustomNick={isReplyHasCustomNick} 
-                          userBadge={replyBadge} // 🔥 YENİ
+                          userBadge={replyBadge} 
                         />
                       );
                     })}
