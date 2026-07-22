@@ -241,6 +241,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                   : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'
                 }`}>
                   {isTrending && <Flame size={12} className="animate-pulse" />}
+                  {/* 🔥 DÜZELTME BURADA YAPILDI: Boş yap rozeti artık doğru basılıyor */}
                   {isConfession ? 'İTİRAF' : isBosYap ? 'BOŞ YAP' : 'OVERHEARD'}
                 </span>
               )}
