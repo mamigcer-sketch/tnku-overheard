@@ -10,7 +10,6 @@ import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
 import { MessageSquareHeart } from 'lucide-react';
-import ClientShareWidget from '@/components/ClientShareWidget'; // Aşağıda oluşturacağız
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -134,7 +133,7 @@ export default async function Home({ searchParams }: any) {
   const filters = ['Tümü', 'İtiraf', 'Boş Yap', 'Overheard', '🔥 Trend'];
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden">
+    <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-20">
       
       <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/15 blur-[120px] pointer-events-none -z-10" />
       <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/15 blur-[140px] pointer-events-none -z-10" />
