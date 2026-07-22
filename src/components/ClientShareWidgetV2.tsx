@@ -45,8 +45,8 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
 
   return (
     <>
-      {/* Paylaş Butonu */}
-      <div className="fixed bottom-24 sm:bottom-6 right-6 z-40">
+      {/* Paylaş Butonu - En sağda ve güvenli yükseklikte */}
+      <div className="fixed bottom-20 right-4 z-40">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
