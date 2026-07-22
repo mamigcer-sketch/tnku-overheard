@@ -174,13 +174,6 @@ export default async function Home({ searchParams }: any) {
         <div className="relative z-10">
           <CountdownWidget countdown={activeCountdown} />
         </div>
-
-        {/* 🔥 GÜNCELLENDİ: Eski Accordion yerine parmak dostu Bottom Sheet bağlandı */}
-        <div className="mb-8 relative z-10">
-          <ShareBottomSheet>
-            <ModernForm />
-          </ShareBottomSheet>
-        </div>
         
         <div className="mb-6 relative z-10">
           <SearchBar />
@@ -253,6 +246,11 @@ export default async function Home({ searchParams }: any) {
           )}
         </div>
       </div>
+
+      {/* 🔥 Sağ altta süzülen yüzen neon artı butonu (FAB Bottom Sheet) */}
+      <ShareBottomSheet>
+        <ModernForm />
+      </ShareBottomSheet>
     </main>
   );
 }
