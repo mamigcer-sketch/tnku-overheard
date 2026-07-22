@@ -80,6 +80,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const isEphemeral = !!post.expiresAt;
   const isConfession = post.type === 'CONFESSION';
+  const isBosYap = post.type === 'BOSYAP'; // 🔥 YENİ: Boş Yap durumu eklendi
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -182,11 +183,14 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const isTrending = post.likes >= 10; 
 
+  // 🔥 GÜNCELLENDİ: Boş Yap için yeşil neon parlama efekti
   const hoverGlow = isEphemeral
     ? 'hover:shadow-[0_0_40px_rgba(245,158,11,0.2)] hover:border-amber-500/40 border-amber-500/20 bg-amber-500/[0.01]'
     : isConfession 
       ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
-      : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
+      : isBosYap
+        ? 'hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] hover:border-emerald-500/30'
+        : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
 
   const authorData = getAnonymousData(post.authorUuid || post.id, customNickname);
 
@@ -199,8 +203,13 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-[0.98]'
         } ${!isEphemeral ? 'bg-white/[0.02] border-white/[0.05]' : ''}`}
       >
+        {/* 🔥 GÜNCELLENDİ: Trend olan Boş Yap postu için yeşil arka plan degrade efekti */}
         {isTrending && !isEphemeral && (
-          <div className={`absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md -z-10 bg-gradient-to-r ${isConfession ? 'from-purple-500/30 to-pink-500/30' : 'from-[#4DA3FF]/30 to-blue-500/30'}`} />
+          <div className={`absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md -z-10 bg-gradient-to-r ${
+            isConfession ? 'from-purple-500/30 to-pink-500/30' 
+            : isBosYap ? 'from-emerald-500/30 to-teal-500/30'
+            : 'from-[#4DA3FF]/30 to-blue-500/30'
+          }`} />
         )}
 
         {isEphemeral && (
@@ -222,9 +231,13 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                   <Clock size={12} /> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
                 </span>
               ) : (
-                <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${isConfession ? 'bg-purple-500/10 text-purple-400' : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'}`}>
+                <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${
+                  isConfession ? 'bg-purple-500/10 text-purple-400' 
+                  : isBosYap ? 'bg-emerald-500/10 text-emerald-400'
+                  : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'
+                }`}>
                   {isTrending && <Flame size={12} className="animate-pulse" />}
-                  {isConfession ? 'İTİRAF' : 'OVERHEARD'}
+                  {isConfession ? 'İTİRAF' : isBosYap ? 'BOŞ YAP' : 'OVERHEARD'}
                 </span>
               )}
 
@@ -275,7 +288,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </div>
         </div>
 
-      {/* 🔥 SADELEŞTİRİLMİŞ YORUM ÖNİZLEMESİ (PEEK) KISMI */}
         {post.comments && post.comments.length > 0 && post.comments[0].content && (
           <div 
             onClick={(e) => {
@@ -319,7 +331,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             
             <button onClick={() => { playClickSound(); setShowComment(!showComment); }} className={`flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-xl transition-all duration-300 ${showComment ? (isEphemeral ? 'text-amber-400 bg-amber-500/10' : 'text-[#4DA3FF] bg-[#4DA3FF]/10') : (isEphemeral ? 'hover:text-amber-400 hover:bg-amber-500/10' : 'hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10')} active:scale-90`}>
               <MessageCircle size={18} className={`${showComment ? (isEphemeral ? 'fill-amber-400/20' : 'fill-[#4DA3FF]/20') : ''}`} /> 
-              {/* 🔥 GÜNCELLENDİ: Gerçek yorum sayısı (_count) buradan okunacak */}
               <span className="text-[13px] font-bold">{post._count?.comments || post.comments?.length || 0}</span>
             </button>
 

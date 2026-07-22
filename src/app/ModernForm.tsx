@@ -2,11 +2,12 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Headphones, VenetianMask, Send, CheckCircle2, Loader2, Info, Clock } from 'lucide-react';
+import { Headphones, VenetianMask, Coffee, Send, CheckCircle2, Loader2, Info, Clock } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
 
 export default function ModernForm() {
-  const [type, setType] = useState<'OVERHEARD' | 'CONFESSION'>('OVERHEARD'); 
+  // 🔥 GÜNCELLENDİ: İlk açılışta artık varsayılan olarak 'CONFESSION' (İtiraf) seçili geliyor.
+  const [type, setType] = useState<'OVERHEARD' | 'CONFESSION' | 'BOSYAP'>('CONFESSION'); 
   const [content, setContent] = useState('');
   const [location, setLocation] = useState('');
   const [people, setPeople] = useState(''); 
@@ -19,10 +20,9 @@ export default function ModernForm() {
   const router = useRouter();
   const maxChars = 500;
 
-  // 🔥 Kritik Çözüm: Sekme değiştirildiğinde İtiraf seçilirse Overheard alanlarını tamamen sıfırla!
-  const handleTabChange = (newType: 'OVERHEARD' | 'CONFESSION') => {
+  const handleTabChange = (newType: 'OVERHEARD' | 'CONFESSION' | 'BOSYAP') => {
     setType(newType);
-    if (newType === 'CONFESSION') {
+    if (newType === 'CONFESSION' || newType === 'BOSYAP') {
       setLocation('');
       setPeople('');
       setGender('');
@@ -39,7 +39,7 @@ export default function ModernForm() {
       const formData = new FormData();
       formData.append('type', type);
       formData.append('content', content);
-      // Eğer itiraf modundaysak bu alanları boş yolla ki backend'e yanlışlıkla gitmesin
+      
       formData.append('location', type === 'OVERHEARD' ? (location || '') : '');
       formData.append('people', type === 'OVERHEARD' ? people : '');
       formData.append('gender', type === 'OVERHEARD' ? gender : '');
@@ -69,53 +69,69 @@ export default function ModernForm() {
     }
   };
 
-  const labelTerm = type === 'CONFESSION' ? 'İtiraf' : 'Fısıltı';
-
   return (
     <div className={`relative bg-white/[0.02] backdrop-blur-2xl border transition-all duration-500 shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] p-3 sm:p-6 rounded-[20px] sm:rounded-[24px] mb-2 overflow-hidden group/form ${
-      (type === 'CONFESSION' && isEphemeral) ? 'border-amber-500/40 shadow-[0_8px_32px_0_rgba(245,158,11,0.15)]' : 'border-white/[0.05]'
+      (type === 'CONFESSION' && isEphemeral) ? 'border-amber-500/40 shadow-[0_8px_32px_0_rgba(245,158,11,0.15)]' 
+      : type === 'BOSYAP' ? 'border-emerald-500/20 shadow-[0_8px_32px_0_rgba(16,185,129,0.1)]' 
+      : 'border-white/[0.05]'
     }`}>
       
-      <div className={`absolute -inset-[1px] opacity-0 group-hover/form:opacity-100 transition-opacity duration-1000 blur-2xl -z-10 bg-gradient-to-b ${type === 'CONFESSION' && isEphemeral ? 'from-amber-500/20' : 'from-white/[0.02]'} to-transparent pointer-events-none`} />
+      <div className={`absolute -inset-[1px] opacity-0 group-hover/form:opacity-100 transition-opacity duration-1000 blur-2xl -z-10 bg-gradient-to-b ${
+        type === 'CONFESSION' && isEphemeral ? 'from-amber-500/20' 
+        : type === 'BOSYAP' ? 'from-emerald-500/10' 
+        : 'from-white/[0.02]'
+      } to-transparent pointer-events-none`} />
 
-      {/* Üst Sekmeler */}
-      <div className="flex gap-1.5 sm:gap-3 mb-4 sm:mb-6 p-1 bg-white/[0.02] backdrop-blur-md rounded-[14px] sm:rounded-[16px] border border-white/[0.03] shadow-inner">
-        <button 
-          type="button"
-          onClick={() => handleTabChange('OVERHEARD')} 
-          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 rounded-xl text-[12px] sm:text-base transition-all duration-300 ${
-            type === 'OVERHEARD' 
-              ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_20px_rgba(77,163,255,0.3)] scale-100' 
-              : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] scale-95 hover:scale-100'
-          }`}
-        >
-          <Headphones size={14} className="sm:w-[18px] sm:h-[18px]" /> Overheard
-        </button>
+      {/* 🔥 ÜÇLÜ SEKMELER (SIRALAMA DEĞİŞTİRİLDİ: İtiraf -> Boş Yap -> Overheard) */}
+      <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6 p-1 bg-white/[0.02] backdrop-blur-md rounded-[14px] sm:rounded-[16px] border border-white/[0.03] shadow-inner">
         <button 
           type="button"
           onClick={() => handleTabChange('CONFESSION')} 
-          className={`flex-1 flex items-center justify-center gap-1.5 sm:gap-2 py-2 sm:py-3 rounded-xl text-[12px] sm:text-base transition-all duration-300 ${
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-xl text-[11px] sm:text-[13px] transition-all duration-300 ${
             type === 'CONFESSION' 
               ? 'bg-purple-500 text-white font-bold shadow-[0_0_20px_rgba(168,85,247,0.4)] scale-100' 
               : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] scale-95 hover:scale-100'
           }`}
         >
-          <VenetianMask size={14} className="sm:w-[18px] sm:h-[18px]" /> İtiraf
+          <VenetianMask size={14} className="sm:w-[16px] sm:h-[16px]" /> İtiraf
+        </button>
+
+        <button 
+          type="button"
+          onClick={() => handleTabChange('BOSYAP')} 
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-xl text-[11px] sm:text-[13px] transition-all duration-300 ${
+            type === 'BOSYAP' 
+              ? 'bg-emerald-500 text-black font-bold shadow-[0_0_20px_rgba(16,185,129,0.3)] scale-100' 
+              : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] scale-95 hover:scale-100'
+          }`}
+        >
+          <Coffee size={14} className="sm:w-[16px] sm:h-[16px]" /> Boş Yap
+        </button>
+
+        <button 
+          type="button"
+          onClick={() => handleTabChange('OVERHEARD')} 
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-xl text-[11px] sm:text-[13px] transition-all duration-300 ${
+            type === 'OVERHEARD' 
+              ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_20px_rgba(77,163,255,0.3)] scale-100' 
+              : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] scale-95 hover:scale-100'
+          }`}
+        >
+          <Headphones size={14} className="sm:w-[16px] sm:h-[16px]" /> <span className="hidden sm:inline">Overheard</span><span className="sm:hidden">Duyum</span>
         </button>
       </div>
 
       {/* Uyarı Kutusu */}
       <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-white/70 bg-white/[0.03] backdrop-blur-md px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl mb-4 sm:mb-6 border border-white/[0.05] shadow-sm">
-        <Info size={14} className={`shrink-0 ${type === 'CONFESSION' ? 'text-purple-400' : 'text-[#4DA3FF]'}`} />
+        <Info size={14} className={`shrink-0 ${type === 'CONFESSION' ? 'text-purple-400' : type === 'BOSYAP' ? 'text-emerald-400' : 'text-[#4DA3FF]'}`} />
         <span className="text-[10px] sm:text-xs font-medium text-center tracking-wide">
-          Lütfen paylaşımını doğru kategoriyle işaretlediğinden emin ol.
+          {type === 'BOSYAP' ? 'Burada kurallar daha esnek, içinden geçeni dökül!' : 'Lütfen paylaşımını doğru kategoriyle işaretlediğinden emin ol.'}
         </span>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-5 relative z-10">
         {type === 'OVERHEARD' && (
           <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 sm:gap-4 animate-in fade-in zoom-in-95 duration-300">
-            
             <div className="col-span-2 md:col-span-1">
                 <input 
                   required 
@@ -175,34 +191,31 @@ export default function ModernForm() {
               required 
               maxLength={maxChars}
               rows={3} 
-              placeholder={type === 'OVERHEARD' ? "Duyduğun o efsane diyalog neydi? 🤫" : "Sırrını buraya fısılda... 🎭"} 
+              placeholder={
+                type === 'OVERHEARD' ? "Duyduğun o efsane diyalog neydi? 🤫" 
+                : type === 'BOSYAP' ? "Boş yapma vakti... Ne düşünüyorsun? ☕"
+                : "Sırrını buraya fısılda... 🎭"
+              } 
               value={content} 
               onChange={(e) => setContent(e.target.value)} 
               className={`w-full bg-white/[0.03] backdrop-blur-md border border-white/[0.05] group-hover/textarea:border-white/[0.1] group-hover/textarea:bg-white/[0.05] p-3 sm:p-4 pb-7 sm:pb-8 rounded-xl text-[13px] sm:text-base text-white outline-none resize-none transition-all shadow-inner placeholder:text-gray-600 ${
-                type === 'CONFESSION' 
-                  ? 'focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50' 
-                  : 'focus:ring-2 focus:ring-[#4DA3FF]/30 focus:border-[#4DA3FF]/50'
+                type === 'CONFESSION' ? 'focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50' 
+                : type === 'BOSYAP' ? 'focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50'
+                : 'focus:ring-2 focus:ring-[#4DA3FF]/30 focus:border-[#4DA3FF]/50'
               }`} 
             />
             <div className={`absolute bottom-2 sm:bottom-3 right-3 sm:right-4 text-[9px] sm:text-xs font-bold transition-colors ${
-              content.length >= maxChars 
-                ? 'text-red-400' 
-                : content.length > maxChars * 0.8 
-                  ? 'text-yellow-400' 
-                  : 'text-gray-600'
+              content.length >= maxChars ? 'text-red-400' : content.length > maxChars * 0.8 ? 'text-yellow-400' : 'text-gray-600'
             }`}>
                 {content.length} / {maxChars}
             </div>
         </div>
 
-        {/* 🔥 SADECE İTİRAF SEKMESİNDE GÖZÜKEN 24 Saat Sonra Yok Olma Toggle Kutusu */}
         {type === 'CONFESSION' && (
           <div 
             onClick={() => setIsEphemeral(!isEphemeral)}
             className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border backdrop-blur-md cursor-pointer transition-all duration-300 animate-in fade-in duration-300 ${
-              isEphemeral 
-                ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)]' 
-                : 'bg-white/[0.02] border-white/[0.05] text-gray-400 hover:border-white/[0.1] hover:text-gray-200'
+              isEphemeral ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)]' : 'bg-white/[0.02] border-white/[0.05] text-gray-400 hover:border-white/[0.1] hover:text-gray-200'
             }`}
           >
             <div className="flex items-center gap-2.5">
@@ -224,11 +237,10 @@ export default function ModernForm() {
           type="submit" 
           disabled={loading} 
           className={`w-full py-2.5 sm:py-4 rounded-xl text-[13px] sm:text-base font-bold text-white flex items-center justify-center gap-2 transition-all duration-300 disabled:opacity-70 disabled:cursor-not-allowed shadow-[0_4px_20px_rgba(0,0,0,0.2)] active:scale-95 ${
-            (type === 'CONFESSION' && isEphemeral)
-              ? 'bg-amber-600 hover:bg-amber-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] text-black'
-              : type === 'CONFESSION' 
-                ? 'bg-purple-600 hover:bg-purple-500 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]' 
-                : 'bg-[#4DA3FF] text-black hover:bg-blue-400 hover:shadow-[0_0_30px_rgba(77,163,255,0.4)]'
+            (type === 'CONFESSION' && isEphemeral) ? 'bg-amber-600 hover:bg-amber-500 hover:shadow-[0_0_30px_rgba(245,158,11,0.4)] text-black'
+            : type === 'CONFESSION' ? 'bg-purple-600 hover:bg-purple-500 hover:shadow-[0_0_30px_rgba(168,85,247,0.4)]' 
+            : type === 'BOSYAP' ? 'bg-emerald-500 text-black hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.4)]'
+            : 'bg-[#4DA3FF] text-black hover:bg-blue-400 hover:shadow-[0_0_30px_rgba(77,163,255,0.4)]'
           }`}
         >
           {loading ? (
@@ -236,17 +248,13 @@ export default function ModernForm() {
               <Loader2 size={16} className="animate-spin sm:w-[20px] sm:h-[20px]" /> Kapsüle Yükleniyor...
             </span>
           ) : (type === 'CONFESSION' && isEphemeral) ? (
-            <span className="flex items-center gap-2">
-              <Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> Süreli İtirafı Fırlat ⏳
-            </span>
+            <span className="flex items-center gap-2"><Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> Süreli İtirafı Fırlat ⏳</span>
           ) : type === 'CONFESSION' ? (
-            <span className="flex items-center gap-2">
-              <Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> İtirafı Gönder
-            </span>
+            <span className="flex items-center gap-2"><Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> İtirafı Gönder</span>
+          ) : type === 'BOSYAP' ? (
+            <span className="flex items-center gap-2"><Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> Boş Yap 🚀</span>
           ) : (
-            <span className="flex items-center gap-2">
-              <Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> Fısıltıyı Gönder
-            </span>
+            <span className="flex items-center gap-2"><Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md" /> Fısıltıyı Gönder</span>
           )}
         </button>
       </form>

@@ -64,12 +64,12 @@ export default async function Home({ searchParams }: any) {
 
   if (currentFilter === 'Overheard') whereQuery.type = { in: ['OVERHEARD', 'OVERHED'] };
   if (currentFilter === 'İtiraf') whereQuery.type = 'CONFESSION';
+  if (currentFilter === 'Boş Yap') whereQuery.type = 'BOSYAP';
   
-  // 🔥 GÜNCELLENDİ: Trend artık sadece son 24 saati baz alıyor
   if (currentFilter === '🔥 Trend') {
     orderQuery = { likes: 'desc' };
     const oneDayAgo = new Date();
-    oneDayAgo.setHours(oneDayAgo.getHours() - 24); // 7 gün yerine 24 saat yapıldı
+    oneDayAgo.setHours(oneDayAgo.getHours() - 24); 
     whereQuery.createdAt = { gte: oneDayAgo };
   }
 
@@ -80,7 +80,6 @@ export default async function Home({ searchParams }: any) {
       where: whereQuery,
       orderBy: orderQuery,
       take: totalTake,
-      // 🔥 YENİ: Önce en çok beğeni alan yoruma göre sırala. Eşitlik varsa en yeni olanı al.
       include: { 
         _count: { select: { comments: true } }, 
         comments: { 
@@ -131,7 +130,7 @@ export default async function Home({ searchParams }: any) {
     }
   }
 
-  const filters = ['Tümü', 'Overheard', 'İtiraf', '🔥 Trend'];
+  const filters = ['Tümü', 'Overheard', 'İtiraf', 'Boş Yap', '🔥 Trend'];
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden">
@@ -186,18 +185,30 @@ export default async function Home({ searchParams }: any) {
           <SearchBar />
         </div>
 
-        {/* 🔥 YENİ: Filtreler de scroll yaparken yukarı yapışsın diye sticky ve z-index eklendi */}
-        <div className="flex gap-2.5 overflow-x-auto pb-6 mb-2 scrollbar-hide snap-x relative z-40 sticky top-[80px] bg-[#0B0B0B]/80 backdrop-blur-md pt-2 -mx-4 px-4 sm:mx-0 sm:px-0 rounded-b-2xl">
+        {/* 🔥 GÜNCELLENDİ: Neon Glow Efektli, Glassmorphism Dinamik Filtreler */}
+        <div className="flex gap-2.5 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/60 backdrop-blur-2xl pt-3 -mx-4 px-4 sm:mx-0 sm:px-0 sm:rounded-b-2xl border-b border-white/[0.02] sm:border-b-0 shadow-sm">
           {filters.map((filter) => {
+            const isActive = currentFilter === filter;
+            
+            // Seçili olan kategoriye göre dinamik renkler (Neon Glow)
+            let activeClass = 'bg-white/10 border-white/20 text-white shadow-[0_0_15px_rgba(255,255,255,0.15)] border';
+            if (isActive) {
+              if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF]/15 border-[#4DA3FF]/40 text-[#4DA3FF] shadow-[0_0_15px_rgba(77,163,255,0.2)] border';
+              else if (filter === 'İtiraf') activeClass = 'bg-purple-500/15 border-purple-500/40 text-purple-300 shadow-[0_0_15px_rgba(168,85,247,0.2)] border';
+              else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500/15 border-emerald-500/40 text-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.2)] border';
+              else if (filter === '🔥 Trend') activeClass = 'bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)] border';
+            }
+
+            // Seçili olmayanların zarif, cam görünümü
+            const inactiveClass = 'bg-white/[0.02] border border-white/[0.05] text-gray-400 hover:text-gray-200 hover:bg-white/[0.06] hover:border-white/[0.1]';
+
             return (
               <Link 
                 key={filter} 
                 href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`} 
                 scroll={false}
-                className={`px-5 py-2.5 rounded-full text-[13px] font-bold whitespace-nowrap snap-start transition-all duration-300 backdrop-blur-md ${
-                  currentFilter === filter 
-                    ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.15)]' 
-                    : 'bg-white/[0.03] border border-white/[0.05] text-gray-400 hover:text-gray-200 hover:bg-white/[0.08]'
+                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold whitespace-nowrap snap-start transition-all duration-300 backdrop-blur-md flex items-center justify-center ${
+                  isActive ? activeClass : inactiveClass
                 }`}
               >
                 {filter}
