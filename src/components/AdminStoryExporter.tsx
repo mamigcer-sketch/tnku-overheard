@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { toPng } from "html-to-image";
-import { Download, Sparkles, Image as ImageIcon } from "lucide-react";
+import { Download } from "lucide-react";
 
 export default function AdminStoryExporter({ postContent, postType, authorName }: { postContent: string; postType: string; authorName: string }) {
   const storyRef = useRef<HTMLDivElement>(null);
@@ -12,8 +12,17 @@ export default function AdminStoryExporter({ postContent, postType, authorName }
     if (!storyRef.current) return;
     setLoading(true);
     try {
-      // HTML elementini yüksek kaliteli PNG'ye çeviriyoruz
-      const dataUrl = await toPng(storyRef.current, { cacheBust: true, pixelRatio: 2 });
+      // Piksel oranını ve boyutları 1080x1920'ye sabitliyoruz (Beyaz boşluk sorununu çözer)
+      const dataUrl = await toPng(storyRef.current, { 
+        cacheBust: true, 
+        pixelRatio: 1, 
+        width: 1080,
+        height: 1920,
+        style: {
+          transform: 'none',
+        }
+      });
+      
       const link = document.createElement("a");
       link.download = `tnku-story-${Date.now()}.png`;
       link.href = dataUrl;
@@ -26,54 +35,59 @@ export default function AdminStoryExporter({ postContent, postType, authorName }
   };
 
   return (
-    <div className="space-y-4">
+    <div className="flex items-center">
       {/* İndir Butonu */}
       <button
         onClick={handleDownloadPng}
         disabled={loading}
-        className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white px-4 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(236,72,153,0.3)] active:scale-95 disabled:opacity-50"
+        className="flex items-center gap-2 bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-400 hover:to-purple-500 text-white px-5 py-2.5 rounded-xl text-xs font-black uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(236,72,153,0.3)] active:scale-95 disabled:opacity-50"
       >
         <Download size={14} />
-        {loading ? "PNG Hazırlanıyor..." : "Story Olarak İndir (PNG)"}
+        {loading ? "Hazırlanıyor..." : "Story İndir (PNG)"}
       </button>
 
-      {/* GİZLİ VEYA ÖNİZLEMELİ HİKAYE ŞABLONU (1080x1920 Instagram Story Oranı) */}
-      {/* Kullanıcıya görselin nasıl çıkacağını göstermek için küçük önizleme yapabiliriz veya ekrandan gizleyebiliriz */}
-      <div className="overflow-hidden rounded-2xl border border-white/10 w-full max-w-[280px] aspect-[9/16] relative shadow-2xl">
+      {/* GİZLİ ŞABLON KAPSAYICISI - Ekrandan tamamen saklı ama tam boyut render edilir */}
+      <div 
+        className="absolute pointer-events-none opacity-0" 
+        style={{ top: '-10000px', left: '-10000px' }}
+      >
+        
+        {/* ASIL 1080x1920 TASARIM */}
         <div 
           ref={storyRef}
-          className="w-[1080px] h-[1920px] bg-[#050505] text-white p-20 flex flex-col justify-between relative select-none origin-top-left scale-[0.25]"
+          className="bg-[#050505] text-white p-20 flex flex-col justify-between relative overflow-hidden"
           style={{ width: '1080px', height: '1920px' }}
         >
           {/* Arka Plan Neon Parlamaları */}
-          <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] rounded-full bg-[#4DA3FF]/20 blur-[150px] pointer-events-none" />
-          <div className="absolute bottom-[-10%] right-[-10%] w-[900px] h-[900px] rounded-full bg-purple-600/20 blur-[150px] pointer-events-none" />
+          <div className="absolute top-[-5%] left-[-10%] w-[800px] h-[800px] rounded-full bg-[#4DA3FF]/30 blur-[150px] pointer-events-none z-0" />
+          <div className="absolute bottom-[5%] right-[-10%] w-[900px] h-[900px] rounded-full bg-purple-600/30 blur-[150px] pointer-events-none z-0" />
 
           {/* Üst Logo Alanı */}
-          <div className="flex items-center justify-between z-10 border-b border-white/10 pb-10">
-            <h1 className="text-4xl font-extrabold tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
-            <span className="bg-white/10 text-white px-6 py-2.5 rounded-full text-xl font-bold uppercase tracking-widest border border-white/10">
-              {postType === 'CONFESSION' ? 'İTİRAF 🎭' : 'FISILTI 📌'}
+          <div className="flex items-center justify-between z-10 border-b border-white/10 pb-12 mt-10">
+            <h1 className="text-5xl font-extrabold tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
+            <span className="bg-white/10 text-white px-8 py-4 rounded-full text-3xl font-bold uppercase tracking-widest border border-white/10 shadow-lg">
+              {postType === 'CONFESSION' ? 'İTİRAF 🎭' : postType === 'BOSYAP' ? 'BOŞ YAP ☕' : 'FISILTI 📌'}
             </span>
           </div>
 
           {/* Orta İçerik Kartı */}
-          <div className="my-auto z-10 bg-white/[0.03] backdrop-blur-3xl border border-white/10 p-16 rounded-[48px] shadow-[0_20px_60px_rgba(0,0,0,0.8)] relative">
-            <div className="absolute -top-6 left-12 bg-gradient-to-r from-amber-500 to-pink-500 text-black px-6 py-2 rounded-full text-xl font-black uppercase tracking-wider">
+          <div className="my-auto z-10 bg-white/[0.04] backdrop-blur-3xl border border-white/10 p-20 rounded-[48px] shadow-[0_30px_80px_rgba(0,0,0,0.9)] relative">
+            <div className="absolute -top-8 left-16 bg-gradient-to-r from-amber-500 to-pink-500 text-black px-8 py-4 rounded-full text-2xl font-black uppercase tracking-wider shadow-[0_0_20px_rgba(245,158,11,0.5)]">
               @ {authorName}
             </div>
             
-            <p className="text-5xl leading-[1.4] font-semibold text-gray-100 tracking-wide mt-6">
+            <p className="text-5xl leading-[1.6] font-semibold text-gray-100 tracking-wide mt-8">
               "{postContent}"
             </p>
           </div>
 
-          {/* Alt Bilgi / Yönlendirme */}
-          <div className="z-10 text-center border-t border-white/10 pt-10 flex flex-col items-center justify-center gap-4">
-            <p className="text-2xl font-bold text-gray-400">Devamı ve daha fazlası için:</p>
-            <span className="text-4xl font-black text-[#4DA3FF] tracking-wider">www.tnkuoverheard.com.tr</span>
+          {/* Alt Bilgi / Yönlendirme - 🔥 YUKARI ALINDI (mb-48 ile alt tarafta boşluk bırakıldı) */}
+          <div className="z-10 text-center border-t border-white/10 pt-16 pb-8 flex flex-col items-center justify-center gap-6 mb-48">
+            <p className="text-3xl font-bold text-gray-400 uppercase tracking-widest">Devamı ve daha fazlası için:</p>
+            <span className="text-5xl font-black text-[#4DA3FF] tracking-wider drop-shadow-[0_0_15px_rgba(77,163,255,0.6)]">www.tnkuoverheard.com.tr</span>
           </div>
         </div>
+
       </div>
     </div>
   );
