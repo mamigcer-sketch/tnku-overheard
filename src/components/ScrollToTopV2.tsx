@@ -32,7 +32,7 @@ export default function ScrollToTopV2() {
   };
 
   return (
-    <button
+   <button
       type="button"
       onClick={scrollToTop}
       style={{
