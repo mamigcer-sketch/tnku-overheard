@@ -62,7 +62,8 @@ export default function CommentForm({
           // 🔥 YAZILAR GÜNCELLENDİ: Daha doğal ve davetkar
           placeholder={parentId ? "Anonim olarak yanıtla..." : "Bu paylaşıma anonim bir yorum bırak..."}
           rows={3}
-          className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-[#4DA3FF]/50 rounded-[20px] px-4 py-3.5 pr-14 text-sm text-gray-100 placeholder-gray-500 focus:outline-none transition-all resize-none shadow-inner"
+          // 🔥 text-sm yerine text-base yapıldı, iPhone zoom sorunu çözüldü!
+          className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-[#4DA3FF]/50 rounded-[20px] px-4 py-3.5 pr-14 text-base text-gray-100 placeholder-gray-500 focus:outline-none transition-all resize-none shadow-inner"
         />
         <button
           type="submit"

@@ -16,7 +16,6 @@ export default function ModernForm() {
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
   
-  // 🔥 NEFES ALAN ARKA PLAN İÇİN FOCUS STATE
   const [isFocused, setIsFocused] = useState(false);
   
   const router = useRouter();
@@ -85,7 +84,6 @@ export default function ModernForm() {
       setTime('');
       setIsEphemeral(false);
       
-      // Buton üzerinde mikro-animasyon başarı mesajı
       setSuccessMsg(true);
       setTimeout(() => setSuccessMsg(false), 4000);
       router.refresh();
@@ -98,7 +96,6 @@ export default function ModernForm() {
 
   return (
     <div className={`relative bg-white/[0.02] backdrop-blur-2xl border transition-all duration-700 p-3 sm:p-6 rounded-[20px] sm:rounded-[24px] mb-2 overflow-hidden group/form ${
-      // 🔥 NEFES ALAN DİNAMİK GLOW EFEKTİ
       isFocused && type === 'CONFESSION' ? 'shadow-[0_0_60px_rgba(168,85,247,0.3)] border-purple-500/50 scale-[1.01]' 
       : isFocused && type === 'BOSYAP' ? 'shadow-[0_0_60px_rgba(16,185,129,0.3)] border-emerald-500/50 scale-[1.01]'
       : isFocused && type === 'OVERHEARD' ? 'shadow-[0_0_60px_rgba(77,163,255,0.3)] border-[#4DA3FF]/50 scale-[1.01]'
@@ -156,7 +153,6 @@ export default function ModernForm() {
         </button>
       </div>
 
-      {/* Uyarı Kutusu */}
       <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-white/70 bg-white/[0.03] backdrop-blur-md px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl mb-4 sm:mb-6 border border-white/[0.05] shadow-sm">
         <Info size={14} className={`shrink-0 transition-colors duration-300 ${type === 'CONFESSION' ? 'text-purple-400' : type === 'BOSYAP' ? 'text-emerald-400' : 'text-[#4DA3FF]'}`} />
         <span className="text-[10px] sm:text-xs font-medium text-center tracking-wide">
@@ -166,11 +162,10 @@ export default function ModernForm() {
 
       <form onSubmit={handleSubmit} key={type} className="space-y-3 sm:space-y-5 relative z-10 animate-in fade-in duration-300">
         
-        {/* 🔥 CAM İÇİNDE CAM (NESTED GLASS) + YÜZEN ETİKETLER */}
         {type === 'OVERHEARD' && (
           <div className="bg-black/30 backdrop-blur-2xl rounded-2xl p-4 sm:p-5 border border-white/[0.04] shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)] grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 relative overflow-hidden">
             
-            {/* Konum - Yüzen Etiket */}
+            {/* 🔥 Bütün input/select'ler "text-base" (16px) yapıldı, Safari zoom iptal! */}
             <div className="relative col-span-2 md:col-span-1 group">
                 <input 
                   type="text" 
@@ -179,19 +174,18 @@ export default function ModernForm() {
                   placeholder=" " 
                   value={location} 
                   onChange={(e) => setLocation(e.target.value)} 
-                  className="block px-3 sm:px-4 pb-2 pt-5 w-full text-xs sm:text-sm text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer" 
+                  className="block px-3 sm:px-4 pb-2 pt-5 w-full text-base text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer" 
                 />
                 <label htmlFor="location_field" className={`absolute text-[10px] sm:text-xs duration-300 transform top-3.5 z-10 origin-[0] left-3.5 sm:left-4 peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 pointer-events-none ${location ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500 scale-100 translate-y-0'}`}>Konum (Örn: Yemekhane)</label>
             </div>
             
-            {/* Kişi Sayısı - Yüzen Etiket */}
             <div className="relative col-span-1 group">
                <select 
                 id="people_field"
                 required 
                 value={people} 
                 onChange={(e) => setPeople(e.target.value)} 
-                className="block px-3 sm:px-4 pb-2 pt-5 w-full text-xs sm:text-sm text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer cursor-pointer"
+                className="block px-3 sm:px-4 pb-2 pt-5 w-full text-base text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer cursor-pointer"
               >
                 <option value="" disabled hidden></option>
                 <option value="2 kişi" className="bg-[#1a1a1a] text-white">2 Kişi</option>
@@ -202,14 +196,13 @@ export default function ModernForm() {
               <label htmlFor="people_field" className={`absolute text-[10px] sm:text-xs duration-300 transform top-3.5 z-10 origin-[0] left-3.5 sm:left-4 peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 pointer-events-none ${people ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500 scale-100 translate-y-0'}`}>Kişi Sayısı</label>
             </div>
 
-            {/* Grup Türü - Yüzen Etiket */}
             <div className="relative col-span-1 group">
               <select 
                 id="gender_field"
                 required
                 value={gender} 
                 onChange={(e) => setGender(e.target.value)} 
-                className="block px-3 sm:px-4 pb-2 pt-5 w-full text-xs sm:text-sm text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer cursor-pointer"
+                className="block px-3 sm:px-4 pb-2 pt-5 w-full text-base text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer cursor-pointer"
               >
                 <option value="" disabled hidden></option>
                 <option value="Kız" className="bg-[#1a1a1a] text-white">Sadece Kız</option>
@@ -219,7 +212,6 @@ export default function ModernForm() {
               <label htmlFor="gender_field" className={`absolute text-[10px] sm:text-xs duration-300 transform top-3.5 z-10 origin-[0] left-3.5 sm:left-4 peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 pointer-events-none ${gender ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500 scale-100 translate-y-0'}`}>Grup Türü</label>
             </div>
 
-            {/* Olay Saati - Yüzen Etiket */}
             <div className="relative col-span-2 md:col-span-1 group">
               <input 
                 type="time" 
@@ -228,7 +220,7 @@ export default function ModernForm() {
                 placeholder=" "
                 value={time} 
                 onChange={(e) => setTime(e.target.value)} 
-                className="block px-3 sm:px-4 pb-2 pt-5 w-full text-xs sm:text-sm text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer [color-scheme:dark]" 
+                className="block px-3 sm:px-4 pb-2 pt-5 w-full text-base text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer [color-scheme:dark]" 
               />
               <label htmlFor="time_field" className={`absolute text-[10px] sm:text-xs duration-300 transform top-3.5 z-10 origin-[0] left-3.5 sm:left-4 peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 pointer-events-none ${time ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500 scale-100 translate-y-0'}`}>Olay Saati</label>
             </div>
@@ -236,6 +228,7 @@ export default function ModernForm() {
         )}
 
         <div className="relative group/textarea">
+            {/* 🔥 Textarea da "text-base" (16px) yapıldı */}
             <textarea 
               required 
               maxLength={maxChars}
@@ -249,7 +242,7 @@ export default function ModernForm() {
               } 
               value={content} 
               onChange={(e) => setContent(e.target.value)} 
-              className={`w-full bg-white/[0.03] backdrop-blur-md border border-white/[0.05] group-hover/textarea:border-white/[0.1] group-hover/textarea:bg-white/[0.05] p-3 sm:p-4 pb-7 sm:pb-8 rounded-xl text-[13px] sm:text-base text-white outline-none resize-none transition-all shadow-inner placeholder:text-gray-600 ${
+              className={`w-full bg-white/[0.03] backdrop-blur-md border border-white/[0.05] group-hover/textarea:border-white/[0.1] group-hover/textarea:bg-white/[0.05] p-3 sm:p-4 pb-7 sm:pb-8 rounded-xl text-base text-white outline-none resize-none transition-all shadow-inner placeholder:text-gray-500 ${
                 type === 'CONFESSION' ? 'focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50' 
                 : type === 'BOSYAP' ? 'focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50'
                 : 'focus:ring-2 focus:ring-[#4DA3FF]/30 focus:border-[#4DA3FF]/50'
@@ -284,7 +277,6 @@ export default function ModernForm() {
           </div>
         )}
 
-        {/* 🔥 GÖNDER BUTONU MİKRO-ANİMASYONLARI */}
         <button 
           type="submit" 
           disabled={loading || successMsg} 
