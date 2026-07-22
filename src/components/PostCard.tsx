@@ -191,6 +191,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
         ? 'hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] hover:border-emerald-500/30'
         : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
 
+  // 🔥 Özel nick burada işleme alınıyor
   const authorData = getAnonymousData(post.authorUuid || post.id, customNickname);
 
   return (
