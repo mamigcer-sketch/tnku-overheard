@@ -12,6 +12,21 @@ import {
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
 export const prisma = globalForPrisma.prisma || new PrismaClient();
 
+// 🔥 ANA SAYFADAKİ OTOMATİK NICK ÜRETİCİ BURAYA EKLENDİ
+const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
+const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
+
+const getAuthorName = (id: string, customNickname?: string) => {
+  if (customNickname) return customNickname;
+  if (!id) return "Gizemli Yolcu";
+  
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  const positiveHash = Math.abs(hash);
+  
+  return `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`;
+};
+
 export default async function AdminDashboard({ searchParams }: any) {
   const cookieStore = await cookies();
   const isAuthenticated = cookieStore.get('admin_auth')?.value === 'true';
@@ -200,7 +215,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard' }, 
     { icon: Rss, label: 'Akış' }, 
-    { icon: Crown, label: 'VIP Üyeler' }, // 🔥 YENİ VIP SEKMESİ
+    { icon: Crown, label: 'VIP Üyeler' }, 
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Coffee, label: 'Boş Yap' }, 
@@ -211,21 +226,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: Timer, label: 'Sayaç' },
     { icon: Ban, label: 'Banlar' }
   ];
-
-  // Adjective & Animals generator for Story
-  const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
-  const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
-
-  const getAuthorName = (id: string, customNickname?: string) => {
-    if (customNickname) return customNickname;
-    if (!id) return "Gizemli Yolcu";
-    
-    let hash = 0;
-    for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-    const positiveHash = Math.abs(hash);
-    
-    return `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`;
-  };
 
   return (
     <div className="flex h-screen bg-[#050505] text-white relative z-0 overflow-hidden">
@@ -364,7 +364,7 @@ export default async function AdminDashboard({ searchParams }: any) {
           {/* DİNAMİK SEKME İÇERİKLERİ */}
           <div className="space-y-4 sm:space-y-6">
             
-            {/* 🔥 YENİ EKLENEN: VIP ÜYELER SEKMESİ */}
+            {/* VIP ÜYELER SEKMESİ */}
             {currentTab === 'VIP Üyeler' ? (
               <div className="space-y-6 sm:space-y-8">
                 
@@ -720,17 +720,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                 </div>
               )
             )}
-
-            {/* İMZA ALANI (FOOTER) */}
-            <div className="mt-12 sm:mt-16 pt-8 sm:pt-10 border-t border-white/5 flex flex-col items-center justify-center text-center pb-6 sm:pb-8 opacity-70 hover:opacity-100 transition-opacity duration-300">
-              <p className="text-gray-500 text-[9px] sm:text-[10px] font-black tracking-widest uppercase mb-2 sm:mb-3">Tasarımda Daha Fazlası İçin</p>
-              <a href="https://www.tnkuoverheard.com.tr" target="_blank" rel="noopener noreferrer" className="text-[#4DA3FF] hover:text-pink-400 text-xs sm:text-sm font-black tracking-wider transition-colors flex items-center gap-1.5 sm:gap-2 group">
-                <Sparkles size={14} className="sm:w-4 sm:h-4 group-hover:animate-spin" />
-                www.tnkuoverheard.com.tr
-                <ExternalLink size={12} className="sm:w-[14px] sm:h-[14px] group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
-              </a>
-            </div>
-
           </div>
         </div>
       </main>
