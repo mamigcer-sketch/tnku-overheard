@@ -80,11 +80,14 @@ export default async function Home({ searchParams }: any) {
       where: whereQuery,
       orderBy: orderQuery,
       take: totalTake,
-      // 🔥 YENİ: Yorum önizlemesi ve gerçek sayı için sorguyu güncelledik!
+      // 🔥 YENİ: Önce en çok beğeni alan yoruma göre sırala. Eşitlik varsa en yeni olanı al.
       include: { 
         _count: { select: { comments: true } }, 
         comments: { 
-          orderBy: { createdAt: 'desc' }, 
+          orderBy: [
+            { likes: 'desc' },
+            { createdAt: 'desc' }
+          ], 
           take: 1, 
           select: { id: true, content: true, authorId: true } 
         } 
