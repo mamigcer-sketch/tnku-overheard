@@ -2,11 +2,11 @@ import { PrismaClient } from '@prisma/client';
 import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
-import AdminStoryPanel from '@/components/AdminStoryPanel'; // 🔥 HİKAYE PANELİ BURAYA EKLENDİ
+import AdminStoryExporter from '@/components/AdminStoryExporter'; 
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, Coffee,
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles, ExternalLink
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -109,7 +109,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     bannedUsers = await (prisma as any).bannedUser.findMany({ orderBy: { createdAt: 'desc' } });
   } else if (currentTab === 'Şikayetler') {
     reports = await (prisma as any).report.findMany({ orderBy: { createdAt: 'desc' }, include: { post: true, comment: true } });
-  } else if (currentTab !== 'Hikayeler') { // Hikayeler tabı için Prisma sorgusu atlıyoruz
+  } else { 
     let queryFilter: any = { status: 'PENDING' };
     if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
     if (currentTab === 'Overheard') queryFilter = { status: 'APPROVED', type: { in: ['OVERHEARD', 'OVERHED'] } };
@@ -190,7 +190,6 @@ export default async function AdminDashboard({ searchParams }: any) {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard' }, 
     { icon: Rss, label: 'Akış' }, 
-    { icon: Sparkles, label: 'Hikayeler' }, // 🔥 YENİ HİKAYE SEKMESİ
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Coffee, label: 'Boş Yap' }, 
@@ -215,7 +214,7 @@ export default async function AdminDashboard({ searchParams }: any) {
           {menuItems.map((item, i) => (
             <Link href={`/admin?tab=${item.label}`} key={i} className={`flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${currentTab === item.label ? 'bg-white/[0.06] text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.02)]' : 'text-gray-400 border border-transparent hover:text-white hover:bg-white/[0.03]'}`}>
               <div className="flex items-center gap-3.5">
-                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? (item.label === 'Hikayeler' ? 'text-pink-400' : 'text-[#4DA3FF]') : 'text-gray-500 group-hover:text-gray-300'}`} /> 
+                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? 'text-[#4DA3FF]' : 'text-gray-500 group-hover:text-gray-300'}`} /> 
                 <span className={`font-semibold tracking-wide text-sm ${currentTab === item.label ? 'opacity-100' : 'opacity-80'}`}>{item.label}</span>
               </div>
               {item.badge !== undefined && item.badge > 0 ? (
@@ -235,7 +234,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0B0B0B]/90 backdrop-blur-3xl border-t border-white/10 px-2 py-3 flex justify-start z-50 overflow-x-auto gap-2 scrollbar-hide shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {menuItems.map((item, i) => (
           <Link href={`/admin?tab=${item.label}`} key={i} className={`flex flex-col items-center justify-center gap-1.5 min-w-[72px] px-2 py-2 rounded-2xl transition-all relative ${currentTab === item.label ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
-            <item.icon size={20} className={currentTab === item.label && item.label === 'Hikayeler' ? 'text-pink-400' : currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
+            <item.icon size={20} className={currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
             {item.badge !== undefined && item.badge > 0 && (
               <span className={`absolute top-1 right-3 w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-black ${item.label === 'Şikayetler' ? 'bg-red-500 text-white' : 'bg-[#4DA3FF] text-black'}`}>{item.badge}</span>
             )}
@@ -249,8 +248,8 @@ export default async function AdminDashboard({ searchParams }: any) {
         
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-10 pb-6 border-b border-white/5 gap-4">
             <h2 className="text-3xl font-extrabold flex items-center gap-4 tracking-tight">
-              <div className={`p-3 rounded-2xl border ${currentTab === 'Yorumlar' ? 'bg-blue-500/10 border-blue-500/20' : currentTab === 'Hikayeler' ? 'bg-pink-500/10 border-pink-500/20' : currentTab === 'Duyurular' ? 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20' : currentTab === 'Sayaç' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Banlar' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Şikayetler' ? 'bg-red-500/10 border-red-500/20' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20'}`}>
-                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400" /> : currentTab === 'Hikayeler' ? <Sparkles className="text-pink-400" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF]" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400" /> : currentTab === 'Banlar' ? <Ban className="text-red-400" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500" /> : <BarChart3 className="text-[#4DA3FF]" />} 
+              <div className={`p-3 rounded-2xl border ${currentTab === 'Yorumlar' ? 'bg-blue-500/10 border-blue-500/20' : currentTab === 'Duyurular' ? 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20' : currentTab === 'Sayaç' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Banlar' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Şikayetler' ? 'bg-red-500/10 border-red-500/20' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20'}`}>
+                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF]" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400" /> : currentTab === 'Banlar' ? <Ban className="text-red-400" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500" /> : <BarChart3 className="text-[#4DA3FF]" />} 
               </div>
               {currentTab} Paneli
             </h2>
@@ -265,8 +264,8 @@ export default async function AdminDashboard({ searchParams }: any) {
 
         <div className="max-w-5xl mx-auto space-y-8">
           
-          {/* İSTATİSTİKLER & CANLI KAMPÜS NABZI (Belirli sekmelerde gizli) */}
-          {currentTab !== 'Yorumlar' && currentTab !== 'Hikayeler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
+          {/* İSTATİSTİKLER & CANLI KAMPÜS NABZI */}
+          {currentTab !== 'Yorumlar' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
             <>
               {/* Canlı Nabız Paneli */}
               <div className="bg-white/[0.02] backdrop-blur-xl p-6 md:p-8 rounded-[32px] border border-white/5 shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-8 mb-8 relative overflow-hidden group">
@@ -339,10 +338,7 @@ export default async function AdminDashboard({ searchParams }: any) {
           {/* DİNAMİK SEKME İÇERİKLERİ */}
           <div className="space-y-6">
             
-            {/* 🔥 YENİ: HİKAYELER SEKME İÇERİĞİ */}
-            {currentTab === 'Hikayeler' ? (
-              <AdminStoryPanel />
-            ) : currentTab === 'Yorumlar' ? (
+            {currentTab === 'Yorumlar' ? (
                 displayComments.map((comment) => (
                   <article key={comment.id} className="bg-white/[0.02] backdrop-blur-xl p-6 sm:p-8 rounded-[24px] border border-white/5 flex flex-col gap-5 shadow-xl hover:border-white/10 transition-colors">
                     <div className="flex justify-between items-start gap-4">
@@ -596,15 +592,23 @@ export default async function AdminDashboard({ searchParams }: any) {
                           )}
                         </div>
                         
-                        <div className="flex gap-3 w-full flex-wrap justify-end pt-4 border-t border-white/5 mt-1">
-                            {post.status === 'PENDING' ? (
-                              <>
-                                <form action={approvePost}><input type="hidden" name="id" value={post.id} /><button className="bg-green-500/10 text-green-400 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-wider border border-green-500/20 flex gap-2 hover:bg-green-500/20 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)] transition-all"><Check size={16}/> Onayla ve Yayınla</button></form>
-                                <form action={rejectPost}><input type="hidden" name="id" value={post.id} /><button className="bg-orange-500/10 text-orange-400 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-wider border border-orange-500/20 flex gap-2 hover:bg-orange-500/20 transition-all"><X size={16}/> Çöpe At</button></form>
-                              </>
-                            ) : null}
-                            <form action={banUser}><input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmiyor'} /><button className="bg-red-500/10 text-red-400 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-wider border border-red-500/20 flex gap-2 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] transition-all"><Ban size={16}/> Cihazı Banla</button></form>
-                            <form action={deletePost}><input type="hidden" name="id" value={post.id} /><button className="bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-wider border border-white/10 flex gap-2 transition-all"><Trash2 size={16}/> Kalıcı Sil</button></form>
+                        <div className="flex gap-3 w-full flex-wrap justify-between items-center pt-4 border-t border-white/5 mt-1">
+                            <AdminStoryExporter 
+                              postContent={post.content} 
+                              postType={post.type} 
+                              authorName={customNicknamesMap[post.authorUuid] || "Gizemli Yolcu"} 
+                            />
+
+                            <div className="flex gap-3 flex-wrap justify-end">
+                                {post.status === 'PENDING' ? (
+                                  <>
+                                    <form action={approvePost}><input type="hidden" name="id" value={post.id} /><button className="bg-green-500/10 text-green-400 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-wider border border-green-500/20 flex gap-2 hover:bg-green-500/20 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)] transition-all"><Check size={16}/> Onayla ve Yayınla</button></form>
+                                    <form action={rejectPost}><input type="hidden" name="id" value={post.id} /><button className="bg-orange-500/10 text-orange-400 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-wider border border-orange-500/20 flex gap-2 hover:bg-orange-500/20 transition-all"><X size={16}/> Çöpe At</button></form>
+                                  </>
+                                ) : null}
+                                <form action={banUser}><input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmiyor'} /><button className="bg-red-500/10 text-red-400 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-wider border border-red-500/20 flex gap-2 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] transition-all"><Ban size={16}/> Cihazı Banla</button></form>
+                                <form action={deletePost}><input type="hidden" name="id" value={post.id} /><button className="bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 py-3 px-6 rounded-xl text-xs font-black uppercase tracking-wider border border-white/10 flex gap-2 transition-all"><Trash2 size={16}/> Kalıcı Sil</button></form>
+                            </div>
                         </div>
                       </article>
                     );
@@ -612,6 +616,17 @@ export default async function AdminDashboard({ searchParams }: any) {
                 </div>
               )
             )}
+
+            {/* İMZA ALANI (FOOTER) */}
+            <div className="mt-16 pt-10 border-t border-white/5 flex flex-col items-center justify-center text-center pb-8 opacity-70 hover:opacity-100 transition-opacity duration-300">
+              <p className="text-gray-500 text-[10px] font-black tracking-widest uppercase mb-3">Tasarımda Daha Fazlası İçin</p>
+              <a href="https://www.tnkuoverheard.com.tr" target="_blank" rel="noopener noreferrer" className="text-[#4DA3FF] hover:text-pink-400 text-sm font-black tracking-wider transition-colors flex items-center gap-2 group">
+                <Sparkles size={16} className="group-hover:animate-spin" />
+                www.tnkuoverheard.com.tr
+                <ExternalLink size={14} className="group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform" />
+              </a>
+            </div>
+
           </div>
         </div>
       </main>
