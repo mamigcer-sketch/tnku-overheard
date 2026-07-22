@@ -37,15 +37,15 @@ export default function ScrollToTopV2() {
       onClick={scrollToTop}
       style={{
         position: 'fixed',
-        bottom: '24px',
+        bottom: '96px', // Sağdaki paylaş butonuyla milimetrik aynı yükseklik (bottom-24 karşılığı)
         left: '24px',
-        zIndex: 9999,
+        zIndex: 40,
         opacity: isVisible ? 1 : 0,
         transform: isVisible ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.8)',
         pointerEvents: isVisible ? 'auto' : 'none',
         transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
       }}
-      className="group relative overflow-hidden flex items-center justify-center p-3.5 sm:py-3.5 sm:px-4 rounded-2xl bg-white/[0.07] backdrop-blur-[24px] border border-white/20 text-white shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-white/45 cursor-pointer active:scale-95"
+      className="group relative overflow-hidden flex items-center justify-center p-3.5 rounded-2xl bg-white/[0.07] backdrop-blur-[24px] border border-white/20 text-white shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-white/45 cursor-pointer active:scale-95"
       aria-label="Yukarı Çık"
     >
       <div className="w-6 h-6 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-[#4DA3FF] group-hover:-translate-y-0.5 transition-transform duration-300">
