@@ -15,24 +15,23 @@ export default function FilterTabs({ filters, currentFilter, searchQuery }: { fi
     if (searchQuery) params.set('q', searchQuery);
     else params.delete('q');
 
-    // 🔥 Geçikmeyi yok eden anlık transition yapısı
     startTransition(() => {
       router.push(`/?${params.toString()}`, { scroll: false });
     });
   };
 
   return (
-    <div className="flex gap-2.5 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/80 backdrop-blur-2xl pt-3 -mx-4 px-4 sm:mx-0 sm:px-0 sm:rounded-b-2xl border-b border-white/[0.02] sm:border-b-0 shadow-sm items-center">
+    // 🔥 DÜZELTİLEN YER: Üstten ve alttan kesilmeyi önlemek için py-4 eklendi, overflow görünür kılındı
+    <div className="flex gap-2.5 overflow-x-auto overflow-y-visible py-4 my-2 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/80 backdrop-blur-2xl -mx-4 px-4 sm:mx-0 sm:px-0 sm:rounded-2xl border-b border-white/[0.02] sm:border-b-0 shadow-sm items-center">
       {filters.map((filter) => {
         const isActive = currentFilter === filter;
         
-        // 🔥 Seçili sekmeler artık dolu renk ve güçlü neon parıltıyla parlayacak
-        let activeClass = 'bg-white text-black font-extrabold shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105';
+        let activeClass = 'bg-white text-black font-extrabold shadow-[0_0_25px_rgba(255,255,255,0.4)] scale-105';
         if (isActive) {
-          if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF] text-black font-extrabold shadow-[0_0_25px_rgba(77,163,255,0.5)] scale-105';
-          else if (filter === 'İtiraf') activeClass = 'bg-purple-600 text-white font-extrabold shadow-[0_0_25px_rgba(168,85,247,0.5)] scale-105';
-          else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500 text-black font-extrabold shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-105';
-          else if (filter === '🔥 Trend') activeClass = 'bg-amber-500 text-black font-extrabold shadow-[0_0_25px_rgba(245,158,11,0.5)] scale-105';
+          if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF] text-black font-extrabold shadow-[0_0_30px_rgba(77,163,255,0.6)] scale-105';
+          else if (filter === 'İtiraf') activeClass = 'bg-purple-600 text-white font-extrabold shadow-[0_0_30px_rgba(168,85,247,0.6)] scale-105';
+          else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500 text-black font-extrabold shadow-[0_0_30px_rgba(16,185,129,0.6)] scale-105';
+          else if (filter === '🔥 Trend') activeClass = 'bg-amber-500 text-black font-extrabold shadow-[0_0_30px_rgba(245,158,11,0.6)] scale-105';
         }
 
         const inactiveClass = 'bg-white/[0.03] border border-white/[0.08] text-gray-400 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.15]';
