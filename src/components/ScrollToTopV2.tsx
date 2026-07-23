@@ -19,12 +19,10 @@ export default function ScrollToTopV2() {
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
 
-    // 🔥 DÜZELTİLEN YER: Artık arka planın kilitlenip kilitlenmediğini kontrol ediyor
     const observer = new MutationObserver(() => {
       setIsModalOpen(document.body.style.overflow === 'hidden');
     });
 
-    // Style değişikliklerini dinle
     observer.observe(document.body, { attributes: true, attributeFilter: ['style'] });
 
     return () => {
@@ -43,7 +41,6 @@ export default function ScrollToTopV2() {
     });
   };
 
-  // Modal açıksa veya yeterince aşağıda değilse butonu gizle
   const showButton = isVisible && !isModalOpen;
 
   return (
@@ -52,9 +49,9 @@ export default function ScrollToTopV2() {
       onClick={scrollToTop}
       style={{
         position: 'fixed',
-        bottom: '80px',
+        bottom: '110px', // 🔥 80'den 110'a çıkardık, araları açıldı!
         right: '16px',
-        zIndex: 30, // Modalların kesinlikle altında kalması için 30'a düşürüldü
+        zIndex: 30,
         opacity: showButton ? 1 : 0,
         transform: showButton ? 'translateY(0) scale(1)' : 'translateY(20px) scale(0.8)',
         pointerEvents: showButton ? 'auto' : 'none',
