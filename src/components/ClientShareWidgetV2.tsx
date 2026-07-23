@@ -18,7 +18,6 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
     }
   }, [isOpen]);
 
-  // Parmakla aşağı kaydırma (Swipe-down) mantığı
   const handleTouchStart = (e: React.TouchEvent) => {
     startYRef.current = e.touches[0].clientY;
     setIsDragging(true);
@@ -28,7 +27,6 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
     if (!isDragging) return;
     const currentY = e.touches[0].clientY;
     const diff = currentY - startYRef.current;
-    // Sadece aşağı doğru çekmeye izin ver
     if (diff > 0) {
       setDragY(diff);
     }
@@ -36,7 +34,6 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
 
   const handleTouchEnd = () => {
     setIsDragging(false);
-    // Eğer 120 pikselden fazla aşağı çekildiyse pencereyi kapat
     if (dragY > 120) {
       setIsOpen(false);
     }
@@ -45,17 +42,26 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
 
   return (
     <>
-     {/* Paylaş Butonu - En altta ve sağda */}
+      {/* 🔥 Dönen RGB Neon Paylaş Butonu */}
       <div className="fixed bottom-6 right-4 z-40">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="group relative overflow-hidden flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-white/[0.07] backdrop-blur-[24px] border border-white/20 text-white font-bold text-sm shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] hover:bg-white/[0.12] hover:border-white/45 cursor-pointer active:scale-95 transition-all"
+          className="group relative flex items-center gap-2.5 py-3.5 px-6 rounded-2xl text-white font-bold text-sm active:scale-95 transition-all overflow-hidden shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:shadow-[0_0_30px_rgba(0,255,255,0.4)]"
         >
-          <div className="w-6 h-6 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-[#4DA3FF]">
-            <Plus size={16} />
+          {/* Dönen RGB Arka Plan (Sihir burada) */}
+          <div className="absolute inset-[-500%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_0deg,#ff0000,#ff00ff,#0000ff,#00ffff,#00ff00,#ffff00,#ff0000)]" />
+          
+          {/* İç Karartma (Border kalınlığını inset-[2px] belirliyor) */}
+          <div className="absolute inset-[2px] rounded-[14px] bg-[#121212] group-hover:bg-[#1a1a1a] transition-colors" />
+
+          {/* Butonun Asıl İçeriği (En üst katman) */}
+          <div className="relative z-10 flex items-center gap-2.5">
+            <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-white shadow-[0_0_10px_rgba(255,255,255,0.2)]">
+              <Plus size={16} />
+            </div>
+            <span className="tracking-wide text-gray-100 group-hover:text-white transition-colors">Paylaş</span>
           </div>
-          <span className="tracking-wide text-gray-100">Paylaş</span>
         </button>
       </div>
 
@@ -67,7 +73,7 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
         />
       )}
 
-      {/* Bottom Sheet Paneli - Kaydırma özellikleri eklendi */}
+      {/* Bottom Sheet Paneli */}
       <div 
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
@@ -83,7 +89,7 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
         }`}
       >
         
-        {/* Üst Tutamaç (Buradan tutup aşağı çekebilirsin) */}
+        {/* Üst Tutamaç */}
         <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-6 cursor-grab active:cursor-grabbing" />
 
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
