@@ -7,11 +7,37 @@ import InstallModal from '@/components/InstallModal';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'TNKU Overheard',
-  description: 'Namık Kemal Üniversitesi - Kampüste olan biteni anonim fısılda.',
+  title: 'TNKU Overheard | NKÜ - Namık Kemal Üniversitesi İtiraf',
+  description: 'Tekirdağ Namık Kemal Üniversitesi (NKÜ) öğrencilerine özel itiraf, dedikodu ve kampüs platformu. Kampüste olan biteni anonim fısılda!',
+  keywords: [
+    'NKÜ', 
+    'nkü', 
+    'Namık Kemal Üniversitesi', 
+    'namık kemal itiraf', 
+    'nkü itiraf', 
+    'TNKU', 
+    'tnku overheard', 
+    'Değirmenaltı', 
+    'Tekirdağ', 
+    'nkü kampüs', 
+    'nkü dedikodu',
+    'nkü obs',
+    'tnkuoverheard'
+  ],
   icons: {
     icon: '/icon.jpg', 
   },
+  openGraph: {
+    title: 'TNKU Overheard | NKÜ İtiraf ve Dedikodu',
+    description: 'Namık Kemal Üniversitesi (NKÜ) itiraf ve dedikodu platformu.',
+    url: 'https://www.tnkuoverheard.com.tr',
+    siteName: 'TNKU Overheard',
+    locale: 'tr_TR',
+    type: 'website',
+  },
+  alternates: {
+    canonical: 'https://www.tnkuoverheard.com.tr',
+  }
 };
 
 export default function RootLayout({
