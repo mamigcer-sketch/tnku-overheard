@@ -42,23 +42,23 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
 
   return (
     <>
-      {/* 🔥 Dönen RGB Neon Paylaş Butonu */}
+      {/* 🔥 Premium Cyberpunk Neon Paylaş Butonu */}
       <div className="fixed bottom-6 right-4 z-40">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-2.5 py-3.5 px-6 rounded-2xl text-white font-bold text-sm active:scale-95 transition-all overflow-hidden shadow-[0_0_20px_rgba(255,0,255,0.3)] hover:shadow-[0_0_30px_rgba(0,255,255,0.4)]"
+          className="group relative flex items-center gap-2.5 py-3.5 px-6 rounded-2xl text-white font-bold text-sm active:scale-95 transition-all overflow-hidden shadow-[0_0_20px_rgba(122,0,255,0.2)] hover:shadow-[0_0_30px_rgba(0,229,255,0.4)]"
         >
-          {/* Dönen RGB Arka Plan (Sihir burada) */}
-          <div className="absolute inset-[-500%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_0deg,#ff0000,#ff00ff,#0000ff,#00ffff,#00ff00,#ffff00,#ff0000)]" />
+          {/* Dönen Elit Renk Paleti (Mor, Pembe, Camgöbeği) */}
+          <div className="absolute inset-[-200%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_0deg,#ff00a0,#7a00ff,#00e5ff,#7a00ff,#ff00a0)]" />
           
-          {/* İç Karartma (Border kalınlığını inset-[2px] belirliyor) */}
-          <div className="absolute inset-[2px] rounded-[14px] bg-[#121212] group-hover:bg-[#1a1a1a] transition-colors" />
+          {/* İç Karartma (Border çok daha ince ve zarif: inset-[1.5px]) */}
+          <div className="absolute inset-[1.5px] rounded-[15px] bg-[#0f0f13] group-hover:bg-[#1a1a24] transition-colors" />
 
-          {/* Butonun Asıl İçeriği (En üst katman) */}
+          {/* Butonun Asıl İçeriği */}
           <div className="relative z-10 flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded-full bg-white/10 flex items-center justify-center text-white shadow-[0_0_10px_rgba(255,255,255,0.2)]">
-              <Plus size={16} />
+            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-[#7a00ff] to-[#ff00a0] flex items-center justify-center text-white shadow-[0_0_10px_rgba(255,0,160,0.4)] group-hover:scale-110 transition-transform duration-300">
+              <Plus size={18} strokeWidth={2.5} />
             </div>
             <span className="tracking-wide text-gray-100 group-hover:text-white transition-colors">Paylaş</span>
           </div>
