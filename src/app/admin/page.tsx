@@ -113,7 +113,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     return acc;
   }, {});
 
-  // VIP Listesini Oluştur (Nickname veya Rozeti olan herkes)
+  // VIP Listesini Oluştur
   const vipUserUuids = Array.from(new Set([...customNicknamesDb.map(n => n.userUuid), ...userBadgesDb.map(b => b.userUuid)]));
   const vipUsers = vipUserUuids.map(uuid => ({
     uuid,
@@ -141,12 +141,42 @@ export default async function AdminDashboard({ searchParams }: any) {
     displayPosts = await prisma.post.findMany({ where: queryFilter, orderBy: { createdAt: 'desc' } });
   }
 
-  // SERVER ACTIONS
-  async function approvePost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'APPROVED' } }); revalidatePath('/admin'); revalidatePath('/'); }
-  async function rejectPost(formData: FormData) { 'use server'; await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'REJECTED' } }); revalidatePath('/admin'); revalidatePath('/'); }
-  async function deletePost(formData: FormData) { 'use server'; await prisma.post.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); revalidatePath('/'); }
+  // ==========================================
+  // 🔥 SERVER ACTIONS (GELİŞTİRİLMİŞ & DÜZENLİ)
+  // ==========================================
   
-  // Post Metni ve Kategorisini Güncelleme Action'ı
+  async function approvePost(formData: FormData) { 
+    'use server'; 
+    await prisma.post.update({ 
+      where: { id: formData.get('id') as string }, 
+      data: { 
+        status: 'APPROVED', 
+        createdAt: new Date() // 🔥 GÖNDERİ ONAYLANDIĞI ANA ÇEKİLİYOR 
+      } 
+    }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
+
+  async function rejectPost(formData: FormData) { 
+    'use server'; 
+    await prisma.post.update({ 
+      where: { id: formData.get('id') as string }, 
+      data: { status: 'REJECTED' } 
+    }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
+
+  async function deletePost(formData: FormData) { 
+    'use server'; 
+    await prisma.post.delete({ 
+      where: { id: formData.get('id') as string } 
+    }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
+  
   async function updatePostContent(formData: FormData) { 
     'use server'; 
     const id = formData.get('postId') as string;
@@ -163,13 +193,51 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/'); 
   }
 
-  async function deleteComment(formData: FormData) { 'use server'; await prisma.comment.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
-  async function banUser(formData: FormData) { 'use server'; const userUuid = formData.get('userUuid') as string; if (!userUuid) return; try { await (prisma as any).bannedUser.create({ data: { userUuid } }); } catch (e) {} revalidatePath('/admin'); }
-  async function unbanUser(formData: FormData) { 'use server'; const id = formData.get('id') as string; await (prisma as any).bannedUser.delete({ where: { id } }); revalidatePath('/admin'); }
+  async function deleteComment(formData: FormData) { 
+    'use server'; 
+    await prisma.comment.delete({ where: { id: formData.get('id') as string } }); 
+    revalidatePath('/admin'); 
+  }
+
+  async function banUser(formData: FormData) { 
+    'use server'; 
+    const userUuid = formData.get('userUuid') as string; 
+    if (!userUuid) return; 
+    try { await (prisma as any).bannedUser.create({ data: { userUuid } }); } catch (e) {} 
+    revalidatePath('/admin'); 
+  }
+
+  async function unbanUser(formData: FormData) { 
+    'use server'; 
+    const id = formData.get('id') as string; 
+    await (prisma as any).bannedUser.delete({ where: { id } }); 
+    revalidatePath('/admin'); 
+  }
   
-  async function createAnnouncement(formData: FormData) { 'use server'; const content = formData.get('content') as string; if (!content) return; await (prisma as any).announcement.create({ data: { content, isActive: true } }); revalidatePath('/admin'); revalidatePath('/'); }
-  async function toggleAnnouncement(formData: FormData) { 'use server'; const id = formData.get('id') as string; const currentState = formData.get('isActive') === 'true'; await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); revalidatePath('/admin'); revalidatePath('/'); }
-  async function deleteAnnouncement(formData: FormData) { 'use server'; await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); revalidatePath('/'); }
+  async function createAnnouncement(formData: FormData) { 
+    'use server'; 
+    const content = formData.get('content') as string; 
+    if (!content) return; 
+    await (prisma as any).announcement.create({ data: { content, isActive: true } }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
+
+  async function toggleAnnouncement(formData: FormData) { 
+    'use server'; 
+    const id = formData.get('id') as string; 
+    const currentState = formData.get('isActive') === 'true'; 
+    await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
+
+  async function deleteAnnouncement(formData: FormData) { 
+    'use server'; 
+    await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); 
+    revalidatePath('/admin'); 
+    revalidatePath('/'); 
+  }
 
   async function createCountdown(formData: FormData) { 
     'use server'; 
@@ -183,6 +251,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
+
   async function deleteCountdown(formData: FormData) { 
     'use server'; 
     await (prisma as any).countdown.delete({ where: { id: formData.get('id') as string } }); 
@@ -190,8 +259,17 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/'); 
   }
 
-  async function dismissReport(formData: FormData) { 'use server'; await (prisma as any).report.delete({ where: { id: formData.get('id') as string } }); revalidatePath('/admin'); }
-  async function logout() { 'use server'; (await cookies()).delete('admin_auth'); revalidatePath('/admin'); }
+  async function dismissReport(formData: FormData) { 
+    'use server'; 
+    await (prisma as any).report.delete({ where: { id: formData.get('id') as string } }); 
+    revalidatePath('/admin'); 
+  }
+
+  async function logout() { 
+    'use server'; 
+    (await cookies()).delete('admin_auth'); 
+    revalidatePath('/admin'); 
+  }
 
   async function updateUserMeta(formData: FormData) {
     'use server';
@@ -201,7 +279,6 @@ export default async function AdminDashboard({ searchParams }: any) {
 
     if (!userUuid) return;
 
-    // Nickname işlemleri
     if (!nickname.trim()) {
       await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
     } else {
@@ -213,7 +290,6 @@ export default async function AdminDashboard({ searchParams }: any) {
       }
     }
 
-    // Rozet işlemleri
     if (!badge.trim()) {
       await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
     } else {
@@ -476,7 +552,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                         <code className="text-[10px] sm:text-xs text-white/90 font-mono bg-black/50 px-2 py-1 rounded-md block truncate">{comment.authorId || 'Bilinmiyor'}</code>
                       </div>
                     </div>
-                     
+                      
                     {comment.authorId && (
                       <form action={updateUserMeta} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full lg:w-auto">
                         <input type="hidden" name="userUuid" value={comment.authorId} />
@@ -486,7 +562,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                       </form>
                     )}
                   </div>
-                   
+                    
                   <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2 sm:pt-3">
                       {comment.authorId && (
                         <form action={banUser} className="w-full sm:w-auto"><input type="hidden" name="userUuid" value={comment.authorId} /><button className="w-full sm:w-auto justify-center bg-red-500/10 text-red-400 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] flex items-center gap-1.5 sm:gap-2 transition-all"><Ban size={14}/> Yazarı Banla</button></form>
@@ -659,7 +735,9 @@ export default async function AdminDashboard({ searchParams }: any) {
                     const isConfession = post.type === 'CONFESSION';
                     const isBosYap = post.type === 'BOSYAP';
 
+                    // 🔥 BEKLEYEN POSTLARA ÖZEL NEFES ALAN (PULSE) GLOW EFEKTİ EKLENDİ!
                     const cardGlow = isEphemeral ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)] bg-amber-500/[0.02]' 
+                      : post.status === 'PENDING' ? 'border-orange-500/40 hover:border-orange-500/60 shadow-[0_0_20px_rgba(249,115,22,0.1)] bg-orange-500/[0.03] animate-[pulse_4s_ease-in-out_infinite]'
                       : isConfession ? 'border-purple-500/20 hover:border-purple-500/40 bg-white/[0.02]'
                       : isBosYap ? 'border-emerald-500/20 hover:border-emerald-500/40 bg-white/[0.02]'
                       : 'border-white/10 hover:border-white/20 bg-white/[0.02]';
@@ -685,13 +763,13 @@ export default async function AdminDashboard({ searchParams }: any) {
                             )}
                             <span className="text-[9px] sm:text-[11px] font-bold px-2 sm:px-3 py-1 sm:py-1.5 bg-black/40 rounded-md sm:rounded-lg text-gray-400 border border-white/5 flex items-center gap-1 sm:gap-1.5"><Calendar size={10} className="sm:w-3 sm:h-3"/> {new Date(post.createdAt).toLocaleDateString('tr-TR')}</span>
                           </div>
-                          <span className={`text-[9px] sm:text-[10px] font-black px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full uppercase tracking-widest border ${post.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.15)]' : post.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.15)]' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
-                            {post.status === 'PENDING' ? 'BEKLİYOR' : post.status === 'APPROVED' ? 'YAYINDA' : 'RED'}
+                          <span className={`text-[9px] sm:text-[10px] font-black px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full uppercase tracking-widest border ${post.status === 'PENDING' ? 'bg-orange-500/20 text-orange-400 border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.3)] animate-pulse' : post.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.15)]' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                            {post.status === 'PENDING' ? '🔥 BEKLİYOR' : post.status === 'APPROVED' ? 'YAYINDA' : 'RED'}
                           </span>
                         </div>
    
-                        {/* 🔥 POST İÇERİĞİ VE NET KATEGORİ SEÇİMİ */}
-                        <details className="group/edit">
+                        {/* POST İÇERİĞİ VE NET KATEGORİ SEÇİMİ */}
+                        <details className="group/edit relative z-10">
                           <summary className="list-none cursor-pointer">
                             <div className="flex justify-between items-start gap-4">
                               <p className="text-white text-base sm:text-lg leading-relaxed py-1 sm:py-2 font-medium break-words flex-1">{post.content}</p>
@@ -719,7 +797,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                           </form>
                         </details>
 
-                        <div className="bg-black/30 border border-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl flex flex-col xl:flex-row gap-3 sm:gap-4 items-start xl:items-center justify-between shadow-inner w-full">
+                        <div className="bg-black/30 border border-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl flex flex-col xl:flex-row gap-3 sm:gap-4 items-start xl:items-center justify-between shadow-inner w-full relative z-10">
                           <div className="flex items-center gap-2 sm:gap-3 w-full lg:w-auto">
                             <div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/5 shrink-0"><Fingerprint className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5" /></div>
                             <div className="overflow-hidden w-full">
@@ -738,7 +816,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                           )}
                         </div>
                          
-                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full justify-between items-stretch sm:items-center pt-3 sm:pt-4 border-t border-white/5 mt-1">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full justify-between items-stretch sm:items-center pt-3 sm:pt-4 border-t border-white/5 mt-1 relative z-10">
                             <AdminStoryExporter 
                               postContent={post.content} 
                               postType={post.type} 
@@ -748,13 +826,25 @@ export default async function AdminDashboard({ searchParams }: any) {
                             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 flex-wrap sm:justify-end w-full sm:w-auto">
                                 {post.status === 'PENDING' ? (
                                   <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3 w-full sm:w-auto">
-                                    <form action={approvePost} className="w-full sm:w-auto"><input type="hidden" name="id" value={post.id} /><button className="w-full justify-center bg-green-500/10 text-green-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-green-500/20 flex gap-1.5 sm:gap-2 hover:bg-green-500/20 hover:shadow-[0_0_15px_rgba(34,197,94,0.2)] transition-all"><Check size={14} className="sm:w-4 sm:h-4"/> Onayla</button></form>
-                                    <form action={rejectPost} className="w-full sm:w-auto"><input type="hidden" name="id" value={post.id} /><button className="w-full justify-center bg-orange-500/10 text-orange-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-orange-500/20 flex gap-1.5 sm:gap-2 hover:bg-orange-500/20 transition-all"><X size={14} className="sm:w-4 sm:h-4"/> Çöpe At</button></form>
+                                    <form action={approvePost} className="w-full sm:w-auto">
+                                      <input type="hidden" name="id" value={post.id} />
+                                      <button className="w-full justify-center bg-green-500/20 text-green-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-green-500/40 flex gap-1.5 sm:gap-2 hover:bg-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all"><Check size={16} className="sm:w-4 sm:h-4"/> Onayla Yolla</button>
+                                    </form>
+                                    <form action={rejectPost} className="w-full sm:w-auto">
+                                      <input type="hidden" name="id" value={post.id} />
+                                      <button className="w-full justify-center bg-orange-500/10 text-orange-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-orange-500/20 flex gap-1.5 sm:gap-2 hover:bg-orange-500/20 transition-all"><X size={14} className="sm:w-4 sm:h-4"/> Çöpe At</button>
+                                    </form>
                                   </div>
                                 ) : null}
-                                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3 w-full sm:w-auto">
-                                  <form action={banUser} className="w-full sm:w-auto"><input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmiyor'} /><button className="w-full justify-center bg-red-500/10 text-red-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 flex gap-1.5 sm:gap-2 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] transition-all"><Ban size={14} className="sm:w-4 sm:h-4"/> Banla</button></form>
-                                  <form action={deletePost} className="w-full sm:w-auto"><input type="hidden" name="id" value={post.id} /><button className="w-full justify-center bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-white/10 flex gap-1.5 sm:gap-2 transition-all"><Trash2 size={14} className="sm:w-4 sm:h-4"/> Sil</button></form>
+                                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3 w-full sm:w-auto mt-2 sm:mt-0">
+                                  <form action={banUser} className="w-full sm:w-auto">
+                                    <input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmiyor'} />
+                                    <button className="w-full justify-center bg-red-500/10 text-red-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 flex gap-1.5 sm:gap-2 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] transition-all"><Ban size={14} className="sm:w-4 sm:h-4"/> Banla</button>
+                                  </form>
+                                  <form action={deletePost} className="w-full sm:w-auto">
+                                    <input type="hidden" name="id" value={post.id} />
+                                    <button className="w-full justify-center bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-white/10 flex gap-1.5 sm:gap-2 transition-all"><Trash2 size={14} className="sm:w-4 sm:h-4"/> Sil</button>
+                                  </form>
                                 </div>
                             </div>
                         </div>
