@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Headphones, VenetianMask, Coffee, Send, CheckCircle2, Loader2, Info, Clock } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
-import VoiceRecorder from "@/components/VoiceRecorder"; // 🔥 Ses kaydedici eklendi
+import VoiceRecorder from "@/components/VoiceRecorder";
 
 export default function ModernForm() {
   const [type, setType] = useState<'CONFESSION' | 'BOSYAP' | 'OVERHEARD'>('CONFESSION'); 
@@ -14,7 +14,8 @@ export default function ModernForm() {
   const [gender, setGender] = useState(''); 
   const [time, setTime] = useState('');
   const [isEphemeral, setIsEphemeral] = useState(false);
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null); // 🔥 Ses blob state'i
+  const [audioBase64, setAudioBase64] = useState<string | null>(null); // 🔥 Base64 ses verisi
+  const [isRecordingNow, setIsRecordingNow] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
@@ -59,6 +60,12 @@ export default function ModernForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (isRecordingNow) {
+      alert("Kral, önce ses kaydını durdurman gerekiyor!");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -72,9 +79,9 @@ export default function ModernForm() {
       formData.append('time', type === 'OVERHEARD' ? time : '');
       formData.append('isEphemeral', (type === 'CONFESSION' && isEphemeral) ? 'true' : 'false');
       
-      // 🔥 Eğer ses kaydedildiyse FormData'ya ekle
-      if (audioBlob) {
-        formData.append('audio', audioBlob, 'whisper.webm');
+      // 🔥 Base64 ses string'ini formData'ya ekliyoruz
+      if (audioBase64) {
+        formData.append('audioUrl', audioBase64);
       }
 
       const res = await createPost(formData);
@@ -90,7 +97,7 @@ export default function ModernForm() {
       setGender(''); 
       setTime('');
       setIsEphemeral(false);
-      setAudioBlob(null); // 🔥 Ses sıfırlanır
+      setAudioBase64(null);
       
       setSuccessMsg(true);
       setTimeout(() => setSuccessMsg(false), 4000);
@@ -260,8 +267,11 @@ export default function ModernForm() {
             </div>
         </div>
 
-        {/* 🔥 SES KAYDEDİCİ BİLEŞENİ BURAYA EKLENDİ */}
-        <VoiceRecorder onAudioReady={(blob) => setAudioBlob(blob)} />
+        {/* 🔥 SES KAYDEDİCİ - Base64 alacak şekilde */}
+        <VoiceRecorder 
+          onAudioReady={(base64) => setAudioBase64(base64)} 
+          onRecordingStateChange={(recording) => setIsRecordingNow(recording)}
+        />
 
         {type === 'CONFESSION' && (
           <div 
@@ -287,11 +297,11 @@ export default function ModernForm() {
 
         <button 
           type="submit" 
-          disabled={loading || successMsg} 
-          onClick={(e) => !successMsg && triggerRipple(e, 'bg-white/50 shadow-[0_0_30px_rgba(255,255,255,0.9)]')}
+          disabled={loading || successMsg || isRecordingNow} 
+          onClick={(e) => !successMsg && !isRecordingNow && triggerRipple(e, 'bg-white/50 shadow-[0_0_30px_rgba(255,255,255,0.9)]')}
           className={`relative overflow-hidden w-full py-3.5 sm:py-4 rounded-xl text-[13px] sm:text-base font-bold flex items-center justify-center gap-2 transition-all duration-500 disabled:shadow-none shadow-[0_4px_20px_rgba(0,0,0,0.2)] group/btn ${
             successMsg ? 'bg-green-500 text-black scale-[1.02] shadow-[0_0_40px_rgba(34,197,94,0.6)] cursor-default' 
-            : loading ? 'bg-gray-700 text-white cursor-wait opacity-80'
+            : (loading || isRecordingNow) ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-70'
             : (type === 'CONFESSION' && isEphemeral) ? 'bg-amber-500 hover:bg-amber-400 hover:shadow-[0_0_30px_rgba(245,158,11,0.5)] text-black active:scale-95'
             : type === 'CONFESSION' ? 'bg-purple-600 hover:bg-purple-500 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] text-white active:scale-95' 
             : type === 'BOSYAP' ? 'bg-emerald-500 hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] text-black active:scale-95'
@@ -301,6 +311,10 @@ export default function ModernForm() {
           {successMsg ? (
             <span className="flex items-center gap-2 animate-in zoom-in duration-300">
               <CheckCircle2 size={20} className="sm:w-[24px] sm:h-[24px]" /> ✓ Başarıyla Fırlatıldı!
+            </span>
+          ) : isRecordingNow ? (
+            <span className="flex items-center gap-2 text-red-300">
+              🎙️ Önce Kaydı Durdurman Gerekiyor!
             </span>
           ) : loading ? (
             <span className="flex items-center gap-2 text-white">

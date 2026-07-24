@@ -3,7 +3,7 @@
 import { useState, useRef } from "react";
 import { Mic, Square, Trash2, UploadCloud, Activity } from "lucide-react";
 
-export default function VoiceRecorder({ onAudioReady }: { onAudioReady: (blob: Blob | null) => void }) {
+export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: { onAudioReady: (base64Audio: string | null) => void, onRecordingStateChange?: (recording: boolean) => void }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [hasAudio, setHasAudio] = useState(false);
@@ -25,16 +25,24 @@ export default function VoiceRecorder({ onAudioReady }: { onAudioReady: (blob: B
 
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        setHasAudio(true);
-        onAudioReady(audioBlob);
+        
+        // 🔥 Blob'u Base64 string'e çeviriyoruz (Vercel & sunucu dostu)
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = () => {
+          const base64data = reader.result as string;
+          setHasAudio(true);
+          onAudioReady(base64data);
+        };
+
         stream.getTracks().forEach(track => track.stop());
       };
 
       mediaRecorder.start();
       setIsRecording(true);
+      if (onRecordingStateChange) onRecordingStateChange(true);
       setRecordingTime(0);
 
-      // Maksimum 15 Saniye Sınırı
       timerRef.current = setInterval(() => {
         setRecordingTime((prev) => {
           if (prev >= 14) {
@@ -54,6 +62,7 @@ export default function VoiceRecorder({ onAudioReady }: { onAudioReady: (blob: B
     if (mediaRecorderRef.current && isRecording) {
       mediaRecorderRef.current.stop();
       setIsRecording(false);
+      if (onRecordingStateChange) onRecordingStateChange(false);
       if (timerRef.current) clearInterval(timerRef.current);
     }
   };
@@ -72,7 +81,7 @@ export default function VoiceRecorder({ onAudioReady }: { onAudioReady: (blob: B
             {isRecording ? (
               <div className="flex items-center gap-2 text-red-400">
                 <Activity size={18} className="animate-pulse" />
-                <span className="font-mono font-bold text-xs">{recordingTime}s / 15s (Ses Kalınlaştırılacak)</span>
+                <span className="font-mono font-bold text-xs">{recordingTime}s / 15s (Kayıt Devam Ediyor...)</span>
               </div>
             ) : (
               <span className="text-gray-400 text-xs font-medium">Anonim sesli fısıltı bırak (İsteğe bağlı)...</span>
@@ -95,7 +104,7 @@ export default function VoiceRecorder({ onAudioReady }: { onAudioReady: (blob: B
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-2 text-green-400">
             <UploadCloud size={18} />
-            <span className="text-xs font-bold">Sesli Fısıltı Hazır! (15sn)</span>
+            <span className="text-xs font-bold">Sesli Fısıltı Hazır! (Gönderilmeye Hazır)</span>
           </div>
           <button type="button" onClick={resetRecording} className="p-2 text-gray-500 hover:text-red-400 transition-colors cursor-pointer">
             <Trash2 size={16} />
