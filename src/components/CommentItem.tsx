@@ -23,10 +23,12 @@ const getRelativeTime = (dateString: string | Date) => {
 
 const formatCommentText = (text: string) => {
   if (!text) return null;
-  const mentionRegex = /(@[a-zA-ZçğıöşüÇĞİÖŞÜ]+\s[a-zA-ZçğıöşüÇĞİÖŞÜ]+)/g;
+  // 🔥 Sadece @ ile başlayıp ilk boşluğa kadar olan kullanıcı adını yakalar (yanındaki kelimeleri boyamaz)
+  const mentionRegex = /(@[a-zA-ZçğıöşüÇĞİÖŞÜ0-9_]+)/g;
   const parts = text.split(mentionRegex);
+  
   return parts.map((part, i) => {
-    if (part.match(/^@[a-zA-ZçğıöşüÇĞİÖŞÜ]+\s[a-zA-ZçğıöşüÇĞİÖŞÜ]+$/)) {
+    if (part.match(/^@[a-zA-ZçğıöşüÇĞİÖŞÜ0-9_]+$/)) {
       return (
         <span key={i} className="text-[#4DA3FF] font-bold drop-shadow-[0_0_8px_rgba(77,163,255,0.6)]">
           {part}
