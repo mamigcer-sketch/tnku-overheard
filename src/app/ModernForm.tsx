@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Headphones, VenetianMask, Coffee, Send, CheckCircle2, Loader2, Info, Clock } from 'lucide-react';
+import { Headphones, VenetianMask, Coffee, Send, CheckCircle2, Loader2, Clock } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
 import VoiceRecorder from "@/components/VoiceRecorder";
 
@@ -166,13 +166,6 @@ export default function ModernForm() {
         >
           <Headphones size={14} className="sm:w-[16px] sm:h-[16px]" /> <span className="hidden sm:inline">Overheard</span><span className="sm:hidden">Duyum</span>
         </button>
-      </div>
-
-      <div className="flex items-center justify-center gap-1.5 sm:gap-2 text-white/70 bg-white/[0.03] backdrop-blur-md px-3 py-2.5 sm:px-4 sm:py-3 rounded-xl mb-4 sm:mb-6 border border-white/[0.05] shadow-sm">
-        <Info size={14} className={`shrink-0 transition-colors duration-300 ${type === 'CONFESSION' ? 'text-purple-400' : type === 'BOSYAP' ? 'text-emerald-400' : 'text-[#4DA3FF]'}`} />
-        <span className="text-[10px] sm:text-xs font-medium text-center tracking-wide">
-          {type === 'BOSYAP' ? 'Burada kurallar daha esnek, içinden geçeni dökül!' : 'Lütfen paylaşımını doğru kategoriyle işaretlediğinden emin ol.'}
-        </span>
       </div>
 
       <form onSubmit={handleSubmit} key={type} className="space-y-3 sm:space-y-5 relative z-10 animate-in fade-in duration-300">
