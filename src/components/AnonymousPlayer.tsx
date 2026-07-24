@@ -10,6 +10,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
+  const filtersRef = useRef<{ highpass: BiquadFilterNode; peaking: BiquadFilterNode } | null>(null);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -22,10 +23,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     };
 
     const handleEnded = () => {
-      setIsPlaying(false);
-      setProgress(0);
-      // 🔥 DÜZELTME BURADA: Ses bitince imleci zorla başa (0. saniyeye) sarıyoruz
-      audio.currentTime = 0; 
+      cleanUpAndReset();
     };
 
     audio.addEventListener("timeupdate", updateProgress);
@@ -34,19 +32,44 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     return () => {
       audio.removeEventListener("timeupdate", updateProgress);
       audio.removeEventListener("ended", handleEnded);
+      if (audioCtxRef.current && audioCtxRef.current.state !== "closed") {
+        audioCtxRef.current.close().catch(() => {});
+      }
     };
   }, []);
+
+  const cleanUpAndReset = () => {
+    setIsPlaying(false);
+    setProgress(0);
+    
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+
+    if (sourceNodeRef.current) {
+      try {
+        sourceNodeRef.current.disconnect();
+      } catch (e) {}
+    }
+    if (filtersRef.current) {
+      try {
+        filtersRef.current.highpass.disconnect();
+        filtersRef.current.peaking.disconnect();
+      } catch (e) {}
+      filtersRef.current = null;
+    }
+  };
 
   const togglePlay = async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // 🔥 EKSTRA GÜVENLİK: Eğer süre sondaysa play'e basınca kesinlikle başa sarsın
-    if (audio.currentTime >= audio.duration) {
-      audio.currentTime = 0;
+    if (isPlaying) {
+      cleanUpAndReset();
+      return;
     }
 
-    // Helyum etkisi için hızı artır ve ton korumasını kapat
     audio.playbackRate = 1.4;
     if ('preservesPitch' in audio) {
       audio.preservesPitch = false;
@@ -54,48 +77,49 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
       (audio as any).webkitPreservesPitch = false;
     }
 
-    // Çocuk sesi filtresi (Kalın sesleri kes, inceyi parlat)
     if (!audioCtxRef.current) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
         audioCtxRef.current = new AudioContextClass();
-        const ctx = audioCtxRef.current;
-        try {
-          sourceNodeRef.current = ctx.createMediaElementSource(audio);
-          
-          const highpass = ctx.createBiquadFilter();
-          highpass.type = "highpass";
-          highpass.frequency.value = 400; 
-
-          const peaking = ctx.createBiquadFilter();
-          peaking.type = "peaking";
-          peaking.frequency.value = 3000;
-          peaking.Q.value = 1.5;
-          peaking.gain.value = 12; 
-
-          sourceNodeRef.current.connect(highpass);
-          highpass.connect(peaking);
-          peaking.connect(ctx.destination);
-        } catch (e) {
-          // Zaten bağlıysa hata vermesin
-        }
       }
     }
 
-    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
-      await audioCtxRef.current.resume();
+    const ctx = audioCtxRef.current;
+    if (!ctx) return;
+
+    if (ctx.state === "suspended") {
+      await ctx.resume();
     }
 
-    if (isPlaying) {
-      audio.pause();
-      setIsPlaying(false);
-    } else {
+    try {
+      if (!sourceNodeRef.current) {
+        sourceNodeRef.current = ctx.createMediaElementSource(audio);
+      }
+
+      const highpass = ctx.createBiquadFilter();
+      highpass.type = "highpass";
+      highpass.frequency.value = 450; 
+
+      const peaking = ctx.createBiquadFilter();
+      peaking.type = "peaking";
+      peaking.frequency.value = 3000;
+      peaking.Q.value = 1.4;
+      peaking.gain.value = 12;
+
+      filtersRef.current = { highpass, peaking };
+
+      sourceNodeRef.current.connect(highpass);
+      highpass.connect(peaking);
+      peaking.connect(ctx.destination);
+
+      await audio.play();
+      setIsPlaying(true);
+    } catch (err) {
+      console.error("Oynatma veya Web Audio hatası:", err);
       try {
         await audio.play();
         setIsPlaying(true);
-      } catch (err) {
-        console.error("Oynatma hatası:", err);
-      }
+      } catch (e) {}
     }
   };
 
@@ -107,7 +131,10 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
       
       <button
         type="button"
-        onClick={togglePlay}
+        onClick={(e) => {
+          e.preventDefault();
+          togglePlay();
+        }}
         className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#4DA3FF] to-purple-500 text-black flex items-center justify-center shadow-[0_0_15px_rgba(77,163,255,0.4)] transition-transform active:scale-95 shrink-0 cursor-pointer relative z-10"
       >
         {isPlaying ? <Pause size={18} className="fill-black" /> : <Play size={18} className="fill-black ml-0.5" />}
@@ -121,7 +148,6 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
           <span className="font-mono text-[10px] text-gray-400">15s</span>
         </div>
 
-        {/* İlerleme Çubuğu */}
         <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden relative">
           <div 
             className="absolute top-0 left-0 bottom-0 bg-gradient-to-r from-[#4DA3FF] to-purple-500 transition-all duration-150"
