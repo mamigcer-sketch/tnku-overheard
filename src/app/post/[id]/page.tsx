@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma';
 import BackButton from '@/components/BackButton';
 import CommentSection from '@/components/CommentSection';
+import AnonymousPlayer from '@/components/AnonymousPlayer'; // 🔥 Hacker Ses Oynatıcısı Eklendi
 import { Home, MapPin, Clock, Users, User, Heart, Eye, Flame } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
@@ -104,7 +105,7 @@ export default async function PostPage({ params }: any) {
   }
 
   const isConfession = post.type === 'CONFESSION';
-  const isBosYap = post.type === 'BOSYAP'; // 🔥 EKLENDİ
+  const isBosYap = post.type === 'BOSYAP'; 
   const isTrending = post.likes >= 10; 
   const isEphemeral = !!post.expiresAt; 
   
@@ -118,7 +119,7 @@ export default async function PostPage({ params }: any) {
     : isConfession 
       ? 'shadow-[0_8px_32px_0_rgba(168,85,247,0.15)] border-purple-500/20' 
       : isBosYap
-        ? 'shadow-[0_8px_32px_0_rgba(16,185,129,0.15)] border-emerald-500/20' // 🔥 EKLENDİ
+        ? 'shadow-[0_8px_32px_0_rgba(16,185,129,0.15)] border-emerald-500/20' 
         : 'shadow-[0_8px_32px_0_rgba(77,163,255,0.15)] border-[#4DA3FF]/20';
 
   return (
@@ -166,12 +167,10 @@ export default async function PostPage({ params }: any) {
                   : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'
                 }`}>
                   {isTrending && <Flame size={12} className="animate-pulse" />}
-                  {/* 🔥 DÜZELTME BURADA YAPILDI: Boş yap rozeti artık detayda da doğru çıkıyor */}
                   {isConfession ? 'İTİRAF' : isBosYap ? 'BOŞ YAP' : 'OVERHEARD'}
                 </span>
               )}
 
-              {/* ROZET VE NICK ALANI */}
               <div className="flex items-center gap-2">
                 {postUserBadge && (
                   <span className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 text-yellow-400 border border-yellow-500/30 px-2 py-1 rounded-lg shadow-[0_0_10px_rgba(245,158,11,0.15)] flex items-center">
@@ -201,9 +200,18 @@ export default async function PostPage({ params }: any) {
 
           </div>
 
-          <p className="text-[15px] sm:text-[17px] leading-relaxed font-medium text-gray-100 mb-6 break-words tracking-wide">
-            {post.content}
-          </p>
+          {post.content && (
+            <p className="text-[15px] sm:text-[17px] leading-relaxed font-medium text-gray-100 mb-6 break-words tracking-wide">
+              {post.content}
+            </p>
+          )}
+
+          {/* 🔥 SESLİ FISILTI OYNATICISI DETAY SAYFASINA EKLENDİ */}
+          {(post as any).audioUrl && (
+            <div className="mb-6">
+              <AnonymousPlayer audioUrl={(post as any).audioUrl} />
+            </div>
+          )}
 
           {(post.location || post.time || post.people || post.gender) && (
             <div className="flex flex-wrap gap-2 mb-6 border-t border-white/[0.04] pt-4">

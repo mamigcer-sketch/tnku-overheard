@@ -3,6 +3,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import AdminStoryExporter from '@/components/AdminStoryExporter'; 
+import AnonymousPlayer from '@/components/AnonymousPlayer'; // 🔥 Admin için ses oynatıcısı eklendi
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, Coffee,
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
@@ -113,7 +114,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     return acc;
   }, {});
 
-  // VIP Listesini Oluştur
   const vipUserUuids = Array.from(new Set([...customNicknamesDb.map(n => n.userUuid), ...userBadgesDb.map(b => b.userUuid)]));
   const vipUsers = vipUserUuids.map(uuid => ({
     uuid,
@@ -140,10 +140,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     if (currentTab === 'Dashboard') queryFilter = { status: 'PENDING' };
     displayPosts = await prisma.post.findMany({ where: queryFilter, orderBy: { createdAt: 'desc' } });
   }
-
-  // ==========================================
-  // 🔥 SERVER ACTIONS (GELİŞTİRİLMİŞ & DÜZENLİ)
-  // ==========================================
   
   async function approvePost(formData: FormData) { 
     'use server'; 
@@ -151,7 +147,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       where: { id: formData.get('id') as string }, 
       data: { 
         status: 'APPROVED', 
-        createdAt: new Date() // 🔥 GÖNDERİ ONAYLANDIĞI ANA ÇEKİLİYOR 
+        createdAt: new Date() 
       } 
     }); 
     revalidatePath('/admin'); 
@@ -322,11 +318,9 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   return (
     <div className="flex h-screen bg-[#050505] text-white relative z-0 overflow-hidden">
-      {/* Genel Arka Plan Işıkları */}
       <div className="fixed top-[-10%] left-[-10%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-[#4DA3FF]/10 blur-[100px] sm:blur-[150px] pointer-events-none -z-10" />
       <div className="fixed bottom-[10%] right-[-10%] w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] rounded-full bg-purple-600/10 blur-[100px] sm:blur-[150px] pointer-events-none -z-10" />
 
-      {/* SOL MENÜ */}
       <aside className="w-72 bg-[#0B0B0B]/80 backdrop-blur-3xl border-r border-white/5 p-6 hidden lg:flex flex-col relative z-20 shadow-[4px_0_24px_rgba(0,0,0,0.5)]">
         <h1 className="text-2xl font-black mb-10 tracking-tighter">TNKU<span className="text-[#4DA3FF]">ADMIN</span></h1>
         <nav className="space-y-1.5 flex-1 overflow-y-auto scrollbar-hide pr-2">
@@ -349,7 +343,6 @@ export default async function AdminDashboard({ searchParams }: any) {
         </form>
       </aside>
 
-      {/* MOBİL ALT NAVİGASYON */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0B0B0B]/90 backdrop-blur-3xl border-t border-white/10 px-2 py-2 flex justify-start z-50 overflow-x-auto gap-1 sm:gap-2 scrollbar-hide shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {menuItems.map((item, i) => (
           <Link href={`/admin?tab=${item.label}`} key={i} className={`flex flex-col items-center justify-center gap-1 min-w-[64px] sm:min-w-[72px] px-1 py-2 rounded-2xl transition-all relative ${currentTab === item.label ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
@@ -362,7 +355,6 @@ export default async function AdminDashboard({ searchParams }: any) {
         ))}
       </nav>
 
-      {/* ANA İÇERİK ALANI */}
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-12 scrollbar-hide pb-24 lg:pb-12 relative z-10">
         
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-10 pb-4 sm:pb-6 border-b border-white/5 gap-3 sm:gap-4">
@@ -383,10 +375,8 @@ export default async function AdminDashboard({ searchParams }: any) {
 
         <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           
-          {/* İSTATİSTİKLER & CANLI KAMPÜS NABZI */}
           {currentTab !== 'Yorumlar' && currentTab !== 'VIP Üyeler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
             <>
-              {/* Canlı Nabız Paneli */}
               <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 sm:gap-8 mb-6 sm:mb-8 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-green-500/5 rounded-full blur-3xl -z-10 group-hover:bg-green-500/10 transition-colors duration-700" />
                  
@@ -398,107 +388,101 @@ export default async function AdminDashboard({ searchParams }: any) {
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
                       <h3 className="text-white font-extrabold text-base sm:text-lg md:text-xl">Canlı Kampüs Nabzı</h3>
                       <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-green-500/20 text-green-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg border border-green-500/30">Son 1 Saat</span>
+                    </div>
+                    <p className="text-gray-400 text-xs sm:text-sm font-medium leading-snug">Değirmenaltı'nda anlık hareketlilik ve okuyucu aktivitesi.</p>
                   </div>
-                  <p className="text-gray-400 text-xs sm:text-sm font-medium leading-snug">Değirmenaltı'nda anlık hareketlilik ve okuyucu aktivitesi.</p>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full xl:w-auto">
+                  <div className="bg-black/30 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
+                    <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Yeni Post</p>
+                    <p className="text-xl sm:text-2xl font-black text-green-400">{recentPostsCount}</p>
                   </div>
+                  <div className="bg-black/30 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
+                    <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Yeni Yorum</p>
+                    <p className="text-xl sm:text-2xl font-black text-[#4DA3FF]">{recentCommentsCount}</p>
+                  </div>
+                  <div className="bg-black/30 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
+                    <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Aktif Yazar</p>
+                    <p className="text-xl sm:text-2xl font-black text-purple-400">{activeAuthorsCount}</p>
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full xl:w-auto">
-                <div className="bg-black/30 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
-                  <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Yeni Post</p>
-                  <p className="text-xl sm:text-2xl font-black text-green-400">{recentPostsCount}</p>
-                </div>
-                <div className="bg-black/30 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
-                  <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Yeni Yorum</p>
-                  <p className="text-xl sm:text-2xl font-black text-[#4DA3FF]">{recentCommentsCount}</p>
-                </div>
-                <div className="bg-black/30 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
-                  <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Aktif Yazar</p>
-                  <p className="text-xl sm:text-2xl font-black text-purple-400">{activeAuthorsCount}</p>
-                </div>
-            </div>
-          </div>
-
-          {/* Büyük İstatistik Kartları */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-8">
-              {[
-                  { label: 'TOPLAM GÖNDERİ', val: total, color: 'text-white', bg: 'bg-white/[0.02]', border: 'border-white/5' },
-                  { label: 'ONAY BEKLİYOR', val: pending, color: 'text-amber-400', bg: 'bg-amber-500/5', border: 'border-amber-500/20' },
-                  { label: 'YAYINDA OLAN', val: approved, color: 'text-green-400', bg: 'bg-green-500/5', border: 'border-green-500/20' },
-                  { label: 'REDDEDİLEN', val: rejected, color: 'text-red-400', bg: 'bg-red-500/5', border: 'border-red-500/20' },
-              ].map((stat, i) => (
-                  <div key={i} className={`${stat.bg} ${stat.border} p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[24px] border backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}>
-                    <p className="text-gray-500 text-[9px] sm:text-[11px] font-black tracking-widest uppercase mb-1.5 sm:mb-3">{stat.label}</p>
-                    <p className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter ${stat.color}`}>{stat.val}</p>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-8">
+                  {[
+                      { label: 'TOPLAM GÖNDERİ', val: total, color: 'text-white', bg: 'bg-white/[0.02]', border: 'border-white/5' },
+                      { label: 'ONAY BEKLİYOR', val: pending, color: 'text-amber-400', bg: 'bg-amber-500/5', border: 'border-amber-500/20' },
+                      { label: 'YAYINDA OLAN', val: approved, color: 'text-green-400', bg: 'bg-green-500/5', border: 'border-green-500/20' },
+                      { label: 'REDDEDİLEN', val: rejected, color: 'text-red-400', bg: 'bg-red-500/5', border: 'border-red-500/20' },
+                  ].map((stat, i) => (
+                      <div key={i} className={`${stat.bg} ${stat.border} p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[24px] border backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}>
+                        <p className="text-gray-500 text-[9px] sm:text-[11px] font-black tracking-widest uppercase mb-1.5 sm:mb-3">{stat.label}</p>
+                        <p className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter ${stat.color}`}>{stat.val}</p>
+                      </div>
+                  ))}
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-8 sm:mb-12">
+                  <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-row items-center gap-4 sm:gap-6 shadow-lg">
+                      <div className="p-3 sm:p-4 bg-pink-500/10 rounded-xl sm:rounded-2xl border border-pink-500/20 shadow-[0_0_20px_rgba(236,72,153,0.15)]"><Heart className="text-pink-400 w-6 h-6 sm:w-8 sm:h-8"/></div>
+                      <div>
+                          <p className="text-gray-500 text-[10px] sm:text-[11px] font-black tracking-widest uppercase mb-0.5 sm:mb-1">Toplam Beğeni</p>
+                          <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white">{totalLikes}</p>
+                      </div>
                   </div>
-              ))}
-          </div>
-          
-          {/* Beğeni ve Görüntülenme */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-8 sm:mb-12">
-              <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-row items-center gap-4 sm:gap-6 shadow-lg">
-                  <div className="p-3 sm:p-4 bg-pink-500/10 rounded-xl sm:rounded-2xl border border-pink-500/20 shadow-[0_0_20px_rgba(236,72,153,0.15)]"><Heart className="text-pink-400 w-6 h-6 sm:w-8 sm:h-8"/></div>
-                  <div>
-                      <p className="text-gray-500 text-[10px] sm:text-[11px] font-black tracking-widest uppercase mb-0.5 sm:mb-1">Toplam Beğeni</p>
-                      <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white">{totalLikes}</p>
+                  <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-row items-center gap-4 sm:gap-6 shadow-lg">
+                      <div className="p-3 sm:p-4 bg-[#4DA3FF]/10 rounded-xl sm:rounded-2xl border border-[#4DA3FF]/20 shadow-[0_0_20px_rgba(77,163,255,0.15)]"><Eye className="text-[#4DA3FF] w-6 h-6 sm:w-8 sm:h-8"/></div>
+                      <div>
+                          <p className="text-gray-500 text-[10px] sm:text-[11px] font-black tracking-widest uppercase mb-0.5 sm:mb-1">Toplam Görüntülenme</p>
+                          <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white">{totalViews}</p>
+                      </div>
                   </div>
               </div>
-              <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-row items-center gap-4 sm:gap-6 shadow-lg">
-                  <div className="p-3 sm:p-4 bg-[#4DA3FF]/10 rounded-xl sm:rounded-2xl border border-[#4DA3FF]/20 shadow-[0_0_20px_rgba(77,163,255,0.15)]"><Eye className="text-[#4DA3FF] w-6 h-6 sm:w-8 sm:h-8"/></div>
-                  <div>
-                      <p className="text-gray-500 text-[10px] sm:text-[11px] font-black tracking-widest uppercase mb-0.5 sm:mb-1">Toplam Görüntülenme</p>
-                      <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white">{totalViews}</p>
-                  </div>
-            </div>
-          </div>
-          </>
-        )}
+            </>
+          )}
 
-        {/* DİNAMİK SEKME İÇERİKLERİ */}
-        <div className="space-y-4 sm:space-y-6">
-           
-          {/* VIP ÜYELER SEKMESİ */}
-          {currentTab === 'VIP Üyeler' ? (
-            <div className="space-y-6 sm:space-y-8">
-               
-              {/* Manuel VIP Ekleme Formu */}
-              <form action={updateUserMeta} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-yellow-500/20 space-y-4 sm:space-y-5 shadow-[0_10px_40px_rgba(234,179,8,0.05)] relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-yellow-500/10 blur-3xl rounded-full -z-10 group-hover:bg-yellow-500/20 transition-colors duration-700" />
-                <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-yellow-500/10 rounded-lg sm:rounded-xl border border-yellow-500/30"><Award className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni VIP Ekle / Rozet Ver</h3>
-                <p className="text-gray-400 text-xs sm:text-sm font-medium mb-2">Kullanıcının UUID'sini buraya yapıştırıp ona doğrudan özel nick ve rozet atayabilirsin.</p>
+          <div className="space-y-4 sm:space-y-6">
+             
+            {currentTab === 'VIP Üyeler' ? (
+              <div className="space-y-6 sm:space-y-8">
                  
-                <div className="grid lg:grid-cols-3 gap-4 sm:gap-5">
-                  <div className="lg:col-span-3">
-                    <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Kullanıcı UUID (Kimlik)</label>
-                    <input type="text" name="userUuid" required placeholder="Örn: clxj12345..." className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner font-mono" />
+                <form action={updateUserMeta} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-yellow-500/20 space-y-4 sm:space-y-5 shadow-[0_10px_40px_rgba(234,179,8,0.05)] relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-yellow-500/10 blur-3xl rounded-full -z-10 group-hover:bg-yellow-500/20 transition-colors duration-700" />
+                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-yellow-500/10 rounded-lg sm:rounded-xl border border-yellow-500/30"><Award className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni VIP Ekle / Rozet Ver</h3>
+                  <p className="text-gray-400 text-xs sm:text-sm font-medium mb-2">Kullanıcının UUID'sini buraya yapıştırıp ona doğrudan özel nick ve rozet atayabilirsin.</p>
+                   
+                  <div className="grid lg:grid-cols-3 gap-4 sm:gap-5">
+                    <div className="lg:col-span-3">
+                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Kullanıcı UUID (Kimlik)</label>
+                      <input type="text" name="userUuid" required placeholder="Örn: clxj12345..." className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner font-mono" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Özel Nickname</label>
+                      <input type="text" name="nickname" placeholder="Örn: Sitenin Sahibi" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Rozet</label>
+                      <input type="text" name="badge" placeholder="Örn: 👑 Yönetici" className="w-full bg-black/40 border border-yellow-500/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner" />
+                    </div>
+                    <div className="flex items-end">
+                      <button type="submit" className="w-full justify-center bg-gradient-to-r from-yellow-500 to-amber-500 hover:to-amber-400 text-black font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-[10px] sm:text-xs transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(234,179,8,0.4)]"><Crown size={16}/> Ayrıcalık Tanımla</button>
+                    </div>
                   </div>
-                  <div>
-                    <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Özel Nickname</label>
-                    <input type="text" name="nickname" placeholder="Örn: Sitenin Sahibi" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner" />
-                  </div>
-                  <div>
-                    <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Rozet</label>
-                    <input type="text" name="badge" placeholder="Örn: 👑 Yönetici" className="w-full bg-black/40 border border-yellow-500/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner" />
-                  </div>
-                  <div className="flex items-end">
-                    <button type="submit" className="w-full justify-center bg-gradient-to-r from-yellow-500 to-amber-500 hover:to-amber-400 text-black font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-[10px] sm:text-xs transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(234,179,8,0.4)]"><Crown size={16}/> Ayrıcalık Tanımla</button>
-                  </div>
-                </div>
-              </form>
+                </form>
 
-              {/* VIP Listesi */}
-              <div>
-                <div className="flex items-center justify-between mb-4 sm:mb-6">
-                  <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">Mevcut VIP Üyeler <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-md text-xs border border-yellow-500/30">{vipUsers.length}</span></h3>
-                </div>
+                <div>
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">Mevcut VIP Üyeler <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-md text-xs border border-yellow-500/30">{vipUsers.length}</span></h3>
+                  </div>
 
-                {vipUsers.length === 0 ? (
-                  <div className="text-center py-12 sm:py-16 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Sistemde henüz hiç VIP üye yok. Çok fakiriz!</div>
-                ) : (
-                  <div className="grid gap-4 sm:gap-6">
-                    {vipUsers.map((user, idx) => (
+                  {vipUsers.length === 0 ? (
+                    <div className="text-center py-12 sm:py-16 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Sistemde henüz hiç VIP üye yok. Çok fakiriz!</div>
+                  ) : (
+                    <div className="grid gap-4 sm:gap-6">
+                      {vipUsers.map((user, idx) => (
                       <div key={idx} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-col md:flex-row gap-4 sm:gap-6 md:items-center justify-between shadow-lg">
-                         
+                          
                         <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
                           <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 p-[2px] shrink-0">
                             <div className="w-full h-full bg-[#050505] rounded-full flex items-center justify-center">
@@ -735,7 +719,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                     const isConfession = post.type === 'CONFESSION';
                     const isBosYap = post.type === 'BOSYAP';
 
-                    // 🔥 BEKLEYEN POSTLARA ÖZEL NEFES ALAN (PULSE) GLOW EFEKTİ EKLENDİ!
                     const cardGlow = isEphemeral ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)] bg-amber-500/[0.02]' 
                       : post.status === 'PENDING' ? 'border-orange-500/40 hover:border-orange-500/60 shadow-[0_0_20px_rgba(249,115,22,0.1)] bg-orange-500/[0.03] animate-[pulse_4s_ease-in-out_infinite]'
                       : isConfession ? 'border-purple-500/20 hover:border-purple-500/40 bg-white/[0.02]'
@@ -768,7 +751,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                           </span>
                         </div>
    
-                        {/* POST İÇERİĞİ VE NET KATEGORİ SEÇİMİ */}
                         <details className="group/edit relative z-10">
                           <summary className="list-none cursor-pointer">
                             <div className="flex justify-between items-start gap-4">
@@ -796,6 +778,13 @@ export default async function AdminDashboard({ searchParams }: any) {
                             </div>
                           </form>
                         </details>
+
+                        {/* 🔥 ADMIN PANELİNDE SESİ DİNLEME ALANI */}
+                        {post.audioUrl && (
+                          <div className="my-2">
+                            <AnonymousPlayer audioUrl={post.audioUrl} />
+                          </div>
+                        )}
 
                         <div className="bg-black/30 border border-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl flex flex-col xl:flex-row gap-3 sm:gap-4 items-start xl:items-center justify-between shadow-inner w-full relative z-10">
                           <div className="flex items-center gap-2 sm:gap-3 w-full lg:w-auto">
