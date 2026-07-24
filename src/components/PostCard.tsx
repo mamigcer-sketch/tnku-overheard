@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
 import AnonymousPlayer from "./AnonymousPlayer"; // 🔥 Hacker Ses Oynatıcısı Eklendi
-import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, BadgeCheck } from "lucide-react";
+import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, BadgeCheck, Quote } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { incrementView, submitReport } from "@/app/post/actions";
 import { playPopSound, playClickSound } from "@/utils/sounds";
@@ -184,14 +184,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const isTrending = post.likes >= 10; 
 
-  const hoverGlow = isEphemeral
-    ? 'hover:shadow-[0_0_40px_rgba(245,158,11,0.2)] hover:border-amber-500/40 border-amber-500/20 bg-amber-500/[0.01]'
-    : isConfession 
-      ? 'hover:shadow-[0_0_40px_rgba(168,85,247,0.15)] hover:border-purple-500/30' 
-      : isBosYap
-        ? 'hover:shadow-[0_0_40px_rgba(16,185,129,0.15)] hover:border-emerald-500/30'
-        : 'hover:shadow-[0_0_40px_rgba(77,163,255,0.15)] hover:border-[#4DA3FF]/30';
-
   const authorData = getAnonymousData(post.authorUuid || post.id, customNickname);
 
   const firstComment = post.comments && post.comments.length > 0 ? post.comments[0] : null;
@@ -204,20 +196,27 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
       <div 
         ref={cardRef} 
         onClick={handleCardInteraction} 
-        className={`relative group backdrop-blur-2xl border p-5 sm:p-6 rounded-[24px] overflow-hidden shadow-[0_8px_32px_0_rgba(0,0,0,0.3)] transition-all duration-700 ease-out will-change-[opacity,transform] select-none cursor-pointer ${hoverGlow} ${
+        // 🔥 GLASSMORPHISM & HOVER GÜNCELLEMESİ: bg, border, shadow ve translate eklendi
+        className={`relative group bg-[#121212]/70 backdrop-blur-xl border border-white/5 hover:border-white/10 p-5 sm:p-6 rounded-[24px] overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-out will-change-[opacity,transform] select-none cursor-pointer hover:-translate-y-1 ${
           isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-[0.98]'
-        } ${!isEphemeral ? 'bg-white/[0.02] border-white/[0.05]' : ''}`}
+        }`}
       >
+        
+        {/* 🔥 DEV TİPOGRAFİ EFEKTİ (Arka planda soluk tırnak işareti) */}
+        <div className="absolute right-4 top-2 text-white/[0.02] -z-10 pointer-events-none">
+          <Quote size={120} />
+        </div>
+
         {isTrending && !isEphemeral && (
-          <div className={`absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md -z-10 bg-gradient-to-r ${
-            isConfession ? 'from-purple-500/30 to-pink-500/30' 
-            : isBosYap ? 'from-emerald-500/30 to-teal-500/30'
-            : 'from-[#4DA3FF]/30 to-blue-500/30'
+          <div className={`absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md -z-20 bg-gradient-to-r ${
+            isConfession ? 'from-purple-500/20 to-pink-500/20' 
+            : isBosYap ? 'from-emerald-500/20 to-teal-500/20'
+            : 'from-[#4DA3FF]/20 to-blue-500/20'
           }`} />
         )}
 
         {isEphemeral && (
-          <div className="absolute -inset-[1px] opacity-20 group-hover:opacity-40 transition-opacity duration-700 blur-md -z-10 bg-gradient-to-r from-amber-500/40 to-orange-500/40" />
+          <div className="absolute -inset-[1px] opacity-20 group-hover:opacity-40 transition-opacity duration-700 blur-md -z-20 bg-gradient-to-r from-amber-500/30 to-orange-500/30" />
         )}
 
         <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-500 ease-out ${
@@ -231,14 +230,14 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
               
               {isEphemeral ? (
-                <span className="px-2.5 py-1 rounded-md uppercase flex items-center gap-1 bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse">
+                <span className="px-2.5 py-1 rounded-md uppercase flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
                   <Clock size={12} /> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
                 </span>
               ) : (
-                <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 ${
-                  isConfession ? 'bg-purple-500/10 text-purple-400' 
-                  : isBosYap ? 'bg-emerald-500/10 text-emerald-400'
-                  : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'
+                <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 shadow-sm ${
+                  isConfession ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.15)]' 
+                  : isBosYap ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.15)]'
+                  : 'bg-[#4DA3FF]/10 text-[#4DA3FF] border border-[#4DA3FF]/20 shadow-[0_0_10px_rgba(77,163,255,0.15)]'
                 }`}>
                   {isTrending && <Flame size={12} className="animate-pulse" />}
                   {isConfession ? 'İTİRAF' : isBosYap ? 'BOŞ YAP' : 'OVERHEARD'}
@@ -252,7 +251,8 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                   </span>
                 )}
                 
-                <span className={`flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.08] transition-colors ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
+                {/* 🔥 YAZAR ROZETİ GÜNCELLEMESİ */}
+                <span className={`flex items-center gap-1.5 bg-white/[0.03] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.06] transition-colors ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
                   <div className={`w-5 h-5 flex items-center justify-center rounded-md ${customNickname ? 'bg-gradient-to-br from-amber-500/20 to-pink-500/20 border border-pink-500/30 text-pink-400' : `${authorData.gradient} text-[10px]`} shadow-inner`}>
                     {customNickname ? (
                       <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
@@ -262,7 +262,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                       authorData.emoji
                     )}
                   </div>
-                  <span className="font-semibold text-[11px] tracking-wide">
+                  <span className="font-semibold text-[11px] tracking-wide text-gray-200 group-hover:text-white transition-colors">
                     @{authorData.name}
                   </span>
                 </span>
@@ -278,7 +278,8 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
           <div className="mb-4 sm:mb-5 relative z-10 transition-all duration-300">
             {post.content && (
-              <p className={`text-gray-100 text-[15px] sm:text-[16px] leading-relaxed font-medium break-words tracking-wide ${!isExpanded && isLongText ? 'line-clamp-4' : ''}`}>
+              // 🔥 TİPOGRAFİ GÜNCELLEMESİ: font-normal, text-gray-200 ve leading-relaxed eklendi
+              <p className={`text-gray-200 text-[15px] sm:text-[16px] leading-relaxed font-normal break-words tracking-wide ${!isExpanded && isLongText ? 'line-clamp-4' : ''}`}>
                 {post.content}
               </p>
             )}
@@ -289,7 +290,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                   playClickSound();
                   setIsExpanded(true); 
                 }}
-                className={`font-bold text-[13px] sm:text-[14px] mt-1 transition-colors active:scale-95 inline-block ${
+                className={`font-semibold text-[13px] sm:text-[14px] mt-2 transition-colors active:scale-95 inline-block ${
                   isEphemeral ? 'text-amber-400 hover:text-amber-300' : 'text-[#4DA3FF] hover:text-blue-400'
                 }`}
               >
@@ -297,9 +298,9 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
               </button>
             )}
 
-            {/* 🔥 SESLİ FISILTI OYNATICISI BURAYA YERLEŞTİRİLDİ */}
+            {/* SESLİ FISILTI OYNATICISI */}
             {post.audioUrl && (
-              <div onClick={(e) => e.stopPropagation()} className="mt-3">
+              <div onClick={(e) => e.stopPropagation()} className="mt-4">
                 <AnonymousPlayer audioUrl={post.audioUrl} />
               </div>
             )}
@@ -313,11 +314,11 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
               playClickSound();
               router.push(`/post/${post.id}`);
             }}
-            className="mt-3 mb-2 bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 flex gap-2.5 items-start cursor-pointer hover:bg-white/[0.05] transition-colors shadow-inner relative z-10"
+            className="mt-3 mb-3 bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 flex gap-2.5 items-start cursor-pointer hover:bg-white/[0.06] transition-colors shadow-inner relative z-10"
           >
             <span className="text-[13px] opacity-60 mt-0.5">💬</span>
-            <div className="text-[13px] text-gray-400 line-clamp-2 leading-relaxed">
-              <span className="font-bold text-gray-200 mr-1.5">
+            <div className="text-[13px] text-gray-300 line-clamp-2 leading-relaxed">
+              <span className="font-semibold text-gray-100 mr-1.5">
                 @{commentAuthorData.name}:
               </span>
               {firstComment.content}
@@ -327,7 +328,8 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
         <div 
           onClick={(e) => e.stopPropagation()} 
-          className="interactive-zone flex items-center justify-between border-t border-white/[0.04] pt-4 text-gray-400 relative z-10 cursor-default"
+          // 🔥 ALT BAR GÜNCELLEMESİ: border-white/5 ile silik çizgi atıldı, padding ayarlandı
+          className="interactive-zone flex items-center justify-between border-t border-white/5 pt-4 text-gray-400 relative z-10 cursor-default"
         >
           <div className="flex items-center gap-4 sm:gap-6">
             <form action={incrementLike} onSubmit={handleLikeClick}>
