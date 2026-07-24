@@ -9,13 +9,14 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
   const [hasAudio, setHasAudio] = useState(false);
   const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
   
-  // Önizleme için oynatma state'leri
   const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
 
   const startRecording = async () => {
     try {
@@ -89,23 +90,41 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
     onAudioReady(null);
   };
 
-  // Önizlemeyi oynat / durdur (Aynı ince hacker ses efektiyle)
-  const togglePreviewPlay = () => {
+  // 🔥 Önizlemede de Hacker Ses Efekti (Web Audio API + playbackRate)
+  const togglePreviewPlay = async () => {
     const audio = previewAudioRef.current;
     if (!audio) return;
 
-    // Hacker sesi (ince ton) için hızı artırıyoruz
+    if (!audioCtxRef.current) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContextClass) {
+        audioCtxRef.current = new AudioContextClass();
+        try {
+          sourceNodeRef.current = audioCtxRef.current.createMediaElementSource(audio);
+          sourceNodeRef.current.connect(audioCtxRef.current.destination);
+        } catch (e) {
+          // Zaten bağlıysa hata vermesin
+        }
+      }
+    }
+
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+      await audioCtxRef.current.resume();
+    }
+
+    // Sesi inceleştir (Hacker modu)
     audio.playbackRate = 1.25; 
 
     if (isPlayingPreview) {
       audio.pause();
       setIsPlayingPreview(false);
     } else {
-      audio.play().then(() => {
+      try {
+        await audio.play();
         setIsPlayingPreview(true);
-      }).catch((err) => {
+      } catch (err) {
         console.error("Önizleme oynatılamadı:", err);
-      });
+      }
     }
   };
 
@@ -119,7 +138,7 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
 
   return (
     <div className="bg-black/40 border border-purple-500/20 p-4 rounded-2xl relative overflow-hidden">
-      {audioPreviewUrl && <audio ref={previewAudioRef} src={audioPreviewUrl} preload="metadata" />}
+      {audioPreviewUrl && <audio ref={previewAudioRef} src={audioPreviewUrl} preload="metadata" crossOrigin="anonymous" />}
 
       {!hasAudio ? (
         <div className="flex items-center justify-between gap-4">
@@ -149,12 +168,11 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
       ) : (
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 flex-1">
-            {/* Önizleme Dinleme Butonu */}
             <button
               type="button"
               onClick={togglePreviewPlay}
               className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center hover:bg-purple-500/30 transition-all cursor-pointer shrink-0"
-              title="Kaydı Önizle"
+              title="Hacker Sesiyle Önizle"
             >
               {isPlayingPreview ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
             </button>
@@ -164,7 +182,7 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
                 <UploadCloud size={14} /> Fısıltı Hazır!
               </span>
               <span className="text-[10px] text-purple-400 flex items-center gap-1">
-                <Sparkles size={11} /> Göndermeden önce dinleyebilirsin
+                <Sparkles size={11} /> Hacker modunda dinleyebilirsin
               </span>
             </div>
           </div>
