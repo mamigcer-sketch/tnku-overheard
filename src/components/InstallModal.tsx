@@ -38,25 +38,24 @@ export default function InstallModal() {
   if (!showModal) return null;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-[#050505]/90 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowModal(false)}>
-      {/* 
-        🔥 BURASI KRİTİK: max-h-[90dvh] ve overflow-y-auto eklendi.
-        Artık ekran küçük olsa bile yukarı taşmayacak, kendi içinde kaydırılabilecek! 
-      */}
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-[#050505]/90 backdrop-blur-md animate-in fade-in duration-300" onClick={() => setShowModal(false)}>
+      
+      {/* 🔥 TAM ORTAYA SABİTLENMİŞ, TAŞMAYAN MODAL KUTUSU */}
       <div 
-        className="w-full max-w-md max-h-[90dvh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] bg-[#0a0a0f] border border-purple-500/30 rounded-3xl shadow-[0_0_40px_rgba(168,85,247,0.15)] relative animate-in zoom-in-95 duration-300"
+        className="w-full max-w-sm sm:max-w-md bg-[#0a0a0f] border border-purple-500/30 rounded-[28px] shadow-[0_0_40px_rgba(168,85,247,0.15)] relative flex flex-col max-h-[85vh] animate-in zoom-in-95 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Üst Cyberpunk Çizgi ve Sistem Yazısı */}
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
-        <span className="absolute top-4 left-5 text-[9px] font-mono text-purple-400/60 tracking-widest hidden sm:inline-block">SYS.APP_INSTALL_v2.0</span>
+        {/* Üst Neon Çizgi */}
+        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 rounded-t-[28px] shadow-[0_0_20px_rgba(168,85,247,0.5)]" />
         
-        {/* Kapat Butonu */}
-        <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 p-2 text-gray-500 hover:text-white hover:bg-purple-500/20 rounded-xl transition-all cursor-pointer z-20 group">
-          <X size={20} className="group-hover:scale-110 transition-transform" />
+        {/* Sabit Kapat Butonu (Asla kaybolmaz, hep sağ üstte) */}
+        <button onClick={() => setShowModal(false)} className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white bg-white/5 hover:bg-purple-500/20 rounded-xl transition-all cursor-pointer z-50">
+          <X size={20} />
         </button>
 
-        <div className="p-6 sm:p-8 pt-10 sm:pt-12">
+        {/* 📜 Kaydırılabilir İçerik Alanı (Modal boyunu aşarsa burası kayar) */}
+        <div className="flex-1 overflow-y-auto p-6 sm:p-8 pt-14 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+          
           {/* 🚀 DURUM 1: ANDROID OTOMATİK YÜKLEME */}
           {deferredPrompt ? (
             <>
@@ -108,11 +107,11 @@ export default function InstallModal() {
                 </h4>
                 <ul className="space-y-4 text-sm text-gray-300 font-medium relative z-10">
                   <li className="flex items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
-                    <div className="bg-cyan-500/10 p-2 rounded-lg text-cyan-400"><Share size={16} /></div>
+                    <div className="bg-cyan-500/10 p-2 rounded-lg text-cyan-400 shrink-0"><Share size={16} /></div>
                     <span className="flex-1 text-xs sm:text-sm">Alt menüden <b className="text-white">Paylaş</b> ikonuna dokun.</span>
                   </li>
                   <li className="flex items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
-                    <div className="bg-cyan-500/10 p-2 rounded-lg text-cyan-400"><PlusSquare size={16} /></div>
+                    <div className="bg-cyan-500/10 p-2 rounded-lg text-cyan-400 shrink-0"><PlusSquare size={16} /></div>
                     <span className="flex-1 text-xs sm:text-sm"><b className="text-white">Ana Ekrana Ekle</b> seçeneğini işaretle.</span>
                   </li>
                 </ul>
@@ -126,11 +125,11 @@ export default function InstallModal() {
                 </h4>
                 <ul className="space-y-4 text-sm text-gray-300 font-medium relative z-10">
                   <li className="flex items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
-                    <div className="bg-green-500/10 p-2 rounded-lg text-green-400"><MoreVertical size={16} /></div>
+                    <div className="bg-green-500/10 p-2 rounded-lg text-green-400 shrink-0"><MoreVertical size={16} /></div>
                     <span className="flex-1 text-xs sm:text-sm">Sağ üstten <b className="text-white">Üç Nokta</b>'ya dokun.</span>
                   </li>
                   <li className="flex items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
-                    <div className="bg-green-500/10 p-2 rounded-lg text-green-400"><Smartphone size={16} /></div>
+                    <div className="bg-green-500/10 p-2 rounded-lg text-green-400 shrink-0"><Smartphone size={16} /></div>
                     <span className="flex-1 text-xs sm:text-sm"><b className="text-white">Ana Ekrana Ekle</b>'yi seç.</span>
                   </li>
                 </ul>
