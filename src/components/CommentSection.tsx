@@ -72,16 +72,17 @@ export default function CommentSection({
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2 px-1 text-gray-300">
+      {/* 🔥 Yorumlar Başlığı */}
+      <div className="flex items-center gap-2 px-1 text-gray-200">
         <MessageCircle size={18} className="text-[#4DA3FF]" />
-        <h2 className="text-[16px] font-bold">
+        <h2 className="text-[16px] font-bold tracking-wide">
           Yorumlar <span className="text-gray-500 font-medium text-sm">({comments.length})</span>
         </h2>
       </div>
 
       <div className="space-y-4">
         {parentComments.length === 0 ? (
-          <div className="text-center py-10 bg-white/[0.02] backdrop-blur-md rounded-[20px] border border-white/[0.05] shadow-inner">
+          <div className="text-center py-12 bg-[#121212]/70 backdrop-blur-xl rounded-[22px] border border-white/5 shadow-inner">
             <p className="text-gray-500 font-medium text-[13px]">Bu fısıltıya ilk cevabı sen ver.</p>
           </div>
         ) : (
@@ -141,15 +142,16 @@ export default function CommentSection({
         )}
       </div>
       
-      <div id="comment-form-section" className="pt-6 border-t border-white/[0.05] mt-8 bg-white/[0.01] backdrop-blur-md rounded-[24px] p-3">
-        <div className="flex items-center justify-between mb-3 px-2">
+      {/* 🔥 PREMIUM GLASSMORPHISM YORUM YAZMA ALANI */}
+      <div id="comment-form-section" className="pt-6 border-t border-white/5 mt-8 bg-[#121212]/80 backdrop-blur-xl rounded-[24px] p-4 sm:p-5 border border-white/5 shadow-lg">
+        <div className="flex items-center justify-between mb-3 px-1">
           <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
             {replyingTo ? `@${replyingTo.name} kişisine yanıt veriliyor` : "Sen Ne Düşünüyorsun?"}
           </h3>
           {replyingTo && (
             <button 
               onClick={() => setReplyingTo(null)} 
-              className="text-xs text-pink-400 hover:text-pink-300 font-semibold transition-colors"
+              className="text-xs text-pink-400 hover:text-pink-300 font-semibold transition-colors cursor-pointer"
             >
               Yanıtı İptal Et ✕
             </button>
