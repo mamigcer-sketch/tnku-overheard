@@ -147,7 +147,7 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
                 <span className="font-mono font-bold text-xs">{recordingTime}s / 15s (Kayıt Devam Ediyor...)</span>
               </div>
             ) : (
-              <span className="text-gray-400 text-xs font-medium">Anonim sesli fısıltı bırak (İsteğe bağlı)...</span>
+              <span className="text-gray-400 text-xs font-medium">Anonim sesli mesaj bırak (İsteğe bağlı)...</span>
             )}
           </div>
           
