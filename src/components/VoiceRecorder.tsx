@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Mic, Square, Trash2, UploadCloud, Activity, Play, Pause, Sparkles } from "lucide-react";
+import { Mic, Square, Trash2, UploadCloud, Activity, Play, Pause, Baby } from "lucide-react";
 
 export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: { onAudioReady: (base64Audio: string | null) => void, onRecordingStateChange?: (recording: boolean) => void }) {
   const [isRecording, setIsRecording] = useState(false);
@@ -15,7 +15,6 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   
-  // 🔥 Gerçek zamanlı ses filtresi için referanslar
   const audioCtxRef = useRef<AudioContext | null>(null);
   const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
 
@@ -39,7 +38,6 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
       };
 
       mediaRecorder.onstop = () => {
-        // 🔥 Waw veya dönüştürme YOK. Sesi standart haliyle alıyoruz.
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         const previewUrl = URL.createObjectURL(audioBlob);
         setAudioPreviewUrl(previewUrl);
@@ -92,11 +90,20 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
     onAudioReady(null);
   };
 
-  // 🔥 Sesi hızlandırmadan anında hacker robot sesine çeviren sihirli oynatıcı
+  // 🔥 ÇOCUK / HELYUM SESİ EFEKTİ
   const togglePreviewPlay = async () => {
     const audio = previewAudioRef.current;
     if (!audio) return;
 
+    // 1. ADIM: Sesi inceltip hızlandırmak için pitch korumasını kapat (Helyum efekti)
+    audio.playbackRate = 1.4; 
+    if ('preservesPitch' in audio) {
+      audio.preservesPitch = false;
+    } else if ('webkitPreservesPitch' in audio as any) {
+      (audio as any).webkitPreservesPitch = false;
+    }
+
+    // 2. ADIM: Yetişkin (Kalın) ses frekanslarını silip atan filtre
     if (!audioCtxRef.current) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
@@ -106,33 +113,25 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
         try {
           sourceNodeRef.current = ctx.createMediaElementSource(audio);
 
-          // 1. ADIM: TELSİZ / TELEFON FİLTRESİ (Sesin karakterini gizler)
-          const bandpass = ctx.createBiquadFilter();
-          bandpass.type = "bandpass";
-          bandpass.frequency.value = 1000;
-          bandpass.Q.value = 1.0;
+          // Kalın sesleri (bas) tamamen kesen filtre (Göğüs sesini yok eder)
+          const highpass = ctx.createBiquadFilter();
+          highpass.type = "highpass";
+          highpass.frequency.value = 400; // 400Hz altındaki yetişkin tonları kesilir
 
-          // 2. ADIM: DİJİTAL ROBOT TİTREŞİMİ (Anonymous efekti veren ana kısım)
-          const modulatorGain = ctx.createGain();
-          const oscillator = ctx.createOscillator();
-          oscillator.type = "sawtooth"; // Testere dişi dalga (mekanik hırıltı verir)
-          oscillator.frequency.value = 45; // 45 Hz mükemmel bir robot kalınlığıdır
-          oscillator.start();
-          oscillator.connect(modulatorGain.gain);
+          // İnce (şirin) sesleri parlatan filtre
+          const peaking = ctx.createBiquadFilter();
+          peaking.type = "peaking";
+          peaking.frequency.value = 3000;
+          peaking.Q.value = 1.5;
+          peaking.gain.value = 12; // Çocuksu çınlamayı artırır
 
-          // Sesi bağlıyoruz: Kaynak -> Telsiz Filtresi -> Robot Titreşimi -> Hoparlör
-          sourceNodeRef.current.connect(bandpass);
-          bandpass.connect(modulatorGain);
-          modulatorGain.connect(ctx.destination);
-
-          // Kelimelerin anlaşılabilmesi için hafifçe filtreli ana sesi de arkaya veriyoruz
-          const dryGain = ctx.createGain();
-          dryGain.gain.value = 0.5;
-          bandpass.connect(dryGain);
-          dryGain.connect(ctx.destination);
+          // Bağlantılar: Kaynak -> Bas Kesici -> Tiz Parlatıcı -> Hoparlör
+          sourceNodeRef.current.connect(highpass);
+          highpass.connect(peaking);
+          peaking.connect(ctx.destination);
 
         } catch (e) {
-          console.error("Efekt uygulanamadı:", e);
+          console.error("Çocuk efekti uygulanamadı:", e);
         }
       }
     }
@@ -163,7 +162,6 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
 
   return (
     <div className="bg-black/40 border border-purple-500/20 p-4 rounded-2xl relative overflow-hidden">
-      {/* crossOrigin eklendi ki tarayıcı efekti uygularken CORS hatası vermesin */}
       {audioPreviewUrl && <audio ref={previewAudioRef} src={audioPreviewUrl} preload="metadata" crossOrigin="anonymous" />}
 
       {!hasAudio ? (
@@ -198,17 +196,17 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
               type="button"
               onClick={togglePreviewPlay}
               className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center hover:bg-purple-500/30 transition-all cursor-pointer shrink-0"
-              title="Hacker Sesiyle Önizle"
+              title="Çocuk Sesiyle Önizle"
             >
               {isPlayingPreview ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
             </button>
             
             <div className="flex flex-col">
               <span className="text-xs font-bold text-green-400 flex items-center gap-1">
-                <UploadCloud size={14} /> Fısıltı Kodlandı!
+                <UploadCloud size={14} /> Fısıltı Hazır!
               </span>
               <span className="text-[10px] text-purple-400 flex items-center gap-1">
-                <Sparkles size={11} /> Maskeli anonim efektiyle dinleyebilirsin
+                <Baby size={13} /> Şirin/Çocuk sesi efektiyle dinleyebilirsin
               </span>
             </div>
           </div>
