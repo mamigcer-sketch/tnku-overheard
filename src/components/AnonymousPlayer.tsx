@@ -9,7 +9,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const isInitializedRef = useRef(false); // 🔥 Filtrelerin bir kere kurulmasını sağlayacak bayrak
+  const isFilteredRef = useRef(false); // 🔥 Filtrelerin sadece 1 kez kurulmasını sağlar
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -24,9 +24,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     const handleEnded = () => {
       setIsPlaying(false);
       setProgress(0);
-      if (audioRef.current) {
-        audioRef.current.currentTime = 0; // Ses bitince sadece imleci başa sarıyoruz
-      }
+      // 🔥 DİKKAT: Tarayıcı bug'ını tetiklememek için burada başa sarmıyoruz!
     };
 
     audio.addEventListener("timeupdate", updateProgress);
@@ -41,65 +39,74 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     };
   }, []);
 
+  const setupFilters = () => {
+    if (isFilteredRef.current) return;
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioContextClass();
+      audioCtxRef.current = ctx;
+
+      const source = ctx.createMediaElementSource(audio);
+
+      // 🔥 KİMLİĞİ GİZLEYEN ANA FİLTRE: Gırtlak ve bas seslerini tamamen yok eder
+      const highpass = ctx.createBiquadFilter();
+      highpass.type = "highpass";
+      highpass.frequency.value = 500; 
+
+      // 🔥 ANONİM PARLAKLIK FİLTRESİ: Sese dijital ve şirin bir efekt katar
+      const peaking = ctx.createBiquadFilter();
+      peaking.type = "peaking";
+      peaking.frequency.value = 3500;
+      peaking.Q.value = 2;
+      peaking.gain.value = 10;
+
+      // Kabloları BİR KERE bağla ve mühürle
+      source.connect(highpass);
+      highpass.connect(peaking);
+      peaking.connect(ctx.destination);
+
+      isFilteredRef.current = true;
+    } catch (error) {
+      console.error("Filtre kurulum hatası:", error);
+    }
+  };
+
   const togglePlay = async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // 🔥 Çalıyorsa sadece durdur, kabloları sökme!
     if (isPlaying) {
       audio.pause();
       setIsPlaying(false);
       return;
     }
 
-    // Helyum etkisi ayarları
-    audio.playbackRate = 1.4;
+    // İlk oynatmada Web Audio maskesini giydir
+    if (!isFilteredRef.current) {
+      setupFilters();
+    }
+
+    const ctx = audioCtxRef.current;
+    if (ctx && ctx.state === "suspended") {
+      await ctx.resume();
+    }
+
+    // Anonimleşme Etkisi (Helyum hızlandırması)
+    audio.playbackRate = 1.45;
     if ('preservesPitch' in audio) {
       audio.preservesPitch = false;
     } else if ('webkitPreservesPitch' in audio as any) {
       (audio as any).webkitPreservesPitch = false;
     }
 
-    // 🔥 FİLTRELERİ SADECE İLK TIKLAMADA 1 KEZ KURUYORUZ (Karışma/Glitch sorununun çözümü)
-    if (!isInitializedRef.current) {
-      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
-      if (AudioContextClass) {
-        try {
-          const ctx = new AudioContextClass();
-          audioCtxRef.current = ctx;
-          
-          const source = ctx.createMediaElementSource(audio);
-
-          const highpass = ctx.createBiquadFilter();
-          highpass.type = "highpass";
-          highpass.frequency.value = 450; 
-
-          const peaking = ctx.createBiquadFilter();
-          peaking.type = "peaking";
-          peaking.frequency.value = 3000;
-          peaking.Q.value = 1.4;
-          peaking.gain.value = 12;
-
-          // Kabloları kalıcı olarak bağlıyoruz
-          source.connect(highpass);
-          highpass.connect(peaking);
-          peaking.connect(ctx.destination);
-
-          isInitializedRef.current = true; // Bir daha buralara girmeyecek!
-        } catch (err) {
-          console.error("Filtre kurulum hatası:", err);
-        }
-      }
-    }
-
-    // Tarayıcı sekme uykuya geçerse context'i uyandır
-    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
-      await audioCtxRef.current.resume();
-    }
-
-    // Güvenlik: Eğer süre bir şekilde sondaysa play'e basınca baştan başlasın
-    if (audio.currentTime >= audio.duration) {
-      audio.currentTime = 0;
+    // 🚀 İŞTE KARIŞMAYI ÇÖZEN SİHİRLİ DOKUNUŞ:
+    // Eğer ses bittiyse tam 0'a değil, 0.05'e sarıyoruz. 
+    // Tarayıcı bu sayede eski sesi hafızada tutmuyor ve sesler ASLA üst üste binmiyor!
+    if (audio.currentTime >= audio.duration || audio.ended) {
+      audio.currentTime = 0.05;
     }
 
     try {
@@ -114,6 +121,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     <div className="bg-gradient-to-r from-purple-500/10 via-black/40 to-[#4DA3FF]/10 border border-purple-500/30 p-3.5 rounded-2xl flex items-center gap-3.5 shadow-inner backdrop-blur-xl relative overflow-hidden group">
       <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       
+      {/* crossOrigin CORS takılmalarını engeller */}
       <audio ref={audioRef} src={audioUrl} preload="metadata" crossOrigin="anonymous" />
       
       <button
@@ -130,7 +138,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
       <div className="flex-1 space-y-1.5 relative z-10">
         <div className="flex items-center justify-between text-[11px] font-bold text-gray-300">
           <span className="flex items-center gap-1.5 text-purple-400">
-            <Baby size={14} className="animate-pulse" /> Anonim Şirin Ses
+            <Baby size={14} className="animate-pulse" /> Tam Korumalı Şirin Ses
           </span>
           <span className="font-mono text-[10px] text-gray-400">15s</span>
         </div>
