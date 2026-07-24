@@ -90,7 +90,7 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
     onAudioReady(null);
   };
 
-  // 🔥 Önizlemede de Hacker Ses Efekti (Web Audio API + playbackRate)
+ // 🔥 Önizlemede daha net hacker sesi için hızı 1.5 yapıyoruz
   const togglePreviewPlay = async () => {
     const audio = previewAudioRef.current;
     if (!audio) return;
@@ -102,9 +102,7 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
         try {
           sourceNodeRef.current = audioCtxRef.current.createMediaElementSource(audio);
           sourceNodeRef.current.connect(audioCtxRef.current.destination);
-        } catch (e) {
-          // Zaten bağlıysa hata vermesin
-        }
+        } catch (e) {}
       }
     }
 
@@ -112,8 +110,8 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
       await audioCtxRef.current.resume();
     }
 
-    // Sesi inceleştir (Hacker modu)
-    audio.playbackRate = 1.25; 
+    // Tonu iyice inceltip hacker moduna sokuyoruz
+    audio.playbackRate = 1.5; 
 
     if (isPlayingPreview) {
       audio.pause();
