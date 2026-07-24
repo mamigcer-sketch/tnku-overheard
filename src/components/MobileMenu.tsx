@@ -7,7 +7,6 @@ import Link from 'next/link';
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   
-  // "Beğendiklerim" için hideOnDesktop özelliği ekledik ki masaüstünde 2 kere gözükmesin
   const menuItems = [
     { name: 'Paylaşımlarım', icon: <FileText size={18} />, href: '/my-posts', isExternal: false },
     { name: 'Beğendiklerim', icon: <Heart size={18} />, href: '/my-likes', isExternal: false, hideOnDesktop: true },
@@ -20,17 +19,18 @@ export default function MobileMenu() {
     <div className="relative z-50">
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        className="p-2 hover:bg-white/10 rounded-full transition-colors text-white cursor-pointer"
+        className="p-2 hover:bg-white/5 rounded-full transition-colors text-white cursor-pointer"
       >
-        {isOpen ? <X size={28} /> : <Menu size={28} />}
+        {isOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
 
       {isOpen && (
         <>
-          {/* Arka plan karartma */}
-          <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)}></div>
+          {/* 🔥 Arka plan karartma blur efektiyle zenginleştirildi */}
+          <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)}></div>
           
-          <div className="absolute top-14 right-0 w-64 bg-[#121212] border border-white/10 rounded-2xl p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
+          {/* 🔥 PREMİUM GLASSMORPHISM AÇILIR MENÜ */}
+          <div className="absolute top-14 right-0 w-64 bg-[#121212]/90 backdrop-blur-2xl border border-white/10 rounded-[24px] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <div className="space-y-0.5">
               {menuItems.map((item) => (
                 item.isExternal ? (
@@ -56,11 +56,10 @@ export default function MobileMenu() {
                 )
               ))}
 
-              {/* 🔥 İŞTE SİHİR BURADA: Artık kendi içindeki eski modalı değil, global tetikleyiciyi ateşliyor */}
               <button 
                 onClick={() => {
                   setIsOpen(false); 
-                  window.dispatchEvent(new Event('trigger-install-modal')); // Yeni V3.0 modalı tetikler!
+                  window.dispatchEvent(new Event('trigger-install-modal'));
                 }}
                 className="w-full flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#4DA3FF]/10 text-[#4DA3FF] font-medium text-sm transition-all border-t border-white/5 mt-2 cursor-pointer"
               >
