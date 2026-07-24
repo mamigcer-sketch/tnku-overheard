@@ -9,7 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
-import { MessageSquareHeart } from 'lucide-react';
+import { MessageSquareHeart, Bell } from 'lucide-react'; // 🔥 Bell ikonu eklendi
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -135,11 +135,11 @@ export default async function Home({ searchParams }: any) {
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-20">
       
-      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/15 blur-[120px] pointer-events-none -z-10" />
-      <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/15 blur-[140px] pointer-events-none -z-10" />
-      <div className="fixed top-[40%] left-[50%] w-[300px] h-[300px] rounded-full bg-pink-500/5 blur-[100px] pointer-events-none -z-10" />
-
-      <header className="sticky top-0 z-50 bg-[#0B0B0B]/40 backdrop-blur-3xl border-b border-white/[0.03] px-4 py-4 md:px-8 flex items-center justify-between transition-all shadow-[0_4px_30px_rgba(0,0,0,0.1)] gap-2">
+      {/* Arkadaki hafif parlamalar kaldı, sayfaya derinlik veriyor */}
+      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/10 blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[140px] pointer-events-none -z-10" />
+      
+      <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-2xl border-b border-white/[0.03] px-4 py-4 md:px-8 flex items-center justify-between transition-all shadow-sm gap-2">
         
         <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity shrink-0">
           <img src="/logo.jpg" alt="Logo" className="w-8 h-8 sm:w-9 sm:h-9 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
@@ -148,7 +148,6 @@ export default async function Home({ searchParams }: any) {
         
         <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <RefreshButton />
-          
           <NotificationBell notifications={notifications} />
           
           <Link 
@@ -162,12 +161,17 @@ export default async function Home({ searchParams }: any) {
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-6 sm:py-8">
+      <div className="max-w-2xl mx-auto px-4 py-5 sm:py-6">
         
+        {/* 🔥 PREMİUM DUYURU ALANI */}
         {activeAnnouncement && (
-          <div className="mb-6 bg-gradient-to-r from-[#4DA3FF]/10 via-purple-500/10 to-[#4DA3FF]/10 backdrop-blur-xl border border-[#4DA3FF]/20 p-4 rounded-[20px] flex items-center gap-3 animate-in fade-in duration-500 shadow-[0_8px_32px_0_rgba(0,0,0,0.2)]">
-            <div className="bg-[#4DA3FF] text-black px-2.5 py-1 rounded-xl shrink-0 font-black text-[10px] uppercase tracking-wider shadow">Duyuru</div>
-            <p className="text-gray-200 text-[13px] sm:text-[14px] font-medium leading-relaxed">{activeAnnouncement.content}</p>
+          <div className="mb-5 flex items-center gap-3 p-3.5 sm:px-4 rounded-[20px] bg-[#121212]/80 backdrop-blur-xl border border-[#4DA3FF]/15 shadow-sm">
+            <span className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#4DA3FF]/10 text-[#4DA3FF] text-[10px] font-bold tracking-wider uppercase border border-[#4DA3FF]/20 shadow-inner">
+              <Bell size={12} className="animate-pulse" /> Duyuru
+            </span>
+            <p className="text-gray-300 text-[13px] sm:text-[14px] font-medium truncate leading-relaxed">
+              {activeAnnouncement.content}
+            </p>
           </div>
         )}
 
@@ -175,30 +179,31 @@ export default async function Home({ searchParams }: any) {
           <CountdownWidget countdown={activeCountdown} />
         </div>
         
-        <div className="mb-6 relative z-10">
+        <div className="mb-5 relative z-10">
           <SearchBar />
         </div>
 
-        <div className="flex gap-2.5 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-transparent backdrop-blur-md pt-3 -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* 🔥 PREMİUM FİLTRE SEKMELERİ (Link yapısı korundu, pavyon ışıkları silindi) */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/90 backdrop-blur-xl pt-3 -mx-4 px-4 sm:mx-0 sm:px-0">
           {filters.map((filter) => {
             const isActive = currentFilter === filter;
             
-            let activeClass = 'bg-white text-black font-extrabold shadow-[0_0_20px_rgba(255,255,255,0.3)] scale-105';
+            let activeClass = 'bg-white/10 text-white border-white/20 shadow-sm scale-[1.02]';
             if (isActive) {
-              if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF] text-black font-extrabold shadow-[0_0_25px_rgba(77,163,255,0.5)] scale-105';
-              else if (filter === 'İtiraf') activeClass = 'bg-purple-600 text-white font-extrabold shadow-[0_0_25px_rgba(168,85,247,0.5)] scale-105';
-              else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500 text-black font-extrabold shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-105';
-              else if (filter === '🔥 Trend') activeClass = 'bg-amber-500 text-black font-extrabold shadow-[0_0_25px_rgba(245,158,11,0.5)] scale-105';
+              if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF]/15 text-[#4DA3FF] border-[#4DA3FF]/30 shadow-[0_0_15px_rgba(77,163,255,0.15)] scale-[1.02]';
+              else if (filter === 'İtiraf') activeClass = 'bg-purple-500/15 text-purple-400 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] scale-[1.02]';
+              else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] scale-[1.02]';
+              else if (filter === '🔥 Trend') activeClass = 'bg-amber-500/15 text-amber-400 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)] scale-[1.02]';
             }
 
-            const inactiveClass = 'bg-white/[0.03] border border-white/[0.08] text-gray-400 hover:text-white hover:bg-white/[0.08] hover:border-white/[0.15]';
+            const inactiveClass = 'bg-transparent border-white/5 text-gray-500 hover:text-gray-300 hover:bg-white/5 hover:border-white/10';
 
             return (
               <Link 
                 key={filter} 
                 href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`} 
                 scroll={false}
-                className={`px-5 py-2.5 rounded-xl text-[13px] font-bold whitespace-nowrap snap-start transition-all duration-300 backdrop-blur-md flex items-center justify-center ${
+                className={`px-4 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap snap-start transition-all duration-300 backdrop-blur-md flex items-center justify-center border ${
                   isActive ? activeClass : inactiveClass
                 }`}
               >
@@ -208,9 +213,9 @@ export default async function Home({ searchParams }: any) {
           })}
         </div>
 
-        <div className="space-y-6 relative z-10">
+        <div className="space-y-5 relative z-10">
           {posts.length === 0 ? (
-            <div className="text-center py-20 bg-white/[0.02] backdrop-blur-2xl rounded-[24px] border border-white/[0.05] flex flex-col items-center justify-center shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]">
+            <div className="text-center py-20 bg-[#121212]/80 backdrop-blur-xl rounded-[24px] border border-white/5 flex flex-col items-center justify-center shadow-lg">
               <p className="text-gray-400 font-medium text-[14px]">
                 {currentFilter === '🔥 Trend' 
                   ? 'Son 24 saatte henüz popülerleşen bir fısıltı yok.' 
@@ -238,7 +243,7 @@ export default async function Home({ searchParams }: any) {
                   <Link 
                     href={`/?f=${currentFilter}${searchQuery ? `&q=${searchQuery}` : ''}&page=${page + 1}`}
                     scroll={false}
-                    className="px-8 py-3.5 bg-white/[0.03] backdrop-blur-md border border-white/[0.08] hover:border-white/[0.2] rounded-full text-[13px] font-bold text-gray-300 transition-all hover:bg-white/[0.08] hover:text-white shadow-[0_8px_32px_0_rgba(0,0,0,0.3)]"
+                    className="px-8 py-3 bg-[#121212]/80 backdrop-blur-xl border border-white/10 hover:border-white/20 rounded-full text-[13px] font-bold text-gray-300 transition-all hover:bg-white/10 hover:text-white shadow-lg"
                   >
                     Daha Fazla Göster
                   </Link>
@@ -249,7 +254,6 @@ export default async function Home({ searchParams }: any) {
         </div>
       </div>
 
-      {/* Paylaş Widget'ı (Tek ve güvenli) */}
       <ClientShareWidgetV2>
         <ModernForm />
       </ClientShareWidgetV2>

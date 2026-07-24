@@ -16,23 +16,19 @@ export default function ShareBottomSheet({ children }: { children: React.ReactNo
 
   return (
     <>
-      {/* 🔥 Tarayıcı barının üstünde ve güvenli bölgede süzülen Likit Cam Paylaş Butonu */}
-      <div className="fixed bottom-24 sm:bottom-6 right-6 z-40">
+      {/* 🔥 Jilet Gibi Minimalist ve Premium Paylaş Butonu */}
+      <div className="fixed bottom-24 sm:bottom-8 right-5 sm:right-8 z-40">
         <button
           onClick={() => setIsOpen(true)}
-          className="group relative overflow-hidden flex items-center gap-2.5 py-3.5 px-6 rounded-2xl bg-white/[0.07] backdrop-blur-[24px] border border-white/20 text-white font-bold text-sm shadow-[0_8px_32px_0_rgba(0,0,0,0.5),inset_0_1px_1px_0_rgba(255,255,255,0.25)] hover:bg-white/[0.12] hover:border-white/45 hover:shadow-[0_0_30px_rgba(77,163,255,0.3),inset_0_1px_2px_0_rgba(255,255,255,0.4)] hover:scale-105 active:scale-95 transition-all duration-300 cursor-pointer"
+          className="group flex items-center gap-2 px-5 py-3.5 rounded-full bg-[#151515]/80 backdrop-blur-xl border border-white/10 text-gray-200 shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:bg-white/10 hover:text-white hover:border-white/20 hover:shadow-[0_8px_30px_rgba(0,0,0,0.7)] transition-all duration-300 active:scale-95 cursor-pointer"
         >
-          {/* Cam Üstünden Geçen Yumuşak Işık Süzmesi */}
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full duration-1000 bg-gradient-to-r from-transparent via-white/20 to-transparent transition-transform pointer-events-none" />
-
-          <div className="w-6 h-6 rounded-xl bg-white/10 border border-white/20 flex items-center justify-center text-[#4DA3FF] group-hover:rotate-90 transition-transform duration-300 shadow-inner">
-            <Plus size={16} />
-          </div>
-          <span className="tracking-wide text-gray-100 group-hover:text-white drop-shadow">Paylaş</span>
+          {/* İkonun etrafındaki o gereksiz kutuyu sildik, sadece şık bir artı ve mavi bir vurgu bıraktık */}
+          <Plus size={18} className="text-[#4DA3FF] transition-transform duration-300 group-hover:rotate-90" />
+          <span className="font-bold text-sm tracking-wide">Paylaş</span>
         </button>
       </div>
 
-      {/* Arka Plan Karartma (Sadece tetiklendiğinde render olur) */}
+      {/* Arka Plan Karartma */}
       {isOpen && (
         <div 
           onClick={() => setIsOpen(false)}
@@ -40,18 +36,18 @@ export default function ShareBottomSheet({ children }: { children: React.ReactNo
         />
       )}
 
-      {/* Bottom Sheet Paneli (Kapalıyken pointer-events-none ile tamamen etkisizleştirildi) */}
-      <div className={`fixed inset-x-0 bottom-0 z-[100] transform transition-transform duration-300 ease-out max-h-[92vh] overflow-y-auto rounded-t-[32px] bg-[#121212]/95 backdrop-blur-3xl border-t border-white/15 p-5 sm:p-8 shadow-[0_-10px_50px_rgba(0,0,0,0.9)] scrollbar-hide ${
+      {/* Bottom Sheet Paneli (Renk tonu PostCard'lar ile aynı #151515 yapıldı) */}
+      <div className={`fixed inset-x-0 bottom-0 z-[100] transform transition-transform duration-300 ease-out max-h-[92vh] overflow-y-auto rounded-t-[32px] bg-[#151515]/95 backdrop-blur-3xl border-t border-white/10 p-5 sm:p-8 shadow-[0_-10px_50px_rgba(0,0,0,0.9)] scrollbar-hide ${
         isOpen ? 'translate-y-0' : 'translate-y-full pointer-events-none'
       }`}>
         
         {/* Mobil Tutamaç */}
-        <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-6" />
+        <div className="w-12 h-1.5 bg-white/15 rounded-full mx-auto mb-6" />
 
         {/* Üst Başlık ve Kapatma Butonu */}
         <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
           <div>
-            <h3 className="text-base sm:text-lg font-bold text-white tracking-tight">Yeni Paylaşım Yap ✨</h3>
+            <h3 className="text-base sm:text-lg font-bold text-gray-100 tracking-tight">Yeni Paylaşım Yap ✨</h3>
             <p className="text-[11px] text-gray-400">Değirmenaltı'nda gizli kalmasın.</p>
           </div>
           <button 
