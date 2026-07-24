@@ -267,11 +267,13 @@ export default function ModernForm() {
             </div>
         </div>
 
-        {/* 🔥 SES KAYDEDİCİ - Base64 alacak şekilde */}
-        <VoiceRecorder 
-          onAudioReady={(base64) => setAudioBase64(base64)} 
-          onRecordingStateChange={(recording) => setIsRecordingNow(recording)}
-        />
+       {/* 🔥 SES KAYDEDİCİ - Sadece Overheard seçili DEĞİLSE görünür */}
+        {type !== 'OVERHEARD' && (
+          <VoiceRecorder 
+            onAudioReady={(base64) => setAudioBase64(base64)} 
+            onRecordingStateChange={(recording) => setIsRecordingNow(recording)}
+          />
+        )}
 
         {type === 'CONFESSION' && (
           <div 
