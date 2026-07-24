@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Play, Pause, Volume2, Sparkles } from "lucide-react";
+import { Play, Pause, Baby } from "lucide-react";
 
 export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -39,14 +39,39 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // 🔥 Web Audio API ile ses değiştirme (İnce/Hacker Sesi için playbackRate'i artırıyoruz)
+    // 🔥 1. ADIM: Helyum etkisi için hızı artır ve ton korumasını kapat
+    audio.playbackRate = 1.4;
+    if ('preservesPitch' in audio) {
+      audio.preservesPitch = false;
+    } else if ('webkitPreservesPitch' in audio as any) {
+      (audio as any).webkitPreservesPitch = false;
+    }
+
+    // 🔥 2. ADIM: Çocuk sesi filtresi (Kalın sesleri kes, inceyi parlat)
     if (!audioCtxRef.current) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
         audioCtxRef.current = new AudioContextClass();
+        const ctx = audioCtxRef.current;
         try {
-          sourceNodeRef.current = audioCtxRef.current.createMediaElementSource(audio);
-          sourceNodeRef.current.connect(audioCtxRef.current.destination);
+          sourceNodeRef.current = ctx.createMediaElementSource(audio);
+          
+          // Yetişkin bas frekanslarını silen yüksek geçiren filtre
+          const highpass = ctx.createBiquadFilter();
+          highpass.type = "highpass";
+          highpass.frequency.value = 400; 
+
+          // Şirin çocuksu frekansları parlatan filtre
+          const peaking = ctx.createBiquadFilter();
+          peaking.type = "peaking";
+          peaking.frequency.value = 3000;
+          peaking.Q.value = 1.5;
+          peaking.gain.value = 12; 
+
+          // Kaynak -> Bas Kesici -> Şirinlik Parlatıcı -> Hoparlör
+          sourceNodeRef.current.connect(highpass);
+          highpass.connect(peaking);
+          peaking.connect(ctx.destination);
         } catch (e) {
           // Zaten bağlıysa hata vermesin
         }
@@ -56,10 +81,6 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
       await audioCtxRef.current.resume();
     }
-
-    // 🔥 Sesi inceleştirmek (hacker efekti) için hızı hafif artırıyoruz (örn: 1.25x - 1.3x)
-    audio.playbackRate = 1.25; 
-    audio.preservesPitch = false; // Sesi chipmunk gibi inceltirken tonu korumasın, iyice hacker yapsın
 
     if (isPlaying) {
       audio.pause();
@@ -78,6 +99,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     <div className="bg-gradient-to-r from-purple-500/10 via-black/40 to-[#4DA3FF]/10 border border-purple-500/30 p-3.5 rounded-2xl flex items-center gap-3.5 shadow-inner backdrop-blur-xl relative overflow-hidden group">
       <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       
+      {/* crossOrigin eklendi ki filtreleri uygularken CORS hatası yemesin */}
       <audio ref={audioRef} src={audioUrl} preload="metadata" crossOrigin="anonymous" />
       
       <button
@@ -91,7 +113,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
       <div className="flex-1 space-y-1.5 relative z-10">
         <div className="flex items-center justify-between text-[11px] font-bold text-gray-300">
           <span className="flex items-center gap-1.5 text-purple-400">
-            <Sparkles size={13} className="animate-spin" /> Anonim İnce Ses (Hacker Modu)
+            <Baby size={14} className="animate-pulse" /> Anonim Şirin Ses
           </span>
           <span className="font-mono text-[10px] text-gray-400">15s</span>
         </div>
