@@ -15,7 +15,16 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      
+      // 🔥 İPHONE / SAFARI UYUMLU FORMAT SEÇİMİ (mp4/aac öncelikli, yoksa webm)
+      let mimeType = 'audio/webm';
+      if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+        mimeType = 'audio/aac';
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -24,9 +33,8 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         
-        // 🔥 Blob'u Base64 string'e çeviriyoruz (Vercel & sunucu dostu)
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = () => {
