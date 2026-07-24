@@ -24,6 +24,8 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     const handleEnded = () => {
       setIsPlaying(false);
       setProgress(0);
+      // 🔥 DÜZELTME BURADA: Ses bitince imleci zorla başa (0. saniyeye) sarıyoruz
+      audio.currentTime = 0; 
     };
 
     audio.addEventListener("timeupdate", updateProgress);
@@ -39,7 +41,12 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // 🔥 1. ADIM: Helyum etkisi için hızı artır ve ton korumasını kapat
+    // 🔥 EKSTRA GÜVENLİK: Eğer süre sondaysa play'e basınca kesinlikle başa sarsın
+    if (audio.currentTime >= audio.duration) {
+      audio.currentTime = 0;
+    }
+
+    // Helyum etkisi için hızı artır ve ton korumasını kapat
     audio.playbackRate = 1.4;
     if ('preservesPitch' in audio) {
       audio.preservesPitch = false;
@@ -47,7 +54,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
       (audio as any).webkitPreservesPitch = false;
     }
 
-    // 🔥 2. ADIM: Çocuk sesi filtresi (Kalın sesleri kes, inceyi parlat)
+    // Çocuk sesi filtresi (Kalın sesleri kes, inceyi parlat)
     if (!audioCtxRef.current) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
@@ -56,19 +63,16 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
         try {
           sourceNodeRef.current = ctx.createMediaElementSource(audio);
           
-          // Yetişkin bas frekanslarını silen yüksek geçiren filtre
           const highpass = ctx.createBiquadFilter();
           highpass.type = "highpass";
           highpass.frequency.value = 400; 
 
-          // Şirin çocuksu frekansları parlatan filtre
           const peaking = ctx.createBiquadFilter();
           peaking.type = "peaking";
           peaking.frequency.value = 3000;
           peaking.Q.value = 1.5;
           peaking.gain.value = 12; 
 
-          // Kaynak -> Bas Kesici -> Şirinlik Parlatıcı -> Hoparlör
           sourceNodeRef.current.connect(highpass);
           highpass.connect(peaking);
           peaking.connect(ctx.destination);
@@ -99,7 +103,6 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     <div className="bg-gradient-to-r from-purple-500/10 via-black/40 to-[#4DA3FF]/10 border border-purple-500/30 p-3.5 rounded-2xl flex items-center gap-3.5 shadow-inner backdrop-blur-xl relative overflow-hidden group">
       <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
       
-      {/* crossOrigin eklendi ki filtreleri uygularken CORS hatası yemesin */}
       <audio ref={audioRef} src={audioUrl} preload="metadata" crossOrigin="anonymous" />
       
       <button
