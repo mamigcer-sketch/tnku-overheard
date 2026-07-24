@@ -182,35 +182,35 @@ export default async function Home({ searchParams }: any) {
           <SearchBar />
         </div>
 
-        {/* 🔥 FİLTRE SEKMELERİ (Taşma sorunları ve kenar yapışmaları düzeltildi) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-5 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/90 backdrop-blur-xl pt-2 px-1">
-          {filters.map((filter) => {
-            const isActive = currentFilter === filter;
-            
-            let activeClass = 'bg-white/10 text-white border-white/20 shadow-sm scale-[1.02]';
-            if (isActive) {
-              if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF]/15 text-[#4DA3FF] border-[#4DA3FF]/30 shadow-[0_0_15px_rgba(77,163,255,0.15)] scale-[1.02]';
-              else if (filter === 'İtiraf') activeClass = 'bg-purple-500/15 text-purple-400 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] scale-[1.02]';
-              else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] scale-[1.02]';
-              else if (filter === '🔥 Trend') activeClass = 'bg-amber-500/15 text-amber-400 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)] scale-[1.02]';
-            }
+        {/* 🔥 DÜZELTİLDİ: Katı siyah arkaplan kaldırıldı, arkasındaki ışıkları gösteren şeffaf cam efektine çevrildi */}
+<div className="flex items-center gap-2 overflow-x-auto pb-4 mb-5 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-transparent backdrop-blur-md pt-2 px-1">
+  {filters.map((filter) => {
+    const isActive = currentFilter === filter;
+    
+    let activeClass = 'bg-white/10 text-white border-white/20 shadow-sm scale-[1.02]';
+    if (isActive) {
+      if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF]/15 text-[#4DA3FF] border-[#4DA3FF]/30 shadow-[0_0_15px_rgba(77,163,255,0.15)] scale-[1.02]';
+      else if (filter === 'İtiraf') activeClass = 'bg-purple-500/15 text-purple-400 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] scale-[1.02]';
+      else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] scale-[1.02]';
+      else if (filter === '🔥 Trend') activeClass = 'bg-amber-500/15 text-amber-400 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)] scale-[1.02]';
+    }
 
-            const inactiveClass = 'bg-transparent border-white/5 text-gray-500 hover:text-gray-300 hover:bg-white/5 hover:border-white/10';
+    const inactiveClass = 'bg-white/[0.02] border-white/5 text-gray-400 hover:text-gray-200 hover:bg-white/[0.05] hover:border-white/10';
 
-            return (
-              <Link 
-                key={filter} 
-                href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`} 
-                scroll={false}
-                className={`px-4 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap snap-start transition-all duration-300 backdrop-blur-md flex items-center justify-center border ${
-                  isActive ? activeClass : inactiveClass
-                }`}
-              >
-                {filter}
-              </Link>
-            )
-          })}
-        </div>
+    return (
+      <Link 
+        key={filter} 
+        href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`} 
+        scroll={false}
+        className={`px-4 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap snap-start transition-all duration-300 backdrop-blur-xl flex items-center justify-center border ${
+          isActive ? activeClass : inactiveClass
+        }`}
+      >
+        {filter}
+      </Link>
+    )
+  })}
+</div>
 
         <div className="space-y-5 relative z-10">
           {posts.length === 0 ? (
