@@ -1,22 +1,26 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { Mic, Square, Trash2, UploadCloud, Activity } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Mic, Square, Trash2, UploadCloud, Activity, Play, Pause, Sparkles } from "lucide-react";
 
 export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: { onAudioReady: (base64Audio: string | null) => void, onRecordingStateChange?: (recording: boolean) => void }) {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [hasAudio, setHasAudio] = useState(false);
+  const [audioPreviewUrl, setAudioPreviewUrl] = useState<string | null>(null);
+  
+  // Önizleme için oynatma state'leri
+  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       
-      // 🔥 İPHONE / SAFARI UYUMLU FORMAT SEÇİMİ (mp4/aac öncelikli, yoksa webm)
       let mimeType = 'audio/webm';
       if (MediaRecorder.isTypeSupported('audio/mp4')) {
         mimeType = 'audio/mp4';
@@ -34,7 +38,9 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
 
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-        
+        const previewUrl = URL.createObjectURL(audioBlob);
+        setAudioPreviewUrl(previewUrl);
+
         const reader = new FileReader();
         reader.readAsDataURL(audioBlob);
         reader.onloadend = () => {
@@ -78,11 +84,43 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
   const resetRecording = () => {
     setHasAudio(false);
     setRecordingTime(0);
+    setAudioPreviewUrl(null);
+    setIsPlayingPreview(false);
     onAudioReady(null);
   };
 
+  // Önizlemeyi oynat / durdur (Aynı ince hacker ses efektiyle)
+  const togglePreviewPlay = () => {
+    const audio = previewAudioRef.current;
+    if (!audio) return;
+
+    // Hacker sesi (ince ton) için hızı artırıyoruz
+    audio.playbackRate = 1.25; 
+
+    if (isPlayingPreview) {
+      audio.pause();
+      setIsPlayingPreview(false);
+    } else {
+      audio.play().then(() => {
+        setIsPlayingPreview(true);
+      }).catch((err) => {
+        console.error("Önizleme oynatılamadı:", err);
+      });
+    }
+  };
+
+  useEffect(() => {
+    const audio = previewAudioRef.current;
+    if (!audio) return;
+    const handleEnded = () => setIsPlayingPreview(false);
+    audio.addEventListener("ended", handleEnded);
+    return () => audio.removeEventListener("ended", handleEnded);
+  }, [audioPreviewUrl]);
+
   return (
     <div className="bg-black/40 border border-purple-500/20 p-4 rounded-2xl relative overflow-hidden">
+      {audioPreviewUrl && <audio ref={previewAudioRef} src={audioPreviewUrl} preload="metadata" />}
+
       {!hasAudio ? (
         <div className="flex items-center justify-between gap-4">
           <div className="flex-1 flex items-center gap-3">
@@ -109,12 +147,29 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
           </button>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2 text-green-400">
-            <UploadCloud size={18} />
-            <span className="text-xs font-bold">Sesli Fısıltı Hazır! (Gönderilmeye Hazır)</span>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3 flex-1">
+            {/* Önizleme Dinleme Butonu */}
+            <button
+              type="button"
+              onClick={togglePreviewPlay}
+              className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center hover:bg-purple-500/30 transition-all cursor-pointer shrink-0"
+              title="Kaydı Önizle"
+            >
+              {isPlayingPreview ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
+            </button>
+            
+            <div className="flex flex-col">
+              <span className="text-xs font-bold text-green-400 flex items-center gap-1">
+                <UploadCloud size={14} /> Fısıltı Hazır!
+              </span>
+              <span className="text-[10px] text-purple-400 flex items-center gap-1">
+                <Sparkles size={11} /> Göndermeden önce dinleyebilirsin
+              </span>
+            </div>
           </div>
-          <button type="button" onClick={resetRecording} className="p-2 text-gray-500 hover:text-red-400 transition-colors cursor-pointer">
+
+          <button type="button" onClick={resetRecording} className="p-2 text-gray-500 hover:text-red-400 transition-colors cursor-pointer shrink-0" title="Sil / Yeniden Kaydet">
             <Trash2 size={16} />
           </button>
         </div>
