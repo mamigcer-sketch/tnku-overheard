@@ -9,8 +9,7 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
   
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const audioCtxRef = useRef<AudioContext | null>(null);
-  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
-  const filtersRef = useRef<{ highpass: BiquadFilterNode; peaking: BiquadFilterNode } | null>(null);
+  const isInitializedRef = useRef(false); // 🔥 Filtrelerin bir kere kurulmasını sağlayacak bayrak
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -23,7 +22,11 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     };
 
     const handleEnded = () => {
-      cleanUpAndReset();
+      setIsPlaying(false);
+      setProgress(0);
+      if (audioRef.current) {
+        audioRef.current.currentTime = 0; // Ses bitince sadece imleci başa sarıyoruz
+      }
     };
 
     audio.addEventListener("timeupdate", updateProgress);
@@ -38,38 +41,18 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
     };
   }, []);
 
-  const cleanUpAndReset = () => {
-    setIsPlaying(false);
-    setProgress(0);
-    
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
-
-    if (sourceNodeRef.current) {
-      try {
-        sourceNodeRef.current.disconnect();
-      } catch (e) {}
-    }
-    if (filtersRef.current) {
-      try {
-        filtersRef.current.highpass.disconnect();
-        filtersRef.current.peaking.disconnect();
-      } catch (e) {}
-      filtersRef.current = null;
-    }
-  };
-
   const togglePlay = async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
+    // 🔥 Çalıyorsa sadece durdur, kabloları sökme!
     if (isPlaying) {
-      cleanUpAndReset();
+      audio.pause();
+      setIsPlaying(false);
       return;
     }
 
+    // Helyum etkisi ayarları
     audio.playbackRate = 1.4;
     if ('preservesPitch' in audio) {
       audio.preservesPitch = false;
@@ -77,49 +60,53 @@ export default function AnonymousPlayer({ audioUrl }: { audioUrl: string }) {
       (audio as any).webkitPreservesPitch = false;
     }
 
-    if (!audioCtxRef.current) {
+    // 🔥 FİLTRELERİ SADECE İLK TIKLAMADA 1 KEZ KURUYORUZ (Karışma/Glitch sorununun çözümü)
+    if (!isInitializedRef.current) {
       const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
       if (AudioContextClass) {
-        audioCtxRef.current = new AudioContextClass();
+        try {
+          const ctx = new AudioContextClass();
+          audioCtxRef.current = ctx;
+          
+          const source = ctx.createMediaElementSource(audio);
+
+          const highpass = ctx.createBiquadFilter();
+          highpass.type = "highpass";
+          highpass.frequency.value = 450; 
+
+          const peaking = ctx.createBiquadFilter();
+          peaking.type = "peaking";
+          peaking.frequency.value = 3000;
+          peaking.Q.value = 1.4;
+          peaking.gain.value = 12;
+
+          // Kabloları kalıcı olarak bağlıyoruz
+          source.connect(highpass);
+          highpass.connect(peaking);
+          peaking.connect(ctx.destination);
+
+          isInitializedRef.current = true; // Bir daha buralara girmeyecek!
+        } catch (err) {
+          console.error("Filtre kurulum hatası:", err);
+        }
       }
     }
 
-    const ctx = audioCtxRef.current;
-    if (!ctx) return;
+    // Tarayıcı sekme uykuya geçerse context'i uyandır
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+      await audioCtxRef.current.resume();
+    }
 
-    if (ctx.state === "suspended") {
-      await ctx.resume();
+    // Güvenlik: Eğer süre bir şekilde sondaysa play'e basınca baştan başlasın
+    if (audio.currentTime >= audio.duration) {
+      audio.currentTime = 0;
     }
 
     try {
-      if (!sourceNodeRef.current) {
-        sourceNodeRef.current = ctx.createMediaElementSource(audio);
-      }
-
-      const highpass = ctx.createBiquadFilter();
-      highpass.type = "highpass";
-      highpass.frequency.value = 450; 
-
-      const peaking = ctx.createBiquadFilter();
-      peaking.type = "peaking";
-      peaking.frequency.value = 3000;
-      peaking.Q.value = 1.4;
-      peaking.gain.value = 12;
-
-      filtersRef.current = { highpass, peaking };
-
-      sourceNodeRef.current.connect(highpass);
-      highpass.connect(peaking);
-      peaking.connect(ctx.destination);
-
       await audio.play();
       setIsPlaying(true);
     } catch (err) {
-      console.error("Oynatma veya Web Audio hatası:", err);
-      try {
-        await audio.play();
-        setIsPlaying(true);
-      } catch (e) {}
+      console.error("Oynatma hatası:", err);
     }
   };
 
