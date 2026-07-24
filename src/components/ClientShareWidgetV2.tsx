@@ -42,27 +42,19 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
 
   return (
     <>
-      {/* 🔥 Liquid Glass & Neon Paylaş Butonu */}
+      {/* 🔥 ASİL VE TOK GLASSMORPHISM PAYLAŞ BUTONU (Pavyon ışıkları temizlendi) */}
       <div className="fixed bottom-6 right-4 z-40">
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-2.5 py-3.5 px-6 rounded-2xl text-white font-bold text-sm active:scale-95 transition-all overflow-hidden shadow-[0_0_20px_rgba(122,0,255,0.2)] hover:shadow-[0_0_30px_rgba(0,229,255,0.4)]"
+          className="group relative flex items-center gap-2.5 py-3.5 px-6 rounded-2xl text-white font-bold text-sm active:scale-95 transition-all duration-300 bg-[#181818]/90 backdrop-blur-2xl border border-white/10 shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:border-white/20 hover:bg-[#202020] cursor-pointer"
         >
-          {/* Arkada Dönen Neon Paleti */}
-          <div className="absolute inset-[-200%] animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_0deg,#ff00a0,#7a00ff,#00e5ff,#7a00ff,#ff00a0)]" />
-          
-          {/* ✨ LİQUİD GLASS KATMANI (İçi hafif saydam, buğulu cam) 
-              Arkada dönen renkler bu buğulu camdan sıvı gibi süzülecek! */}
-          <div className="absolute inset-[1.5px] rounded-[15px] bg-[#0a0a0f]/50 backdrop-blur-xl group-hover:bg-[#0a0a0f]/30 transition-colors shadow-[inset_0_1px_3px_rgba(255,255,255,0.2),inset_0_-1px_3px_rgba(0,0,0,0.5)]" />
-
           {/* Butonun Asıl İçeriği */}
           <div className="relative z-10 flex items-center gap-2.5">
-            {/* Artı ikonunu da Liquid Glass konseptine uydurduk */}
-            <div className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white shadow-[0_0_15px_rgba(255,0,160,0.3)] group-hover:scale-110 transition-transform duration-300">
+            <div className="w-7 h-7 rounded-full bg-white/10 backdrop-blur-md border border-white/25 flex items-center justify-center text-white group-hover:scale-110 transition-transform duration-300 shadow-inner">
               <Plus size={18} strokeWidth={2.5} />
             </div>
-            <span className="tracking-wide text-white/90 group-hover:text-white transition-colors drop-shadow-[0_2px_10px_rgba(255,255,255,0.4)]">Paylaş</span>
+            <span className="tracking-wide text-white/90 group-hover:text-white transition-colors">Paylaş</span>
           </div>
         </button>
       </div>
@@ -71,7 +63,7 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
       {isOpen && (
         <div 
           onClick={() => setIsOpen(false)}
-          className="fixed inset-0 z-[90] bg-black/80 backdrop-blur-md animate-in fade-in duration-300"
+          className="fixed inset-0 z-[90] bg-black/70 backdrop-blur-md animate-in fade-in duration-300"
         />
       )}
 
@@ -86,7 +78,7 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
             : 'translateY(100%)',
           transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
-        className={`fixed inset-x-0 bottom-0 z-[100] max-h-[90vh] overflow-y-auto rounded-t-[32px] bg-[#121212]/95 backdrop-blur-3xl border-t border-white/15 p-5 sm:p-8 pb-12 sm:pb-8 shadow-[0_-10px_50px_rgba(0,0,0,0.9)] scrollbar-hide ${
+        className={`fixed inset-x-0 bottom-0 z-[100] max-h-[90vh] overflow-y-auto rounded-t-[32px] bg-[#151515]/95 backdrop-blur-3xl border-t border-white/15 p-5 sm:p-8 pb-12 sm:pb-8 shadow-[0_-10px_50px_rgba(0,0,0,0.9)] scrollbar-hide ${
           isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
         }`}
       >
