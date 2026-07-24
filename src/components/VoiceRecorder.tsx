@@ -14,6 +14,10 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // 🔥 Gerçek zamanlı ses filtresi için referanslar
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const sourceNodeRef = useRef<MediaElementAudioSourceNode | null>(null);
 
   const startRecording = async () => {
     try {
@@ -35,6 +39,7 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
       };
 
       mediaRecorder.onstop = () => {
+        // 🔥 Waw veya dönüştürme YOK. Sesi standart haliyle alıyoruz.
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         const previewUrl = URL.createObjectURL(audioBlob);
         setAudioPreviewUrl(previewUrl);
@@ -87,13 +92,54 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
     onAudioReady(null);
   };
 
-  // 🔥 Önizlemede tıkır tıkır çalan ve hızı artıran oynatıcı
-  const togglePreviewPlay = () => {
+  // 🔥 Sesi hızlandırmadan anında hacker robot sesine çeviren sihirli oynatıcı
+  const togglePreviewPlay = async () => {
     const audio = previewAudioRef.current;
     if (!audio) return;
 
-    // Hacker modu için hızı 1.4 yapıyoruz (ses ince ve net duyulur)
-    audio.playbackRate = 1.4;
+    if (!audioCtxRef.current) {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioContextClass) {
+        audioCtxRef.current = new AudioContextClass();
+        const ctx = audioCtxRef.current;
+
+        try {
+          sourceNodeRef.current = ctx.createMediaElementSource(audio);
+
+          // 1. ADIM: TELSİZ / TELEFON FİLTRESİ (Sesin karakterini gizler)
+          const bandpass = ctx.createBiquadFilter();
+          bandpass.type = "bandpass";
+          bandpass.frequency.value = 1000;
+          bandpass.Q.value = 1.0;
+
+          // 2. ADIM: DİJİTAL ROBOT TİTREŞİMİ (Anonymous efekti veren ana kısım)
+          const modulatorGain = ctx.createGain();
+          const oscillator = ctx.createOscillator();
+          oscillator.type = "sawtooth"; // Testere dişi dalga (mekanik hırıltı verir)
+          oscillator.frequency.value = 45; // 45 Hz mükemmel bir robot kalınlığıdır
+          oscillator.start();
+          oscillator.connect(modulatorGain.gain);
+
+          // Sesi bağlıyoruz: Kaynak -> Telsiz Filtresi -> Robot Titreşimi -> Hoparlör
+          sourceNodeRef.current.connect(bandpass);
+          bandpass.connect(modulatorGain);
+          modulatorGain.connect(ctx.destination);
+
+          // Kelimelerin anlaşılabilmesi için hafifçe filtreli ana sesi de arkaya veriyoruz
+          const dryGain = ctx.createGain();
+          dryGain.gain.value = 0.5;
+          bandpass.connect(dryGain);
+          dryGain.connect(ctx.destination);
+
+        } catch (e) {
+          console.error("Efekt uygulanamadı:", e);
+        }
+      }
+    }
+
+    if (audioCtxRef.current && audioCtxRef.current.state === "suspended") {
+      await audioCtxRef.current.resume();
+    }
 
     if (isPlayingPreview) {
       audio.pause();
@@ -117,16 +163,8 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
 
   return (
     <div className="bg-black/40 border border-purple-500/20 p-4 rounded-2xl relative overflow-hidden">
-      {audioPreviewUrl && (
-        <audio 
-          ref={previewAudioRef} 
-          src={audioPreviewUrl} 
-          preload="auto" 
-          onLoadedMetadata={(e) => {
-            (e.target as HTMLAudioElement).playbackRate = 1.4;
-          }}
-        />
-      )}
+      {/* crossOrigin eklendi ki tarayıcı efekti uygularken CORS hatası vermesin */}
+      {audioPreviewUrl && <audio ref={previewAudioRef} src={audioPreviewUrl} preload="metadata" crossOrigin="anonymous" />}
 
       {!hasAudio ? (
         <div className="flex items-center justify-between gap-4">
@@ -160,17 +198,17 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
               type="button"
               onClick={togglePreviewPlay}
               className="w-9 h-9 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 flex items-center justify-center hover:bg-purple-500/30 transition-all cursor-pointer shrink-0"
-              title="Önizle"
+              title="Hacker Sesiyle Önizle"
             >
               {isPlayingPreview ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
             </button>
             
             <div className="flex flex-col">
               <span className="text-xs font-bold text-green-400 flex items-center gap-1">
-                <UploadCloud size={14} /> Fısıltı Hazır!
+                <UploadCloud size={14} /> Fısıltı Kodlandı!
               </span>
               <span className="text-[10px] text-purple-400 flex items-center gap-1">
-                <Sparkles size={11} /> Göndermeden önce dinleyebilirsin
+                <Sparkles size={11} /> Maskeli anonim efektiyle dinleyebilirsin
               </span>
             </div>
           </div>
