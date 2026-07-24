@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
+import AnonymousPlayer from "./AnonymousPlayer"; // 🔥 Hacker Ses Oynatıcısı Eklendi
 import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, BadgeCheck } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { incrementView, submitReport } from "@/app/post/actions";
@@ -64,7 +65,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const [isVisible, setIsVisible] = useState(false);
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const isLongText = post.content.length > 250; 
+  const isLongText = post.content && post.content.length > 250; 
 
   const [localLiked, setLocalLiked] = useState(isLiked);
   const [localLikesCount, setLocalLikesCount] = useState(post.likes);
@@ -193,7 +194,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const authorData = getAnonymousData(post.authorUuid || post.id, customNickname);
 
-  // Yorum önizlemesi için yazar verisi
   const firstComment = post.comments && post.comments.length > 0 ? post.comments[0] : null;
   const commentAuthorUuid = firstComment ? (firstComment.authorId || firstComment.id) : null;
   const commentCustomNick = commentAuthorUuid ? customNicknamesMap[commentAuthorUuid] : undefined;
@@ -241,7 +241,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                   : 'bg-[#4DA3FF]/10 text-[#4DA3FF]'
                 }`}>
                   {isTrending && <Flame size={12} className="animate-pulse" />}
-                  {/* 🔥 DÜZELTME BURADA YAPILDI: Boş yap rozeti artık doğru basılıyor */}
                   {isConfession ? 'İTİRAF' : isBosYap ? 'BOŞ YAP' : 'OVERHEARD'}
                 </span>
               )}
@@ -278,9 +277,11 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </div>
 
           <div className="mb-4 sm:mb-5 relative z-10 transition-all duration-300">
-            <p className={`text-gray-100 text-[15px] sm:text-[16px] leading-relaxed font-medium break-words tracking-wide ${!isExpanded && isLongText ? 'line-clamp-4' : ''}`}>
-              {post.content}
-            </p>
+            {post.content && (
+              <p className={`text-gray-100 text-[15px] sm:text-[16px] leading-relaxed font-medium break-words tracking-wide ${!isExpanded && isLongText ? 'line-clamp-4' : ''}`}>
+                {post.content}
+              </p>
+            )}
             {!isExpanded && isLongText && (
               <button
                 onClick={(e) => { 
@@ -294,6 +295,13 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
               >
                 Devamını Oku...
               </button>
+            )}
+
+            {/* 🔥 SESLİ FISILTI OYNATICISI BURAYA YERLEŞTİRİLDİ */}
+            {post.audioUrl && (
+              <div onClick={(e) => e.stopPropagation()} className="mt-3">
+                <AnonymousPlayer audioUrl={post.audioUrl} />
+              </div>
             )}
           </div>
         </div>

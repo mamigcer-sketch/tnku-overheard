@@ -3,6 +3,8 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from "next/cache";
 import { cookies } from 'next/headers';
+import { writeFile } from 'fs/promises';
+import path from 'path';
 
 // 🔥 Ortak Çerez Yöneticisi
 async function getOrCreateAuthorId() {
@@ -25,7 +27,7 @@ async function getOrCreateAuthorId() {
   return authorId;
 }
 
-// 1. Post Oluşturma (🔥 24 Saat Sonra Yok Olma Desteği)
+// 1. Post Oluşturma (🔥 Sesli Fısıltı ve 24 Saat Yok Olma Desteği)
 export async function createPost(formData: FormData) {
   const authorUuid = await getOrCreateAuthorId();
 
@@ -43,6 +45,34 @@ export async function createPost(formData: FormData) {
   const people = formData.get("people") as string;
   const gender = formData.get("gender") as string;
   const isEphemeral = formData.get("isEphemeral") === "true";
+  
+  // 🔥 Gelen ses dosyasını yakala
+  const audioFile = formData.get("audio") as File | null;
+  let audioUrl: string | null = null;
+
+  if (audioFile && audioFile.size > 0) {
+    try {
+      const bytes = await audioFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+
+      // Benzersiz bir dosya adı oluştur (Düzeltildi)
+      const filename = `whisper_${Date.now()}_${Math.random().toString(36).substring(2, 7)}.webm`;
+      const uploadDir = path.join(process.cwd(), 'public/uploads');
+      
+      // Klasör yoksa oluştur
+      const fs = require('fs');
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+
+      const filePath = path.join(uploadDir, filename);
+      await writeFile(filePath, buffer);
+      
+      audioUrl = `/uploads/${filename}`;
+    } catch (err) {
+      console.error("Ses dosyası sunucuya kaydedilemedi:", err);
+    }
+  }
 
   // Eğer 24 saat sonra kaybolması seçildiyse, bitiş zamanını şimdiden 24 saat sonrasına ayarla
   const expiresAt = isEphemeral ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null;
@@ -50,12 +80,13 @@ export async function createPost(formData: FormData) {
   const post = await prisma.post.create({
     data: {
       type,
-      content,
+      content: content || "", 
       location,
       people,
       gender,
       authorUuid, 
       status: 'PENDING', 
+      audioUrl, // 🔥 Ses linki veritabanına kaydediliyor
       expiresAt,
     },
   });
@@ -222,16 +253,13 @@ export async function toggleCommentReaction(commentId: string, emoji: string, po
   const prisma = new PrismaClient();
 
   try {
-    // Daha önce bu emojiyi atmış mı kontrol et
     const existing = await prisma.commentReaction.findFirst({
       where: { commentId, userUuid, emoji }
     });
 
     if (existing) {
-      // Varsa sil (geri al)
       await prisma.commentReaction.delete({ where: { id: existing.id } });
     } else {
-      // Yoksa oluştur
       await prisma.commentReaction.create({ 
         data: { commentId, userUuid, emoji } 
       });

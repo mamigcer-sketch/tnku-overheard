@@ -10,7 +10,7 @@ datasource db {
 model Post {
   id         String    @id @default(cuid())
   type       String
-  content    String
+  content    String?   // 🔥 DEĞİŞTİRİLDİ: Sadece ses atılabilmesi için opsiyonel (?) yapıldı
   status     String    @default("PENDING")
   likes      Int       @default(0)
   views      Int       @default(0)
@@ -20,6 +20,8 @@ model Post {
   time       String?
   authorUuid String?   
   
+  audioUrl   String?   // 🔥 YENİ EKLENDİ: Ses dosyasının linkini tutacak
+
   // 🔥 24 saat sonra kaybolacak süreli postlar için bitiş zamanı
   expiresAt  DateTime? 
 
@@ -43,9 +45,9 @@ model Comment {
   replies      Comment[]     @relation("CommentReplies")
 
   post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
-  reactions CommentReaction[]
+  reactions    CommentReaction[]
   commentLikes CommentLike[]  
-  reports      Report[]      
+  reports      Report[]     
 }
 
 model CommentLike {

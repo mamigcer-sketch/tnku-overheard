@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Headphones, VenetianMask, Coffee, Send, CheckCircle2, Loader2, Info, Clock } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
+import VoiceRecorder from "@/components/VoiceRecorder"; // 🔥 Ses kaydedici eklendi
 
 export default function ModernForm() {
   const [type, setType] = useState<'CONFESSION' | 'BOSYAP' | 'OVERHEARD'>('CONFESSION'); 
@@ -13,9 +14,10 @@ export default function ModernForm() {
   const [gender, setGender] = useState(''); 
   const [time, setTime] = useState('');
   const [isEphemeral, setIsEphemeral] = useState(false);
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null); // 🔥 Ses blob state'i
+  
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
-  
   const [isFocused, setIsFocused] = useState(false);
   
   const router = useRouter();
@@ -69,6 +71,11 @@ export default function ModernForm() {
       formData.append('gender', type === 'OVERHEARD' ? gender : '');
       formData.append('time', type === 'OVERHEARD' ? time : '');
       formData.append('isEphemeral', (type === 'CONFESSION' && isEphemeral) ? 'true' : 'false');
+      
+      // 🔥 Eğer ses kaydedildiyse FormData'ya ekle
+      if (audioBlob) {
+        formData.append('audio', audioBlob, 'whisper.webm');
+      }
 
       const res = await createPost(formData);
 
@@ -83,6 +90,7 @@ export default function ModernForm() {
       setGender(''); 
       setTime('');
       setIsEphemeral(false);
+      setAudioBlob(null); // 🔥 Ses sıfırlanır
       
       setSuccessMsg(true);
       setTimeout(() => setSuccessMsg(false), 4000);
@@ -165,7 +173,6 @@ export default function ModernForm() {
         {type === 'OVERHEARD' && (
           <div className="bg-black/30 backdrop-blur-2xl rounded-2xl p-4 sm:p-5 border border-white/[0.04] shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)] grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 relative overflow-hidden">
             
-            {/* 🔥 Bütün input/select'ler "text-base" (16px) yapıldı, Safari zoom iptal! */}
             <div className="relative col-span-2 md:col-span-1 group">
                 <input 
                   type="text" 
@@ -228,9 +235,7 @@ export default function ModernForm() {
         )}
 
         <div className="relative group/textarea">
-            {/* 🔥 Textarea da "text-base" (16px) yapıldı */}
             <textarea 
-              required 
               maxLength={maxChars}
               rows={3} 
               onFocus={() => setIsFocused(true)}
@@ -254,6 +259,9 @@ export default function ModernForm() {
                 {content.length} / {maxChars}
             </div>
         </div>
+
+        {/* 🔥 SES KAYDEDİCİ BİLEŞENİ BURAYA EKLENDİ */}
+        <VoiceRecorder onAudioReady={(blob) => setAudioBlob(blob)} />
 
         {type === 'CONFESSION' && (
           <div 
