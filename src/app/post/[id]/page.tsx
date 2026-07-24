@@ -123,13 +123,11 @@ export default async function PostPage({ params }: any) {
         : 'shadow-[0_8px_32px_0_rgba(77,163,255,0.15)] border-[#4DA3FF]/20';
 
   return (
-    <main className="min-h-screen bg-[#121212] text-white relative z-0 overflow-hidden pb-24">
+    <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-24">
       
-      {/* 🔥 Ana sayfadaki zemin parlamaları detay sayfasına da eklendi */}
-      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/10 blur-[120px] pointer-events-none -z-10" />
-      <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[140px] pointer-events-none -z-10" />
+      {/* 🔥 Detay sayfasındaki tüm renkli ışık sızıntıları/lekeler temizlendi */}
 
-      <header className="sticky top-0 z-50 bg-[#121212]/80 backdrop-blur-2xl border-b border-white/[0.03] px-4 py-4 md:px-8 mb-6 shadow-sm">
+      <header className="sticky top-0 z-50 bg-[#121212]/80 backdrop-blur-2xl border-b border-white/5 px-4 py-4 md:px-8 mb-6 shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <h1 className="text-lg font-extrabold tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
@@ -144,7 +142,6 @@ export default async function PostPage({ params }: any) {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 pb-12 relative z-10">
-        {/* 🔥 ANA AKIŞTAKİ TOK, ASİL VE CAM EFEKTLİ POSTCARD TASARIMI BURAYA UYARLANDI */}
         <article className={`backdrop-blur-2xl border p-5 sm:p-6 rounded-[22px] mb-8 relative overflow-hidden transition-all duration-300 bg-[#121212]/80 border-white/5 shadow-lg hover:border-white/10 ${glowStyle}`}>
           
           {isEphemeral && (
@@ -208,7 +205,6 @@ export default async function PostPage({ params }: any) {
             </p>
           )}
 
-          {/* 🔥 SESLİ FISILTI OYNATICISI DETAY SAYFASINA EKLENDİ */}
           {(post as any).audioUrl && (
             <div className="mb-6">
               <AnonymousPlayer audioUrl={(post as any).audioUrl} />

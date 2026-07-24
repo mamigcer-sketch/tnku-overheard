@@ -135,10 +135,8 @@ export default async function Home({ searchParams }: any) {
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-20">
       
-      <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/10 blur-[120px] pointer-events-none -z-10" />
-      <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[140px] pointer-events-none -z-10" />
+      {/* 🔥 Arka plandaki tüm renkli ışık sızıntıları/lekeler temizlendi */}
       
-      {/* 🔥 HEADER KARTI TASARIMIYLA BİREBİR UYUMLU GLASSMORPHISM STANDARTINA GETİRİLDİ */}
       <header className="sticky top-0 z-50 bg-[#121212]/80 backdrop-blur-2xl border-b border-white/5 px-4 py-4 md:px-8 flex items-center justify-between transition-all shadow-md gap-2">
         <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity shrink-0">
           <img src="/logo.jpg" alt="Logo" className="w-8 h-8 sm:w-9 sm:h-9 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
