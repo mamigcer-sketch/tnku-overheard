@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google';
 import './globals.css';
 import ScrollToTopV2 from '@/components/ScrollToTopV2';
 import InstallModal from '@/components/InstallModal';
+import SyncAuth from '@/components/SyncAuth'; // 🔥 Instagram kimlik sabitleme bileşeni eklendi
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -50,11 +51,14 @@ export default function RootLayout({
       <body className={inter.className}>
         {children}
         
-        {/* 🔥 YUKARI ÇIK BUTONU: Tüm sayfalarda sol altta gizli, kaydırınca belirecek! */}
+        {/* 🔥 YUKARI ÇIK BUTONU */}
         <ScrollToTopV2 />
 
-        {/* 🔥 UYGULAMAYI YÜKLE MODALI: Tüm sayfalarda gizlice bekler, menüden tıklanınca fırlar! */}
+        {/* 🔥 UYGULAMAYI YÜKLE MODALI */}
         <InstallModal />
+
+        {/* 🔥 İNSTAGRAM TARAYICI KİMLİK SABİTLEME KÖPRÜSÜ */}
+        <SyncAuth />
       </body>
     </html>
   );
