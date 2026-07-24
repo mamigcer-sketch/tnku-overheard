@@ -15,84 +15,18 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // 🔥 Sesi kalıcı olarak inceştiren (Hacker efekti veren) fonksiyon
-  const pitchShiftAudioBlob = async (inputBlob: Blob): Promise<Blob> => {
-    try {
-      const arrayBuffer = await inputBlob.arrayBuffer();
-      const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-
-      // Yeni hızlandırılmış/inceltilmiş buffer (örn: 1.4 kat daha hızlı = ince hacker sesi)
-      const pitchFactor = 1.4;
-      const newLength = Math.floor(audioBuffer.length / pitchFactor);
-      const offlineCtx = new OfflineAudioContext(
-        audioBuffer.numberOfChannels,
-        newLength,
-        audioBuffer.sampleRate
-      );
-
-      const source = offlineCtx.createBufferSource();
-      source.buffer = audioBuffer;
-      source.playbackRate.value = pitchFactor; // Sesi hem hızlandırır hem inceltir
-      source.connect(offlineCtx.destination);
-      source.start(0);
-
-      const renderedBuffer = await offlineCtx.startRendering();
-
-      // Render edilen buffer'ı WAV/Webm Blob'a çevir
-      const numOfChan = renderedBuffer.numberOfChannels;
-      const length = renderedBuffer.length * numOfChan * 2 + 44;
-      const out = new DataView(new ArrayBuffer(length));
-      let channels = [];
-      let sampleRate = renderedBuffer.sampleRate;
-      let offset = 0;
-      let pos = 0;
-
-      function writeString(str: string) {
-        for (let i = 0; i < str.length; i++) {
-          out.setUint8(pos++, str.charCodeAt(i));
-        }
-      }
-
-      writeString('RIFF');
-      out.setUint32(pos, length - 8, true); pos += 4;
-      writeString('WAVE');
-      writeString('fmt ');
-      out.setUint32(pos, 16, true); pos += 4;
-      out.setUint16(pos, 1, true); pos += 2;
-      out.setUint16(pos, numOfChan, true); pos += 2;
-      out.setUint32(pos, sampleRate, true); pos += 4;
-      out.setUint32(pos, sampleRate * 2 * numOfChan, true); pos += 4;
-      out.setUint16(pos, numOfChan * 2, true); pos += 2;
-      out.setUint16(pos, 16, true); pos += 2;
-      writeString('data');
-      out.setUint32(pos, length - pos - 4, true); pos += 4;
-
-      for (let i = 0; i < renderedBuffer.numberOfChannels; i++) {
-        channels.push(renderedBuffer.getChannelData(i));
-      }
-
-      while (offset < renderedBuffer.length) {
-        for (let i = 0; i < numOfChan; i++) {
-          let sample = Math.max(-1, Math.min(1, channels[i][offset]));
-          sample = (0.5 + sample < 0 ? sample * 32768 : sample * 32767) | 0;
-          out.setInt16(pos, sample, true);
-          pos += 2;
-        }
-        offset++;
-      }
-
-      return new Blob([out.buffer], { type: 'audio/wav' });
-    } catch (e) {
-      console.error("Ses dönüştürme hatası, orijinal kullanılıyor:", e);
-      return inputBlob;
-    }
-  };
-
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      const mediaRecorder = new MediaRecorder(stream);
+      
+      let mimeType = 'audio/webm';
+      if (MediaRecorder.isTypeSupported('audio/mp4')) {
+        mimeType = 'audio/mp4';
+      } else if (MediaRecorder.isTypeSupported('audio/aac')) {
+        mimeType = 'audio/aac';
+      }
+
+      const mediaRecorder = new MediaRecorder(stream, { mimeType });
       mediaRecorderRef.current = mediaRecorder;
       audioChunksRef.current = [];
 
@@ -100,17 +34,13 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
         if (event.data.size > 0) audioChunksRef.current.push(event.data);
       };
 
-      mediaRecorder.onstop = async () => {
-        const rawBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        
-        // 🔥 Kayıt bittiği an sesi kalıcı olarak ince hacker sesine dönüştür!
-        const processedBlob = await pitchShiftAudioBlob(rawBlob);
-
-        const previewUrl = URL.createObjectURL(processedBlob);
+      mediaRecorder.onstop = () => {
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        const previewUrl = URL.createObjectURL(audioBlob);
         setAudioPreviewUrl(previewUrl);
 
         const reader = new FileReader();
-        reader.readAsDataURL(processedBlob);
+        reader.readAsDataURL(audioBlob);
         reader.onloadend = () => {
           const base64data = reader.result as string;
           setHasAudio(true);
@@ -157,9 +87,13 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
     onAudioReady(null);
   };
 
+  // 🔥 Önizlemede doğrudan playbackRate ile net hacker sesi
   const togglePreviewPlay = () => {
     const audio = previewAudioRef.current;
     if (!audio) return;
+
+    // Hacker modu için hızı 1.6 yapıyoruz (gayet ince ve net)
+    audio.playbackRate = 1.6;
 
     if (isPlayingPreview) {
       audio.pause();
@@ -183,7 +117,16 @@ export default function VoiceRecorder({ onAudioReady, onRecordingStateChange }: 
 
   return (
     <div className="bg-black/40 border border-purple-500/20 p-4 rounded-2xl relative overflow-hidden">
-      {audioPreviewUrl && <audio ref={previewAudioRef} src={audioPreviewUrl} preload="metadata" />}
+      {audioPreviewUrl && (
+        <audio 
+          ref={previewAudioRef} 
+          src={audioPreviewUrl} 
+          preload="auto" 
+          onLoadedMetadata={(e) => {
+            (e.target as HTMLAudioElement).playbackRate = 1.6;
+          }} 
+        />
+      )}
 
       {!hasAudio ? (
         <div className="flex items-center justify-between gap-4">
