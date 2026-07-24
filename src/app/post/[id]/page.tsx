@@ -115,7 +115,7 @@ export default async function PostPage({ params }: any) {
   const authorData = getAnonymousData(postAuthorUuid || post.id, customNicknamesMap[postAuthorUuid]);
 
   const glowStyle = isEphemeral
-    ? 'shadow-[0_8px_32px_0_rgba(245,158,11,0.2)] border-amber-500/40 bg-amber-500/[0.01]'
+    ? 'shadow-[0_8px_32px_0_rgba(245,158,11,0.2)] border-amber-500/40'
     : isConfession 
       ? 'shadow-[0_8px_32px_0_rgba(168,85,247,0.15)] border-purple-500/20' 
       : isBosYap
@@ -128,7 +128,7 @@ export default async function PostPage({ params }: any) {
       <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/15 blur-[120px] pointer-events-none -z-10" />
       <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/15 blur-[140px] pointer-events-none -z-10" />
 
-      <header className="sticky top-0 z-50 bg-[#0B0B0B]/40 backdrop-blur-3xl border-b border-white/[0.03] px-4 py-4 md:px-8 mb-6 shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+      <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-2xl border-b border-white/[0.03] px-4 py-4 md:px-8 mb-6 shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <Link href="/" className="hover:opacity-80 transition-opacity">
             <h1 className="text-lg font-extrabold tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
@@ -143,7 +143,8 @@ export default async function PostPage({ params }: any) {
       </header>
 
       <div className="max-w-2xl mx-auto px-4 pb-12 relative z-10">
-        <article className={`backdrop-blur-2xl border p-6 rounded-[24px] mb-8 relative overflow-hidden transition-all duration-500 ${glowStyle} ${!isEphemeral ? 'bg-white/[0.02] border-white/[0.05]' : ''}`}>
+        {/* 🔥 ANA AKIŞTAKİ TOK, ASİL VE CAM EFEKTLİ POSTCARD TASARIMI BURAYA UYARLANDI */}
+        <article className={`backdrop-blur-2xl border p-5 sm:p-6 rounded-[22px] mb-8 relative overflow-hidden transition-all duration-300 bg-[#121212]/80 border-white/5 shadow-lg hover:border-white/10 ${glowStyle}`}>
           
           {isEphemeral && (
             <div className="absolute -inset-[1px] opacity-30 blur-xl -z-10 bg-gradient-to-r from-amber-500/40 to-orange-500/40" />
@@ -222,12 +223,12 @@ export default async function PostPage({ params }: any) {
             </div>
           )}
 
-          <div className="flex items-center gap-4 pt-4 border-t border-white/[0.04]">
+          <div className="flex items-center gap-4 pt-4 border-t border-white/5">
             <div className="flex items-center gap-1.5 bg-pink-500/10 px-4 py-2 rounded-xl border border-pink-500/20 shadow-sm">
-              <Heart size={16} className="text-pink-400" /> 
+              <Heart size={16} className="text-pink-400 fill-pink-500" /> 
               <span className="text-[13px] font-bold text-pink-100">{post.likes}</span>
             </div>
-            <div className="flex items-center gap-1.5 bg-white/[0.03] px-4 py-2 rounded-xl border border-white/[0.05] shadow-sm">
+            <div className="flex items-center gap-1.5 bg-white/[0.03] px-4 py-2 rounded-xl border border-white/5 shadow-sm">
               <Eye size={16} className="text-blue-400" /> 
               <span className="text-[13px] font-bold text-blue-100">{post.views}</span>
             </div>
