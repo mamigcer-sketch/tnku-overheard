@@ -9,7 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
-import { MessageSquareHeart, Bell } from 'lucide-react'; // 🔥 Bell ikonu eklendi
+import { MessageSquareHeart, Bell } from 'lucide-react';
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -135,12 +135,10 @@ export default async function Home({ searchParams }: any) {
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-20">
       
-      {/* Arkadaki hafif parlamalar kaldı, sayfaya derinlik veriyor */}
       <div className="fixed top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-[#4DA3FF]/10 blur-[120px] pointer-events-none -z-10" />
       <div className="fixed bottom-[10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-purple-600/10 blur-[140px] pointer-events-none -z-10" />
       
       <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-2xl border-b border-white/[0.03] px-4 py-4 md:px-8 flex items-center justify-between transition-all shadow-sm gap-2">
-        
         <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity shrink-0">
           <img src="/logo.jpg" alt="Logo" className="w-8 h-8 sm:w-9 sm:h-9 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
           <h1 className="text-base sm:text-xl font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
@@ -161,9 +159,9 @@ export default async function Home({ searchParams }: any) {
         </div>
       </header>
 
+      {/* 🔥 KARTLARLA BİREBİR HİZALANAN ANA CONTAINER (max-w-2xl mx-auto px-4) */}
       <div className="max-w-2xl mx-auto px-4 py-5 sm:py-6">
         
-        {/* 🔥 PREMİUM DUYURU ALANI */}
         {activeAnnouncement && (
           <div className="mb-5 flex items-center gap-3 p-3.5 sm:px-4 rounded-[20px] bg-[#121212]/80 backdrop-blur-xl border border-[#4DA3FF]/15 shadow-sm">
             <span className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#4DA3FF]/10 text-[#4DA3FF] text-[10px] font-bold tracking-wider uppercase border border-[#4DA3FF]/20 shadow-inner">
@@ -175,16 +173,17 @@ export default async function Home({ searchParams }: any) {
           </div>
         )}
 
-        <div className="relative z-10">
+        <div className="relative z-10 mb-5">
           <CountdownWidget countdown={activeCountdown} />
         </div>
         
-        <div className="mb-5 relative z-10">
+        {/* 🔥 ARAMA ÇUBUĞU ARTIK KARTLARLA TAM HİZADA */}
+        <div className="mb-4 relative z-10">
           <SearchBar />
         </div>
 
-        {/* 🔥 PREMİUM FİLTRE SEKMELERİ (Link yapısı korundu, pavyon ışıkları silindi) */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/90 backdrop-blur-xl pt-3 -mx-4 px-4 sm:mx-0 sm:px-0">
+        {/* 🔥 FİLTRE SEKMELERİ (Taşma sorunları ve kenar yapışmaları düzeltildi) */}
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-5 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-[#0B0B0B]/90 backdrop-blur-xl pt-2 px-1">
           {filters.map((filter) => {
             const isActive = currentFilter === filter;
             
