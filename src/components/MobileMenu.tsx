@@ -115,7 +115,7 @@ export default function MobileMenu() {
         </>
       )}
 
-      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) */}
+      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) - ORTAYA ALINDI */}
       {isNickModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
           <div 
@@ -123,7 +123,8 @@ export default function MobileMenu() {
             onClick={() => !loading && setIsNickModalOpen(false)}
           ></div>
           
-          <div className="relative w-full max-w-sm bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 rounded-[24px] shadow-2xl animate-in zoom-in-95 fade-in duration-200">
+          {/* 🔥 Burada flex ve justify-center olan ana kapsayıcının içinde modalın tam ortalanması için my-auto eklendi */}
+          <div className="relative w-full max-w-sm bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 rounded-[24px] shadow-2xl animate-in zoom-in-95 fade-in duration-200 my-auto">
             
             <button 
               onClick={() => !loading && setIsNickModalOpen(false)}
@@ -141,7 +142,7 @@ export default function MobileMenu() {
               İtiraflarında anonim hayvan isimleri yerine kendi seçtiğin özel bir nick kullan. (Örn: baddie, d6_mudavimi)
             </p>
 
-            {/* 🔥 Küfür/Ban Uyarısı Eklendi */}
+            {/* 🔥 Küfür/Ban Uyarısı */}
             <div className="flex items-start gap-1.5 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] p-2.5 rounded-lg mb-6 shadow-inner">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span><strong>Aman diyim!</strong> Küfürlü, hakaret içeren veya ofansif nickler kullanmak anında sistemden uzaklaştırılma sebebidir.</span>

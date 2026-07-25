@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
-import AnonymousPlayer from "./AnonymousPlayer"; // 🔥 Hacker Ses Oynatıcısı Eklendi
+import AnonymousPlayer from "./AnonymousPlayer";
 import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, BadgeCheck, Quote } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { incrementView, submitReport } from "@/app/post/actions";
@@ -196,7 +196,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
       <div 
         ref={cardRef} 
         onClick={handleCardInteraction} 
-        // 🔥 GLASSMORPHISM & HOVER GÜNCELLEMESİ: bg, border, shadow ve translate eklendi
         className={`relative group bg-[#121212]/70 backdrop-blur-xl border border-white/5 hover:border-white/10 p-5 sm:p-6 rounded-[24px] overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-out will-change-[opacity,transform] select-none cursor-pointer hover:-translate-y-1 ${
           isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-[0.98]'
         }`}
@@ -251,18 +250,14 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                   </span>
                 )}
                 
-                {/* 🔥 YAZAR ROZETİ GÜNCELLEMESİ */}
-                <span className={`flex items-center gap-1.5 bg-white/[0.03] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.06] transition-colors ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
-                  <div className={`w-5 h-5 flex items-center justify-center rounded-md ${customNickname ? 'bg-gradient-to-br from-amber-500/20 to-pink-500/20 border border-pink-500/30 text-pink-400' : `${authorData.gradient} text-[10px]`} shadow-inner`}>
-                    {customNickname ? (
-                      <svg className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
-                        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                      </svg>
-                    ) : (
-                      authorData.emoji
-                    )}
-                  </div>
-                  <span className="font-semibold text-[11px] tracking-wide text-gray-200 group-hover:text-white transition-colors">
+                {/* 🔥 YAZAR ROZETİ GÜNCELLEMESİ (Tüm simgeler kaldırıldı) */}
+                <span className={`flex items-center gap-1.5 bg-white/[0.03] py-1 rounded-lg border shadow-sm hover:bg-white/[0.06] transition-colors ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)] px-3' : 'border-white/[0.05] pr-3 pl-1.5'}`}>
+                  {!customNickname && (
+                    <div className={`w-5 h-5 flex items-center justify-center rounded-md ${authorData.gradient} text-[10px] shadow-inner`}>
+                      {authorData.emoji}
+                    </div>
+                  )}
+                  <span className={`font-semibold text-[11px] tracking-wide transition-colors ${customNickname ? 'text-yellow-100 group-hover:text-yellow-50' : 'text-gray-200 group-hover:text-white'}`}>
                     @{authorData.name}
                   </span>
                 </span>
@@ -278,7 +273,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
           <div className="mb-4 sm:mb-5 relative z-10 transition-all duration-300">
             {post.content && (
-              // 🔥 TİPOGRAFİ GÜNCELLEMESİ: font-normal, text-gray-200 ve leading-relaxed eklendi
               <p className={`text-gray-200 text-[15px] sm:text-[16px] leading-relaxed font-normal break-words tracking-wide ${!isExpanded && isLongText ? 'line-clamp-4' : ''}`}>
                 {post.content}
               </p>
@@ -328,7 +322,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
         <div 
           onClick={(e) => e.stopPropagation()} 
-          // 🔥 ALT BAR GÜNCELLEMESİ: border-white/5 ile silik çizgi atıldı, padding ayarlandı
           className="interactive-zone flex items-center justify-between border-t border-white/5 pt-4 text-gray-400 relative z-10 cursor-default"
         >
           <div className="flex items-center gap-4 sm:gap-6">
