@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Heart, Reply, Flag, ShieldAlert } from "lucide-react";
+import { Heart, Reply, Flag, ShieldAlert, User } from "lucide-react";
 import { toggleCommentLike, submitReport } from "@/app/post/actions";
 import { playPopSound, playClickSound } from "@/utils/sounds";
 
@@ -24,16 +24,10 @@ const getRelativeTime = (dateString: string | Date) => {
 const formatCommentText = (text: string) => {
   if (!text) return null;
   
-  // 🔥 EFSANE REGEX: 
-  // 1. İki büyük harfle başlayan kelimeyi (Örn: @Şüpheli Pelikan) TAMAMINI alır boşlukta kesmez!
-  // 2. VEYA tek parça bitişik kelimeyi (Örn: @aleyisiil) alır.
-  // Yanındaki küçük harfle başlayan normal kelimelere ("detay ver" gibi) ASLA dokunmaz!
   const mentionRegex = /(@(?:[A-ZÇĞİÖŞÜ][a-zçğıöşü]+\s[A-ZÇĞİÖŞÜ][a-zçğıöşü]+|[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+))/g;
-  
   const parts = text.split(mentionRegex);
   
   return parts.map((part, i) => {
-    // Parça @ ile başlıyorsa yapıştır maviyi gitsin!
     if (part.startsWith('@')) {
       return (
         <span key={i} className="text-[#4DA3FF] font-bold drop-shadow-[0_0_8px_rgba(77,163,255,0.6)]">
@@ -100,7 +94,6 @@ export default function CommentItem({
 
   return (
     <>
-      {/* 🔥 PREMIUM GLASSMORPHISM YORUM KARTI */}
       <div className={`bg-[#121212]/75 backdrop-blur-xl border border-white/5 p-4 sm:p-5 rounded-[22px] shadow-md transition-all duration-300 hover:border-white/10 hover:bg-[#151515] ${
         isReply ? 'ml-6 sm:ml-10 border-l-2 border-l-[#4DA3FF]/40 bg-[#121212]/50' : ''
       }`}>
@@ -112,14 +105,16 @@ export default function CommentItem({
               </span>
             )}
             
-            {/* 🔥 YORUM YAZARI ROZETİ (Logo Kaldırıldı) */}
+            {/* 🔥 YORUM YAZARI - KLASİK GRİ ADAM (USER SİLÜETİ) */}
             <div className={`flex items-center gap-1.5 bg-white/[0.03] pr-3 pl-1.5 py-1 rounded-lg border shadow-sm transition-colors ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
-               {!hasCustomNick && (
-                  <div className={`w-5 h-5 flex items-center justify-center rounded-md ${commentAuthor.gradient} text-[10px] shadow-inner`}>
-                     {commentAuthor.emoji}
-                  </div>
-               )}
-               <span className={`font-semibold text-[11px] tracking-wide ${hasCustomNick ? 'text-yellow-100 pl-1.5' : 'text-gray-200'}`}>
+               <div className={`w-5 h-5 flex items-center justify-center rounded-md ${hasCustomNick ? 'bg-white/10 text-gray-400 border border-white/15' : `${commentAuthor.gradient} text-[10px]` } shadow-inner`}>
+                  {hasCustomNick ? (
+                     <User className="w-3.5 h-3.5 text-gray-400" />
+                  ) : (
+                     commentAuthor.emoji
+                  )}
+               </div>
+               <span className={`font-semibold text-[11px] tracking-wide ${hasCustomNick ? 'text-yellow-100' : 'text-gray-200'}`}>
                  @{commentAuthor.name}
                </span>
             </div>
@@ -137,7 +132,6 @@ export default function CommentItem({
           {formatCommentText(comment.content)}
         </p>
         
-        {/* 🔥 ALT ETKİLEŞİM BARİ */}
         <div className="flex items-center gap-4 pt-3 border-t border-white/5 text-gray-400">
           <button 
             onClick={handleLike}

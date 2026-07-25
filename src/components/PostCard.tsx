@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
 import AnonymousPlayer from "./AnonymousPlayer";
-import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, BadgeCheck, Quote } from "lucide-react";
+import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, Quote } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { incrementView, submitReport } from "@/app/post/actions";
 import { playPopSound, playClickSound } from "@/utils/sounds";
@@ -201,7 +201,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
         }`}
       >
         
-        {/* 🔥 DEV TİPOGRAFİ EFEKTİ (Arka planda soluk tırnak işareti) */}
         <div className="absolute right-4 top-2 text-white/[0.02] -z-10 pointer-events-none">
           <Quote size={120} />
         </div>
@@ -250,13 +249,15 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                   </span>
                 )}
                 
-                {/* 🔥 YAZAR ROZETİ GÜNCELLEMESİ (Tüm simgeler kaldırıldı) */}
-                <span className={`flex items-center gap-1.5 bg-white/[0.03] py-1 rounded-lg border shadow-sm hover:bg-white/[0.06] transition-colors ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)] px-3' : 'border-white/[0.05] pr-3 pl-1.5'}`}>
-                  {!customNickname && (
-                    <div className={`w-5 h-5 flex items-center justify-center rounded-md ${authorData.gradient} text-[10px] shadow-inner`}>
-                      {authorData.emoji}
-                    </div>
-                  )}
+                {/* 🔥 KLASİK GRİ ADAM (USER SİLÜETİ) EKLENDİ */}
+                <span className={`flex items-center gap-1.5 bg-white/[0.03] pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.06] transition-colors ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
+                  <div className={`w-5 h-5 flex items-center justify-center rounded-md ${customNickname ? 'bg-white/10 text-gray-400 border border-white/15' : `${authorData.gradient} text-[10px]` } shadow-inner`}>
+                    {customNickname ? (
+                      <User className="w-3.5 h-3.5 text-gray-400" />
+                    ) : (
+                      authorData.emoji
+                    )}
+                  </div>
                   <span className={`font-semibold text-[11px] tracking-wide transition-colors ${customNickname ? 'text-yellow-100 group-hover:text-yellow-50' : 'text-gray-200 group-hover:text-white'}`}>
                     @{authorData.name}
                   </span>
@@ -292,7 +293,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
               </button>
             )}
 
-            {/* SESLİ FISILTI OYNATICISI */}
             {post.audioUrl && (
               <div onClick={(e) => e.stopPropagation()} className="mt-4">
                 <AnonymousPlayer audioUrl={post.audioUrl} />
