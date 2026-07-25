@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, X, Heart, ShieldAlert, BookOpen, FileText, ExternalLink, Download, VenetianMask, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -16,6 +16,18 @@ export default function MobileMenu() {
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
   
   const router = useRouter();
+
+  // 🔥 MODAL AÇIKKEN ARKA PLANIN KAYMASINI KESİN OLARAK ENGelle
+  useEffect(() => {
+    if (isNickModalOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [isNickModalOpen]);
   
   const menuItems = [
     { name: 'Paylaşımlarım', icon: <FileText size={18} />, href: '/my-posts', isExternal: false },
@@ -115,12 +127,12 @@ export default function MobileMenu() {
         </>
       )}
 
-      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) - ORTADA VE HATASIZ */}
+      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) - ARKA PLAN KİLİTLİ VE TAM ORTADA */}
       {isNickModalOpen && (
-        <div className="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
+        <div className="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-hidden animate-in fade-in duration-200">
           
           <div 
-            className="relative w-full max-w-sm bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 rounded-[24px] shadow-2xl my-auto animate-in zoom-in-95 fade-in duration-200"
+            className="relative w-full max-w-sm bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 rounded-[24px] shadow-2xl my-auto animate-in zoom-in-95 fade-in duration-200 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             
