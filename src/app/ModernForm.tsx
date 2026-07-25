@@ -100,7 +100,8 @@ export default function ModernForm() {
       setAudioBase64(null);
       
       setSuccessMsg(true);
-      setTimeout(() => setSuccessMsg(false), 4000);
+      // 🔥 Mesajı rahat okuyabilmeleri için süreyi 5 saniyeye çıkardık
+      setTimeout(() => setSuccessMsg(false), 5000);
       router.refresh();
     } catch (error) {
       console.error("Hata:", error);
@@ -304,8 +305,12 @@ export default function ModernForm() {
           }`}
         >
           {successMsg ? (
-            <span className="flex items-center gap-2 animate-in zoom-in duration-300">
-              <CheckCircle2 size={20} className="sm:w-[24px] sm:h-[24px]" /> ✓ Başarıyla Fırlatıldı!
+            <span className="flex items-center gap-2.5 animate-in zoom-in duration-300">
+              <CheckCircle2 size={22} className="shrink-0" /> 
+              <span className="flex flex-col items-start text-left leading-tight">
+                <span>Başarıyla Fırlatıldı!</span>
+                <span className="text-[10px] font-medium opacity-80">Yönetici onayından sonra paylaşılacaktır.</span>
+              </span>
             </span>
           ) : isRecordingNow ? (
             <span className="flex items-center gap-2 text-red-300">
