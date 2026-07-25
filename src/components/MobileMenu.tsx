@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { Menu, X, Heart, ShieldAlert, BookOpen, FileText, ExternalLink, Download, VenetianMask, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import Link from 'next/link';
-import { updateCustomNickname } from '@/app/profile/actions'; 
+import { updateCustomNickname } from '@/app/profile/actions';
 
 export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -115,15 +115,14 @@ export default function MobileMenu() {
         </>
       )}
 
-      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) - EKRANA SABİTLENDİ VE ORTALANDI */}
+      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) - ORTADA VE HATASIZ */}
       {isNickModalOpen && (
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
-          <div 
-            className="fixed inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200" 
-            onClick={() => !loading && setIsNickModalOpen(false)}
-          ></div>
+        <div className="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto animate-in fade-in duration-200">
           
-          <div className="relative w-full max-w-sm bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 rounded-[24px] shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-in zoom-in-95 fade-in duration-200 z-[100000] my-auto">
+          <div 
+            className="relative w-full max-w-sm bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 rounded-[24px] shadow-2xl my-auto animate-in zoom-in-95 fade-in duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
             
             <button 
               onClick={() => !loading && setIsNickModalOpen(false)}
