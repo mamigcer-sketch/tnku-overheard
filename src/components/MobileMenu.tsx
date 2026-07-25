@@ -115,20 +115,19 @@ export default function MobileMenu() {
         </>
       )}
 
-      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) - ORTAYA ALINDI */}
+      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) - EKRANA SABİTLENDİ VE ORTALANDI */}
       {isNickModalOpen && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
           <div 
-            className="absolute inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200" 
+            className="fixed inset-0 bg-black/80 backdrop-blur-md animate-in fade-in duration-200" 
             onClick={() => !loading && setIsNickModalOpen(false)}
           ></div>
           
-          {/* 🔥 Burada flex ve justify-center olan ana kapsayıcının içinde modalın tam ortalanması için my-auto eklendi */}
-          <div className="relative w-full max-w-sm bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 rounded-[24px] shadow-2xl animate-in zoom-in-95 fade-in duration-200 my-auto">
+          <div className="relative w-full max-w-sm bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 rounded-[24px] shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-in zoom-in-95 fade-in duration-200 z-[100000] my-auto">
             
             <button 
               onClick={() => !loading && setIsNickModalOpen(false)}
-              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -177,7 +176,7 @@ export default function MobileMenu() {
               <button
                 type="submit"
                 disabled={loading || status.type === 'success'}
-                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] flex items-center justify-center gap-2 active:scale-95 disabled:opacity-70 disabled:pointer-events-none text-sm"
+                className="w-full bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-[0_0_20px_rgba(168,85,247,0.3)] hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] flex items-center justify-center gap-2 active:scale-95 disabled:opacity-70 disabled:pointer-events-none text-sm cursor-pointer"
               >
                 {loading ? <Loader2 className="animate-spin" size={18} /> : 'Kimliğimi Güncelle'}
               </button>
