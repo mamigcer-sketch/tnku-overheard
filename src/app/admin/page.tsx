@@ -3,11 +3,11 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import Link from 'next/link';
 import AdminStoryExporter from '@/components/AdminStoryExporter'; 
-import AnonymousPlayer from '@/components/AnonymousPlayer'; // 🔥 Admin için ses oynatıcısı eklendi
+import AnonymousPlayer from '@/components/AnonymousPlayer'; 
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, Coffee,
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles, ExternalLink, Crown, Award, UserMinus
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles, ExternalLink, Crown, Award, UserMinus, UserCog
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -101,7 +101,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   let reports: any[] = [];
 
   let customNicknamesDb: any[] = [];
-  try { customNicknamesDb = await (prisma as any).customNickname.findMany(); } catch (e) {}
+  try { customNicknamesDb = await (prisma as any).customNickname.findMany({ orderBy: { createdAt: 'desc' } }); } catch (e) {}
   const customNicknamesMap = customNicknamesDb.reduce((acc: any, curr: any) => {
     acc[curr.userUuid] = curr.nickname;
     return acc;
@@ -115,7 +115,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   }, {});
 
   const vipUserUuids = Array.from(new Set([...customNicknamesDb.map(n => n.userUuid), ...userBadgesDb.map(b => b.userUuid)]));
-  const vipUsers = vipUserUuids.map(uuid => ({
+  const customUsers = vipUserUuids.map(uuid => ({
     uuid,
     nickname: customNicknamesMap[uuid] || '',
     badge: userBadgesMap[uuid] || ''
@@ -131,7 +131,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     bannedUsers = await (prisma as any).bannedUser.findMany({ orderBy: { createdAt: 'desc' } });
   } else if (currentTab === 'Şikayetler') {
     reports = await (prisma as any).report.findMany({ orderBy: { createdAt: 'desc' }, include: { post: true, comment: true } });
-  } else if (currentTab !== 'VIP Üyeler') { 
+  } else if (currentTab !== 'Özel Nickler') { 
     let queryFilter: any = { status: 'PENDING' };
     if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
     if (currentTab === 'Overheard') queryFilter = { status: 'APPROVED', type: { in: ['OVERHEARD', 'OVERHED'] } };
@@ -301,10 +301,21 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/');
   }
 
+  // 🔥 YENİ: Tek Tıkla Kullanıcı Verisini Silen Aksiyon
+  async function removeUserMeta(formData: FormData) {
+    'use server';
+    const userUuid = formData.get('userUuid') as string;
+    if (!userUuid) return;
+    await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
+    await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
+    revalidatePath('/admin');
+    revalidatePath('/');
+  }
+
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard' }, 
     { icon: Rss, label: 'Akış' }, 
-    { icon: Crown, label: 'VIP Üyeler' }, 
+    { icon: Sparkles, label: 'Özel Nickler' },  // 🔥 İsim ve ikon değişti
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Coffee, label: 'Boş Yap' }, 
@@ -327,7 +338,7 @@ export default async function AdminDashboard({ searchParams }: any) {
           {menuItems.map((item, i) => (
             <Link href={`/admin?tab=${item.label}`} key={i} className={`flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${currentTab === item.label ? 'bg-white/[0.06] text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.02)]' : 'text-gray-400 border border-transparent hover:text-white hover:bg-white/[0.03]'}`}>
               <div className="flex items-center gap-3.5">
-                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? (item.label === 'VIP Üyeler' ? 'text-yellow-400' : 'text-[#4DA3FF]') : 'text-gray-500 group-hover:text-gray-300'}`} /> 
+                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? (item.label === 'Özel Nickler' ? 'text-purple-400' : 'text-[#4DA3FF]') : 'text-gray-500 group-hover:text-gray-300'}`} /> 
                 <span className={`font-semibold tracking-wide text-sm ${currentTab === item.label ? 'opacity-100' : 'opacity-80'}`}>{item.label}</span>
               </div>
               {item.badge !== undefined && item.badge > 0 ? (
@@ -346,7 +357,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0B0B0B]/90 backdrop-blur-3xl border-t border-white/10 px-2 py-2 flex justify-start z-50 overflow-x-auto gap-1 sm:gap-2 scrollbar-hide shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {menuItems.map((item, i) => (
           <Link href={`/admin?tab=${item.label}`} key={i} className={`flex flex-col items-center justify-center gap-1 min-w-[64px] sm:min-w-[72px] px-1 py-2 rounded-2xl transition-all relative ${currentTab === item.label ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
-            <item.icon size={18} className={currentTab === item.label && item.label === 'VIP Üyeler' ? 'text-yellow-400' : currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
+            <item.icon size={18} className={currentTab === item.label && item.label === 'Özel Nickler' ? 'text-purple-400' : currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
             {item.badge !== undefined && item.badge > 0 && (
               <span className={`absolute top-0 right-2 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-black ${item.label === 'Şikayetler' ? 'bg-red-500 text-white' : 'bg-[#4DA3FF] text-black'}`}>{item.badge}</span>
             )}
@@ -359,8 +370,8 @@ export default async function AdminDashboard({ searchParams }: any) {
         
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-10 pb-4 sm:pb-6 border-b border-white/5 gap-3 sm:gap-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold flex items-center gap-3 sm:gap-4 tracking-tight">
-              <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border ${currentTab === 'Yorumlar' ? 'bg-blue-500/10 border-blue-500/20' : currentTab === 'VIP Üyeler' ? 'bg-yellow-500/10 border-yellow-500/20' : currentTab === 'Duyurular' ? 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20' : currentTab === 'Sayaç' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Banlar' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Şikayetler' ? 'bg-red-500/10 border-red-500/20' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20'}`}>
-                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'VIP Üyeler' ? <Crown className="text-yellow-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
+              <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border ${currentTab === 'Yorumlar' ? 'bg-blue-500/10 border-blue-500/20' : currentTab === 'Özel Nickler' ? 'bg-purple-500/10 border-purple-500/20' : currentTab === 'Duyurular' ? 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20' : currentTab === 'Sayaç' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Banlar' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Şikayetler' ? 'bg-red-500/10 border-red-500/20' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20'}`}>
+                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Özel Nickler' ? <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
               </div>
               {currentTab} Paneli
             </h2>
@@ -375,7 +386,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
         <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           
-          {currentTab !== 'Yorumlar' && currentTab !== 'VIP Üyeler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
+          {currentTab !== 'Yorumlar' && currentTab !== 'Özel Nickler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
             <>
               <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 sm:gap-8 mb-6 sm:mb-8 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-green-500/5 rounded-full blur-3xl -z-10 group-hover:bg-green-500/10 transition-colors duration-700" />
@@ -443,67 +454,78 @@ export default async function AdminDashboard({ searchParams }: any) {
           )}
 
           <div className="space-y-4 sm:space-y-6">
-             
-            {currentTab === 'VIP Üyeler' ? (
+              
+            {/* 🔥 ÖZEL NİCKLER / KULLANICI YÖNETİMİ PANELİ */}
+            {currentTab === 'Özel Nickler' ? (
               <div className="space-y-6 sm:space-y-8">
                  
-                <form action={updateUserMeta} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-yellow-500/20 space-y-4 sm:space-y-5 shadow-[0_10px_40px_rgba(234,179,8,0.05)] relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-yellow-500/10 blur-3xl rounded-full -z-10 group-hover:bg-yellow-500/20 transition-colors duration-700" />
-                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-yellow-500/10 rounded-lg sm:rounded-xl border border-yellow-500/30"><Award className="text-yellow-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni VIP Ekle / Rozet Ver</h3>
-                  <p className="text-gray-400 text-xs sm:text-sm font-medium mb-2">Kullanıcının UUID'sini buraya yapıştırıp ona doğrudan özel nick ve rozet atayabilirsin.</p>
+                {/* Manuel Ekleme Formu */}
+                <form action={updateUserMeta} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-purple-500/20 space-y-4 sm:space-y-5 shadow-[0_10px_40px_rgba(168,85,247,0.05)] relative overflow-hidden group">
+                  <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-purple-500/10 blur-3xl rounded-full -z-10 group-hover:bg-purple-500/20 transition-colors duration-700" />
+                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-purple-500/10 rounded-lg sm:rounded-xl border border-purple-500/30"><UserCog className="text-purple-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Kullanıcı Ekle / Rozet Ver</h3>
+                  <p className="text-gray-400 text-xs sm:text-sm font-medium mb-2">Kullanıcının UUID'sini buraya yapıştırıp ona manuel olarak özel nick veya VIP rozeti atayabilirsin.</p>
                    
                   <div className="grid lg:grid-cols-3 gap-4 sm:gap-5">
                     <div className="lg:col-span-3">
                       <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Kullanıcı UUID (Kimlik)</label>
-                      <input type="text" name="userUuid" required placeholder="Örn: clxj12345..." className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner font-mono" />
+                      <input type="text" name="userUuid" required placeholder="Örn: clxj12345..." className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-purple-400 focus:bg-black/60 transition-all shadow-inner font-mono" />
                     </div>
                     <div>
                       <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Özel Nickname</label>
-                      <input type="text" name="nickname" placeholder="Örn: Sitenin Sahibi" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner" />
+                      <input type="text" name="nickname" placeholder="Örn: Sitenin Sahibi" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-purple-400 focus:bg-black/60 transition-all shadow-inner" />
                     </div>
                     <div>
                       <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Rozet</label>
                       <input type="text" name="badge" placeholder="Örn: 👑 Yönetici" className="w-full bg-black/40 border border-yellow-500/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner" />
                     </div>
                     <div className="flex items-end">
-                      <button type="submit" className="w-full justify-center bg-gradient-to-r from-yellow-500 to-amber-500 hover:to-amber-400 text-black font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-[10px] sm:text-xs transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(234,179,8,0.4)]"><Crown size={16}/> Ayrıcalık Tanımla</button>
+                      <button type="submit" className="w-full justify-center bg-gradient-to-r from-purple-500 to-pink-500 hover:to-pink-400 text-white font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-[10px] sm:text-xs transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)]"><Sparkles size={16}/> Ayrıcalık Tanımla</button>
                     </div>
                   </div>
                 </form>
 
+                {/* Nick Yönetimi Listesi */}
                 <div>
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">Mevcut VIP Üyeler <span className="bg-yellow-500/20 text-yellow-400 px-2 py-0.5 rounded-md text-xs border border-yellow-500/30">{vipUsers.length}</span></h3>
+                    <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">Sistemdeki Özel Nickler <span className="bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-md text-xs border border-purple-500/30">{customUsers.length}</span></h3>
                   </div>
 
-                  {vipUsers.length === 0 ? (
-                    <div className="text-center py-12 sm:py-16 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Sistemde henüz hiç VIP üye yok. Çok fakiriz!</div>
+                  {customUsers.length === 0 ? (
+                    <div className="text-center py-12 sm:py-16 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Henüz kendine özel nick alan veya VIP olan kimse yok.</div>
                   ) : (
                     <div className="grid gap-4 sm:gap-6">
-                      {vipUsers.map((user, idx) => (
-                      <div key={idx} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-col md:flex-row gap-4 sm:gap-6 md:items-center justify-between shadow-lg">
+                      {customUsers.map((user, idx) => (
+                      <div key={idx} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-col xl:flex-row gap-4 sm:gap-6 xl:items-center justify-between shadow-lg">
                           
                         <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-yellow-400 to-amber-600 p-[2px] shrink-0">
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 p-[2px] shrink-0">
                             <div className="w-full h-full bg-[#050505] rounded-full flex items-center justify-center">
-                              <Crown className="text-yellow-400 w-5 h-5 sm:w-6 sm:h-6" />
+                              <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" />
                             </div>
                           </div>
                           <div className="overflow-hidden">
                             <div className="flex items-center gap-2 flex-wrap">
-                              {user.nickname ? <span className="font-extrabold text-white text-sm sm:text-base">{user.nickname}</span> : <span className="font-extrabold text-gray-500 italic text-sm sm:text-base">Nick Yok</span>}
+                              {user.nickname ? <span className="font-extrabold text-white text-sm sm:text-base">@{user.nickname}</span> : <span className="font-extrabold text-gray-500 italic text-sm sm:text-base">Sadece Rozeti Var</span>}
                               {user.badge && <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-[10px] sm:text-xs font-black px-2 py-0.5 rounded-full">{user.badge}</span>}
                             </div>
                             <code className="text-[10px] sm:text-xs text-gray-500 font-mono mt-1 block truncate">UUID: {user.uuid}</code>
                           </div>
                         </div>
 
-                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full md:w-auto">
-                          <form action={updateUserMeta} className="flex gap-2 w-full sm:w-auto">
+                        {/* 🔥 HIZLI DÜZENLEME VE SİLME FORMLARI */}
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full xl:w-auto">
+                          {/* Güncelleme Formu */}
+                          <form action={updateUserMeta} className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <input type="hidden" name="userUuid" value={user.uuid} />
-                            <input type="hidden" name="nickname" value="" />
-                            <input type="hidden" name="badge" value="" />
-                            <button type="submit" className="w-full sm:w-auto justify-center bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center gap-2"><UserMinus size={14}/> Yetkileri Al</button>
+                            <input type="text" name="nickname" defaultValue={user.nickname} placeholder="Nick Yok" className="bg-black/50 border border-white/10 text-xs sm:text-sm text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-[#4DA3FF] outline-none transition-colors shadow-inner w-full sm:w-32" />
+                            <input type="text" name="badge" defaultValue={user.badge} placeholder="Rozet Yok" className="bg-yellow-500/5 border border-yellow-500/20 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-yellow-500 focus:bg-yellow-500/10 outline-none transition-colors shadow-inner w-full sm:w-32" />
+                            <button type="submit" className="w-full sm:w-auto justify-center bg-[#4DA3FF]/10 text-[#4DA3FF] hover:bg-[#4DA3FF]/20 border border-[#4DA3FF]/20 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center gap-1.5"><Pencil size={14}/> Güncelle</button>
+                          </form>
+
+                          {/* Silme (Tamamen Kaldırma) Formu */}
+                          <form action={removeUserMeta} className="w-full sm:w-auto">
+                             <input type="hidden" name="userUuid" value={user.uuid} />
+                             <button type="submit" className="w-full sm:w-auto justify-center bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center gap-1.5"><Trash2 size={14}/> Kaldır</button>
                           </form>
                         </div>
 
@@ -794,7 +816,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                               <code className="text-[10px] sm:text-xs text-white/90 font-mono bg-black/50 px-2 py-1 rounded-md border border-white/5 block truncate">{post.authorUuid || 'Bilinmiyor'}</code>
                             </div>
                           </div>
-                           
+                            
                           {post.authorUuid && (
                             <form action={updateUserMeta} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full xl:w-auto">
                               <input type="hidden" name="userUuid" value={post.authorUuid} />
@@ -804,7 +826,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                             </form>
                           )}
                         </div>
-                         
+                          
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full justify-between items-stretch sm:items-center pt-3 sm:pt-4 border-t border-white/5 mt-1 relative z-10">
                             <AdminStoryExporter 
                               postContent={post.content} 
