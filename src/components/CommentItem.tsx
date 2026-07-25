@@ -105,14 +105,10 @@ export default function CommentItem({
               </span>
             )}
             
-            {/* 🔥 YORUM YAZARI - KLASİK GRİ ADAM (USER SİLÜETİ) */}
+            {/* 🔥 YORUM YAZARI - HERKES İÇİN GRİ ADAM (USER SİLÜETİ) */}
             <div className={`flex items-center gap-1.5 bg-white/[0.03] pr-3 pl-1.5 py-1 rounded-lg border shadow-sm transition-colors ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
-               <div className={`w-5 h-5 flex items-center justify-center rounded-md ${hasCustomNick ? 'bg-white/10 text-gray-400 border border-white/15' : `${commentAuthor.gradient} text-[10px]` } shadow-inner`}>
-                  {hasCustomNick ? (
-                     <User className="w-3.5 h-3.5 text-gray-400" />
-                  ) : (
-                     commentAuthor.emoji
-                  )}
+               <div className="w-5 h-5 flex items-center justify-center rounded-md bg-white/10 text-gray-400 border border-white/15 shadow-inner">
+                  <User className="w-3.5 h-3.5 text-gray-400" />
                </div>
                <span className={`font-semibold text-[11px] tracking-wide ${hasCustomNick ? 'text-yellow-100' : 'text-gray-200'}`}>
                  @{commentAuthor.name}

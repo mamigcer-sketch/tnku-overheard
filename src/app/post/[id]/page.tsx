@@ -27,30 +27,19 @@ const getRelativeTime = (dateString: string | Date) => {
 
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
-const emojis = ["🦊", "🐼", "🦉", "🦝", "🐨", "🦁", "🐸", "🐙", "🦋", "🦖", "🦄", "🐧", "🐱", "🐶", "🐰", "🐯"];
-const gradients = [
-  "from-blue-400 to-indigo-600", "from-pink-400 to-rose-600", "from-purple-400 to-fuchsia-600",
-  "from-emerald-400 to-teal-600", "from-amber-400 to-orange-600", "from-cyan-400 to-blue-600"
-];
 
 const getAnonymousData = (id: string, customNickname?: string) => {
-  if (!id) return { name: "Gizemli Yolcu", emoji: "👤", gradient: gradients[0] };
+  if (!id) return { name: "Gizemli Yolcu" };
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   const positiveHash = Math.abs(hash);
   
   if (customNickname) {
-    return {
-      name: customNickname,
-      emoji: emojis[positiveHash % emojis.length],
-      gradient: gradients[Math.floor(positiveHash / emojis.length) % gradients.length]
-    };
+    return { name: customNickname };
   }
 
   return {
-    name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`,
-    emoji: emojis[positiveHash % emojis.length],
-    gradient: gradients[Math.floor(positiveHash / emojis.length) % gradients.length]
+    name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`
   };
 };
 
@@ -175,14 +164,10 @@ export default async function PostPage({ params }: any) {
                   </span>
                 )}
                 
-                {/* 🔥 DETAY SAYFASI - KLASİK GRİ ADAM (USER SİLÜETİ) */}
+                {/* 🔥 DETAY SAYFASI - HERKES İÇİN GRİ ADAM */}
                 <span className={`flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
-                  <div className={`w-5 h-5 flex items-center justify-center rounded-md ${hasCustomNick ? 'bg-white/10 text-gray-400 border border-white/15' : `${authorData.gradient} text-[10px]` } shadow-inner`}>
-                    {hasCustomNick ? (
-                      <User className="w-3.5 h-3.5 text-gray-400" />
-                    ) : (
-                      authorData.emoji
-                    )}
+                  <div className="w-5 h-5 flex items-center justify-center rounded-md bg-white/10 text-gray-400 border border-white/15 shadow-inner">
+                    <User className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                   <span className="font-semibold text-[11px] tracking-wide">
                     @{authorData.name}
@@ -220,7 +205,7 @@ export default async function PostPage({ params }: any) {
 
           <div className="flex items-center gap-4 pt-4 border-t border-white/5">
             <div className="flex items-center gap-1.5 bg-pink-500/10 px-4 py-2 rounded-xl border border-pink-500/20 shadow-sm">
-              <Heart size={16} className="text-pink-400 fill-pink-500" /> 
+              <Heart size= {16} className="text-pink-400 fill-pink-500" /> 
               <span className="text-[13px] font-bold text-pink-100">{post.likes}</span>
             </div>
             <div className="flex items-center gap-1.5 bg-white/[0.03] px-4 py-2 rounded-xl border border-white/5 shadow-sm">
