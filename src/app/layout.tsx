@@ -8,7 +8,7 @@ import SyncAuth from '@/components/SyncAuth'; // 🔥 Instagram kimlik sabitleme
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'TNKU Overheard | NKÜ - Namık Kemal Üniversitesi İtiraf',
+  title: 'TNKU Overheard | NKÜ - NKÜ İtiraf',
   description: 'Tekirdağ Namık Kemal Üniversitesi (NKÜ) öğrencilerine özel itiraf, dedikodu ve kampüs platformu. Kampüste olan biteni anonim fısılda!',
   keywords: [
     'NKÜ', 
@@ -48,6 +48,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="tr">
+      <head>
+        {/* 🔥 Google AdSense Doğrulama Kodu */}
+        <script 
+          async 
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1909951189105935" 
+          crossOrigin="anonymous">
+        </script>
+      </head>
       <body className={inter.className}>
         {children}
         
