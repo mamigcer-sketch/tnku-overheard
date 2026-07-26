@@ -189,6 +189,24 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/'); 
   }
 
+  // 🔥 YENİ: Göz Boyama (Beğeni ve İzlenme Manipülasyonu) Fonksiyonu
+  async function updatePostStats(formData: FormData) {
+    'use server';
+    const postId = formData.get('postId') as string;
+    const likes = parseInt(formData.get('likes') as string) || 0;
+    const views = parseInt(formData.get('views') as string) || 0;
+
+    if (!postId) return;
+
+    await prisma.post.update({
+      where: { id: postId },
+      data: { likes, views }
+    });
+
+    revalidatePath('/admin');
+    revalidatePath('/');
+  }
+
   async function deleteComment(formData: FormData) { 
     'use server'; 
     await prisma.comment.delete({ where: { id: formData.get('id') as string } }); 
@@ -301,7 +319,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/');
   }
 
-  // 🔥 YENİ: Tek Tıkla Kullanıcı Verisini Silen Aksiyon
   async function removeUserMeta(formData: FormData) {
     'use server';
     const userUuid = formData.get('userUuid') as string;
@@ -315,7 +332,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard' }, 
     { icon: Rss, label: 'Akış' }, 
-    { icon: Sparkles, label: 'Özel Nickler' },  // 🔥 İsim ve ikon değişti
+    { icon: Sparkles, label: 'Özel Nickler' }, 
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Coffee, label: 'Boş Yap' }, 
@@ -455,11 +472,9 @@ export default async function AdminDashboard({ searchParams }: any) {
 
           <div className="space-y-4 sm:space-y-6">
               
-            {/* 🔥 ÖZEL NİCKLER / KULLANICI YÖNETİMİ PANELİ */}
             {currentTab === 'Özel Nickler' ? (
               <div className="space-y-6 sm:space-y-8">
                  
-                {/* Manuel Ekleme Formu */}
                 <form action={updateUserMeta} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-purple-500/20 space-y-4 sm:space-y-5 shadow-[0_10px_40px_rgba(168,85,247,0.05)] relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-purple-500/10 blur-3xl rounded-full -z-10 group-hover:bg-purple-500/20 transition-colors duration-700" />
                   <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-purple-500/10 rounded-lg sm:rounded-xl border border-purple-500/30"><UserCog className="text-purple-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Kullanıcı Ekle / Rozet Ver</h3>
@@ -484,7 +499,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                   </div>
                 </form>
 
-                {/* Nick Yönetimi Listesi */}
                 <div>
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
                     <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">Sistemdeki Özel Nickler <span className="bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-md text-xs border border-purple-500/30">{customUsers.length}</span></h3>
@@ -512,9 +526,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                           </div>
                         </div>
 
-                        {/* 🔥 HIZLI DÜZENLEME VE SİLME FORMLARI */}
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full xl:w-auto">
-                          {/* Güncelleme Formu */}
                           <form action={updateUserMeta} className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <input type="hidden" name="userUuid" value={user.uuid} />
                             <input type="text" name="nickname" defaultValue={user.nickname} placeholder="Nick Yok" className="bg-black/50 border border-white/10 text-xs sm:text-sm text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-[#4DA3FF] outline-none transition-colors shadow-inner w-full sm:w-32" />
@@ -522,7 +534,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                             <button type="submit" className="w-full sm:w-auto justify-center bg-[#4DA3FF]/10 text-[#4DA3FF] hover:bg-[#4DA3FF]/20 border border-[#4DA3FF]/20 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center gap-1.5"><Pencil size={14}/> Güncelle</button>
                           </form>
 
-                          {/* Silme (Tamamen Kaldırma) Formu */}
                           <form action={removeUserMeta} className="w-full sm:w-auto">
                              <input type="hidden" name="userUuid" value={user.uuid} />
                              <button type="submit" className="w-full sm:w-auto justify-center bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center gap-1.5"><Trash2 size={14}/> Kaldır</button>
@@ -796,12 +807,30 @@ export default async function AdminDashboard({ searchParams }: any) {
                                   <option value="BOSYAP">☕ Boş Yap</option>
                                 </select>
                               </div>
-                              <button type="submit" className="bg-[#4DA3FF] hover:bg-[#3b8fd8] text-black font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(77,163,255,0.3)]">Değişiklikleri Kaydet</button>
+                              <button type="submit" className="bg-[#4DA3FF] hover:bg-[#3b8fd8] text-black font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(77,163,255,0.3)]">Metni Kaydet</button>
                             </div>
+                          </form>
+
+                          {/* 🔥 GÖZ BOYAMA: BEĞENİ VE GÖRÜNTÜLENME MANİPÜLASYONU */}
+                          <form action={updatePostStats} className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
+                            <input type="hidden" name="postId" value={post.id} />
+                            
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">Beğeni:</label>
+                              <input type="number" name="likes" defaultValue={post.likes} className="bg-black border border-white/15 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-pink-500 w-20 font-bold text-center shadow-inner" />
+                            </div>
+
+                            <div className="flex items-center gap-1.5">
+                              <label className="text-[10px] text-[#4DA3FF] font-bold uppercase tracking-wider">İzlenme:</label>
+                              <input type="number" name="views" defaultValue={post.views} className="bg-black border border-white/15 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-[#4DA3FF] w-20 font-bold text-center shadow-inner" />
+                            </div>
+
+                            <button type="submit" className="bg-white/10 hover:bg-white/20 text-white font-black px-4 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all border border-white/10 ml-auto cursor-pointer">
+                              Sayıları Çak 🎯
+                            </button>
                           </form>
                         </details>
 
-                        {/* 🔥 ADMIN PANELİNDE SESİ DİNLEME ALANI */}
                         {post.audioUrl && (
                           <div className="my-2">
                             <AnonymousPlayer audioUrl={post.audioUrl} />
