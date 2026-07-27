@@ -4,8 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export default function BakimPage() {
-  // 🔥 Hedef tarih: 1 Eylül 2026
-  const targetTime = new Date("2026-09-01T00:00:00").getTime();
+  const targetTime = new Date("2026-10-01T00:00:00").getTime();
 
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
@@ -58,14 +57,11 @@ export default function BakimPage() {
         </div>
 
         <div className="space-y-2">
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-neutral-500 bg-neutral-900/80 px-3 py-1.5 rounded-full border border-white/5">
-            Sistem Güncelleniyor
-          </span>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tighter text-white">
             BAKIMDAYIZ
           </h1>
           <p className="text-neutral-400 text-xs sm:text-sm font-medium px-4">
-            Değirmenaltı'nın nabzını daha güçlü tutmak için altyapıyı yeniliyoruz. Çok yakındayız.
+            HEPİNİZİ YERİM, SAYAÇ BİTTİĞİNDE BURDA OLUNN! <br />
           </p>
         </div>
 
