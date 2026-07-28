@@ -2,43 +2,38 @@
 
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
-import { sendMessage } from "./actions";
+import { sendMessage, getChatData } from "./actions";
 import { Home, Send, User } from "lucide-react";
 import Link from "next/link";
-import BackButton from "@/components/BackButton"; // Kendi BackButton'unun yolu doğru değilse düzeltirsin
-
-const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
-const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
-
-const getAnonymousData = (id: string) => {
-  if (!id) return { name: "Gizemli Yolcu" };
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  const positiveHash = Math.abs(hash);
-  return { name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}` };
-};
+import BackButton from "@/components/BackButton"; 
 
 export default function GlobalChatPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
+  
   const [myId, setMyId] = useState("");
+  const [nicknames, setNicknames] = useState<any>({});
+  const [badges, setBadges] = useState<any>({});
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Kendi yolladığımız mesajı sağda göstermek için tarayıcıdan ID okuyoruz
+  // Sayfa açıldığında sunucudan senin kimliğini ve herkesin nickini çekiyor
   useEffect(() => {
-    const cookies = document.cookie.split(';');
-    const authorCookie = cookies.find(c => c.trim().startsWith('tnku_author_id='));
-    if (authorCookie) setMyId(authorCookie.split('=')[1]);
+    const loadUserData = async () => {
+      const data = await getChatData();
+      setMyId(data.userUuid);
+      setNicknames(data.customNicknamesMap);
+      setBadges(data.userBadgesMap);
+    };
+    loadUserData();
   }, []);
 
-  // Mesajlar her güncellendiğinde en alta kaydır
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
   useEffect(() => { scrollToBottom(); }, [messages]);
 
   useEffect(() => {
-    // Önce eski mesajları (son 50 tane) getir
     const fetchInitialMessages = async () => {
       const { data } = await supabase
         .from('ChatMessage')
@@ -50,7 +45,6 @@ export default function GlobalChatPage() {
     };
     fetchInitialMessages();
 
-    // Supabase REALTIME - Yeni mesaj geldiği an ekrana bas!
     const channel = supabase
       .channel("realtime:chat")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ChatMessage" }, (payload) => {
@@ -65,16 +59,15 @@ export default function GlobalChatPage() {
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputValue.trim()) return;
+    if (!inputValue.trim() || !myId) return;
     const msg = inputValue;
-    setInputValue(""); // İnputu hemen temizle, hissiyat hızlı olsun
-    await sendMessage(msg); // Veritabanına gönder
+    setInputValue(""); 
+    await sendMessage(msg); 
   };
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white flex flex-col h-screen">
       
-      {/* Üst Header */}
       <header className="sticky top-0 z-50 bg-[#121212]/90 backdrop-blur-md border-b border-white/5 px-4 py-4 md:px-8 shadow-sm">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Link href="/" className="hover:opacity-80 transition-opacity flex items-center gap-2">
@@ -90,7 +83,6 @@ export default function GlobalChatPage() {
         </div>
       </header>
 
-      {/* Mesajların Aktığı Alan */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4 max-w-3xl mx-auto w-full pb-32 custom-scrollbar">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-gray-500 text-sm font-medium">
@@ -98,15 +90,29 @@ export default function GlobalChatPage() {
           </div>
         )}
 
-        {messages.map((msg) => {
-          const isMe = msg.authorUuid === myId;
-          const author = getAnonymousData(msg.authorUuid);
+        {messages.map((msg, index) => {
+          // Veritabanından gelen büyük/küçük harf ezilmelerini toparlıyoruz (Yazılar artık boş gelmeyecek)
+          const rawAuthorId = msg.authorUuid || msg.authoruuid || msg.author_uuid || "";
+          const rawContent = msg.content || msg.message || msg.text || "";
+          
+          const isMe = rawAuthorId === myId;
+          
+          // Gerçek sitedeki nickini bul, eğer nick almamışsa "Anonim Öğrenci" yaz
+          const displayName = nicknames[rawAuthorId] || "Anonim Öğrenci";
+          const userBadge = badges[rawAuthorId];
           
           return (
-            <div key={msg.id} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+            <div key={msg.id || index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               {!isMe && (
-                <span className="text-[10px] text-gray-400 font-bold mb-1 ml-1 flex items-center gap-1">
-                  <User size={10} /> {author.name}
+                <span className="text-[11px] text-gray-400 font-bold mb-1 ml-1 flex items-center gap-1.5">
+                  <User size={10} /> 
+                  {displayName}
+                  {/* Eğer kullanıcının rozeti varsa isminin yanında göster */}
+                  {userBadge && (
+                    <span className="bg-[#4DA3FF]/20 text-[#4DA3FF] px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">
+                      {userBadge}
+                    </span>
+                  )}
                 </span>
               )}
               <div 
@@ -116,16 +122,15 @@ export default function GlobalChatPage() {
                     : 'bg-[#1A1A1A] text-gray-100 border border-white/5 rounded-bl-sm'
                 }`}
               >
-                {msg.content}
+                {/* Hata olması durumuna karşı tuzağımız duruyor, boş veri gelirse JSON basacak */}
+                {rawContent ? rawContent : JSON.stringify(msg)}
               </div>
             </div>
           );
         })}
-        {/* En alta inmek için referans divi */}
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Mesaj Gönderme Kutusu */}
       <div className="fixed bottom-0 left-0 right-0 bg-[#0B0B0B] border-t border-white/10 p-3 pb-6 sm:pb-3">
         <form onSubmit={handleSend} className="max-w-3xl mx-auto relative flex items-center">
           <input
