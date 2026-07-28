@@ -5,9 +5,10 @@ import { cookies } from 'next/headers';
 
 export async function getChatData() {
   const cookieStore = await cookies();
-  const userUuid = cookieStore.get('user_uuid')?.value || '';
+  
+  // 🔥 ÇİFTE SİGORTA: Sitede hangi çerez kullanılıyorsa onu yakalayacak!
+  const userUuid = cookieStore.get('user_uuid')?.value || cookieStore.get('tnku_author_id')?.value || '';
 
-  // 🔥 ŞAHESER DOKUNUŞ: Nickler ve rozetlerle birlikte SON 50 MESAJI da Prisma ile çekiyoruz!
   const [customNicknamesDb, userBadgesDb, initialMessagesDb] = await Promise.all([
     (prisma as any).customNickname.findMany().catch(() => []),
     (prisma as any).userBadge.findMany().catch(() => []),
@@ -27,7 +28,6 @@ export async function getChatData() {
     return acc;
   }, {});
 
-  // Mesajları en eskiden en yeniye doğru sıralıyoruz ki sohbet akışı düzgün görünsün
   const initialMessages = (initialMessagesDb || []).reverse();
 
   return { userUuid, customNicknamesMap, userBadgesMap, initialMessages };

@@ -45,7 +45,6 @@ export default function GlobalChatPage() {
       setNicknames(data.customNicknamesMap);
       setBadges(data.userBadgesMap);
       
-      // 🔥 EFSANE DOKUNUŞ: Sayfa açılır açılmaz Prisma'dan gelen son 50 mesajı ekrana basıyoruz!
       if (data.initialMessages) {
         setMessages(data.initialMessages);
       }
@@ -59,7 +58,6 @@ export default function GlobalChatPage() {
   useEffect(() => { scrollToBottom(); }, [messages]);
 
   useEffect(() => {
-    // Sadece Canlı Yayın (Realtime) dinleyicisi kaldı. Supabase engellerini tamamen by-pass ettik!
     const channel = supabase
       .channel("realtime:chat")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ChatMessage" }, (payload) => {
@@ -99,13 +97,18 @@ export default function GlobalChatPage() {
         </div>
       </header>
 
-      {/* Akıllı Uyarı: Sadece nicki olmayanlara görünür! */}
-      {!nicknames[myId] && (
-        <div className="bg-[#4DA3FF]/10 border-b border-[#4DA3FF]/20 py-2.5 px-4 flex items-center justify-center text-[#4DA3FF] text-[11px] sm:text-xs font-bold gap-1.5 tracking-wide">
-          <Info size={14} />
-          NİCKİNİ BELİRLE KISMINDAN NİCKİNİ AL!
+      {/* 🔥 UYARI BÖLÜMÜ: Hem nick al uyarısı, hem de 50 mesaj bilgisi */}
+      <div className="flex flex-col w-full z-40">
+        {!nicknames[myId] && (
+          <div className="bg-[#4DA3FF]/10 border-b border-[#4DA3FF]/20 py-2.5 px-4 flex items-center justify-center text-[#4DA3FF] text-[11px] sm:text-xs font-bold gap-1.5 tracking-wide">
+            <Info size={14} className="shrink-0" />
+            NİCKİNİ BELİRLE KISMINDAN NİCKİNİ AL!
+          </div>
+        )}
+        <div className="bg-white/[0.02] border-b border-white/5 py-1.5 px-4 flex items-center justify-center text-gray-500 text-[10px] sm:text-[11px] font-medium tracking-wide">
+          Sohbet akışını korumak için sadece son 50 mesaj gösterilir.
         </div>
-      )}
+      </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4 max-w-3xl mx-auto w-full pb-32 custom-scrollbar">
         {messages.length === 0 && (
