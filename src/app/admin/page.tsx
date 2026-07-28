@@ -73,7 +73,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-  const [total, pending, approved, rejected, aggregateStats, reportsCount, recentPostsCount, recentCommentsCount, recentAuthors] = await Promise.all([
+  const [total, pending, approved, rejected, aggregateStats, reportsCount, recentPostsCount, recentCommentsCount, recentAuthors, chatCount] = await Promise.all([
     prisma.post.count(),
     prisma.post.count({ where: { status: 'PENDING' } }),
     prisma.post.count({ where: { status: 'APPROVED' } }),
@@ -86,7 +86,8 @@ export default async function AdminDashboard({ searchParams }: any) {
       where: { createdAt: { gte: oneHourAgo } },
       select: { authorUuid: true },
       distinct: ['authorUuid']
-    })
+    }),
+    (prisma as any).chatMessage ? (prisma as any).chatMessage.count() : Promise.resolve(0)
   ]);
 
   const totalLikes = aggregateStats._sum.likes || 0;
@@ -95,6 +96,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   let displayPosts: any[] = [];
   let displayComments: any[] = [];
+  let displayChatMessages: any[] = [];
   let announcements: any[] = [];
   let countdowns: any[] = [];
   let bannedUsers: any[] = [];
@@ -123,6 +125,10 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   if (currentTab === 'Yorumlar') {
     displayComments = await prisma.comment.findMany({ orderBy: { createdAt: 'desc' }, include: { post: { select: { content: true, type: true } } } });
+  } else if (currentTab === 'Lobi Sohbet') {
+    try {
+      displayChatMessages = await (prisma as any).chatMessage.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
+    } catch (e) {}
   } else if (currentTab === 'Duyurular') {
     announcements = await (prisma as any).announcement.findMany({ orderBy: { createdAt: 'desc' } });
   } else if (currentTab === 'Sayaç') {
@@ -189,7 +195,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/'); 
   }
 
-  // 🔥 YENİ: Göz Boyama (Beğeni ve İzlenme Manipülasyonu) Fonksiyonu
   async function updatePostStats(formData: FormData) {
     'use server';
     const postId = formData.get('postId') as string;
@@ -211,6 +216,18 @@ export default async function AdminDashboard({ searchParams }: any) {
     'use server'; 
     await prisma.comment.delete({ where: { id: formData.get('id') as string } }); 
     revalidatePath('/admin'); 
+  }
+
+  // 🔥 YENİ: Lobi Mesajını Silme Action'ı
+  async function deleteChatMessage(formData: FormData) {
+    'use server';
+    const id = formData.get('id') as string;
+    if (!id) return;
+    try {
+      await (prisma as any).chatMessage.delete({ where: { id } });
+    } catch (e) {}
+    revalidatePath('/admin');
+    revalidatePath('/sohbet');
   }
 
   async function banUser(formData: FormData) { 
@@ -338,6 +355,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: Coffee, label: 'Boş Yap' }, 
     { icon: Inbox, label: 'Bekleyenler', badge: pending },
     { icon: MessageSquare, label: 'Yorumlar' },
+    { icon: Radio, label: 'Lobi Sohbet', badge: chatCount }, // 🔥 YENİ: Lobi Sekmesi Eklendi
     { icon: Flag, label: 'Şikayetler', badge: reportsCount },
     { icon: Bell, label: 'Duyurular' },
     { icon: Timer, label: 'Sayaç' },
@@ -387,8 +405,8 @@ export default async function AdminDashboard({ searchParams }: any) {
         
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-10 pb-4 sm:pb-6 border-b border-white/5 gap-3 sm:gap-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold flex items-center gap-3 sm:gap-4 tracking-tight">
-              <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border ${currentTab === 'Yorumlar' ? 'bg-blue-500/10 border-blue-500/20' : currentTab === 'Özel Nickler' ? 'bg-purple-500/10 border-purple-500/20' : currentTab === 'Duyurular' ? 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20' : currentTab === 'Sayaç' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Banlar' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Şikayetler' ? 'bg-red-500/10 border-red-500/20' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20'}`}>
-                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Özel Nickler' ? <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
+              <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border ${currentTab === 'Yorumlar' ? 'bg-blue-500/10 border-blue-500/20' : currentTab === 'Lobi Sohbet' ? 'bg-emerald-500/10 border-emerald-500/20' : currentTab === 'Özel Nickler' ? 'bg-purple-500/10 border-purple-500/20' : currentTab === 'Duyurular' ? 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20' : currentTab === 'Sayaç' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Banlar' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Şikayetler' ? 'bg-red-500/10 border-red-500/20' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20'}`}>
+                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Lobi Sohbet' ? <Radio className="text-emerald-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Özel Nickler' ? <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
               </div>
               {currentTab} Paneli
             </h2>
@@ -403,7 +421,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
         <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           
-          {currentTab !== 'Yorumlar' && currentTab !== 'Özel Nickler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
+          {currentTab !== 'Yorumlar' && currentTab !== 'Lobi Sohbet' && currentTab !== 'Özel Nickler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
             <>
               <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 sm:gap-8 mb-6 sm:mb-8 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-green-500/5 rounded-full blur-3xl -z-10 group-hover:bg-green-500/10 transition-colors duration-700" />
@@ -475,7 +493,7 @@ export default async function AdminDashboard({ searchParams }: any) {
             {currentTab === 'Özel Nickler' ? (
               <div className="space-y-6 sm:space-y-8">
                  
-                <form action={updateUserMeta} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-purple-500/20 space-y-4 sm:space-y-5 shadow-[0_10px_40px_rgba(168,85,247,0.05)] relative overflow-hidden group">
+              <form action={updateUserMeta} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-purple-500/20 space-y-4 sm:space-y-5 shadow-[0_10px_40px_rgba(168,85,247,0.05)] relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-purple-500/10 blur-3xl rounded-full -z-10 group-hover:bg-purple-500/20 transition-colors duration-700" />
                   <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-purple-500/10 rounded-lg sm:rounded-xl border border-purple-500/30"><UserCog className="text-purple-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Kullanıcı Ekle / Rozet Ver</h3>
                   <p className="text-gray-400 text-xs sm:text-sm font-medium mb-2">Kullanıcının UUID'sini buraya yapıştırıp ona manuel olarak özel nick veya VIP rozeti atayabilirsin.</p>
@@ -542,11 +560,11 @@ export default async function AdminDashboard({ searchParams }: any) {
 
                       </div>
                       ))}
-                    </div>
-                  )}
-                </div>
-
+                  </div>
+                )}
               </div>
+
+            </div>
 
             ) : currentTab === 'Yorumlar' ? (
               displayComments.map((comment) => (
@@ -588,6 +606,69 @@ export default async function AdminDashboard({ searchParams }: any) {
                   </div>
                 </article>
               ))
+
+            // 🔥 YENİ: Lobi Sohbet Sekmesi Arayüzü
+            ) : currentTab === 'Lobi Sohbet' ? (
+              <div className="space-y-4">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Radio className="text-emerald-400 animate-pulse" size={24} />
+                    <div>
+                      <h3 className="text-white font-bold text-sm sm:text-base">Global Lobi Canlı Akış Yönetimi</h3>
+                      <p className="text-gray-400 text-xs">Buradan lobiye atılan son mesajları inceleyebilir, uygunsuz olanları silebilir veya yazarlarını banlayabilirsin.</p>
+                    </div>
+                  </div>
+                  <span className="text-xs font-black bg-emerald-500/20 text-emerald-300 px-3 py-1 rounded-full">{displayChatMessages.length} Mesaj</span>
+                </div>
+
+                {displayChatMessages.length === 0 ? (
+                  <div className="text-center py-16 bg-white/[0.01] rounded-[24px] border border-dashed border-white/10 text-gray-500 text-sm">
+                    Lobide henüz hiç mesaj atılmamış veya tablo boş.
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {displayChatMessages.map((msg: any) => {
+                      const authorNick = customNicknamesMap[msg.authorUuid] || getAuthorName(msg.authorUuid);
+                      const authorBadge = userBadgesMap[msg.authorUuid];
+
+                      return (
+                        <div key={msg.id} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-5 rounded-2xl border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md">
+                          <div className="space-y-1.5 flex-1 overflow-hidden">
+                            <div className="flex items-center gap-2 text-xs flex-wrap">
+                              <span className="font-bold text-white bg-white/10 px-2 py-0.5 rounded-md">@{authorNick}</span>
+                              {authorBadge && <span className="bg-yellow-500/10 text-yellow-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{authorBadge}</span>}
+                              <span className="text-gray-500">•</span>
+                              <span className="text-gray-400">{new Date(msg.createdAt).toLocaleString('tr-TR')}</span>
+                            </div>
+                            <p className="text-sm text-gray-200 font-medium break-words bg-black/40 p-3 rounded-xl border border-white/5">
+                              {msg.content}
+                            </p>
+                            <code className="text-[10px] text-gray-500 font-mono block">UUID: {msg.authorUuid}</code>
+                          </div>
+
+                          <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
+                            {msg.authorUuid && (
+                              <form action={banUser}>
+                                <input type="hidden" name="userUuid" value={msg.authorUuid} />
+                                <button type="submit" className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition-colors">
+                                  <Ban size={14} /> Banla
+                                </button>
+                              </form>
+                            )}
+                            <form action={deleteChatMessage}>
+                              <input type="hidden" name="id" value={msg.id} />
+                              <button type="submit" className="flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition-colors">
+                                <Trash2 size={14} /> Mesajı Sil
+                              </button>
+                            </form>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
             ) : currentTab === 'Duyurular' ? (
               <div className="space-y-6 sm:space-y-8">
                 <form action={createAnnouncement} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 space-y-4 sm:space-y-5 shadow-2xl relative overflow-hidden">
@@ -670,7 +751,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                 <div className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-red-600/10 blur-3xl rounded-full -z-10" />
                   <h3 className="text-lg sm:text-xl font-black text-white mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-red-500/10 rounded-lg sm:rounded-xl border border-red-500/20"><Ban className="text-red-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Engellenen Yazarlar <span className="text-xs sm:text-sm text-red-400 bg-red-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-red-500/20">{bannedUsers.length}</span></h3>
-                   
+                  
                   {bannedUsers.length === 0 ? (
                     <p className="text-center text-gray-500 text-sm font-medium py-8 sm:py-10 bg-black/30 rounded-xl sm:rounded-2xl border border-dashed border-white/10">Sistemde hiç banlı kullanıcı bulunmuyor. Herkes uslu!</p>
                   ) : (
@@ -687,7 +768,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                             <button className="w-full bg-green-500/10 text-green-400 border border-green-500/20 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-green-500/20 hover:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all">Banı Kaldır / Affet</button>
                           </form>
                         </div>
-                        ))}
+                      ))}
                     </div>
                   )}
                 </div>
@@ -783,7 +864,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                             {post.status === 'PENDING' ? '🔥 BEKLİYOR' : post.status === 'APPROVED' ? 'YAYINDA' : 'RED'}
                           </span>
                         </div>
-   
+    
                         <details className="group/edit relative z-10">
                           <summary className="list-none cursor-pointer">
                             <div className="flex justify-between items-start gap-4">
@@ -797,7 +878,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                               <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Gönderi Metni</label>
                               <textarea name="content" defaultValue={post.content} className="w-full bg-black/60 border border-white/15 rounded-xl p-3.5 text-sm text-white outline-none focus:border-[#4DA3FF] resize-none h-28 shadow-inner"></textarea>
                             </div>
-                            
+                             
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-white/5">
                               <div className="flex items-center gap-2">
                                 <label className="text-xs text-gray-300 font-extrabold uppercase tracking-wider">Kategori Seç:</label>
@@ -808,27 +889,26 @@ export default async function AdminDashboard({ searchParams }: any) {
                                 </select>
                               </div>
                               <button type="submit" className="bg-[#4DA3FF] hover:bg-[#3b8fd8] text-black font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(77,163,255,0.3)]">Metni Kaydet</button>
-                            </div>
-                          </form>
+                          </div>
+                        </form>
 
-                          {/* 🔥 GÖZ BOYAMA: BEĞENİ VE GÖRÜNTÜLENME MANİPÜLASYONU */}
-                          <form action={updatePostStats} className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
-                            <input type="hidden" name="postId" value={post.id} />
-                            
-                            <div className="flex items-center gap-1.5">
-                              <label className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">Beğeni:</label>
-                              <input type="number" name="likes" defaultValue={post.likes} className="bg-black border border-white/15 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-pink-500 w-20 font-bold text-center shadow-inner" />
-                            </div>
+                        <form action={updatePostStats} className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
+                          <input type="hidden" name="postId" value={post.id} />
+                           
+                          <div className="flex items-center gap-1.5">
+                            <label className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">Beğeni:</label>
+                            <input type="number" name="likes" defaultValue={post.likes} className="bg-black border border-white/15 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-pink-500 w-20 font-bold text-center shadow-inner" />
+                          </div>
 
-                            <div className="flex items-center gap-1.5">
-                              <label className="text-[10px] text-[#4DA3FF] font-bold uppercase tracking-wider">İzlenme:</label>
-                              <input type="number" name="views" defaultValue={post.views} className="bg-black border border-white/15 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-[#4DA3FF] w-20 font-bold text-center shadow-inner" />
-                            </div>
+                          <div className="flex items-center gap-1.5">
+                            <label className="text-[10px] text-[#4DA3FF] font-bold uppercase tracking-wider">İzlenme:</label>
+                            <input type="number" name="views" defaultValue={post.views} className="bg-black border border-white/15 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-[#4DA3FF] w-20 font-bold text-center shadow-inner" />
+                          </div>
 
-                            <button type="submit" className="bg-white/10 hover:bg-white/20 text-white font-black px-4 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all border border-white/10 ml-auto cursor-pointer">
-                              Sayıları Çak 🎯
-                            </button>
-                          </form>
+                          <button type="submit" className="bg-white/10 hover:bg-white/20 text-white font-black px-4 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all border border-white/10 ml-auto cursor-pointer">
+                            Sayıları Çak 🎯
+                          </button>
+                        </form>
                         </details>
 
                         {post.audioUrl && (
@@ -845,7 +925,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                               <code className="text-[10px] sm:text-xs text-white/90 font-mono bg-black/50 px-2 py-1 rounded-md border border-white/5 block truncate">{post.authorUuid || 'Bilinmiyor'}</code>
                             </div>
                           </div>
-                            
+                             
                           {post.authorUuid && (
                             <form action={updateUserMeta} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full xl:w-auto">
                               <input type="hidden" name="userUuid" value={post.authorUuid} />
