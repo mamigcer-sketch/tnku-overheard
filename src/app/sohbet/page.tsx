@@ -17,11 +17,23 @@ export default function GlobalChatPage() {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // Sayfa açıldığında sunucudan senin kimliğini ve herkesin nickini çekiyor
+ // Sayfa açıldığında sunucudan senin kimliğini ve herkesin nickini çekiyor
   useEffect(() => {
     const loadUserData = async () => {
       const data = await getChatData();
-      setMyId(data.userUuid);
+      
+      let finalId = data.userUuid;
+      if (!finalId) {
+        // 🔥 ÇÖZÜM BURADA: Sonuna ' || "" ' ekleyerek TypeScript'in null korkusunu yendik!
+        finalId = localStorage.getItem('tnku_chat_anon_id') || "";
+        
+        if (!finalId) {
+          finalId = 'anon_' + Math.random().toString(36).substring(2);
+          localStorage.setItem('tnku_chat_anon_id', finalId);
+        }
+      }
+      
+      setMyId(finalId);
       setNicknames(data.customNicknamesMap);
       setBadges(data.userBadgesMap);
     };
@@ -62,7 +74,9 @@ export default function GlobalChatPage() {
     if (!inputValue.trim() || !myId) return;
     const msg = inputValue;
     setInputValue(""); 
-    await sendMessage(msg); 
+    
+    // 🔥 DEĞİŞTİRİLDİ: Mesaj atarken o anki kimliği (myId) zorunlu olarak server'a paslıyoruz!
+    await sendMessage(msg, myId); 
   };
 
   return (
@@ -91,13 +105,11 @@ export default function GlobalChatPage() {
         )}
 
         {messages.map((msg, index) => {
-          // Veritabanından gelen büyük/küçük harf ezilmelerini toparlıyoruz (Yazılar artık boş gelmeyecek)
           const rawAuthorId = msg.authorUuid || msg.authoruuid || msg.author_uuid || "";
           const rawContent = msg.content || msg.message || msg.text || "";
           
           const isMe = rawAuthorId === myId;
           
-          // Gerçek sitedeki nickini bul, eğer nick almamışsa "Anonim Öğrenci" yaz
           const displayName = nicknames[rawAuthorId] || "Anonim Öğrenci";
           const userBadge = badges[rawAuthorId];
           
@@ -107,7 +119,6 @@ export default function GlobalChatPage() {
                 <span className="text-[11px] text-gray-400 font-bold mb-1 ml-1 flex items-center gap-1.5">
                   <User size={10} /> 
                   {displayName}
-                  {/* Eğer kullanıcının rozeti varsa isminin yanında göster */}
                   {userBadge && (
                     <span className="bg-[#4DA3FF]/20 text-[#4DA3FF] px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider">
                       {userBadge}
@@ -122,7 +133,6 @@ export default function GlobalChatPage() {
                     : 'bg-[#1A1A1A] text-gray-100 border border-white/5 rounded-bl-sm'
                 }`}
               >
-                {/* Hata olması durumuna karşı tuzağımız duruyor, boş veri gelirse JSON basacak */}
                 {rawContent ? rawContent : JSON.stringify(msg)}
               </div>
             </div>

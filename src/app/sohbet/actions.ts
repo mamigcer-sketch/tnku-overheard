@@ -26,19 +26,15 @@ export async function getChatData() {
   return { userUuid, customNicknamesMap, userBadgesMap };
 }
 
-// Mesaj gönderirken tarayıcıdaki gerçek "user_uuid" çerezini kullanıyoruz
-export async function sendMessage(content: string) {
-  if (!content || content.trim() === '') return;
-
-  const cookieStore = await cookies();
-  const userUuid = cookieStore.get('user_uuid')?.value;
-
-  if (!userUuid) return; // ID'si olmayan mesaj atamasın
+// 🔥 DEĞİŞTİRİLDİ: Mesaj gönderirken çerez aramak yerine ID'yi direkt parametre (authorId) olarak alıyoruz. 
+// Bu sayede çerezi olmayanlar engellenmeyecek!
+export async function sendMessage(content: string, authorId: string) {
+  if (!content || content.trim() === '' || !authorId) return;
 
   await prisma.chatMessage.create({
     data: {
       content: content.trim(),
-      authorUuid: userUuid,
+      authorUuid: authorId,
     },
   });
 }
