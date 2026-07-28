@@ -3,9 +3,20 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { sendMessage, getChatData } from "./actions";
-import { Home, Send, User } from "lucide-react";
+import { Home, Send, User, Info } from "lucide-react"; 
 import Link from "next/link";
 import BackButton from "@/components/BackButton"; 
+
+const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare"];
+const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek"];
+
+const getAnonymousData = (id: string) => {
+  if (!id) return "Gizemli Yolcu";
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  const positiveHash = Math.abs(hash);
+  return `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`;
+};
 
 export default function GlobalChatPage() {
   const [messages, setMessages] = useState<any[]>([]);
@@ -17,16 +28,13 @@ export default function GlobalChatPage() {
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
- // Sayfa açıldığında sunucudan senin kimliğini ve herkesin nickini çekiyor
   useEffect(() => {
     const loadUserData = async () => {
       const data = await getChatData();
       
       let finalId = data.userUuid;
       if (!finalId) {
-        // 🔥 ÇÖZÜM BURADA: Sonuna ' || "" ' ekleyerek TypeScript'in null korkusunu yendik!
         finalId = localStorage.getItem('tnku_chat_anon_id') || "";
-        
         if (!finalId) {
           finalId = 'anon_' + Math.random().toString(36).substring(2);
           localStorage.setItem('tnku_chat_anon_id', finalId);
@@ -36,6 +44,11 @@ export default function GlobalChatPage() {
       setMyId(finalId);
       setNicknames(data.customNicknamesMap);
       setBadges(data.userBadgesMap);
+      
+      // 🔥 EFSANE DOKUNUŞ: Sayfa açılır açılmaz Prisma'dan gelen son 50 mesajı ekrana basıyoruz!
+      if (data.initialMessages) {
+        setMessages(data.initialMessages);
+      }
     };
     loadUserData();
   }, []);
@@ -46,17 +59,7 @@ export default function GlobalChatPage() {
   useEffect(() => { scrollToBottom(); }, [messages]);
 
   useEffect(() => {
-    const fetchInitialMessages = async () => {
-      const { data } = await supabase
-        .from('ChatMessage')
-        .select('*')
-        .order('createdAt', { ascending: false })
-        .limit(50);
-      
-      if (data) setMessages(data.reverse());
-    };
-    fetchInitialMessages();
-
+    // Sadece Canlı Yayın (Realtime) dinleyicisi kaldı. Supabase engellerini tamamen by-pass ettik!
     const channel = supabase
       .channel("realtime:chat")
       .on("postgres_changes", { event: "INSERT", schema: "public", table: "ChatMessage" }, (payload) => {
@@ -75,7 +78,6 @@ export default function GlobalChatPage() {
     const msg = inputValue;
     setInputValue(""); 
     
-    // 🔥 DEĞİŞTİRİLDİ: Mesaj atarken o anki kimliği (myId) zorunlu olarak server'a paslıyoruz!
     await sendMessage(msg, myId); 
   };
 
@@ -97,6 +99,14 @@ export default function GlobalChatPage() {
         </div>
       </header>
 
+      {/* Akıllı Uyarı: Sadece nicki olmayanlara görünür! */}
+      {!nicknames[myId] && (
+        <div className="bg-[#4DA3FF]/10 border-b border-[#4DA3FF]/20 py-2.5 px-4 flex items-center justify-center text-[#4DA3FF] text-[11px] sm:text-xs font-bold gap-1.5 tracking-wide">
+          <Info size={14} />
+          NİCKİNİ BELİRLE KISMINDAN NİCKİNİ AL!
+        </div>
+      )}
+
       <div className="flex-1 overflow-y-auto p-4 space-y-4 max-w-3xl mx-auto w-full pb-32 custom-scrollbar">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-gray-500 text-sm font-medium">
@@ -110,7 +120,7 @@ export default function GlobalChatPage() {
           
           const isMe = rawAuthorId === myId;
           
-          const displayName = nicknames[rawAuthorId] || "Anonim Öğrenci";
+          const displayName = nicknames[rawAuthorId] || getAnonymousData(rawAuthorId);
           const userBadge = badges[rawAuthorId];
           
           return (

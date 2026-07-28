@@ -9,7 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
-import { MessageSquareHeart, Bell, MessageCircle } from 'lucide-react'; // 🔥 MessageCircle EKLENDİ
+import { MessageSquareHeart, Bell, MessageCircle } from 'lucide-react';
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -141,7 +141,6 @@ export default async function Home({ searchParams }: any) {
           <h1 className="text-base sm:text-xl font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
         </Link>
         
-        {/* 🔥 SAĞ ÜST KÖŞE - YENİ DÜZEN */}
         <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
           <RefreshButton />
           
@@ -153,20 +152,8 @@ export default async function Home({ searchParams }: any) {
             <span>Beğendiklerim</span>
           </Link>
 
-          {/* 🔥 DİKKAT ÇEKİCİ CANLI CHAT BUTONU */}
-          <Link 
-            href="/sohbet" 
-            className="relative flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-[#4DA3FF]/10 to-[#4DA3FF]/5 hover:from-[#4DA3FF]/20 hover:to-[#4DA3FF]/10 border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/40 transition-all group shadow-[0_0_15px_rgba(77,163,255,0.1)]"
-          >
-            <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-emerald-500"></span>
-            </span>
-            <span className="text-[11px] sm:text-[13px] font-black tracking-wide text-white group-hover:text-[#4DA3FF] transition-colors whitespace-nowrap">
-              CANLI CHAT
-            </span>
-          </Link>
-
+          {/* 🔥 Lobi butonu buradan kalktı, menü rahatladı! */}
+          
           <NotificationBell notifications={notifications} />
           <MobileMenu />
         </div>
@@ -193,7 +180,7 @@ export default async function Home({ searchParams }: any) {
           <SearchBar />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-5 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-transparent backdrop-blur-md pt-2 px-1">
+        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-transparent backdrop-blur-md pt-2 px-1">
           {filters.map((filter) => {
             const isActive = currentFilter === filter;
             
@@ -221,6 +208,36 @@ export default async function Home({ searchParams }: any) {
             )
           })}
         </div>
+
+        {/* 🔥 YENİ EFSANE LOBİ KARTI BURADA (Filtrelerin Altı) */}
+        <Link href="/sohbet" className="block mb-6 relative group z-10 mx-1">
+          <div className="absolute inset-0 bg-gradient-to-r from-[#4DA3FF]/10 to-emerald-500/10 rounded-[20px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
+          <div className="relative bg-[#121212]/90 backdrop-blur-xl border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/40 rounded-[20px] p-4 flex items-center justify-between transition-all overflow-hidden shadow-lg">
+            
+            {/* Arka plan ışık detayı */}
+            <div className="absolute right-0 top-0 w-32 h-32 bg-[#4DA3FF]/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
+
+            <div className="flex items-center gap-4">
+              <div className="relative flex h-3 w-3 shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
+              </div>
+              
+              <div>
+                <h3 className="text-white text-[15px] sm:text-base font-extrabold tracking-tight flex items-center gap-2">
+                  GLOBAL LOBİ <span className="bg-[#4DA3FF]/20 text-[#4DA3FF] text-[9px] px-1.5 py-0.5 rounded flex items-center tracking-widest font-black uppercase">Canlı</span>
+                </h3>
+                <p className="text-gray-400 text-[12px] sm:text-[13px] font-medium mt-0.5">
+                  Kampüs şimdi ne konuşuyor? Hemen sohbete katıl!
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-[#4DA3FF]/10 p-2.5 rounded-full text-[#4DA3FF] group-hover:bg-[#4DA3FF] group-hover:text-white transition-colors shrink-0">
+              <MessageCircle size={20} className="transform group-hover:scale-110 transition-transform" />
+            </div>
+          </div>
+        </Link>
 
         <div className="space-y-5 relative z-10">
           {posts.length === 0 ? (

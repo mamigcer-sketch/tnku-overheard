@@ -3,14 +3,18 @@
 import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
 
-// Sitedeki orijinal nickleri ve rozetleri çekiyoruz
 export async function getChatData() {
   const cookieStore = await cookies();
   const userUuid = cookieStore.get('user_uuid')?.value || '';
 
-  const [customNicknamesDb, userBadgesDb] = await Promise.all([
+  // 🔥 ŞAHESER DOKUNUŞ: Nickler ve rozetlerle birlikte SON 50 MESAJI da Prisma ile çekiyoruz!
+  const [customNicknamesDb, userBadgesDb, initialMessagesDb] = await Promise.all([
     (prisma as any).customNickname.findMany().catch(() => []),
-    (prisma as any).userBadge.findMany().catch(() => [])
+    (prisma as any).userBadge.findMany().catch(() => []),
+    (prisma as any).chatMessage.findMany({
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    }).catch(() => [])
   ]);
 
   const customNicknamesMap = (customNicknamesDb || []).reduce((acc: any, curr: any) => {
@@ -23,11 +27,12 @@ export async function getChatData() {
     return acc;
   }, {});
 
-  return { userUuid, customNicknamesMap, userBadgesMap };
+  // Mesajları en eskiden en yeniye doğru sıralıyoruz ki sohbet akışı düzgün görünsün
+  const initialMessages = (initialMessagesDb || []).reverse();
+
+  return { userUuid, customNicknamesMap, userBadgesMap, initialMessages };
 }
 
-// 🔥 DEĞİŞTİRİLDİ: Mesaj gönderirken çerez aramak yerine ID'yi direkt parametre (authorId) olarak alıyoruz. 
-// Bu sayede çerezi olmayanlar engellenmeyecek!
 export async function sendMessage(content: string, authorId: string) {
   if (!content || content.trim() === '' || !authorId) return;
 
