@@ -9,7 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
-import { MessageSquareHeart, Bell } from 'lucide-react';
+import { MessageSquareHeart, Bell, MessageCircle } from 'lucide-react'; // 🔥 MessageCircle EKLENDİ
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -135,17 +135,15 @@ export default async function Home({ searchParams }: any) {
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-20">
       
-      {/* 🔥 Arka plandaki tüm renkli ışık sızıntıları/lekeler temizlendi */}
-      
       <header className="sticky top-0 z-50 bg-[#121212]/80 backdrop-blur-2xl border-b border-white/5 px-4 py-4 md:px-8 flex items-center justify-between transition-all shadow-md gap-2">
         <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity shrink-0">
           <img src="/logo.jpg" alt="Logo" className="w-8 h-8 sm:w-9 sm:h-9 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
           <h1 className="text-base sm:text-xl font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
         </Link>
         
-        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
+        {/* 🔥 SAĞ ÜST KÖŞE - YENİ DÜZEN */}
+        <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
           <RefreshButton />
-          <NotificationBell notifications={notifications} />
           
           <Link 
             href="/my-likes" 
@@ -154,6 +152,22 @@ export default async function Home({ searchParams }: any) {
             <MessageSquareHeart size={15} />
             <span>Beğendiklerim</span>
           </Link>
+
+          {/* 🔥 DİKKAT ÇEKİCİ CANLI CHAT BUTONU */}
+          <Link 
+            href="/sohbet" 
+            className="relative flex items-center gap-1.5 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full bg-gradient-to-r from-[#4DA3FF]/10 to-[#4DA3FF]/5 hover:from-[#4DA3FF]/20 hover:to-[#4DA3FF]/10 border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/40 transition-all group shadow-[0_0_15px_rgba(77,163,255,0.1)]"
+          >
+            <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-emerald-500"></span>
+            </span>
+            <span className="text-[11px] sm:text-[13px] font-black tracking-wide text-white group-hover:text-[#4DA3FF] transition-colors whitespace-nowrap">
+              CANLI CHAT
+            </span>
+          </Link>
+
+          <NotificationBell notifications={notifications} />
           <MobileMenu />
         </div>
       </header>

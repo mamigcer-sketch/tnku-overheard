@@ -127,4 +127,10 @@ model CommentReaction {
 
   // Bir kişi aynı yoruma aynı emojiyi sadece 1 kez atabilsin diye:
   @@unique([commentId, userUuid, emoji])
+  
+}model ChatMessage {
+  id         String   @id @default(cuid())
+  content    String
+  authorUuid String
+  createdAt  DateTime @default(now())
 }
