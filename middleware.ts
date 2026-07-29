@@ -3,7 +3,7 @@ import type { NextRequest } from 'next/server';
 
 export function middleware(request: NextRequest) {
   const url = request.nextUrl;
-  const maintenanceMode = false; // 🔥 Bakım modu aktif! İşin bitince false yaparsın.
+  const maintenanceMode = true; // 🔥 Bakım modu aktif! İşin bitince false yaparsın.
 
   if (!maintenanceMode) {
     return NextResponse.next();
