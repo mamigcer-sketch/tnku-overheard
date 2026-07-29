@@ -80,13 +80,13 @@ export default function GlobalChatPage() {
   };
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] text-white flex flex-col h-screen relative selection:bg-[#4DA3FF]/30">
+    // 🔥 ŞAHESER: h-[100dvh] ile mobildeki adres çubuğu sorununu kökten çözüyoruz.
+    <main className="h-[100dvh] bg-[#0B0B0B] text-white flex flex-col relative selection:bg-[#4DA3FF]/30 overflow-hidden">
       
-      {/* Hafif arka plan ışıltısı */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#4DA3FF]/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
-      {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 sm:py-4 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      {/* 🔥 HEADER: shrink-0 sayesinde asla küçülmez, en üstte kalır */}
+      <header className="shrink-0 relative z-50 bg-[#0B0B0B]/90 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         <div className="max-w-3xl mx-auto flex items-center justify-between w-full">
           <Link href="/" className="hover:opacity-80 transition-opacity flex items-center gap-2.5">
             <div className="relative flex h-3 w-3">
@@ -105,25 +105,22 @@ export default function GlobalChatPage() {
         </div>
       </header>
 
-      {/* SOHBET AKIŞI BİLGİSİ */}
-      <div className="w-full flex justify-center py-3 relative z-10">
-        <span className="flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-gray-400 px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-medium tracking-wide shadow-sm">
-          <ShieldAlert size={12} className="text-[#4DA3FF]" /> Sohbet akışını korumak için son 50 mesaj gösterilir
+      {/* 🔥 BİLGİ KUTULARI (Sabit Üstte) */}
+      <div className="shrink-0 w-full flex flex-col items-center gap-2 pt-3 px-4 relative z-10 max-w-3xl mx-auto">
+        <span className="flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-gray-400 px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-medium tracking-wide shadow-sm text-center">
+          <ShieldAlert size={12} className="text-[#4DA3FF] shrink-0" /> Sohbet akışını korumak için son 50 mesaj gösterilir
         </span>
-      </div>
 
-      {/* NİCK UYARISI */}
-      {!nicknames[myId] && (
-        <div className="max-w-3xl mx-auto w-full px-4 mb-2 relative z-10">
-          <div className="bg-[#4DA3FF]/10 border border-[#4DA3FF]/20 py-2.5 px-4 rounded-xl flex items-center justify-center text-[#4DA3FF] text-[11px] sm:text-xs font-bold gap-1.5 tracking-wide shadow-[0_0_15px_rgba(77,163,255,0.05)]">
-            <Info size={14} />
+        {!nicknames[myId] && (
+          <div className="bg-[#4DA3FF]/10 border border-[#4DA3FF]/20 py-2 px-4 rounded-xl flex items-center justify-center text-[#4DA3FF] text-[11px] sm:text-xs font-bold gap-1.5 tracking-wide shadow-[0_0_15px_rgba(77,163,255,0.05)] w-full text-center">
+            <Info size={14} className="shrink-0" />
             NİCKİNİ BELİRLE KISMINDAN NİCKİNİ AL!
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
-      {/* MESAJLAR ALANI */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-5 max-w-3xl mx-auto w-full pb-36 custom-scrollbar relative z-10">
+      {/* 🔥 MESAJLAR ALANI: flex-1 ile sadece burası kaydırılabilir oluyor! */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-5 max-w-3xl mx-auto w-full custom-scrollbar relative z-10">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-gray-500 text-sm font-medium">
             Lobide şu an kimse yok. İlk mesajı sen at! 🚀
@@ -172,24 +169,24 @@ export default function GlobalChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* YÜZEN INPUT ALANI */}
-      <div className="fixed bottom-0 left-0 right-0 bg-gradient-to-t from-[#0B0B0B] via-[#0B0B0B]/95 to-transparent pt-12 pb-6 px-4 z-50 pointer-events-none">
-        <form onSubmit={handleSend} className="max-w-3xl mx-auto relative flex items-center pointer-events-auto">
-          <div className="w-full bg-[#1A1A1A]/80 backdrop-blur-xl border border-white/10 rounded-full flex items-center p-1 shadow-[0_10px_40px_rgba(0,0,0,0.5)] transition-all focus-within:border-[#4DA3FF]/50 focus-within:bg-[#202020]/90">
+      {/* 🔥 ALT YAZMA ALANI: shrink-0 ile en alta mühürlüyoruz. Havada asılı kalmıyor! */}
+      <div className="shrink-0 w-full bg-[#0B0B0B]/95 backdrop-blur-xl border-t border-white/5 pt-3 pb-4 sm:pb-6 px-3 sm:px-4 relative z-50">
+        <form onSubmit={handleSend} className="max-w-3xl mx-auto flex items-center w-full">
+          <div className="w-full bg-[#1A1A1A]/80 border border-white/10 rounded-full flex items-center p-1 shadow-[0_5px_20px_rgba(0,0,0,0.3)] transition-all focus-within:border-[#4DA3FF]/50 focus-within:bg-[#202020]/90">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Lobiye bir şeyler fısılda..."
               maxLength={250}
-              className="flex-1 bg-transparent text-white py-3 pl-5 pr-4 outline-none text-sm sm:text-[15px] placeholder:text-gray-500"
+              className="flex-1 bg-transparent text-white py-2.5 pl-4 pr-3 outline-none text-[14px] sm:text-[15px] placeholder:text-gray-500"
             />
             <button 
               type="submit" 
               disabled={!inputValue.trim()}
-              className="p-3 mr-1 bg-gradient-to-r from-[#4DA3FF] to-blue-600 text-white rounded-full hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 disabled:grayscale transition-all shadow-lg shadow-blue-500/25 shrink-0"
+              className="p-2.5 mr-0.5 bg-gradient-to-r from-[#4DA3FF] to-blue-600 text-white rounded-full hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 disabled:grayscale transition-all shadow-lg shrink-0"
             >
-              <Send size={18} className="ml-0.5" />
+              <Send size={16} className="ml-0.5" />
             </button>
           </div>
         </form>
