@@ -4,6 +4,7 @@ import './globals.css';
 import ScrollToTopV2 from '@/components/ScrollToTopV2';
 import InstallModal from '@/components/InstallModal';
 import SyncAuth from '@/components/SyncAuth'; // 🔥 Instagram kimlik sabitleme bileşeni eklendi
+import SplashScreen from '@/components/SplashScreen'; // 🔥 EFSANE AÇILIŞ EKRANI EKLENDİ
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -49,6 +50,10 @@ export default function RootLayout({
   return (
     <html lang="tr">
       <body className={inter.className}>
+        
+        {/* 🔥 ŞELALE GİBİ AKACAK İNTRO EKRANI */}
+        <SplashScreen />
+
         {children}
         
         {/* 🔥 YUKARI ÇIK BUTONU */}
