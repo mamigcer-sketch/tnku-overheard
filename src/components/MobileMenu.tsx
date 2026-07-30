@@ -6,7 +6,7 @@ import { Menu, X, Heart, ShieldAlert, BookOpen, ExternalLink, Download, Venetian
 import Link from 'next/link';
 import { updateCustomNickname } from '@/app/profile/actions';
 
-export default function MobileMenu() {
+export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   
   const [isNickModalOpen, setIsNickModalOpen] = useState(false);
@@ -74,7 +74,7 @@ export default function MobileMenu() {
           <div className="absolute top-14 right-0 w-64 bg-[#121212]/90 backdrop-blur-2xl border border-white/10 rounded-[24px] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <div className="space-y-0.5">
               
-              {/* 🔥 Doğrudan sunucu tabanlı gerçek profil rotası */}
+              {/* 🔥 Doğrudan gerçek kimliğe yönlendiren /profil/ben rotası */}
               <Link 
                 href="/profil/ben"
                 onClick={() => setIsOpen(false)}
