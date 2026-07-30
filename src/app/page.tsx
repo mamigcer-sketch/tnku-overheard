@@ -152,10 +152,9 @@ export default async function Home({ searchParams }: any) {
             <span>Beğendiklerim</span>
           </Link>
 
-          {/* 🔥 Lobi butonu buradan kalktı, menü rahatladı! */}
-          
           <NotificationBell notifications={notifications} />
-          <MobileMenu />
+          {/* 🔥 userUuid prop'u eklendi */}
+          <MobileMenu userUuid={userUuid} />
         </div>
       </header>
 
@@ -209,12 +208,10 @@ export default async function Home({ searchParams }: any) {
           })}
         </div>
 
-        {/* 🔥 YENİ EFSANE LOBİ KARTI BURADA (Filtrelerin Altı) */}
         <Link href="/sohbet" className="block mb-6 relative group z-10 mx-1">
           <div className="absolute inset-0 bg-gradient-to-r from-[#4DA3FF]/10 to-emerald-500/10 rounded-[20px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
           <div className="relative bg-[#121212]/90 backdrop-blur-xl border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/40 rounded-[20px] p-4 flex items-center justify-between transition-all overflow-hidden shadow-lg">
             
-            {/* Arka plan ışık detayı */}
             <div className="absolute right-0 top-0 w-32 h-32 bg-[#4DA3FF]/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
 
             <div className="flex items-center gap-4">

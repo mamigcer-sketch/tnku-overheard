@@ -2,11 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, X, Heart, ShieldAlert, BookOpen, FileText, ExternalLink, Download, VenetianMask, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Menu, X, Heart, ShieldAlert, BookOpen, ExternalLink, Download, VenetianMask, AlertCircle, CheckCircle2, Loader2, User } from 'lucide-react';
 import Link from 'next/link';
 import { updateCustomNickname } from '@/app/profile/actions';
 
-export default function MobileMenu() {
+export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   
   // 🔥 Nick Modal State'leri
@@ -17,7 +17,7 @@ export default function MobileMenu() {
   
   const router = useRouter();
 
-  // 🔥 MODAL AÇIKKEN ARKA PLANIN KAYMASINI KESİN OLARAK ENGelle
+  // 🔥 MODAL AÇIKKEN ARKA PLANIN KAYMASINI KESİN OLARAK ENGELLE
   useEffect(() => {
     if (isNickModalOpen) {
       document.body.style.overflow = 'hidden';
@@ -30,7 +30,6 @@ export default function MobileMenu() {
   }, [isNickModalOpen]);
   
   const menuItems = [
-    { name: 'Paylaşımlarım', icon: <FileText size={18} />, href: '/my-posts', isExternal: false },
     { name: 'Beğendiklerim', icon: <Heart size={18} />, href: '/my-likes', isExternal: false, hideOnDesktop: true },
     { name: 'Topluluk Kuralları', icon: <BookOpen size={18} />, href: '/rules', isExternal: false },
     { name: 'Instagram', icon: <ExternalLink size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
@@ -78,6 +77,17 @@ export default function MobileMenu() {
           <div className="absolute top-14 right-0 w-64 bg-[#121212]/90 backdrop-blur-2xl border border-white/10 rounded-[24px] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <div className="space-y-0.5">
               
+              {/* 🔥 Profilim Butonu (Dinamik UUID ile) */}
+              {userUuid && (
+                <Link 
+                  href={`/profil/${encodeURIComponent(userUuid)}`}
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#4DA3FF]/10 text-[#4DA3FF] transition-all font-bold text-sm cursor-pointer mb-1 border border-[#4DA3FF]/20 bg-[#4DA3FF]/5 shadow-inner"
+                >
+                  <User size={18} /> Profilim
+                </Link>
+              )}
+
               {/* 🔥 Nick Belirle Butonu */}
               <button 
                 onClick={() => {
@@ -127,7 +137,7 @@ export default function MobileMenu() {
         </>
       )}
 
-      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) - ARKA PLAN KİLİTLİ VE TAM ORTADA */}
+      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) */}
       {isNickModalOpen && (
         <div className="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-hidden animate-in fade-in duration-200">
           
@@ -152,7 +162,6 @@ export default function MobileMenu() {
               İtiraflarında anonim hayvan isimleri yerine kendi seçtiğin özel bir nick kullan. (Örn: baddie, d6_mudavimi)
             </p>
 
-            {/* 🔥 Küfür/Ban Uyarısı */}
             <div className="flex items-start gap-1.5 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] p-2.5 rounded-lg mb-6 shadow-inner">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
               <span><strong>Aman diyim!</strong> Küfürlü, hakaret içeren veya ofansif nickler kullanmak anında sistemden uzaklaştırılma sebebidir.</span>

@@ -139,19 +139,23 @@ export default function GlobalChatPage() {
             <div key={msg.id || index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               
               {!isMe && (
-                <div className="flex items-center gap-1.5 mb-1.5 ml-1">
-                  <div className="bg-white/5 border border-white/10 p-1 rounded-full flex items-center justify-center">
-                    <User size={10} className="text-gray-400" /> 
+                // 🔥 NİCK VE İKON LİNK İLE SARILDI (Tıklanabilir Profil Bağlantısı)
+                <Link 
+                  href={`/profil/${encodeURIComponent(rawAuthorId)}`}
+                  className="flex items-center gap-1.5 mb-1.5 ml-1 group w-fit cursor-pointer"
+                >
+                  <div className="bg-white/5 border border-white/10 p-1 rounded-full flex items-center justify-center group-hover:bg-white/10 group-hover:border-[#4DA3FF]/30 transition-all duration-300">
+                    <User size={10} className="text-gray-400 group-hover:text-[#4DA3FF] transition-colors" /> 
                   </div>
-                  <span className="text-[11px] text-gray-400 font-bold">
+                  <span className="text-[11px] text-gray-400 font-bold group-hover:text-gray-200 transition-colors">
                     {displayName}
                   </span>
                   {userBadge && (
-                    <span className="bg-[#4DA3FF]/15 text-[#4DA3FF] border border-[#4DA3FF]/20 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-black">
+                    <span className="bg-[#4DA3FF]/15 text-[#4DA3FF] border border-[#4DA3FF]/20 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-wider font-black group-hover:bg-[#4DA3FF]/25 transition-colors">
                       {userBadge}
                     </span>
                   )}
-                </div>
+                </Link>
               )}
 
               <div 

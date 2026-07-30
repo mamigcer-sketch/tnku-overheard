@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma';
 import PostCard from '@/components/PostCard';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { Heart, MessageCircle, FileText, Award, UserCircle2, ArrowRight } from 'lucide-react';
+import { Heart, MessageCircle, FileText, Award, UserCircle2, ArrowRight, Home } from 'lucide-react'; // 🔥 Home ikonu eklendi
 import BackButton from '@/components/BackButton';
 import Link from 'next/link';
 
@@ -47,13 +47,11 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const sParams = await searchParams;
   const targetUuid = decodeURIComponent(id);
   
-  // 🔥 TAB KONTROLÜ: ?tab=yorumlar gelirse yorum sekmesi açılacak
   const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
 
   const cookieStore = await cookies();
   const currentUserUuid = cookieStore.get('user_uuid')?.value || '';
 
-  // 🔥 PRİSMA SORGULARINA userComments'i DE EKLEDİK
   const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb] = await Promise.all([
     prisma.post.count({ where: { authorUuid: targetUuid, status: 'APPROVED' } }),
     prisma.comment.count({ where: { authorId: targetUuid } }),
@@ -72,9 +70,9 @@ export default async function ProfilePage({ params, searchParams }: { params: an
     prisma.comment.findMany({
       where: { authorId: targetUuid },
       orderBy: { createdAt: 'desc' },
-      take: 50, // Yüzlerce yorum varsa sayfayı çökertmesin diye en son 50 yorum
+      take: 50,
       include: {
-        post: { select: { id: true, content: true, type: true } } // Yorum yapılan asıl gönderinin içeriği
+        post: { select: { id: true, content: true, type: true } }
       }
     }),
     (prisma as any).userBadge.findUnique({ where: { userUuid: targetUuid } }).catch(() => null),
@@ -125,9 +123,17 @@ export default async function ProfilePage({ params, searchParams }: { params: an
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[400px] bg-gradient-to-b from-[#4DA3FF]/15 to-transparent blur-[80px] pointer-events-none z-0"></div>
 
       <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 sm:py-4 flex items-center shadow-sm">
-        <div className="max-w-2xl mx-auto flex items-center gap-3 w-full">
-          <BackButton />
-          <h1 className="text-sm sm:text-base font-bold text-gray-200">Kullanıcı Profili</h1>
+        <div className="max-w-2xl mx-auto flex items-center justify-between w-full">
+          {/* 🔥 SOL TARAF: Geri Dön ve Başlık */}
+          <div className="flex items-center gap-3">
+            <BackButton />
+            <h1 className="text-sm sm:text-base font-bold text-gray-200">Kullanıcı Profili</h1>
+          </div>
+          
+          {/* 🔥 SAĞ TARAF: Ana Sayfa Butonu Eklendi */}
+          <Link href="/" className="flex items-center gap-1.5 sm:gap-2 bg-white/[0.03] hover:bg-white/[0.08] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-colors text-[12px] sm:text-[13px] font-medium border border-white/[0.05]">
+            <Home size={14} /> <span className="hidden sm:inline">Ana Sayfa</span>
+          </Link>
         </div>
       </header>
 
@@ -177,7 +183,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           </div>
         </div>
 
-        {/* 🔥 TAB SİSTEMİ (Gönderiler / Yorumlar Geçişi) */}
         <div className="flex gap-2 mb-6 bg-white/[0.02] p-1.5 rounded-[20px] border border-white/5 shadow-inner">
           <Link 
             href={`/profil/${id}?tab=gonderiler`} 
@@ -203,10 +208,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           </Link>
         </div>
 
-        {/* 🔥 AKIŞ KISMI: Tab'e Göre Değişir */}
         <div className="space-y-5">
           
-          {/* GÖNDERİLER SEKMESİ */}
           {activeTab === 'gonderiler' && (
             <>
               {userPosts.length === 0 ? (
@@ -231,7 +234,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
             </>
           )}
 
-          {/* YORUMLAR SEKMESİ */}
           {activeTab === 'yorumlar' && (
             <>
               {userComments.length === 0 ? (
@@ -242,7 +244,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                 userComments.map((comment: any) => (
                   <div key={comment.id} className="bg-[#121212]/80 backdrop-blur-xl border border-white/5 hover:border-white/10 p-5 rounded-[24px] shadow-sm transition-all duration-300 group hover:-translate-y-1">
                     
-                    {/* Yorum Başlığı & Beğeni */}
                     <div className="flex justify-between items-start mb-3">
                       <span className="text-[11px] text-gray-500 font-bold tracking-wide uppercase bg-white/[0.03] px-2 py-1 rounded-md border border-white/5">
                         {getRelativeTime(comment.createdAt)}
@@ -252,12 +253,10 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                       </div>
                     </div>
                     
-                    {/* Yorum İçeriği */}
                     <p className="text-gray-200 text-[14px] sm:text-[15px] leading-relaxed mb-4 font-medium">
                       "{comment.content}"
                     </p>
                     
-                    {/* Yorum Yapılan Asıl Gönderinin Önizlemesi */}
                     {comment.post && (
                       <div className="bg-white/[0.02] border border-white/[0.05] p-3 sm:p-4 rounded-xl mb-4 relative overflow-hidden">
                         <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#4DA3FF]/50 rounded-l-xl"></div>
@@ -268,7 +267,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                       </div>
                     )}
                     
-                    {/* Gönderiye Git Butonu */}
                     <Link 
                       href={`/post/${comment.postId}`} 
                       className="inline-flex items-center gap-1.5 text-[#4DA3FF] text-[12px] font-black uppercase tracking-wider hover:text-blue-400 transition-colors group-hover:translate-x-1 duration-300 bg-[#4DA3FF]/10 px-3 py-1.5 rounded-lg border border-[#4DA3FF]/20"
