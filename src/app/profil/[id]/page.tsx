@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma';
 import PostCard from '@/components/PostCard';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { Heart, MessageCircle, FileText, Award, UserCircle2, ArrowRight, Home } from 'lucide-react'; // 🔥 Home ikonu eklendi
+import { Heart, MessageCircle, FileText, Award, UserCircle2, ArrowRight, Home } from 'lucide-react';
 import BackButton from '@/components/BackButton';
 import Link from 'next/link';
 
@@ -24,8 +24,9 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
-const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
+// 🔥 Sohbet (Lobi) sayfasıyla birebir aynı havuz dizileri (İsimlerin uyuşması için)
+const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare"];
+const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek"];
 
 const getAnonymousData = (id: string, customNickname?: string) => {
   if (!id) return { name: "Gizemli Yolcu" };
@@ -124,13 +125,11 @@ export default async function ProfilePage({ params, searchParams }: { params: an
 
       <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 sm:py-4 flex items-center shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between w-full">
-          {/* 🔥 SOL TARAF: Geri Dön ve Başlık */}
           <div className="flex items-center gap-3">
             <BackButton />
             <h1 className="text-sm sm:text-base font-bold text-gray-200">Kullanıcı Profili</h1>
           </div>
           
-          {/* 🔥 SAĞ TARAF: Ana Sayfa Butonu Eklendi */}
           <Link href="/" className="flex items-center gap-1.5 sm:gap-2 bg-white/[0.03] hover:bg-white/[0.08] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-colors text-[12px] sm:text-[13px] font-medium border border-white/[0.05]">
             <Home size={14} /> <span className="hidden sm:inline">Ana Sayfa</span>
           </Link>
@@ -157,7 +156,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                   <Award size={14} /> {userBadge}
                 </div>
               ) : (
-                <p className="text-[13px] sm:text-sm text-gray-400 mt-1.5 font-bold tracking-wider">TNKUOVERHEARD TAKİPÇİSİ</p>
+                <p className="text-[13px] sm:text-sm text-gray-400 mt-1.5 font-bold tracking-wider">TNKUOVERHEARD TAKİÇİSİ</p>
               )}
             </div>
           </div>
