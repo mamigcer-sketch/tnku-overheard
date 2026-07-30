@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { Heart, Reply, Flag, ShieldAlert, User } from "lucide-react";
+import Link from "next/link"; // 🔥 PROFİL LİNKLERİ İÇİN EKLENDİ
 import { toggleCommentLike, submitReport } from "@/app/post/actions";
 import { playPopSound, playClickSound } from "@/utils/sounds";
 
@@ -40,7 +41,15 @@ const formatCommentText = (text: string) => {
 };
 
 export default function CommentItem({ 
-  comment, commentAuthor, isPostAuthor, isInitiallyLiked = false, onReply, isReply = false, hasCustomNick = false, userBadge 
+  comment, 
+  commentAuthor, 
+  isPostAuthor, 
+  isInitiallyLiked = false, 
+  onReply, 
+  isReply = false, 
+  hasCustomNick = false, 
+  userBadge,
+  authorUuid // 🔥 PROFİL ID'Sİ YAKALANDI
 }: any) {
   const [localLiked, setLocalLiked] = useState(isInitiallyLiked);
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
@@ -92,6 +101,9 @@ export default function CommentItem({
     }
   };
 
+  // Eğer authorUuid gelmezse fallback olarak id kullanılsın
+  const finalProfileId = authorUuid || comment.authorId || comment.id;
+
   return (
     <>
       <div className={`bg-[#121212]/75 backdrop-blur-xl border border-white/5 p-4 sm:p-5 rounded-[22px] shadow-md transition-all duration-300 hover:border-white/10 hover:bg-[#151515] ${
@@ -105,15 +117,19 @@ export default function CommentItem({
               </span>
             )}
             
-            {/* 🔥 YORUM YAZARI - HERKES İÇİN GRİ ADAM (USER SİLÜETİ) */}
-            <div className={`flex items-center gap-1.5 bg-white/[0.03] pr-3 pl-1.5 py-1 rounded-lg border shadow-sm transition-colors ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
+            {/* 🔥 YORUM YAZARI (LİNK EKLENDİ VE TIKLANABİLİR OLDU) */}
+            <Link 
+              href={`/profil/${encodeURIComponent(finalProfileId)}`}
+              onClick={(e) => playClickSound()}
+              className={`group flex items-center gap-1.5 bg-white/[0.03] pr-3 pl-1.5 py-1 rounded-lg border shadow-sm transition-all hover:bg-white/[0.08] hover:scale-105 active:scale-95 ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}
+            >
                <div className="w-5 h-5 flex items-center justify-center rounded-md bg-white/10 text-gray-400 border border-white/15 shadow-inner">
                   <User className="w-3.5 h-3.5 text-gray-400" />
                </div>
-               <span className={`font-semibold text-[11px] tracking-wide ${hasCustomNick ? 'text-yellow-100' : 'text-gray-200'}`}>
+               <span className={`font-semibold text-[11px] tracking-wide transition-colors ${hasCustomNick ? 'text-yellow-100 group-hover:text-yellow-50' : 'text-gray-200 group-hover:text-white'}`}>
                  @{commentAuthor.name}
                </span>
-            </div>
+            </Link>
 
             {isPostAuthor && (
               <span className="bg-[#4DA3FF]/10 text-[#4DA3FF] text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border border-[#4DA3FF]/20 shadow-sm">

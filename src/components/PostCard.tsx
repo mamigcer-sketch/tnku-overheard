@@ -5,6 +5,7 @@ import CommentForm from "./CommentForm";
 import AnonymousPlayer from "./AnonymousPlayer";
 import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, Quote } from "lucide-react";
 import { useRouter } from "next/navigation";
+import Link from "next/link"; // 🔥 PROFİL LİNKLERİ İÇİN EKLENDİ
 import { incrementView, submitReport } from "@/app/post/actions";
 import { playPopSound, playClickSound } from "@/utils/sounds";
 
@@ -139,7 +140,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const handleCardInteraction = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('form') || target.closest('.interactive-zone') || showReportModal) return;
+    if (target.closest('button') || target.closest('form') || target.closest('.interactive-zone') || target.closest('a') || showReportModal) return;
 
     if (clickTimeout.current) {
       clearTimeout(clickTimeout.current);
@@ -233,15 +234,19 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                   </span>
                 )}
                 
-                {/* 🔥 HERKES İÇİN GRİ ADAM (USER SİLÜETİ) */}
-                <span className={`flex items-center gap-1.5 bg-white/[0.03] pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.06] transition-colors ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
+                {/* 🔥 YENİ PROFİL LİNKİ: Artık adamın ismine basınca profiline gider */}
+                <Link 
+                  href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`}
+                  onClick={(e) => { e.stopPropagation(); playClickSound(); }}
+                  className={`interactive-zone flex items-center gap-1.5 bg-white/[0.03] pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.08] hover:scale-105 active:scale-95 transition-all ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}
+                >
                   <div className="w-5 h-5 flex items-center justify-center rounded-md bg-white/10 text-gray-400 border border-white/15 shadow-inner">
                     <User className="w-3.5 h-3.5 text-gray-400" />
                   </div>
                   <span className={`font-semibold text-[11px] tracking-wide transition-colors ${customNickname ? 'text-yellow-100 group-hover:text-yellow-50' : 'text-gray-200 group-hover:text-white'}`}>
                     @{authorData.name}
                   </span>
-                </span>
+                </Link>
               </div>
               
               {post.location && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><MapPin className="w-3 h-3" /> {post.location}</span>}
@@ -274,7 +279,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             )}
 
             {post.audioUrl && (
-              <div onClick={(e) => e.stopPropagation()} className="mt-4">
+              <div onClick={(e) => e.stopPropagation()} className="mt-4 interactive-zone">
                 <AnonymousPlayer audioUrl={post.audioUrl} />
               </div>
             )}
@@ -292,9 +297,14 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           >
             <span className="text-[13px] opacity-60 mt-0.5">💬</span>
             <div className="text-[13px] text-gray-300 line-clamp-2 leading-relaxed">
-              <span className="font-semibold text-gray-100 mr-1.5">
+              {/* 🔥 YORUM YAPANIN İSMİNE DE PROFİL LİNKİ EKLENDİ */}
+              <Link 
+                href={`/profil/${encodeURIComponent(commentAuthorUuid || '')}`}
+                onClick={(e) => { e.stopPropagation(); playClickSound(); }}
+                className="interactive-zone font-semibold text-[#4DA3FF] hover:text-blue-400 hover:underline mr-1.5 transition-colors"
+              >
                 @{commentAuthorData.name}:
-              </span>
+              </Link>
               {firstComment.content}
             </div>
           </div>

@@ -97,10 +97,10 @@ export default async function PostPage({ params }: any) {
   const isBosYap = post.type === 'BOSYAP'; 
   const isEphemeral = !!post.expiresAt; 
   
-  const postAuthorUuid = (post as any).authorUuid;
+  const postAuthorUuid = (post as any).authorUuid || post.id;
   const hasCustomNick = !!customNicknamesMap[postAuthorUuid];
   const postUserBadge = userBadgesMap[postAuthorUuid]; 
-  const authorData = getAnonymousData(postAuthorUuid || post.id, customNicknamesMap[postAuthorUuid]);
+  const authorData = getAnonymousData(postAuthorUuid, customNicknamesMap[postAuthorUuid]);
 
   const glowStyle = isEphemeral
     ? 'border-amber-500/40'
@@ -158,14 +158,18 @@ export default async function PostPage({ params }: any) {
                   </span>
                 )}
                 
-                <span className={`flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}>
+                {/* 🔥 YENİ PROFİL LİNKİ EKLENDİ (Gönderiyi Atan Kişi) */}
+                <Link 
+                  href={`/profil/${encodeURIComponent(postAuthorUuid)}`} 
+                  className={`flex items-center gap-1.5 bg-white/[0.04] text-gray-200 pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.08] hover:scale-105 transition-all ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}
+                >
                   <div className="w-5 h-5 flex items-center justify-center rounded-md bg-white/10 text-gray-400 border border-white/15 shadow-inner">
                     <User className="w-3.5 h-3.5 text-gray-400" />
                   </div>
-                  <span className="font-semibold text-[11px] tracking-wide">
+                  <span className={`font-semibold text-[11px] tracking-wide transition-colors ${hasCustomNick ? 'text-yellow-100 group-hover:text-yellow-50' : 'text-gray-200 group-hover:text-white'}`}>
                     @{authorData.name}
                   </span>
-                </span>
+                </Link>
               </div>
 
             </div>

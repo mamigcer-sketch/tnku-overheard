@@ -107,7 +107,8 @@ export default function CommentSection({
                   isInitiallyLiked={isLiked}
                   onReply={handleReplyClick}
                   hasCustomNick={hasCustomNick} 
-                  userBadge={badge} 
+                  userBadge={badge}
+                  authorUuid={authorUuid} // 🔥 LİNKLEME İÇİN EKLENDİ
                 />
 
                 {replies.length > 0 && (
@@ -130,7 +131,8 @@ export default function CommentSection({
                           isReply={true}
                           onReply={handleReplyClick}
                           hasCustomNick={isReplyHasCustomNick} 
-                          userBadge={replyBadge} 
+                          userBadge={replyBadge}
+                          authorUuid={replyAuthorUuid} // 🔥 LİNKLEME İÇİN EKLENDİ
                         />
                       );
                     })}
