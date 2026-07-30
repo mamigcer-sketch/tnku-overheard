@@ -9,7 +9,6 @@ import { updateCustomNickname } from '@/app/profile/actions';
 export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   
-  // 🔥 Nick Modal State'leri
   const [isNickModalOpen, setIsNickModalOpen] = useState(false);
   const [nickname, setNickname] = useState('');
   const [loading, setLoading] = useState(false);
@@ -17,7 +16,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   
   const router = useRouter();
 
-  // 🔥 MODAL AÇIKKEN ARKA PLANIN KAYMASINI KESİN OLARAK ENGELLE
   useEffect(() => {
     if (isNickModalOpen) {
       document.body.style.overflow = 'hidden';
@@ -35,6 +33,18 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     { name: 'Instagram', icon: <ExternalLink size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
     { name: 'Bildir / Şikayet', icon: <ShieldAlert size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
   ];
+
+  // 🔥 ÇEREZDEN VEYA LOCALSTORAGE'DAN GERÇEK YAZAR ID'SİNİ YAKALAYAN FONKSİYON
+  const getMyProfileId = () => {
+    if (typeof window !== 'undefined') {
+      // Çerezden tnku_author_id'yi okumaya çalışalım
+      const match = document.cookie.match(new RegExp('(^| )tnku_author_id=([^;]+)'));
+      if (match) return match[2];
+    }
+    return userUuid;
+  };
+
+  const profileHref = `/profil/${encodeURIComponent(getMyProfileId() || userUuid || '')}`;
 
   const handleNickSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -69,7 +79,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
         {isOpen ? <X size={26} /> : <Menu size={26} />}
       </button>
 
-      {/* 🔥 MOBİL MENÜ DROPDOWN */}
       {isOpen && (
         <>
           <div className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm" onClick={() => setIsOpen(false)}></div>
@@ -77,18 +86,15 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           <div className="absolute top-14 right-0 w-64 bg-[#121212]/90 backdrop-blur-2xl border border-white/10 rounded-[24px] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <div className="space-y-0.5">
               
-              {/* 🔥 Profilim Butonu (Dinamik UUID ile) */}
-              {userUuid && (
-                <Link 
-                  href={`/profil/${encodeURIComponent(userUuid)}`}
-                  onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#4DA3FF]/10 text-[#4DA3FF] transition-all font-bold text-sm cursor-pointer mb-1 border border-[#4DA3FF]/20 bg-[#4DA3FF]/5 shadow-inner"
-                >
-                  <User size={18} /> Profilim
-                </Link>
-              )}
+              {/* 🔥 Doğru ID'ye giden Profilim Butonu */}
+              <Link 
+                href={profileHref}
+                onClick={() => setIsOpen(false)}
+                className="flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#4DA3FF]/10 text-[#4DA3FF] transition-all font-bold text-sm cursor-pointer mb-1 border border-[#4DA3FF]/20 bg-[#4DA3FF]/5 shadow-inner"
+              >
+                <User size={18} /> Profilim
+              </Link>
 
-              {/* 🔥 Nick Belirle Butonu */}
               <button 
                 onClick={() => {
                   setIsOpen(false);
@@ -137,7 +143,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
         </>
       )}
 
-      {/* 🔥 NİCK BELİRLEME POPUP'I (MODAL) */}
       {isNickModalOpen && (
         <div className="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-hidden animate-in fade-in duration-200">
           
@@ -159,12 +164,12 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
 
             <h2 className="text-xl font-black mb-1.5 tracking-tight text-white">Nickini Belirle</h2>
             <p className="text-gray-400 text-xs mb-3 leading-relaxed pr-4">
-              İtiraflarında anonim hayvan isimleri yerine kendi seçtiğin özel bir nick kullan. (Örn: baddie, d6_mudavimi)
+              İtiraflarında anonim hayvan isimleri yerine kendi seçtiğin özel bir nick kullan.
             </p>
 
             <div className="flex items-start gap-1.5 bg-red-500/10 border border-red-500/20 text-red-400 text-[10px] p-2.5 rounded-lg mb-6 shadow-inner">
               <AlertCircle size={14} className="shrink-0 mt-0.5" />
-              <span><strong>Aman diyim!</strong> Küfürlü, hakaret içeren veya ofansif nickler kullanmak anında sistemden uzaklaştırılma sebebidir.</span>
+              <span><strong>Aman diyim!</strong> Küfürlü veya hakaret içeren nickler anında sistemden uzaklaştırılır.</span>
             </div>
 
             <form onSubmit={handleNickSubmit} className="space-y-4">
