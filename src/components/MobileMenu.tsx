@@ -34,17 +34,21 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     { name: 'Bildir / Şikayet', icon: <ShieldAlert size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
   ];
 
-  // 🔥 ÇEREZDEN VEYA LOCALSTORAGE'DAN GERÇEK YAZAR ID'SİNİ YAKALAYAN FONKSİYON
-  const getMyProfileId = () => {
+  // 🔥 GERÇEK YAZAR KİMLİĞİNİ (tnku_author_id) YAKALAYAN FONKSİYON
+  const getMyRealAuthorId = () => {
     if (typeof window !== 'undefined') {
-      // Çerezden tnku_author_id'yi okumaya çalışalım
       const match = document.cookie.match(new RegExp('(^| )tnku_author_id=([^;]+)'));
       if (match) return match[2];
+      
+      // Eğer cookie'de yoksa daha önce localStorage'a kaydedilmiş olabilir mi diye bakıyoruz
+      const localAuthorId = localStorage.getItem('tnku_author_id');
+      if (localAuthorId) return localAuthorId;
     }
     return userUuid;
   };
 
-  const profileHref = `/profil/${encodeURIComponent(getMyProfileId() || userUuid || '')}`;
+  const realId = getMyRealAuthorId() || userUuid;
+  const profileHref = realId ? `/profil/${encodeURIComponent(realId)}` : '/';
 
   const handleNickSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,7 +90,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           <div className="absolute top-14 right-0 w-64 bg-[#121212]/90 backdrop-blur-2xl border border-white/10 rounded-[24px] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <div className="space-y-0.5">
               
-              {/* 🔥 Doğru ID'ye giden Profilim Butonu */}
+              {/* 🔥 Sabit ve Gerçek Profil Linki */}
               <Link 
                 href={profileHref}
                 onClick={() => setIsOpen(false)}
