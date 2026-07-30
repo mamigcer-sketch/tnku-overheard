@@ -6,9 +6,8 @@ import { Menu, X, Heart, ShieldAlert, BookOpen, ExternalLink, Download, Venetian
 import Link from 'next/link';
 import { updateCustomNickname } from '@/app/profile/actions';
 
-export default function MobileMenu({ userUuid }: { userUuid?: string }) {
+export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [profileUrl, setProfileUrl] = useState('/profil/ben');
   
   const [isNickModalOpen, setIsNickModalOpen] = useState(false);
   const [nickname, setNickname] = useState('');
@@ -16,23 +15,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
   
   const router = useRouter();
-
-  // 🔥 Gerçek yazar ID'si olan tnku_author_id'yi öncelikli alarak doğru profile bağlıyoruz
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const getCookie = (name: string) => {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${name}=`);
-        if (parts.length === 2) return parts.pop()?.split(';').shift();
-      };
-
-      // Öncelik sırası: tnku_author_id (Asıl Yazar ID) -> userUuid prop -> user_uuid çerezi
-      const realAuthorId = getCookie('tnku_author_id') || userUuid || getCookie('user_uuid');
-      if (realAuthorId) {
-        setProfileUrl(`/profil/${encodeURIComponent(realAuthorId)}`);
-      }
-    }
-  }, [userUuid]);
 
   useEffect(() => {
     if (isNickModalOpen) {
@@ -92,9 +74,9 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           <div className="absolute top-14 right-0 w-64 bg-[#121212]/90 backdrop-blur-2xl border border-white/10 rounded-[24px] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <div className="space-y-0.5">
               
-              {/* 🔥 Doğru ve Sabit Gerçek Profil Linki */}
+              {/* 🔥 Doğrudan sunucu tabanlı gerçek profil rotası */}
               <Link 
-                href={profileUrl}
+                href="/profil/ben"
                 onClick={() => setIsOpen(false)}
                 className="flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#4DA3FF]/10 text-[#4DA3FF] transition-all font-bold text-sm cursor-pointer mb-1 border border-[#4DA3FF]/20 bg-[#4DA3FF]/5 shadow-inner"
               >
