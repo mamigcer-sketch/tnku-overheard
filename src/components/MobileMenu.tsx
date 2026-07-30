@@ -8,6 +8,7 @@ import { updateCustomNickname } from '@/app/profile/actions';
 
 export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [isOpen, setIsOpen] = useState(false);
+  const [profileUrl, setProfileUrl] = useState('/profil/ben');
   
   const [isNickModalOpen, setIsNickModalOpen] = useState(false);
   const [nickname, setNickname] = useState('');
@@ -15,6 +16,30 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
   
   const router = useRouter();
+
+  // 🔥 Menü açıldığı veya bileşen yüklendiği an doğru yazar ID'sini sabitliyoruz
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      // 1. Önce çerezden tnku_author_id'yi arayalım
+      const match = document.cookie.match(new RegExp('(^| )tnku_author_id=([^;]+)'));
+      let authorId = match ? match[2] : null;
+
+      // 2. Çerezde yoksa localStorage'a bakalım
+      if (!authorId) {
+        authorId = localStorage.getItem('tnku_author_id');
+      }
+
+      // 3. Hiçbirinde yoksa props'tan gelen userUuid'yi hem state'e hem localStorage'a basalım ki sabitlensin
+      if (!authorId && userUuid) {
+        authorId = userUuid;
+      }
+
+      if (authorId) {
+        localStorage.setItem('tnku_author_id', authorId);
+        setProfileUrl(`/profil/${encodeURIComponent(authorId)}`);
+      }
+    }
+  }, [userUuid]);
 
   useEffect(() => {
     if (isNickModalOpen) {
@@ -33,22 +58,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     { name: 'Instagram', icon: <ExternalLink size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
     { name: 'Bildir / Şikayet', icon: <ShieldAlert size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
   ];
-
-  // 🔥 GERÇEK YAZAR KİMLİĞİNİ (tnku_author_id) YAKALAYAN FONKSİYON
-  const getMyRealAuthorId = () => {
-    if (typeof window !== 'undefined') {
-      const match = document.cookie.match(new RegExp('(^| )tnku_author_id=([^;]+)'));
-      if (match) return match[2];
-      
-      // Eğer cookie'de yoksa daha önce localStorage'a kaydedilmiş olabilir mi diye bakıyoruz
-      const localAuthorId = localStorage.getItem('tnku_author_id');
-      if (localAuthorId) return localAuthorId;
-    }
-    return userUuid;
-  };
-
-  const realId = getMyRealAuthorId() || userUuid;
-  const profileHref = realId ? `/profil/${encodeURIComponent(realId)}` : '/';
 
   const handleNickSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -92,7 +101,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
               
               {/* 🔥 Sabit ve Gerçek Profil Linki */}
               <Link 
-                href={profileHref}
+                href={profileUrl}
                 onClick={() => setIsOpen(false)}
                 className="flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#4DA3FF]/10 text-[#4DA3FF] transition-all font-bold text-sm cursor-pointer mb-1 border border-[#4DA3FF]/20 bg-[#4DA3FF]/5 shadow-inner"
               >
