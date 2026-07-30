@@ -17,7 +17,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   
   const router = useRouter();
 
-  // 🔥 Menü açıldığı veya sayfa yüklendiği an çerezden doğru ID'yi anında alıyoruz (Beyaz ekranı keser)
+  // 🔥 Gerçek yazar ID'si olan tnku_author_id'yi öncelikli alarak doğru profile bağlıyoruz
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const getCookie = (name: string) => {
@@ -26,7 +26,8 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
         if (parts.length === 2) return parts.pop()?.split(';').shift();
       };
 
-      const realAuthorId = getCookie('tnku_author_id') || getCookie('user_uuid') || userUuid;
+      // Öncelik sırası: tnku_author_id (Asıl Yazar ID) -> userUuid prop -> user_uuid çerezi
+      const realAuthorId = getCookie('tnku_author_id') || userUuid || getCookie('user_uuid');
       if (realAuthorId) {
         setProfileUrl(`/profil/${encodeURIComponent(realAuthorId)}`);
       }
@@ -91,7 +92,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           <div className="absolute top-14 right-0 w-64 bg-[#121212]/90 backdrop-blur-2xl border border-white/10 rounded-[24px] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <div className="space-y-0.5">
               
-              {/* 🔥 Direkt hesaplanmış ID linkine gider, beyaz ekranı yok eder */}
+              {/* 🔥 Doğru ve Sabit Gerçek Profil Linki */}
               <Link 
                 href={profileUrl}
                 onClick={() => setIsOpen(false)}
