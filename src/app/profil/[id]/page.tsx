@@ -3,7 +3,6 @@ import PostCard from '@/components/PostCard';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { Heart, MessageCircle, FileText, Award, UserCircle2, ArrowRight, Home } from 'lucide-react';
-import BackButton from '@/components/BackButton';
 import Link from 'next/link';
 
 export const dynamic = 'force-dynamic';
@@ -24,7 +23,6 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// 🔥 Sohbet (Lobi) sayfasıyla birebir aynı havuz dizileri (İsimlerin uyuşması için)
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek"];
 
@@ -125,14 +123,15 @@ export default async function ProfilePage({ params, searchParams }: { params: an
 
       <header className="sticky top-0 z-50 bg-[#0B0B0B]/80 backdrop-blur-xl border-b border-white/5 px-4 py-3 sm:py-4 flex items-center shadow-sm">
         <div className="max-w-2xl mx-auto flex items-center justify-between w-full">
-          <div className="flex items-center gap-3">
-            <BackButton />
-            <h1 className="text-sm sm:text-base font-bold text-gray-200">Kullanıcı Profili</h1>
-          </div>
           
-          <Link href="/" className="flex items-center gap-1.5 sm:gap-2 bg-white/[0.03] hover:bg-white/[0.08] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-colors text-[12px] sm:text-[13px] font-medium border border-white/[0.05]">
-            <Home size={14} /> <span className="hidden sm:inline">Ana Sayfa</span>
+          {/* 🔥 Sol taraftaki Geri Dön yerine direkt Ana Sayfa linki */}
+          <Link href="/" className="flex items-center gap-2 bg-white/[0.03] hover:bg-white/[0.08] px-3 py-1.5 sm:px-4 sm:py-2 rounded-full transition-colors text-[12px] sm:text-[13px] font-medium border border-white/[0.05]">
+            <Home size={14} /> <span>Ana Sayfa</span>
           </Link>
+          
+          <h1 className="text-sm sm:text-base font-bold text-gray-200">Kullanıcı Profili</h1>
+          
+          <div className="w-16 sm:w-20"></div> {/* Başlığı tam ortalamak için dengeleme boşluğu */}
         </div>
       </header>
 
