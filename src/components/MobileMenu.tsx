@@ -8,7 +8,6 @@ import { updateCustomNickname } from '@/app/profile/actions';
 
 export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [profileUrl, setProfileUrl] = useState('/profil/ben');
   
   const [isNickModalOpen, setIsNickModalOpen] = useState(false);
   const [nickname, setNickname] = useState('');
@@ -16,30 +15,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
   
   const router = useRouter();
-
-  // 🔥 Menü açıldığı veya bileşen yüklendiği an doğru yazar ID'sini sabitliyoruz
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // 1. Önce çerezden tnku_author_id'yi arayalım
-      const match = document.cookie.match(new RegExp('(^| )tnku_author_id=([^;]+)'));
-      let authorId = match ? match[2] : null;
-
-      // 2. Çerezde yoksa localStorage'a bakalım
-      if (!authorId) {
-        authorId = localStorage.getItem('tnku_author_id');
-      }
-
-      // 3. Hiçbirinde yoksa props'tan gelen userUuid'yi hem state'e hem localStorage'a basalım ki sabitlensin
-      if (!authorId && userUuid) {
-        authorId = userUuid;
-      }
-
-      if (authorId) {
-        localStorage.setItem('tnku_author_id', authorId);
-        setProfileUrl(`/profil/${encodeURIComponent(authorId)}`);
-      }
-    }
-  }, [userUuid]);
 
   useEffect(() => {
     if (isNickModalOpen) {
@@ -99,9 +74,9 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           <div className="absolute top-14 right-0 w-64 bg-[#121212]/90 backdrop-blur-2xl border border-white/10 rounded-[24px] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <div className="space-y-0.5">
               
-              {/* 🔥 Sabit ve Gerçek Profil Linki */}
+              {/* 🔥 Doğrudan gerçek kimliğe yönlendiren /profil/ben rotası */}
               <Link 
-                href={profileUrl}
+                href="/profil/ben"
                 onClick={() => setIsOpen(false)}
                 className="flex items-center gap-3 p-3.5 rounded-xl hover:bg-[#4DA3FF]/10 text-[#4DA3FF] transition-all font-bold text-sm cursor-pointer mb-1 border border-[#4DA3FF]/20 bg-[#4DA3FF]/5 shadow-inner"
               >
