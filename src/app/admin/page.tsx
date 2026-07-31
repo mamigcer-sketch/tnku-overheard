@@ -72,7 +72,6 @@ export default async function AdminDashboard({ searchParams }: any) {
   const currentTab = params?.tab || 'Dashboard';
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-  // 🔥 Güvenli Veri Çekme (Tablo çökmesini önleyen try-catch mimarisi)
   let total = 0, pending = 0, approved = 0, rejected = 0, totalLikes = 0, totalViews = 0, reportsCount = 0, recentPostsCount = 0, recentCommentsCount = 0, chatCount = 0;
   let activeAuthorsCount = 0;
 
@@ -225,7 +224,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/sohbet');
   }
 
-  // 🔥 Toplu Sohbet Silme Aksiyonu
   async function clearAllChatMessages() {
     'use server';
     try {
@@ -632,11 +630,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                   <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
                     <span className="text-xs font-black bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-full">{displayChatMessages.length} Mesaj</span>
                     
-                    <form action={clearAllChatMessages} onSubmit={(e) => {
-                      if (!confirm('Dikkat! Tüm lobi sohbeti kalıcı olarak silinecek. Emin misin?')) {
-                        e.preventDefault();
-                      }
-                    }}>
+                    <form action={clearAllChatMessages}>
                       <button 
                         type="submit"
                         className="bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-400 font-bold px-4 py-2 rounded-xl transition-all flex items-center gap-2 text-xs cursor-pointer shadow-sm"
@@ -654,8 +648,10 @@ export default async function AdminDashboard({ searchParams }: any) {
                 ) : (
                   <div className="space-y-3">
                     {displayChatMessages.map((msg: any) => {
-                      const authorNick = customNicknamesMap[msg.authorUuid] || getAuthorName(msg.authorUuid);
-                      const authorBadge = userBadgesMap[msg.authorUuid];
+                      const rawAuthorId = msg.authorUuid || msg.authoruuid || msg.author_uuid || "";
+                      const rawContent = msg.content || msg.message || msg.text || "";
+                      const authorNick = customNicknamesMap[rawAuthorId] || getAuthorName(rawAuthorId);
+                      const authorBadge = userBadgesMap[rawAuthorId];
 
                       return (
                         <div key={msg.id} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-5 rounded-2xl border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md">
@@ -664,18 +660,18 @@ export default async function AdminDashboard({ searchParams }: any) {
                               <span className="font-bold text-white bg-white/10 px-2 py-0.5 rounded-md">@{authorNick}</span>
                               {authorBadge && <span className="bg-yellow-500/10 text-yellow-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{authorBadge}</span>}
                               <span className="text-gray-500">•</span>
-                              <span className="text-gray-400">{new Date(msg.createdAt).toLocaleString('tr-TR')}</span>
+                              <span className="text-gray-400">{msg.createdAt ? new Date(msg.createdAt).toLocaleString('tr-TR') : 'Bilinmiyor'}</span>
                             </div>
                             <p className="text-sm text-gray-200 font-medium break-words bg-black/40 p-3 rounded-xl border border-white/5">
-                              {msg.content}
+                              {rawContent ? rawContent : JSON.stringify(msg)}
                             </p>
-                            <code className="text-[10px] text-gray-500 font-mono block">UUID: {msg.authorUuid}</code>
+                            <code className="text-[10px] text-gray-500 font-mono block">UUID: {rawAuthorId}</code>
                           </div>
 
                           <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
-                            {msg.authorUuid && (
+                            {rawAuthorId && (
                               <form action={banUser}>
-                                <input type="hidden" name="userUuid" value={msg.authorUuid} />
+                                <input type="hidden" name="userUuid" value={rawAuthorId} />
                                 <button type="submit" className="flex items-center gap-1.5 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 rounded-xl text-xs font-bold transition-colors">
                                   <Ban size={14} /> Banla
                                 </button>
