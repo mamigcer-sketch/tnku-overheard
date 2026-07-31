@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { sendMessage, getChatData } from "./actions";
-import { Home, Send, User, Info, ShieldAlert } from "lucide-react"; 
+import { Home, Send, User, Info, ShieldAlert, CheckCircle2, BookOpen, X } from "lucide-react"; 
 import Link from "next/link";
 import BackButton from "@/components/BackButton"; 
 
@@ -22,6 +22,9 @@ export default function GlobalChatPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
   
+  // 🔥 Kurallar Pop-up State'i (İlk girişte direkt açık gelir)
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(true);
+
   const [myId, setMyId] = useState("");
   const [nicknames, setNicknames] = useState<any>({});
   const [badges, setBadges] = useState<any>({});
@@ -80,12 +83,10 @@ export default function GlobalChatPage() {
   };
 
   return (
-    // 🔥 ŞAHESER: h-[100dvh] ile mobildeki adres çubuğu sorununu kökten çözüyoruz.
     <main className="h-[100dvh] bg-[#0B0B0B] text-white flex flex-col relative selection:bg-[#4DA3FF]/30 overflow-hidden">
       
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#4DA3FF]/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
-      {/* 🔥 HEADER: shrink-0 sayesinde asla küçülmez, en üstte kalır */}
       <header className="shrink-0 relative z-50 bg-[#0B0B0B]/90 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center justify-between shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         <div className="max-w-3xl mx-auto flex items-center justify-between w-full">
           <Link href="/" className="hover:opacity-80 transition-opacity flex items-center gap-2.5">
@@ -105,7 +106,6 @@ export default function GlobalChatPage() {
         </div>
       </header>
 
-      {/* 🔥 BİLGİ KUTULARI (Sabit Üstte) */}
       <div className="shrink-0 w-full flex flex-col items-center gap-2 pt-3 px-4 relative z-10 max-w-3xl mx-auto">
         <span className="flex items-center gap-1.5 bg-white/[0.03] border border-white/5 text-gray-400 px-4 py-1.5 rounded-full text-[10px] sm:text-[11px] font-medium tracking-wide shadow-sm text-center">
           <ShieldAlert size={12} className="text-[#4DA3FF] shrink-0" /> Sohbet akışını korumak için son 50 mesaj gösterilir
@@ -119,7 +119,6 @@ export default function GlobalChatPage() {
         )}
       </div>
 
-      {/* 🔥 MESAJLAR ALANI: flex-1 ile sadece burası kaydırılabilir oluyor! */}
       <div className="flex-1 overflow-y-auto p-4 space-y-5 max-w-3xl mx-auto w-full custom-scrollbar relative z-10">
         {messages.length === 0 && (
           <div className="h-full flex flex-col items-center justify-center text-gray-500 text-sm font-medium">
@@ -139,7 +138,6 @@ export default function GlobalChatPage() {
             <div key={msg.id || index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
               
               {!isMe && (
-                // 🔥 NİCK VE İKON LİNK İLE SARILDI (Tıklanabilir Profil Bağlantısı)
                 <Link 
                   href={`/profil/${encodeURIComponent(rawAuthorId)}`}
                   className="flex items-center gap-1.5 mb-1.5 ml-1 group w-fit cursor-pointer"
@@ -173,7 +171,6 @@ export default function GlobalChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 🔥 ALT YAZMA ALANI: shrink-0 ile en alta mühürlüyoruz. Havada asılı kalmıyor! */}
       <div className="shrink-0 w-full bg-[#0B0B0B]/95 backdrop-blur-xl border-t border-white/5 pt-3 pb-4 sm:pb-6 px-3 sm:px-4 relative z-50">
         <form onSubmit={handleSend} className="max-w-3xl mx-auto flex items-center w-full">
           <div className="w-full bg-[#1A1A1A]/80 border border-white/10 rounded-full flex items-center p-1 shadow-[0_5px_20px_rgba(0,0,0,0.3)] transition-all focus-within:border-[#4DA3FF]/50 focus-within:bg-[#202020]/90">
@@ -183,7 +180,7 @@ export default function GlobalChatPage() {
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Lobiye bir şeyler fısılda..."
               maxLength={250}
-              className="flex-1 bg-transparent text-white py-2.5 pl-4 pr-3 outline-none text-[14px] sm:text-[15px] placeholder:text-gray-500"
+              className="flex-1 bg-transparent text-white py-2.5 pl-4 pr-3 outline-none text-[16px] placeholder:text-gray-500"
             />
             <button 
               type="submit" 
@@ -195,6 +192,56 @@ export default function GlobalChatPage() {
           </div>
         </form>
       </div>
+
+      {/* 🔥 EKRANIN TAM ORTASINDA ÇIKAN KURALLAR POP-UP'I */}
+      {isRulesModalOpen && (
+        <div className="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+          <div 
+            className="relative w-full max-w-md bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 sm:p-8 rounded-[32px] shadow-2xl animate-in zoom-in-95 fade-in duration-200 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Kapatma Çarpısı */}
+            <button 
+              onClick={() => setIsRulesModalOpen(false)}
+              className="absolute top-5 right-5 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+            >
+              <X size={20} />
+            </button>
+
+            {/* İkon */}
+            <div className="w-12 h-12 rounded-2xl bg-[#4DA3FF]/10 border border-[#4DA3FF]/20 text-[#4DA3FF] flex items-center justify-center mb-5 shadow-inner">
+              <BookOpen size={24} />
+            </div>
+
+            <h2 className="text-xl sm:text-2xl font-black mb-2 tracking-tight text-white">Global Lobi Kuralları</h2>
+            <p className="text-gray-400 text-xs sm:text-sm mb-6 leading-relaxed">
+              TNKU Lobi ortamının huzurunu ve neşesini korumak için uyman gereken temel kurallar aşağıdadır:
+            </p>
+
+            <div className="space-y-3 mb-8 text-left text-xs sm:text-sm text-gray-300">
+              <div className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 p-3 rounded-xl">
+                <span className="text-[#4DA3FF] font-bold">01.</span>
+                <p>Küfür, hakaret, nefret söylemi ve kişisel hedef gösterme kesinlikle yasaktır.</p>
+              </div>
+              <div className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 p-3 rounded-xl">
+                <span className="text-[#4DA3FF] font-bold">02.</span>
+                <p>Spam yapmak, aynı mesajı sürekli göndermek veya sohbet akışını bozmak engellenme sebebidir.</p>
+              </div>
+              <div className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 p-3 rounded-xl">
+                <span className="text-[#4DA3FF] font-bold">03.</span>
+                <p>Kişisel gizliliğe saygı duyulmalı, kimsenin özel bilgileri paylaşılmamalıdır.</p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setIsRulesModalOpen(false)}
+              className="w-full bg-gradient-to-r from-[#4DA3FF] to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-[0_0_20px_rgba(77,163,255,0.3)] hover:shadow-[0_0_30px_rgba(77,163,255,0.5)] flex items-center justify-center gap-2 active:scale-95 text-sm cursor-pointer"
+            >
+              <CheckCircle2 size={18} /> Kuralları Okudum, Anladım
+            </button>
+          </div>
+        </div>
+      )}
 
     </main>
   );
