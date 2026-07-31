@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { Heart, MessageCircle, FileText, Award, UserCircle2, ArrowRight, Home } from 'lucide-react';
 import Link from 'next/link';
-import ProfileNickEdit from '@/components/ProfileNickEdit'; // 🔥 Butonumuzu import ettik
+import ProfileNickEdit from '@/components/ProfileNickEdit'; 
 
 export const dynamic = 'force-dynamic';
 
@@ -48,9 +48,9 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const cookieStore = await cookies();
   const currentUserUuid = cookieStore.get('user_uuid')?.value || '';
 
-  // 🔥 EĞER PARAMETRE 'ben' İSE, TARGET OLARAK KULLANICININ KENDİ UUID'SİNİ ALIR
-  const targetUuid = id === 'ben' ? currentUserUuid : decodeURIComponent(id);
-  const isOwnProfile = targetUuid === currentUserUuid;
+  // 🔥 EĞER PARAMETRE 'ben' İSE VEYA UUID'LER EŞLEŞİYORSA SENİN PROFİLİNDİR
+  const targetUuid = id === 'ben' ? (currentUserUuid || 'ben') : decodeURIComponent(id);
+  const isOwnProfile = Boolean(id === 'ben' || (currentUserUuid && targetUuid === currentUserUuid));
   
   const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
 
@@ -160,8 +160,12 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                 <p className="text-[13px] sm:text-sm text-gray-400 mt-1.5 font-bold tracking-wider">TNKUOVERHEARD TAKİÇİSİ</p>
               )}
 
-              {/* 🔥 Sahiplik kontrolünü Client Component kendi içinde yapıyor! */}
-              <ProfileNickEdit targetUuid={targetUuid} currentNick={displayNickname} />
+              {/* 🔥 KODU BURAYA MÜHÜRLEDİK! KENDİ KİMLİĞİYLE BUTON AÇILACAK */}
+              <ProfileNickEdit 
+                targetUuid={targetUuid} 
+                currentNick={displayNickname} 
+                isServerOwner={isOwnProfile} 
+              />
             </div>
           </div>
 

@@ -5,38 +5,35 @@ import { useRouter } from 'next/navigation';
 import { VenetianMask, X, AlertCircle, CheckCircle2, Loader2, Pencil } from 'lucide-react';
 import { updateCustomNickname } from '@/app/profile/actions';
 
-export default function ProfileNickEdit({ targetUuid, currentNick }: { targetUuid: string, currentNick: string }) {
+// 🔥 YENİ: isServerOwner prop'u eklendi
+export default function ProfileNickEdit({ targetUuid, currentNick, isServerOwner }: { targetUuid: string, currentNick: string, isServerOwner: boolean }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nickname, setNickname] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
+  
   const router = useRouter();
 
   const [isOwner, setIsOwner] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
 
-  // 🔥 Sunucu localStorage'ı göremediği için sahiplik kontrolünü BURADA yapıyoruz!
   useEffect(() => {
+    setIsMounted(true);
+
+    // 🔥 1. Kontrol: Sunucu bu senin profilin diyorsa direkt göster!
+    if (isServerOwner) {
+      setIsOwner(true);
+      return;
+    }
+
+    // 🔥 2. Kontrol: Sunucu göremezse diye LocalStorage yedek kontrolü
     const localChatId = localStorage.getItem('tnku_chat_anon_id');
     const localAnonId = localStorage.getItem('tnku_anon_id');
 
-    const getCookie = (name: string) => {
-      const value = `; ${document.cookie}`;
-      const parts = value.split(`; ${name}=`);
-      if (parts.length === 2) return parts.pop()?.split(';').shift();
-      return null;
-    };
-    const cookieId = getCookie('user_uuid');
-
-    // Eğer bakılan profil senin local ID'lerinle eşleşiyorsa VEYA direkt /profil/ben sayfasına geldiysen butonu göster!
-    if (
-      targetUuid === localChatId || 
-      targetUuid === localAnonId || 
-      targetUuid === cookieId || 
-      targetUuid === 'ben'
-    ) {
+    if (targetUuid === localChatId || targetUuid === localAnonId || targetUuid === 'ben') {
       setIsOwner(true);
     }
-  }, [targetUuid]);
+  }, [targetUuid, isServerOwner]);
 
   useEffect(() => {
     if (isModalOpen) document.body.style.overflow = 'hidden';
@@ -53,9 +50,10 @@ export default function ProfileNickEdit({ targetUuid, currentNick }: { targetUui
     formData.append('nickname', nickname);
     
     // Gerçek UUID'yi alıp forma mühürlüyoruz
-    const finalUuid = targetUuid === 'ben' 
-      ? (localStorage.getItem('tnku_chat_anon_id') || localStorage.getItem('tnku_anon_id') || '') 
-      : targetUuid;
+    let finalUuid = targetUuid;
+    if (targetUuid === 'ben') {
+      finalUuid = localStorage.getItem('tnku_chat_anon_id') || localStorage.getItem('tnku_anon_id') || '';
+    }
       
     formData.append('userUuid', finalUuid);
 
@@ -74,6 +72,8 @@ export default function ProfileNickEdit({ targetUuid, currentNick }: { targetUui
     }
     setLoading(false);
   };
+
+  if (!isMounted) return null;
 
   // 🔥 Sen değilsen butonu HİÇ ekrana basma!
   if (!isOwner) return null;
