@@ -5,23 +5,25 @@ import CommentForm from "./CommentForm";
 import AnonymousPlayer from "./AnonymousPlayer";
 import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, Quote } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Link from "next/link"; // 🔥 PROFİL LİNKLERİ İÇİN EKLENDİ
+import Link from "next/link"; 
 import { incrementView, submitReport } from "@/app/post/actions";
 import { playPopSound, playClickSound } from "@/utils/sounds";
 
+// 🔥 SÖZLÜK GÜNCELLENDİ (40 Sıfat, 40 Hayvan) - Artık profille ve adminle %100 eşleşecek!
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 
 const getAnonymousData = (id: string, customNickname?: string) => {
   if (!id) return { name: "Gizemli Yolcu" };
-  let hash = 0;
-  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
-  const positiveHash = Math.abs(hash);
   
   if (customNickname) {
     return { name: customNickname };
   }
 
+  let hash = 0;
+  for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
+  const positiveHash = Math.abs(hash);
+  
   return {
     name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`
   };
@@ -234,7 +236,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                   </span>
                 )}
                 
-                {/* 🔥 YENİ PROFİL LİNKİ: Artık adamın ismine basınca profiline gider */}
                 <Link 
                   href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`}
                   onClick={(e) => { e.stopPropagation(); playClickSound(); }}
@@ -297,7 +298,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           >
             <span className="text-[13px] opacity-60 mt-0.5">💬</span>
             <div className="text-[13px] text-gray-300 line-clamp-2 leading-relaxed">
-              {/* 🔥 YORUM YAPANIN İSMİNE DE PROFİL LİNKİ EKLENDİ */}
               <Link 
                 href={`/profil/${encodeURIComponent(commentAuthorUuid || '')}`}
                 onClick={(e) => { e.stopPropagation(); playClickSound(); }}
