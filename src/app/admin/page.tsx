@@ -70,29 +70,36 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   const params = await searchParams;
   const currentTab = params?.tab || 'Dashboard';
-
   const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
 
-  const [total, pending, approved, rejected, aggregateStats, reportsCount, recentPostsCount, recentCommentsCount, recentAuthors, chatCount] = await Promise.all([
-    prisma.post.count(),
-    prisma.post.count({ where: { status: 'PENDING' } }),
-    prisma.post.count({ where: { status: 'APPROVED' } }),
-    prisma.post.count({ where: { status: 'REJECTED' } }),
-    prisma.post.aggregate({ _sum: { likes: true, views: true } }),
-    (prisma as any).report.count(),
-    prisma.post.count({ where: { createdAt: { gte: oneHourAgo } } }),
-    prisma.comment.count({ where: { createdAt: { gte: oneHourAgo } } }),
-    prisma.post.findMany({
-      where: { createdAt: { gte: oneHourAgo } },
-      select: { authorUuid: true },
-      distinct: ['authorUuid']
-    }),
-    (prisma as any).chatMessage ? (prisma as any).chatMessage.count() : Promise.resolve(0)
-  ]);
+  // 🔥 Güvenli Veri Çekme (Tablo çökmesini önleyen try-catch mimarisi)
+  let total = 0, pending = 0, approved = 0, rejected = 0, totalLikes = 0, totalViews = 0, reportsCount = 0, recentPostsCount = 0, recentCommentsCount = 0, chatCount = 0;
+  let activeAuthorsCount = 0;
 
-  const totalLikes = aggregateStats._sum.likes || 0;
-  const totalViews = aggregateStats._sum.views || 0;
-  const activeAuthorsCount = recentAuthors.length;
+  try {
+    const [t, p, a, r, agg, repC, rPosts, rComms, rAuthors, cCount] = await Promise.all([
+      prisma.post.count().catch(() => 0),
+      prisma.post.count({ where: { status: 'PENDING' } }).catch(() => 0),
+      prisma.post.count({ where: { status: 'APPROVED' } }).catch(() => 0),
+      prisma.post.count({ where: { status: 'REJECTED' } }).catch(() => 0),
+      prisma.post.aggregate({ _sum: { likes: true, views: true } }).catch(() => ({ _sum: { likes: 0, views: 0 } })),
+      (prisma as any).report ? (prisma as any).report.count().catch(() => 0) : Promise.resolve(0),
+      prisma.post.count({ where: { createdAt: { gte: oneHourAgo } } }).catch(() => 0),
+      prisma.comment.count({ where: { createdAt: { gte: oneHourAgo } } }).catch(() => 0),
+      prisma.post.findMany({ where: { createdAt: { gte: oneHourAgo } }, select: { authorUuid: true }, distinct: ['authorUuid'] }).catch(() => []),
+      (prisma as any).chatMessage ? (prisma as any).chatMessage.count().catch(() => 0) : Promise.resolve(0)
+    ]);
+    total = t; pending = p; approved = a; rejected = r;
+    totalLikes = agg._sum?.likes || 0;
+    totalViews = agg._sum?.views || 0;
+    reportsCount = repC;
+    recentPostsCount = rPosts;
+    recentCommentsCount = rComms;
+    activeAuthorsCount = rAuthors.length;
+    chatCount = cCount;
+  } catch (err) {
+    console.error("Admin dashboard veri çekme hatası:", err);
+  }
 
   let displayPosts: any[] = [];
   let displayComments: any[] = [];
@@ -124,19 +131,19 @@ export default async function AdminDashboard({ searchParams }: any) {
   }));
 
   if (currentTab === 'Yorumlar') {
-    displayComments = await prisma.comment.findMany({ orderBy: { createdAt: 'desc' }, include: { post: { select: { content: true, type: true } } } });
+    try { displayComments = await prisma.comment.findMany({ orderBy: { createdAt: 'desc' }, include: { post: { select: { content: true, type: true } } } }); } catch (e) {}
   } else if (currentTab === 'Lobi Sohbet') {
     try {
       displayChatMessages = await (prisma as any).chatMessage.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
     } catch (e) {}
   } else if (currentTab === 'Duyurular') {
-    announcements = await (prisma as any).announcement.findMany({ orderBy: { createdAt: 'desc' } });
+    try { announcements = await (prisma as any).announcement.findMany({ orderBy: { createdAt: 'desc' } }); } catch (e) {}
   } else if (currentTab === 'Sayaç') {
-    countdowns = await (prisma as any).countdown.findMany({ orderBy: { createdAt: 'desc' } });
+    try { countdowns = await (prisma as any).countdown.findMany({ orderBy: { createdAt: 'desc' } }); } catch (e) {}
   } else if (currentTab === 'Banlar') {
-    bannedUsers = await (prisma as any).bannedUser.findMany({ orderBy: { createdAt: 'desc' } });
+    try { bannedUsers = await (prisma as any).bannedUser.findMany({ orderBy: { createdAt: 'desc' } }); } catch (e) {}
   } else if (currentTab === 'Şikayetler') {
-    reports = await (prisma as any).report.findMany({ orderBy: { createdAt: 'desc' }, include: { post: true, comment: true } });
+    try { reports = await (prisma as any).report.findMany({ orderBy: { createdAt: 'desc' }, include: { post: true, comment: true } }); } catch (e) {}
   } else if (currentTab !== 'Özel Nickler') { 
     let queryFilter: any = { status: 'PENDING' };
     if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
@@ -144,17 +151,14 @@ export default async function AdminDashboard({ searchParams }: any) {
     if (currentTab === 'İtiraflar') queryFilter = { status: 'APPROVED', type: 'CONFESSION' };
     if (currentTab === 'Boş Yap') queryFilter = { status: 'APPROVED', type: 'BOSYAP' };
     if (currentTab === 'Dashboard') queryFilter = { status: 'PENDING' };
-    displayPosts = await prisma.post.findMany({ where: queryFilter, orderBy: { createdAt: 'desc' } });
+    try { displayPosts = await prisma.post.findMany({ where: queryFilter, orderBy: { createdAt: 'desc' } }); } catch (e) {}
   }
   
   async function approvePost(formData: FormData) { 
     'use server'; 
     await prisma.post.update({ 
       where: { id: formData.get('id') as string }, 
-      data: { 
-        status: 'APPROVED', 
-        createdAt: new Date() 
-      } 
+      data: { status: 'APPROVED', createdAt: new Date() } 
     }); 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
@@ -172,9 +176,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   async function deletePost(formData: FormData) { 
     'use server'; 
-    await prisma.post.delete({ 
-      where: { id: formData.get('id') as string } 
-    }); 
+    await prisma.post.delete({ where: { id: formData.get('id') as string } }).catch(() => {}); 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
@@ -190,7 +192,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     if (content) updateData.content = content.trim();
     if (type) updateData.type = type;
 
-    await prisma.post.update({ where: { id }, data: updateData }); 
+    await prisma.post.update({ where: { id }, data: updateData }).catch(() => {}); 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
@@ -203,18 +205,14 @@ export default async function AdminDashboard({ searchParams }: any) {
 
     if (!postId) return;
 
-    await prisma.post.update({
-      where: { id: postId },
-      data: { likes, views }
-    });
-
+    await prisma.post.update({ where: { id: postId }, data: { likes, views } }).catch(() => {});
     revalidatePath('/admin');
     revalidatePath('/');
   }
 
   async function deleteComment(formData: FormData) { 
     'use server'; 
-    await prisma.comment.delete({ where: { id: formData.get('id') as string } }); 
+    await prisma.comment.delete({ where: { id: formData.get('id') as string } }).catch(() => {}); 
     revalidatePath('/admin'); 
   }
 
@@ -222,13 +220,12 @@ export default async function AdminDashboard({ searchParams }: any) {
     'use server';
     const id = formData.get('id') as string;
     if (!id) return;
-    try {
-      await (prisma as any).chatMessage.delete({ where: { id } });
-    } catch (e) {}
+    try { await (prisma as any).chatMessage.delete({ where: { id } }); } catch (e) {}
     revalidatePath('/admin');
     revalidatePath('/sohbet');
   }
 
+  // 🔥 Toplu Sohbet Silme Aksiyonu
   async function clearAllChatMessages() {
     'use server';
     try {
@@ -249,7 +246,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   async function unbanUser(formData: FormData) { 
     'use server'; 
     const id = formData.get('id') as string; 
-    await (prisma as any).bannedUser.delete({ where: { id } }); 
+    try { await (prisma as any).bannedUser.delete({ where: { id } }); } catch (e) {} 
     revalidatePath('/admin'); 
   }
   
@@ -257,7 +254,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     'use server'; 
     const content = formData.get('content') as string; 
     if (!content) return; 
-    await (prisma as any).announcement.create({ data: { content, isActive: true } }); 
+    try { await (prisma as any).announcement.create({ data: { content, isActive: true } }); } catch (e) {} 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
@@ -266,14 +263,14 @@ export default async function AdminDashboard({ searchParams }: any) {
     'use server'; 
     const id = formData.get('id') as string; 
     const currentState = formData.get('isActive') === 'true'; 
-    await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); 
+    try { await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); } catch (e) {} 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
 
   async function deleteAnnouncement(formData: FormData) { 
     'use server'; 
-    await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); 
+    try { await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); } catch (e) {} 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
@@ -285,22 +282,24 @@ export default async function AdminDashboard({ searchParams }: any) {
     if (!title || !dateStr) return;
     const targetDate = new Date(dateStr);
     
-    await (prisma as any).countdown.updateMany({ data: { isActive: false } });
-    await (prisma as any).countdown.create({ data: { title, targetDate, isActive: true } }); 
+    try {
+      await (prisma as any).countdown.updateMany({ data: { isActive: false } });
+      await (prisma as any).countdown.create({ data: { title, targetDate, isActive: true } }); 
+    } catch (e) {}
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
 
   async function deleteCountdown(formData: FormData) { 
     'use server'; 
-    await (prisma as any).countdown.delete({ where: { id: formData.get('id') as string } }); 
+    try { await (prisma as any).countdown.delete({ where: { id: formData.get('id') as string } }); } catch (e) {} 
     revalidatePath('/admin'); 
     revalidatePath('/'); 
   }
 
   async function dismissReport(formData: FormData) { 
     'use server'; 
-    await (prisma as any).report.delete({ where: { id: formData.get('id') as string } }); 
+    try { await (prisma as any).report.delete({ where: { id: formData.get('id') as string } }); } catch (e) {} 
     revalidatePath('/admin'); 
   }
 
@@ -318,27 +317,29 @@ export default async function AdminDashboard({ searchParams }: any) {
 
     if (!userUuid) return;
 
-    if (!nickname.trim()) {
-      await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
-    } else {
-      const existingNick = await (prisma as any).customNickname.findUnique({ where: { userUuid } });
-      if (existingNick) {
-        await (prisma as any).customNickname.update({ where: { userUuid }, data: { nickname: nickname.trim() } });
+    try {
+      if (!nickname || !nickname.trim()) {
+        await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
       } else {
-        await (prisma as any).customNickname.create({ data: { userUuid, nickname: nickname.trim() } });
+        const existingNick = await (prisma as any).customNickname.findUnique({ where: { userUuid } });
+        if (existingNick) {
+          await (prisma as any).customNickname.update({ where: { userUuid }, data: { nickname: nickname.trim() } });
+        } else {
+          await (prisma as any).customNickname.create({ data: { userUuid, nickname: nickname.trim() } });
+        }
       }
-    }
 
-    if (!badge.trim()) {
-      await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
-    } else {
-      const existingBadge = await (prisma as any).userBadge.findUnique({ where: { userUuid } });
-      if (existingBadge) {
-        await (prisma as any).userBadge.update({ where: { userUuid }, data: { badgeName: badge.trim() } });
+      if (!badge || !badge.trim()) {
+        await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
       } else {
-        await (prisma as any).userBadge.create({ data: { userUuid, badgeName: badge.trim() } });
+        const existingBadge = await (prisma as any).userBadge.findUnique({ where: { userUuid } });
+        if (existingBadge) {
+          await (prisma as any).userBadge.update({ where: { userUuid }, data: { badgeName: badge.trim() } });
+        } else {
+          await (prisma as any).userBadge.create({ data: { userUuid, badgeName: badge.trim() } });
+        }
       }
-    }
+    } catch (e) {}
     
     revalidatePath('/admin');
     revalidatePath('/');
@@ -348,8 +349,10 @@ export default async function AdminDashboard({ searchParams }: any) {
     'use server';
     const userUuid = formData.get('userUuid') as string;
     if (!userUuid) return;
-    await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
-    await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
+    try {
+      await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
+      await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
+    } catch (e) {}
     revalidatePath('/admin');
     revalidatePath('/');
   }
@@ -580,7 +583,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                   <div className="flex justify-between items-start gap-3 sm:gap-4">
                     <div className="flex-1">
                       <div className="bg-white/[0.03] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5 mb-3 sm:mb-4">
-                        <p className="text-gray-400 text-[11px] sm:text-xs italic mb-1.5 sm:mb-2">"{comment.post.content.substring(0, 80)}..." gönderisine yorum yaptı:</p>
+                        <p className="text-gray-400 text-[11px] sm:text-xs italic mb-1.5 sm:mb-2">"{comment.post?.content?.substring(0, 80) || ''}..." gönderisine yorum yaptı:</p>
                         <p className="text-white text-base sm:text-lg leading-relaxed font-medium">{comment.content}</p>
                       </div>
                       <span className="text-[10px] sm:text-xs font-semibold text-gray-500 bg-black/40 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg">{new Date(comment.createdAt).toLocaleString('tr-TR')}</span>
