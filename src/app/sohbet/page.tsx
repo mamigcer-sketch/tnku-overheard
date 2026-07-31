@@ -22,7 +22,6 @@ export default function GlobalChatPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
   
-  // 🔥 Kurallar Pop-up State'i (İlk girişte direkt açık gelir)
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(true);
 
   const [myId, setMyId] = useState("");
@@ -83,7 +82,8 @@ export default function GlobalChatPage() {
   };
 
   return (
-    <main className="h-[100dvh] bg-[#0B0B0B] text-white flex flex-col relative selection:bg-[#4DA3FF]/30 overflow-hidden">
+    // 🔥 Mobilde klavye açıldığında zıplamayı ve yukarı çık tuşunu kesen kesin çözüm: fixed inset-0
+    <main className="fixed inset-0 w-full h-full bg-[#0B0B0B] text-white flex flex-col relative selection:bg-[#4DA3FF]/30 overflow-hidden">
       
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#4DA3FF]/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
@@ -193,14 +193,12 @@ export default function GlobalChatPage() {
         </form>
       </div>
 
-      {/* 🔥 EKRANIN TAM ORTASINDA ÇIKAN KURALLAR POP-UP'I */}
       {isRulesModalOpen && (
         <div className="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
           <div 
             className="relative w-full max-w-md bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 sm:p-8 rounded-[32px] shadow-2xl animate-in zoom-in-95 fade-in duration-200 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Kapatma Çarpısı */}
             <button 
               onClick={() => setIsRulesModalOpen(false)}
               className="absolute top-5 right-5 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
@@ -208,7 +206,6 @@ export default function GlobalChatPage() {
               <X size={20} />
             </button>
 
-            {/* İkon */}
             <div className="w-12 h-12 rounded-2xl bg-[#4DA3FF]/10 border border-[#4DA3FF]/20 text-[#4DA3FF] flex items-center justify-center mb-5 shadow-inner">
               <BookOpen size={24} />
             </div>
