@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { Heart, MessageCircle, FileText, Award, UserCircle2, ArrowRight, Home } from 'lucide-react';
 import Link from 'next/link';
+import ProfileNickEdit from '@/components/ProfileNickEdit'; // 🔥 Butonumuzu import ettik
 
 export const dynamic = 'force-dynamic';
 
@@ -23,7 +24,6 @@ const getRelativeTime = (dateString: string | Date) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// 🔥 SÖZLÜK GÜNCELLENDİ (40 Sıfat, 40 Hayvan) - Artık post ile profil %100 eşleşecek!
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 
@@ -45,12 +45,14 @@ const getAnonymousData = (id: string, customNickname?: string) => {
 export default async function ProfilePage({ params, searchParams }: { params: any, searchParams: any }) {
   const { id } = await params;
   const sParams = await searchParams;
-  const targetUuid = decodeURIComponent(id);
-  
-  const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
-
   const cookieStore = await cookies();
   const currentUserUuid = cookieStore.get('user_uuid')?.value || '';
+
+  // 🔥 EĞER PARAMETRE 'ben' İSE, TARGET OLARAK KULLANICININ KENDİ UUID'SİNİ ALIR
+  const targetUuid = id === 'ben' ? currentUserUuid : decodeURIComponent(id);
+  const isOwnProfile = targetUuid === currentUserUuid;
+  
+  const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
 
   const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb] = await Promise.all([
     prisma.post.count({ where: { authorUuid: targetUuid, status: 'APPROVED' } }),
@@ -156,6 +158,11 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                 </div>
               ) : (
                 <p className="text-[13px] sm:text-sm text-gray-400 mt-1.5 font-bold tracking-wider">TNKUOVERHEARD TAKİÇİSİ</p>
+              )}
+
+              {/* 🔥 KENDİ PROFİLİYSE NİCK BELİRLEME BUTONU ÇIKAR */}
+              {isOwnProfile && (
+                <ProfileNickEdit userUuid={targetUuid} currentNick={displayNickname} />
               )}
             </div>
           </div>
