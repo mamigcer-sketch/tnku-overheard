@@ -160,10 +160,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                 <p className="text-[13px] sm:text-sm text-gray-400 mt-1.5 font-bold tracking-wider">TNKUOVERHEARD TAKİÇİSİ</p>
               )}
 
-              {/* 🔥 KENDİ PROFİLİYSE NİCK BELİRLEME BUTONU ÇIKAR */}
-              {isOwnProfile && (
-                <ProfileNickEdit userUuid={targetUuid} currentNick={displayNickname} />
-              )}
+              {/* 🔥 Sahiplik kontrolünü Client Component kendi içinde yapıyor! */}
+              <ProfileNickEdit targetUuid={targetUuid} currentNick={displayNickname} />
             </div>
           </div>
 

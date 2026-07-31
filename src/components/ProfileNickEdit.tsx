@@ -5,12 +5,38 @@ import { useRouter } from 'next/navigation';
 import { VenetianMask, X, AlertCircle, CheckCircle2, Loader2, Pencil } from 'lucide-react';
 import { updateCustomNickname } from '@/app/profile/actions';
 
-export default function ProfileNickEdit({ userUuid, currentNick }: { userUuid: string, currentNick: string }) {
+export default function ProfileNickEdit({ targetUuid, currentNick }: { targetUuid: string, currentNick: string }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nickname, setNickname] = useState('');
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState<{ type: 'success' | 'error' | null, msg: string }>({ type: null, msg: '' });
   const router = useRouter();
+
+  const [isOwner, setIsOwner] = useState(false);
+
+  // 🔥 Sunucu localStorage'ı göremediği için sahiplik kontrolünü BURADA yapıyoruz!
+  useEffect(() => {
+    const localChatId = localStorage.getItem('tnku_chat_anon_id');
+    const localAnonId = localStorage.getItem('tnku_anon_id');
+
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift();
+      return null;
+    };
+    const cookieId = getCookie('user_uuid');
+
+    // Eğer bakılan profil senin local ID'lerinle eşleşiyorsa VEYA direkt /profil/ben sayfasına geldiysen butonu göster!
+    if (
+      targetUuid === localChatId || 
+      targetUuid === localAnonId || 
+      targetUuid === cookieId || 
+      targetUuid === 'ben'
+    ) {
+      setIsOwner(true);
+    }
+  }, [targetUuid]);
 
   useEffect(() => {
     if (isModalOpen) document.body.style.overflow = 'hidden';
@@ -25,7 +51,13 @@ export default function ProfileNickEdit({ userUuid, currentNick }: { userUuid: s
 
     const formData = new FormData();
     formData.append('nickname', nickname);
-    formData.append('userUuid', userUuid); // UUID'yi form dataya mühürlüyoruz
+    
+    // Gerçek UUID'yi alıp forma mühürlüyoruz
+    const finalUuid = targetUuid === 'ben' 
+      ? (localStorage.getItem('tnku_chat_anon_id') || localStorage.getItem('tnku_anon_id') || '') 
+      : targetUuid;
+      
+    formData.append('userUuid', finalUuid);
 
     const res = await updateCustomNickname(formData);
 
@@ -42,6 +74,9 @@ export default function ProfileNickEdit({ userUuid, currentNick }: { userUuid: s
     }
     setLoading(false);
   };
+
+  // 🔥 Sen değilsen butonu HİÇ ekrana basma!
+  if (!isOwner) return null;
 
   return (
     <>
