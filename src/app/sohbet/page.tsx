@@ -6,7 +6,6 @@ import { sendMessage, getChatData } from "./actions";
 import { Home, Send, User, ShieldAlert, CheckCircle2, BookOpen, X, Sparkles } from "lucide-react"; 
 import Link from "next/link";
 
-// 🔥 SÖZLÜK EŞİTLENDİ (40 Sıfat, 40 Hayvan) - Artık Profil ve Postlarla %100 aynı çalışacak!
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 
@@ -22,7 +21,8 @@ export default function GlobalChatPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
   
-  const [isRulesModalOpen, setIsRulesModalOpen] = useState(true);
+  // 🔥 Başlangıçta kapalı, sadece localStorage'da yoksa açılacak
+  const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
 
   const [myId, setMyId] = useState("");
   const [nicknames, setNicknames] = useState<any>({});
@@ -31,6 +31,12 @@ export default function GlobalChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    // 🔥 Sadece ilk kez girenlerde uyarı gösterir
+    const rulesAccepted = localStorage.getItem('tnku_chat_rules_accepted');
+    if (!rulesAccepted) {
+      setIsRulesModalOpen(true);
+    }
+
     const loadUserData = async () => {
       const data = await getChatData();
       
@@ -79,6 +85,12 @@ export default function GlobalChatPage() {
     setInputValue(""); 
     
     await sendMessage(msg, myId); 
+  };
+
+  // 🔥 Kuralları kapatınca tarayıcıya kaydeder
+  const acceptRules = () => {
+    localStorage.setItem('tnku_chat_rules_accepted', 'true');
+    setIsRulesModalOpen(false);
   };
 
   return (
@@ -227,7 +239,7 @@ export default function GlobalChatPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <button 
-              onClick={() => setIsRulesModalOpen(false)}
+              onClick={acceptRules}
               className="absolute top-5 right-5 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
             >
               <X size={20} />
@@ -258,7 +270,7 @@ export default function GlobalChatPage() {
             </div>
 
             <button
-              onClick={() => setIsRulesModalOpen(false)}
+              onClick={acceptRules}
               className="w-full bg-gradient-to-r from-[#4DA3FF] to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-[0_0_20px_rgba(77,163,255,0.3)] hover:shadow-[0_0_30px_rgba(77,163,255,0.5)] flex items-center justify-center gap-2 active:scale-95 text-sm cursor-pointer"
             >
               <CheckCircle2 size={18} /> Kuralları Okudum, Anladım
