@@ -6,8 +6,9 @@ import { sendMessage, getChatData } from "./actions";
 import { Home, Send, User, ShieldAlert, CheckCircle2, BookOpen, X, Sparkles } from "lucide-react"; 
 import Link from "next/link";
 
-const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare"];
-const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek"];
+// 🔥 SÖZLÜK EŞİTLENDİ (40 Sıfat, 40 Hayvan) - Artık Profil ve Postlarla %100 aynı çalışacak!
+const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
+const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 
 const getAnonymousData = (id: string) => {
   if (!id) return "Gizemli Yolcu";
@@ -136,7 +137,6 @@ export default function GlobalChatPage() {
           const displayName = nicknames[rawAuthorId] || getAnonymousData(rawAuthorId);
           const userBadge = badges[rawAuthorId];
 
-          // 🔥 Bir önceki mesajı kontrol ediyoruz (Ard arda atılanları birleştirmek için)
           const prevMsg = index > 0 ? messages[index - 1] : null;
           const prevAuthorId = prevMsg ? (prevMsg.authorUuid || prevMsg.authoruuid || prevMsg.author_uuid || "") : null;
           const isSameAuthor = prevAuthorId === rawAuthorId;
@@ -144,7 +144,7 @@ export default function GlobalChatPage() {
           return (
             <div key={msg.id || index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} ${isSameAuthor ? 'mt-1' : 'mt-3'}`}>
               
-              {/* Yazar Bilgisi (Sadece serinin ilk mesajında görünür) */}
+              {/* Yazar Bilgisi */}
               {!isSameAuthor && !isMe && (
                 <Link 
                   href={`/profil/${encodeURIComponent(rawAuthorId)}`}
@@ -172,7 +172,7 @@ export default function GlobalChatPage() {
                 </div>
               )}
 
-              {/* Mesaj Baloncuğu (Ard arda atıldıysa köşeleri birleşir) */}
+              {/* Mesaj Baloncuğu */}
               <div 
                 className={`px-4 py-3 max-w-[85%] sm:max-w-[70%] break-words text-[14.5px] sm:text-[15px] leading-relaxed shadow-sm ${
                   isMe 
