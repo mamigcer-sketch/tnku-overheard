@@ -40,3 +40,10 @@ export async function banUser(userUuid: string) {
   }).catch(() => {});
   revalidatePath('/admin');
 }
+export async function clearAllChatMessages() {
+  'use server';
+  // İsteğe bağlı: Burada admin yetki kontrolü yapabilirsin
+  await prisma.chatMessage.deleteMany({});
+  revalidatePath('/sohbet'); // Sohbet ekranını anında günceller
+  revalidatePath('/admin');
+}
