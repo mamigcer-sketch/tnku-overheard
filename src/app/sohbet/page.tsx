@@ -104,11 +104,11 @@ export default function GlobalChatPage() {
         </div>
       </header>
 
-      {/* MESAJLAR AKIŞI (Şık Baloncuklu Tasarım) */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-4 max-w-3xl mx-auto w-full custom-scrollbar relative z-10">
+      {/* MESAJLAR AKIŞI */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-2 max-w-3xl mx-auto w-full custom-scrollbar relative z-10">
         
         {!nicknames[myId] && (
-          <div className="bg-[#4DA3FF]/10 border border-[#4DA3FF]/20 p-3 rounded-2xl flex items-center justify-between text-white text-xs font-semibold gap-3">
+          <div className="bg-[#4DA3FF]/10 border border-[#4DA3FF]/20 p-3 rounded-2xl flex items-center justify-between text-white text-xs font-semibold gap-3 mb-4">
             <div className="flex items-center gap-2">
               <Sparkles size={16} className="text-[#4DA3FF] shrink-0" />
               <span>Özel nickin yok! Rastgele hayvan ismiyle görünüyorsun.</span>
@@ -135,15 +135,20 @@ export default function GlobalChatPage() {
           const isMe = rawAuthorId === myId;
           const displayName = nicknames[rawAuthorId] || getAnonymousData(rawAuthorId);
           const userBadge = badges[rawAuthorId];
+
+          // 🔥 Bir önceki mesajı kontrol ediyoruz (Ard arda atılanları birleştirmek için)
+          const prevMsg = index > 0 ? messages[index - 1] : null;
+          const prevAuthorId = prevMsg ? (prevMsg.authorUuid || prevMsg.authoruuid || prevMsg.author_uuid || "") : null;
+          const isSameAuthor = prevAuthorId === rawAuthorId;
           
           return (
-            <div key={msg.id || index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1`}>
+            <div key={msg.id || index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} ${isSameAuthor ? 'mt-1' : 'mt-3'}`}>
               
-              {/* Yazar Bilgisi (Sadece başkalarında görünür) */}
-              {!isMe && (
+              {/* Yazar Bilgisi (Sadece serinin ilk mesajında görünür) */}
+              {!isSameAuthor && !isMe && (
                 <Link 
                   href={`/profil/${encodeURIComponent(rawAuthorId)}`}
-                  className="flex items-center gap-1.5 ml-1 group w-fit cursor-pointer"
+                  className="flex items-center gap-1.5 ml-1 mb-1 group w-fit cursor-pointer"
                 >
                   <span className="text-[11px] text-gray-400 font-bold group-hover:text-gray-200 transition-colors">
                     {displayName}
@@ -156,9 +161,8 @@ export default function GlobalChatPage() {
                 </Link>
               )}
 
-              {/* Kendi mesajımızda üstte minik Sen etiketi */}
-              {isMe && (
-                <div className="flex items-center gap-1.5 mr-1">
+              {!isSameAuthor && isMe && (
+                <div className="flex items-center gap-1.5 mr-1 mb-1">
                   {userBadge && (
                     <span className="bg-[#4DA3FF]/15 text-[#4DA3FF] border border-[#4DA3FF]/20 px-1.5 py-0.2 rounded text-[9px] uppercase tracking-wider font-black">
                       {userBadge}
@@ -168,12 +172,20 @@ export default function GlobalChatPage() {
                 </div>
               )}
 
-              {/* Mesaj Baloncuğu */}
+              {/* Mesaj Baloncuğu (Ard arda atıldıysa köşeleri birleşir) */}
               <div 
-                className={`px-4 py-3 max-w-[85%] sm:max-w-[70%] break-words text-[14.5px] sm:text-[15px] leading-relaxed shadow-md ${
+                className={`px-4 py-3 max-w-[85%] sm:max-w-[70%] break-words text-[14.5px] sm:text-[15px] leading-relaxed shadow-sm ${
                   isMe 
-                    ? 'bg-gradient-to-tr from-[#2563EB] to-[#4DA3FF] text-white rounded-[22px] rounded-tr-[4px] font-medium shadow-blue-500/10' 
-                    : 'bg-[#18181B] text-gray-100 border border-white/5 rounded-[22px] rounded-tl-[4px] font-normal'
+                    ? `bg-gradient-to-tr from-[#2563EB] to-[#4DA3FF] text-white font-medium shadow-blue-500/10 ${
+                        isSameAuthor 
+                          ? 'rounded-[22px] rounded-tr-[8px] rounded-br-[22px]' 
+                          : 'rounded-[22px] rounded-tr-[4px]'
+                      }` 
+                    : `bg-[#18181B] text-gray-100 border border-white/5 font-normal ${
+                        isSameAuthor 
+                          ? 'rounded-[22px] rounded-tl-[8px] rounded-bl-[22px]' 
+                          : 'rounded-[22px] rounded-tl-[4px]'
+                      }`
                 }`}
               >
                 {rawContent ? rawContent : JSON.stringify(msg)}
