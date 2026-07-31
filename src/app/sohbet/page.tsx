@@ -5,7 +5,6 @@ import { supabase } from "@/lib/supabaseClient";
 import { sendMessage, getChatData } from "./actions";
 import { Home, Send, User, ShieldAlert, CheckCircle2, BookOpen, X, Sparkles } from "lucide-react"; 
 import Link from "next/link";
-import BackButton from "@/components/BackButton"; 
 
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek"];
@@ -82,57 +81,41 @@ export default function GlobalChatPage() {
   };
 
   return (
-    <main className="fixed inset-0 w-full h-full bg-[#09090B] text-white flex flex-col justify-between overflow-hidden selection:bg-[#4DA3FF]/30">
+    <main className="fixed inset-0 w-full h-full bg-[#0B0B0B] text-white flex flex-col justify-between overflow-hidden selection:bg-[#4DA3FF]/30">
       
-      {/* Arka plan ambient ışıklandırma */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[600px] h-[350px] bg-gradient-to-b from-[#4DA3FF]/10 to-transparent blur-[120px] pointer-events-none z-0"></div>
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#4DA3FF]/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
 
-      {/* 1. HEADER (Discord Tarzı Cam Efektli & Sade) */}
-      <header className="shrink-0 relative z-50 bg-[#09090B]/80 backdrop-blur-2xl border-b border-white/[0.06] px-4 py-3 flex items-center justify-between">
+      {/* HEADER */}
+      <header className="shrink-0 relative z-50 bg-[#0B0B0B]/90 backdrop-blur-2xl border-b border-white/5 px-4 py-3 flex items-center justify-between shadow-md">
         <div className="max-w-3xl mx-auto flex items-center justify-between w-full">
-          
           <Link href="/" className="hover:opacity-80 transition-opacity flex items-center gap-2.5">
             <div className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.8)]"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
             </div>
             <h1 className="text-base sm:text-lg font-black tracking-tighter">GLOBAL <span className="text-[#4DA3FF]">LOBİ</span></h1>
           </Link>
           
           <div className="flex items-center gap-2">
-            <Link href="/" className="flex items-center gap-1.5 bg-white/[0.04] hover:bg-white/[0.08] px-3.5 py-1.5 rounded-full transition-all text-[12px] sm:text-[13px] font-medium border border-white/[0.08] shadow-sm">
+            <Link href="/" className="flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] px-3.5 py-1.5 rounded-full transition-colors text-[12px] sm:text-[13px] font-medium border border-white/[0.05]">
               <Home size={14} /> <span className="hidden sm:inline">Ana Sayfa</span>
             </Link>
           </div>
-
         </div>
       </header>
 
-      {/* BİLGİ BANTI (Şık Minimal Rozet) */}
-      <div className="shrink-0 w-full flex flex-col items-center pt-2.5 px-4 relative z-10 max-w-3xl mx-auto">
-        <div className="flex items-center gap-2 bg-white/[0.02] border border-white/[0.06] text-gray-400 px-4 py-1 rounded-full text-[10px] sm:text-[11px] font-medium tracking-wide shadow-inner">
-          <ShieldAlert size={12} className="text-[#4DA3FF] shrink-0" />
-          <span>Sohbet akışını korumak için son 50 mesaj gösterilir</span>
-        </div>
-      </div>
-
-      {/* 2. MESAJLAR AKIŞI (Discord / Telegram Hibrit Akış Düzeni) */}
+      {/* MESAJLAR AKIŞI (Şık Baloncuklu Tasarım) */}
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-4 max-w-3xl mx-auto w-full custom-scrollbar relative z-10">
         
         {!nicknames[myId] && (
-          <div className="bg-gradient-to-r from-[#4DA3FF]/15 via-blue-500/15 to-purple-500/15 border border-[#4DA3FF]/30 p-3.5 rounded-2xl flex items-center justify-between text-white text-xs font-semibold gap-3 shadow-lg">
-            <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-xl bg-[#4DA3FF]/20 border border-[#4DA3FF]/30 flex items-center justify-center text-[#4DA3FF] shrink-0">
-                <Sparkles size={16} />
-              </div>
-              <div>
-                <p className="font-bold text-[#4DA3FF]">Özel bir nickin yok!</p>
-                <p className="text-gray-400 text-[11px]">Lobide rastgele hayvan ismiyle görünüyorsun.</p>
-              </div>
+          <div className="bg-[#4DA3FF]/10 border border-[#4DA3FF]/20 p-3 rounded-2xl flex items-center justify-between text-white text-xs font-semibold gap-3">
+            <div className="flex items-center gap-2">
+              <Sparkles size={16} className="text-[#4DA3FF] shrink-0" />
+              <span>Özel nickin yok! Rastgele hayvan ismiyle görünüyorsun.</span>
             </div>
             <button 
               onClick={() => window.dispatchEvent(new Event('trigger-nick-modal'))}
-              className="bg-[#4DA3FF] hover:bg-blue-500 text-white px-3 py-1.5 rounded-xl font-bold text-xs transition-colors shrink-0 shadow-md cursor-pointer"
+              className="bg-[#4DA3FF] hover:bg-blue-500 text-white px-3 py-1 rounded-xl font-bold text-xs transition-colors shrink-0 cursor-pointer"
             >
               Nick Al
             </button>
@@ -154,32 +137,45 @@ export default function GlobalChatPage() {
           const userBadge = badges[rawAuthorId];
           
           return (
-            <div 
-              key={msg.id || index} 
-              className={`group flex flex-col relative px-3 py-2 rounded-xl transition-colors hover:bg-white/[0.02] ${
-                isMe ? 'border-l-2 border-[#4DA3FF]' : 'border-l-2 border-transparent'
-              }`}
-            >
-              {/* Yazar Bilgisi (Üst Bar) */}
-              <div className="flex items-center gap-2 mb-1">
+            <div key={msg.id || index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1`}>
+              
+              {/* Yazar Bilgisi (Sadece başkalarında görünür) */}
+              {!isMe && (
                 <Link 
                   href={`/profil/${encodeURIComponent(rawAuthorId)}`}
-                  className="flex items-center gap-1.5 hover:underline cursor-pointer"
+                  className="flex items-center gap-1.5 ml-1 group w-fit cursor-pointer"
                 >
-                  <span className={`text-[12px] font-bold tracking-tight ${isMe ? 'text-[#4DA3FF]' : 'text-gray-300'}`}>
-                    {isMe ? `${displayName} (Sen)` : displayName}
+                  <span className="text-[11px] text-gray-400 font-bold group-hover:text-gray-200 transition-colors">
+                    {displayName}
                   </span>
+                  {userBadge && (
+                    <span className="bg-[#4DA3FF]/15 text-[#4DA3FF] border border-[#4DA3FF]/20 px-1.5 py-0.2 rounded text-[9px] uppercase tracking-wider font-black">
+                      {userBadge}
+                    </span>
+                  )}
                 </Link>
+              )}
 
-                {userBadge && (
-                  <span className="bg-[#4DA3FF]/15 text-[#4DA3FF] border border-[#4DA3FF]/25 px-1.5 py-0.2 rounded text-[9px] uppercase tracking-wider font-black">
-                    {userBadge}
-                  </span>
-                )}
-              </div>
+              {/* Kendi mesajımızda üstte minik Sen etiketi */}
+              {isMe && (
+                <div className="flex items-center gap-1.5 mr-1">
+                  {userBadge && (
+                    <span className="bg-[#4DA3FF]/15 text-[#4DA3FF] border border-[#4DA3FF]/20 px-1.5 py-0.2 rounded text-[9px] uppercase tracking-wider font-black">
+                      {userBadge}
+                    </span>
+                  )}
+                  <span className="text-[11px] text-[#4DA3FF] font-bold">Sen</span>
+                </div>
+              )}
 
-              {/* Mesaj İçeriği (Discord Tarzı Düz Akış) */}
-              <div className="text-gray-200 text-[14.5px] sm:text-[15px] leading-relaxed break-words font-normal pl-0.5">
+              {/* Mesaj Baloncuğu */}
+              <div 
+                className={`px-4 py-3 max-w-[85%] sm:max-w-[70%] break-words text-[14.5px] sm:text-[15px] leading-relaxed shadow-md ${
+                  isMe 
+                    ? 'bg-gradient-to-tr from-[#2563EB] to-[#4DA3FF] text-white rounded-[22px] rounded-tr-[4px] font-medium shadow-blue-500/10' 
+                    : 'bg-[#18181B] text-gray-100 border border-white/5 rounded-[22px] rounded-tl-[4px] font-normal'
+                }`}
+              >
                 {rawContent ? rawContent : JSON.stringify(msg)}
               </div>
             </div>
@@ -188,24 +184,24 @@ export default function GlobalChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 3. ALT YAZMA ALANI (Neon Parıltılı Hibrit Bar) */}
-      <div className="shrink-0 w-full bg-[#09090B]/95 backdrop-blur-2xl border-t border-white/[0.06] pt-3 pb-4 sm:pb-6 px-3 sm:px-4 relative z-50">
+      {/* ALT YAZMA ALANI */}
+      <div className="shrink-0 w-full bg-[#0B0B0B]/95 backdrop-blur-2xl border-t border-white/5 pt-3 pb-4 sm:pb-6 px-3 sm:px-4 relative z-50">
         <form onSubmit={handleSend} className="max-w-3xl mx-auto flex items-center w-full">
-          <div className="w-full bg-[#141417] border border-white/10 rounded-2xl flex items-center p-1.5 shadow-[0_0_30px_rgba(77,163,255,0.08)] transition-all focus-within:border-[#4DA3FF]/60 focus-within:ring-1 focus-within:ring-[#4DA3FF]/30">
+          <div className="w-full bg-[#141417] border border-white/10 rounded-full flex items-center p-1 shadow-lg transition-all focus-within:border-[#4DA3FF]/50">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Lobiye bir şeyler fısılda..."
               maxLength={250}
-              className="flex-1 bg-transparent text-white py-2.5 pl-3.5 pr-3 outline-none text-[16px] placeholder:text-gray-500 font-medium"
+              className="flex-1 bg-transparent text-white py-2.5 pl-4 pr-3 outline-none text-[16px] placeholder:text-gray-500"
             />
             <button 
               type="submit" 
               disabled={!inputValue.trim()}
-              className="p-2.5 bg-gradient-to-r from-[#4DA3FF] to-blue-600 text-white rounded-xl hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 disabled:grayscale transition-all shadow-[0_0_15px_rgba(77,163,255,0.4)] shrink-0 cursor-pointer"
+              className="p-2.5 mr-0.5 bg-gradient-to-r from-[#4DA3FF] to-blue-600 text-white rounded-full hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 disabled:grayscale transition-all shadow-md shrink-0 cursor-pointer"
             >
-              <Send size={16} />
+              <Send size={16} className="ml-0.5" />
             </button>
           </div>
         </form>
