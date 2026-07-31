@@ -41,6 +41,15 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
 
     const formData = new FormData();
     formData.append('nickname', nickname);
+    
+    // 🔥 ÇÖZÜM BURADA: Eksik olan User UUID verisini forma ekliyoruz!
+    if (userUuid) {
+      formData.append('userUuid', userUuid);
+    } else {
+      // Eğer prop boş gelirse, yedek olarak tarayıcıdan (localStorage) çekiyoruz
+      const localId = localStorage.getItem('tnku_chat_anon_id') || localStorage.getItem('tnku_anon_id');
+      if (localId) formData.append('userUuid', localId);
+    }
 
     const res = await updateCustomNickname(formData);
 

@@ -17,11 +17,32 @@ const getAnonymousData = (id: string) => {
   return `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`;
 };
 
+// 🔥 YENİ EKLENDİ: Bugün, Dün ve Saat formatlayıcı
+const formatMessageTime = (dateString: string | Date) => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  const now = new Date();
+
+  const isToday = date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
+
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.getDate() === yesterday.getDate() && date.getMonth() === yesterday.getMonth() && date.getFullYear() === yesterday.getFullYear();
+
+  const hours = date.getHours().toString().padStart(2, '0');
+  const minutes = date.getMinutes().toString().padStart(2, '0');
+  const timeStr = `${hours}:${minutes}`;
+
+  if (isToday) return `Bugün ${timeStr}`;
+  if (isYesterday) return `Dün ${timeStr}`;
+
+  return `${date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' })} ${timeStr}`;
+};
+
 export default function GlobalChatPage() {
   const [messages, setMessages] = useState<any[]>([]);
   const [inputValue, setInputValue] = useState("");
   
-  // 🔥 Başlangıçta kapalı, sadece localStorage'da yoksa açılacak
   const [isRulesModalOpen, setIsRulesModalOpen] = useState(false);
 
   const [myId, setMyId] = useState("");
@@ -31,7 +52,6 @@ export default function GlobalChatPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    // 🔥 Sadece ilk kez girenlerde uyarı gösterir
     const rulesAccepted = localStorage.getItem('tnku_chat_rules_accepted');
     if (!rulesAccepted) {
       setIsRulesModalOpen(true);
@@ -87,7 +107,6 @@ export default function GlobalChatPage() {
     await sendMessage(msg, myId); 
   };
 
-  // 🔥 Kuralları kapatınca tarayıcıya kaydeder
   const acceptRules = () => {
     localStorage.setItem('tnku_chat_rules_accepted', 'true');
     setIsRulesModalOpen(false);
@@ -144,6 +163,8 @@ export default function GlobalChatPage() {
         {messages.map((msg, index) => {
           const rawAuthorId = msg.authorUuid || msg.authoruuid || msg.author_uuid || "";
           const rawContent = msg.content || msg.message || msg.text || "";
+          // Hem Prisma hem Supabase formatlarını yakalar
+          const rawTimestamp = msg.createdAt || msg.created_at || new Date(); 
           
           const isMe = rawAuthorId === myId;
           const displayName = nicknames[rawAuthorId] || getAnonymousData(rawAuthorId);
@@ -184,24 +205,32 @@ export default function GlobalChatPage() {
                 </div>
               )}
 
-              {/* Mesaj Baloncuğu */}
+              {/* 🔥 Mesaj Baloncuğu ve Zaman Damgası */}
               <div 
-                className={`px-4 py-3 max-w-[85%] sm:max-w-[70%] break-words text-[14.5px] sm:text-[15px] leading-relaxed shadow-sm ${
+                className={`px-3.5 py-2.5 max-w-[85%] sm:max-w-[70%] shadow-sm flex flex-col ${
                   isMe 
-                    ? `bg-gradient-to-tr from-[#2563EB] to-[#4DA3FF] text-white font-medium shadow-blue-500/10 ${
+                    ? `bg-gradient-to-tr from-[#2563EB] to-[#4DA3FF] text-white shadow-blue-500/10 ${
                         isSameAuthor 
                           ? 'rounded-[22px] rounded-tr-[8px] rounded-br-[22px]' 
                           : 'rounded-[22px] rounded-tr-[4px]'
                       }` 
-                    : `bg-[#18181B] text-gray-100 border border-white/5 font-normal ${
+                    : `bg-[#18181B] border border-white/5 ${
                         isSameAuthor 
                           ? 'rounded-[22px] rounded-tl-[8px] rounded-bl-[22px]' 
                           : 'rounded-[22px] rounded-tl-[4px]'
                       }`
                 }`}
               >
-                {rawContent ? rawContent : JSON.stringify(msg)}
+                <span className={`text-[14.5px] sm:text-[15px] leading-relaxed break-words font-medium ${isMe ? 'text-white' : 'text-gray-100'}`}>
+                  {rawContent ? rawContent : JSON.stringify(msg)}
+                </span>
+                
+                {/* SAAT YAZISI */}
+                <span className={`text-[9.5px] self-end mt-1 font-bold whitespace-nowrap ${isMe ? 'text-white/70' : 'text-gray-500'}`}>
+                  {formatMessageTime(rawTimestamp)}
+                </span>
               </div>
+
             </div>
           );
         })}
