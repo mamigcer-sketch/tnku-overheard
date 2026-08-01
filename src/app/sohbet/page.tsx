@@ -17,10 +17,18 @@ const getAnonymousData = (id: string) => {
   return `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`;
 };
 
-// 🔥 YENİ EKLENDİ: Bugün, Dün ve Saat formatlayıcı
-const formatMessageTime = (dateString: string | Date) => {
-  if (!dateString) return "";
-  const date = new Date(dateString);
+// 🔥 YENİ EKLENDİ VE SAAT FARKI ÇÖZÜLDÜ: Bugün, Dün ve Saat formatlayıcı
+const formatMessageTime = (dateInput: string | Date) => {
+  if (!dateInput) return "";
+  
+  // 🔥 Supabase Realtime (Canlı) verisi Z (UTC) takısı olmadan gelir, bu da saati 3 saat geri gösterir.
+  // Gelen veride saat dilimi yoksa sonuna 'Z' ekleyerek tarayıcının Türkiye saatine (+3) çevirmesini sağlıyoruz!
+  let safeDate = dateInput;
+  if (typeof safeDate === 'string' && !safeDate.endsWith('Z') && !safeDate.includes('+')) {
+    safeDate += 'Z';
+  }
+  
+  const date = new Date(safeDate);
   const now = new Date();
 
   const isToday = date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
