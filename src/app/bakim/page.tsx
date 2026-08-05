@@ -58,10 +58,10 @@ export default function BakimPage() {
 
         <div className="space-y-2">
           <h1 className="text-3xl sm:text-4xl font-black tracking-tighter text-white">
-            BAKIMDAYIZ
+            KAPALIYIZ! <span className="text-[#FF4D4D]">🔥</span>
           </h1>
           <p className="text-neutral-400 text-xs sm:text-sm font-medium px-4">
-            HEPİNİZİ YERİM, SAYAÇ BİTTİĞİNDE BURDA OLUNN! <br />
+            OKUL AÇILINCA AKTİF OLACAK ASKİM <br />
           </p>
         </div>
 
