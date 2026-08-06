@@ -2,6 +2,7 @@
 
 import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
+import { addPoints } from '@/lib/gamification';
 
 export async function getChatData() {
   const cookieStore = await cookies();
@@ -42,4 +43,7 @@ export async function sendMessage(content: string, authorId: string) {
       authorUuid: authorId,
     },
   });
+
+  // 🔥 İŞTE BURASI: Mesaj başarıyla atıldığı an kullanıcıya şak diye +2 puan veriyoruz!
+  await addPoints(authorId, 2);
 }

@@ -127,10 +127,29 @@ model CommentReaction {
 
   // Bir kişi aynı yoruma aynı emojiyi sadece 1 kez atabilsin diye:
   @@unique([commentId, userUuid, emoji])
-  
-}model ChatMessage {
+}
+
+model ChatMessage {
   id         String   @id @default(cuid())
   content    String
   authorUuid String
   createdAt  DateTime @default(now())
+}
+
+// Kullanıcının puan ve seviye durumunu tutar
+model UserStats {
+  userUuid  String   @id
+  points    Int      @default(0)
+  level     Int      @default(1)
+  updatedAt DateTime @updatedAt
+}
+
+// Kazanılan görev/başarım rozetlerini tutar
+model UnlockedBadge {
+  id         String   @id @default(cuid())
+  userUuid   String
+  badgeName  String
+  unlockedAt DateTime @default(now())
+
+  @@unique([userUuid, badgeName]) // Aynı rozeti iki kere almasını engeller
 }

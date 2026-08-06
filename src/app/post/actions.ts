@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from "next/cache";
 import { cookies } from 'next/headers';
+import { addPoints } from '@/lib/gamification'; // 🔥 Gamification motorunu buraya çağırdık!
 
 // 🔥 Ortak Çerez Yöneticisi
 async function getOrCreateAuthorId() {
@@ -64,6 +65,9 @@ export async function createPost(formData: FormData) {
     },
   });
 
+  // 🔥 İŞTE BURASI: Yeni gönderi paylaşıldığı an kullanıcıya şak diye +10 XP veriyoruz!
+  await addPoints(authorUuid, 10);
+
   revalidatePath("/");
   return post; 
 }
@@ -94,6 +98,9 @@ export async function addComment(formData: FormData) {
       parentId: parentId || null, 
     },
   });
+
+  // 🔥 İŞTE BURASI: Yorum yapıldığı an kullanıcıya şak diye +5 XP veriyoruz!
+  await addPoints(authorId, 5);
 
   // 🔥 BİLDİRİM GÖNDERME MANTIĞI
   try {
