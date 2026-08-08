@@ -2,7 +2,7 @@ import prisma from '@/lib/prisma';
 import PostCard from '@/components/PostCard';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { Heart, MessageCircle, FileText, Award, UserCircle2, ArrowRight, Home } from 'lucide-react';
+import { Heart, MessageCircle, FileText, Award, UserCircle2, ArrowRight, Home, Flame } from 'lucide-react'; // 🔥 Flame ikonunu ekledik
 import Link from 'next/link';
 import ProfileNickEdit from '@/components/ProfileNickEdit'; 
 
@@ -54,7 +54,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   
   const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
 
-  const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb] = await Promise.all([
+  // 🔥 userStats verisini de veritabanından çektik
+  const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb, userStats] = await Promise.all([
     prisma.post.count({ where: { authorUuid: targetUuid, status: 'APPROVED' } }),
     prisma.comment.count({ where: { authorId: targetUuid } }),
     prisma.post.findMany({
@@ -79,7 +80,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
     }),
     (prisma as any).userBadge.findUnique({ where: { userUuid: targetUuid } }).catch(() => null),
     (prisma as any).customNickname.findMany().catch(() => []),
-    (prisma as any).userBadge.findMany().catch(() => [])
+    (prisma as any).userBadge.findMany().catch(() => []),
+    (prisma as any).userStats.findUnique({ where: { userUuid: targetUuid } }).catch(() => null)
   ]);
 
   const customNicknamesMap = (allNicknamesDb || []).reduce((acc: any, curr: any) => {
@@ -98,6 +100,13 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const userBadge = userBadgeDb?.badgeName;
   
   const likedPosts = cookieStore.get('liked_posts')?.value?.split(',') || [];
+
+  // 🔥 XP ve Seviye Değerleri
+  const points = userStats?.points || 0;
+  const level = userStats?.level || 1;
+  // Görsel amaçlı doluluk oranı (500 puanda bir bar yenilenir gibi gösterir)
+  const nextTarget = (Math.floor(points / 500) + 1) * 500;
+  const fillPercentage = Math.max(5, (points / nextTarget) * 100);
 
   async function incrementLike(formData: FormData) {
     'use server';
@@ -147,7 +156,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               <UserCircle2 size={50} className="text-[#4DA3FF]/70" />
             </div>
 
-            <div className="flex flex-col items-center sm:items-start text-center sm:text-left flex-1">
+            <div className="flex flex-col items-center sm:items-start text-center sm:text-left flex-1 w-full">
               <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2 flex-wrap justify-center sm:justify-start">
                 {displayNickname}
               </h2>
@@ -157,15 +166,34 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                   <Award size={14} /> {userBadge}
                 </div>
               ) : (
-                <p className="text-[13px] sm:text-sm text-gray-400 mt-1.5 font-bold tracking-wider">TNKUOVERHEARD TAKİÇİSİ</p>
+                <p className="text-[13px] sm:text-sm text-gray-400 mt-1.5 font-bold tracking-wider">TNKUOVERHEARD TAKİPÇİSİ</p>
               )}
 
-              {/* 🔥 KODU BURAYA MÜHÜRLEDİK! KENDİ KİMLİĞİYLE BUTON AÇILACAK */}
-              <ProfileNickEdit 
-                targetUuid={targetUuid} 
-                currentNick={displayNickname} 
-                isServerOwner={isOwnProfile} 
-              />
+              {/* 🔥 ALEVLİ, ALTIN SARISI XP VE SEVİYE BARI EKLENDİ */}
+              <div className="mt-4 w-full sm:w-[85%] bg-white/[0.02] border border-white/5 p-3 rounded-2xl shadow-inner">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] sm:text-[11px] font-black tracking-widest uppercase text-amber-500 flex items-center gap-1">
+                    <Flame size={14} className="animate-pulse" /> Seviye {level}
+                  </span>
+                  <span className="text-[12px] font-black text-amber-400 drop-shadow-md">
+                    {points} XP
+                  </span>
+                </div>
+                <div className="h-2 w-full bg-black/60 rounded-full overflow-hidden border border-white/5">
+                  <div 
+                    className="h-full bg-gradient-to-r from-amber-600 via-amber-500 to-orange-400 rounded-full shadow-[0_0_15px_rgba(245,158,11,0.8)] transition-all duration-1000 ease-out"
+                    style={{ width: `${fillPercentage}%` }}
+                  ></div>
+                </div>
+              </div>
+
+              <div className="mt-4 w-full sm:w-auto">
+                <ProfileNickEdit 
+                  targetUuid={targetUuid} 
+                  currentNick={displayNickname} 
+                  isServerOwner={isOwnProfile} 
+                />
+              </div>
             </div>
           </div>
 
