@@ -9,7 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
-import { MessageSquareHeart, Bell, MessageCircle } from 'lucide-react';
+import { MessageSquareHeart, Bell, MessageCircle, Trophy } from 'lucide-react'; // 🔥 Trophy (Kupa) eklendi!
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -150,6 +150,15 @@ export default async function Home({ searchParams }: any) {
           >
             <MessageSquareHeart size={15} />
             <span>Beğendiklerim</span>
+          </Link>
+
+          {/* 🔥 KAMPÜS SEFİRLERİ LİNKİ BURADA! Işıl Işıl Parıldıyor */}
+          <Link 
+            href="/liderlik" 
+            className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 sm:px-3.5 py-2 rounded-full transition-all duration-300 text-[13px] font-bold border border-amber-500/30 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] hover:-translate-y-0.5"
+          >
+            <Trophy size={16} className="shrink-0" />
+            <span className="hidden sm:inline">Sefirler</span>
           </Link>
 
           <NotificationBell notifications={notifications} />
