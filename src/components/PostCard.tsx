@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import CommentForm from "./CommentForm";
 import AnonymousPlayer from "./AnonymousPlayer";
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -198,12 +199,11 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </button>
         </div>
 
-        {/* 2. ANA METİN (Çift Tıklama Alanı) */}
+        {/* 2. ANA METİN */}
         <div 
           onClick={handleDoubleTap}
           className="px-4 py-2 relative select-none cursor-pointer"
         >
-          {/* Çift Tıklama Kalp Efekti */}
           <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-300 ease-out ${
             showBigHeart ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.3]'
           }`}>
@@ -231,25 +231,25 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
         {/* 3. İKONLAR */}
         <div className="px-4 pt-3 pb-2 flex items-center justify-between">
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3.5">
             <form action={incrementLike} onSubmit={handleLikeClick}>
               <input type="hidden" name="id" value={post.id} />
               <button type="submit" disabled={localLiked} className="group relative transition-transform active:scale-75">
-                <Heart size={26} className={`transition-all duration-300 ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-red-500 text-red-500' : 'text-white hover:text-gray-400'}`} />
+                <Heart size={22} className={`transition-all duration-300 ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-red-500 text-red-500' : 'text-white hover:text-gray-400'}`} />
               </button>
             </form>
             
             <button onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }} className="transition-transform active:scale-75">
-              <MessageCircle size={26} className="text-white hover:text-gray-400 transform -scale-x-100" />
+              <MessageCircle size={22} className="text-white hover:text-gray-400 transform -scale-x-100" />
             </button>
             
             <button onClick={handleShare} className="transition-transform active:scale-75">
-              <Send size={26} className="text-white hover:text-gray-400 transform -rotate-12 -mt-1" />
+              <Send size={22} className="text-white hover:text-gray-400 transform -rotate-12 -mt-1" />
             </button>
           </div>
           
           <button onClick={() => setIsSaved(!isSaved)} className="transition-transform active:scale-75">
-            <Bookmark size={26} className={isSaved ? 'fill-white text-white' : 'text-white hover:text-gray-400'} />
+            <Bookmark size={22} className={isSaved ? 'fill-white text-white' : 'text-white hover:text-gray-400'} />
           </button>
         </div>
 
