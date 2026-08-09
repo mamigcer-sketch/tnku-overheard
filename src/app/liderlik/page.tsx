@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
-import { ArrowLeft, Trophy, Flame, Crown, Medal, Award } from 'lucide-react';
+import { ArrowLeft, Trophy, Flame, Crown, Medal, Award, ChevronRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -9,9 +9,7 @@ const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Mart
 
 const getAnonymousData = (id: string, customNickname?: string) => {
   if (!id) return { name: "Gizemli Yolcu" };
-  if (customNickname) {
-    return { name: customNickname };
-  }
+  if (customNickname) return { name: customNickname };
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   const positiveHash = Math.abs(hash);
@@ -27,127 +25,81 @@ export default async function LeaderboardPage() {
 
   try {
     const [fetchedStats, nicknamesDb, badgesDb] = await Promise.all([
-      (prisma as any).userStats.findMany({
-        orderBy: { points: 'desc' },
-        take: 50
-      }).catch(() => []),
+      (prisma as any).userStats.findMany({ orderBy: { points: 'desc' }, take: 50 }).catch(() => []),
       (prisma as any).customNickname.findMany().catch(() => []),
       (prisma as any).userBadge.findMany().catch(() => [])
     ]);
-
     stats = fetchedStats;
-
-    customNicknamesMap = (nicknamesDb || []).reduce((acc: any, curr: any) => {
-      acc[curr.userUuid] = curr.nickname;
-      return acc;
-    }, {});
-
-    userBadgesMap = (badgesDb || []).reduce((acc: any, curr: any) => {
-      acc[curr.userUuid] = curr.badgeName;
-      return acc;
-    }, {});
-  } catch (err) {
-    console.error("Liderlik tablosu çekilemedi:", err);
-  }
+    customNicknamesMap = (nicknamesDb || []).reduce((acc: any, curr: any) => { acc[curr.userUuid] = curr.nickname; return acc; }, {});
+    userBadgesMap = (badgesDb || []).reduce((acc: any, curr: any) => { acc[curr.userUuid] = curr.badgeName; return acc; }, {});
+  } catch (err) { console.error(err); }
 
   return (
-    <main className="min-h-screen bg-[#000000] text-white relative z-0 pb-20 selection:bg-amber-500/30">
+    <main className="min-h-screen bg-[#000000] text-white pb-20">
       
-      {/* 1. ÜST HEADER */}
-      <header className="sticky top-0 z-50 bg-[#000000]/90 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="text-white hover:opacity-70 transition-opacity p-1 -ml-1">
-            <ArrowLeft size={24} />
-          </Link>
-          <h1 className="text-[17px] font-bold tracking-tight flex items-center gap-2">
-            <Trophy size={18} className="text-amber-400" />
-            Sefirlik Tablosu
-          </h1>
-        </div>
+      <header className="sticky top-0 z-50 bg-[#000000]/80 backdrop-blur-2xl border-b border-white/5 px-4 py-3 flex items-center gap-4">
+        <Link href="/" className="p-1.5 hover:bg-white/10 rounded-full transition-colors">
+          <ArrowLeft size={22} />
+        </Link>
+        <h1 className="font-black text-lg">Sefirlik Tablosu</h1>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 pt-6">
+      <div className="max-w-xl mx-auto px-4 pt-6">
         
-        {/* KAMPÜSÜN SEFİRLERİ BAŞLIK ALANI */}
-        <div className="text-center mb-8 px-4">
-          <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-400 mb-3 shadow-[0_0_20px_rgba(245,158,11,0.15)]">
-            <Trophy size={24} />
-          </div>
-          <h2 className="text-2xl sm:text-3xl font-black tracking-tight text-white mb-1">
-            KAMPÜSÜN <span className="text-amber-400">SEFİRLERİ</span>
-          </h2>
-          <p className="text-gray-400 text-[13px]">
-            Kampüsün nabzını tutanlar, masanın kralları ve dedikodunun pîrleri.
-          </p>
+        {/* PODYUM (Top 3) */}
+        <div className="grid grid-cols-3 gap-2 mb-8 items-end px-2">
+          {stats.slice(0, 3).map((user, index) => {
+            const rank = index + 1;
+            const pos = rank === 1 ? 2 : rank === 2 ? 1 : 3; // Podyum dizilimi: 2, 1, 3
+            const rankedUser = stats[pos - 1];
+            if (!rankedUser) return null;
+            
+            const authorData = getAnonymousData(rankedUser.userUuid, customNicknamesMap[rankedUser.userUuid]);
+            const isFirst = pos === 1;
+
+            return (
+              <div key={rankedUser.userUuid} className={`flex flex-col items-center gap-2 ${isFirst ? 'scale-110 mb-2' : ''}`}>
+                <div className={`relative w-16 h-16 rounded-full border-2 flex items-center justify-center bg-[#121212] ${isFirst ? 'border-amber-400' : 'border-gray-700'}`}>
+                  {isFirst && <Crown size={24} className="text-amber-400 absolute -top-3" />}
+                  <span className="font-black text-xl opacity-60">{authorData.name.charAt(0)}</span>
+                </div>
+                <div className="text-center">
+                  <p className="text-[11px] font-bold truncate w-20">@{authorData.name}</p>
+                  <p className="text-[10px] font-black text-amber-500">{rankedUser.points} XP</p>
+                </div>
+                <div className={`w-full py-1 text-center font-black rounded-t-lg ${isFirst ? 'bg-amber-400 text-black' : 'bg-gray-800 text-gray-400'}`}>
+                  {pos}
+                </div>
+              </div>
+            );
+          })}
         </div>
 
-        {/* LİDERLİK LİSTESİ */}
-        {stats.length === 0 ? (
-          <div className="text-center py-16 bg-[#121212]/50 rounded-2xl border border-white/5 flex flex-col items-center justify-center">
-            <p className="text-gray-400 font-medium text-[13px]">Henüz sıralamaya giren sefir bulunmuyor.</p>
-          </div>
-        ) : (
-          <div className="bg-[#121212]/60 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden shadow-xl divide-y divide-white/5">
-            {stats.map((user: any, index: number) => {
-              const rank = index + 1;
-              const hasCustomNick = Boolean(customNicknamesMap[user.userUuid]);
-              // 🔥 Sadece özel nicki olanların özel nickini göster, olmayanlara orjinal UUID/ID verisini temiz yansıt
-              const displayName = hasCustomNick 
-                ? customNicknamesMap[user.userUuid] 
-                : `Kullanıcı_${user.userUuid.substring(0, 6)}`;
-              
-              const badge = userBadgesMap[user.userUuid];
-
-              return (
-                <Link
-                  key={user.userUuid || index}
-                  href={`/profil/${encodeURIComponent(user.userUuid)}`}
-                  className="flex items-center justify-between p-4 hover:bg-white/[0.04] transition-colors group"
-                >
-                  <div className="flex items-center gap-4">
-                    
-                    {/* Sıralama İkonu veya Numarası */}
-                    <div className="w-8 flex items-center justify-center shrink-0">
-                      {rank === 1 ? (
-                        <Crown size={22} className="text-amber-400 drop-shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
-                      ) : rank === 2 ? (
-                        <Medal size={20} className="text-gray-300" />
-                      ) : rank === 3 ? (
-                        <Award size={20} className="text-amber-600" />
-                      ) : (
-                        <span className="text-[14px] font-bold text-gray-500">#{rank}</span>
-                      )}
-                    </div>
-
-                    {/* Kullanıcı Bilgisi */}
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-white text-[15px] group-hover:text-amber-400 transition-colors">
-                          @{displayName}
-                        </span>
-                        {badge && (
-                          <span className="bg-amber-500/20 text-amber-400 text-[9px] font-black px-1.5 py-0.5 rounded uppercase">
-                            {badge}
-                          </span>
-                        )}
-                      </div>
-                      <span className="text-[11px] text-gray-500 font-medium mt-0.5">
-                        Seviye {user.level || 1}
-                      </span>
-                    </div>
-
+        {/* LİSTE (4+) */}
+        <div className="space-y-2">
+          {stats.slice(3).map((user, index) => {
+            const rank = index + 4;
+            const authorData = getAnonymousData(user.userUuid, customNicknamesMap[user.userUuid]);
+            return (
+              <Link key={user.userUuid} href={`/profil/${user.userUuid}`} className="flex items-center gap-4 p-3.5 bg-[#121212]/50 hover:bg-[#1A1A1A] rounded-2xl border border-white/5 transition-all">
+                <span className="text-[15px] font-black text-gray-500 w-6 text-center">{rank}</span>
+                <div className="flex-1 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-[#1A1A1A] flex items-center justify-center font-bold text-sm opacity-70">
+                    {authorData.name.charAt(0)}
                   </div>
-
-                  {/* XP Puanı */}
-                  <div className="flex items-center gap-1.5 text-amber-400 bg-amber-500/10 border border-amber-500/20 px-3 py-1.5 rounded-full text-[13px] font-black shadow-inner">
-                    <Flame size={14} className="animate-pulse" />
-                    <span>{user.points || 0} XP</span>
+                  <div>
+                    <p className="text-[14px] font-bold text-white">@{authorData.name}</p>
+                    <p className="text-[11px] text-gray-500 font-medium">Seviye {user.level}</p>
                   </div>
-                </Link>
-              );
-            })}
-          </div>
-        )}
+                </div>
+                <div className="flex items-center gap-1.5 text-amber-400 bg-amber-500/10 px-3 py-1.5 rounded-full text-[12px] font-black">
+                  <Flame size={12} /> {user.points}
+                </div>
+                <ChevronRight size={16} className="text-gray-600" />
+              </Link>
+            );
+          })}
+        </div>
       </div>
     </main>
   );
