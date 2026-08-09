@@ -9,7 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
-import { MessageSquareHeart, Bell, MessageCircle, Trophy, LayoutGrid, Coffee, Headphones, Flame } from 'lucide-react'; // 🔥 İkonları buraya ekledik!
+import { MessageSquareHeart, Bell, MessageCircle, Trophy, LayoutGrid, Coffee, Headphones, Flame, ChevronRight } from 'lucide-react';
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -130,7 +130,6 @@ export default async function Home({ searchParams }: any) {
     }
   }
 
-  // 🔥 Filtreler ve İkon Eşleştirmeleri
   const filterData = [
     { name: 'Tümü', icon: LayoutGrid },
     { name: 'İtiraf', icon: MessageSquareHeart },
@@ -142,28 +141,29 @@ export default async function Home({ searchParams }: any) {
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-20">
       
-      <header className="sticky top-0 z-50 bg-[#121212]/80 backdrop-blur-2xl border-b border-white/5 px-4 py-4 md:px-8 flex items-center justify-between transition-all shadow-md gap-2">
-        <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity shrink-0">
-          <img src="/logo.jpg" alt="Logo" className="w-8 h-8 sm:w-9 sm:h-9 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
-          <h1 className="text-base sm:text-xl font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
+      {/* HEADER - DAHA ZARİF */}
+      <header className="sticky top-0 z-50 bg-[#121212]/90 backdrop-blur-2xl border-b border-white/5 px-4 py-3 md:px-8 flex items-center justify-between shadow-sm gap-2">
+        <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
+          <img src="/logo.jpg" alt="Logo" className="w-7 h-7 sm:w-8 sm:h-8 object-cover rounded-xl shadow-[0_0_15px_rgba(255,255,255,0.05)]" />
+          <h1 className="text-[15px] sm:text-lg font-black tracking-tighter">TNKU<span className="text-[#4DA3FF]">OVERHEARD</span></h1>
         </Link>
         
-        <div className="flex items-center gap-2.5 sm:gap-4 shrink-0">
+        <div className="flex items-center gap-2 sm:gap-3 shrink-0">
           <RefreshButton />
           
           <Link 
             href="/my-likes" 
-            className="hidden sm:flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] px-3.5 py-2 rounded-full transition-colors text-[13px] font-medium border border-white/[0.05] text-pink-400"
+            className="hidden sm:flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] px-3 py-1.5 rounded-full transition-colors text-[12px] font-medium border border-white/[0.05] text-pink-400"
           >
-            <MessageSquareHeart size={15} />
+            <MessageSquareHeart size={14} />
             <span>Beğendiklerim</span>
           </Link>
 
           <Link 
             href="/liderlik" 
-            className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 sm:px-3.5 py-2 rounded-full transition-all duration-300 text-[13px] font-bold border border-amber-500/30 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] hover:-translate-y-0.5"
+            className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 sm:px-3 py-1.5 rounded-full transition-all duration-300 text-[12px] font-bold border border-amber-500/30 text-amber-400 shadow-[0_0_10px_rgba(245,158,11,0.15)]"
           >
-            <Trophy size={16} className="shrink-0" />
+            <Trophy size={14} className="shrink-0" />
             <span className="hidden sm:inline">Sefirler</span>
           </Link>
 
@@ -172,34 +172,57 @@ export default async function Home({ searchParams }: any) {
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-4 py-5 sm:py-6">
+      {/* İÇERİK ALANI - BOŞLUKLAR TIRAŞLANDI (py-3) */}
+      <div className="max-w-2xl mx-auto px-3 py-3 sm:py-4">
         
+        {/* İNCECİK ZARİF DUYURU BAR'I */}
         {activeAnnouncement && (
-          <div className="mb-5 flex items-center gap-3 p-3.5 sm:px-4 rounded-[20px] bg-[#121212]/80 backdrop-blur-xl border border-[#4DA3FF]/15 shadow-sm">
-            <span className="shrink-0 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#4DA3FF]/10 text-[#4DA3FF] text-[10px] font-bold tracking-wider uppercase border border-[#4DA3FF]/20 shadow-inner">
-              <Bell size={12} className="animate-pulse" /> Duyuru
-            </span>
-            <p className="text-gray-300 text-[13px] sm:text-[14px] font-medium truncate leading-relaxed">
+          <div className="mb-3 flex items-center gap-2.5 px-3 py-2 rounded-xl bg-gradient-to-r from-[#4DA3FF]/15 to-transparent border border-[#4DA3FF]/20 shadow-sm relative overflow-hidden">
+            <Bell size={14} className="text-[#4DA3FF] animate-pulse shrink-0" />
+            <p className="text-gray-200 text-[12px] sm:text-[13px] font-medium truncate flex-1">
+              <span className="font-bold text-[#4DA3FF] mr-1.5">DUYURU:</span>
               {activeAnnouncement.content}
             </p>
           </div>
         )}
 
-        <div className="relative z-10 mb-5">
-          <CountdownWidget countdown={activeCountdown} />
-        </div>
+        {/* İNCECİK GLOBAL LOBİ BAR'I */}
+        <Link href="/sohbet" className="flex items-center justify-between bg-[#121212]/80 backdrop-blur-xl border border-white/5 hover:border-white/10 rounded-xl p-2.5 mb-3 transition-all group">
+          <div className="flex items-center gap-3">
+            <div className="relative flex h-2.5 w-2.5 shrink-0 ml-1">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </div>
+            <div className="flex flex-col">
+               <span className="text-white text-[13px] font-bold flex items-center gap-1.5">
+                 GLOBAL LOBİ 
+                 <span className="bg-[#4DA3FF]/20 text-[#4DA3FF] text-[9px] px-1.5 py-0.5 rounded font-black uppercase tracking-wider">Canlı</span>
+               </span>
+               <span className="text-gray-400 text-[11px] truncate mt-0.5">Kampüs şimdi ne konuşuyor? Tıkla ve katıl!</span>
+            </div>
+          </div>
+          <div className="bg-white/5 p-1.5 rounded-lg text-gray-400 group-hover:text-white group-hover:bg-[#4DA3FF]/20 group-hover:text-[#4DA3FF] transition-colors mr-1">
+            <ChevronRight size={16} />
+          </div>
+        </Link>
+
+        {activeCountdown && (
+          <div className="mb-3 relative z-10">
+            <CountdownWidget countdown={activeCountdown} />
+          </div>
+        )}
         
-        <div className="mb-4 relative z-10">
+        {/* ARAMA ÇUBUĞU */}
+        <div className="mb-3 relative z-10">
           <SearchBar />
         </div>
 
-        {/* 🔥 YENİ NESİL YÜZEN FİLTRE MENÜSÜ (FLOATING PILL NAV) 🔥 */}
-        <div className="flex justify-center sticky top-[75px] sm:top-[85px] z-40 mb-6 pointer-events-none">
-          <div className="flex items-center bg-[#121212]/90 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.6)] pointer-events-auto">
+        {/* YÜZEN FİLTRE MENÜSÜ */}
+        <div className="flex justify-center sticky top-[65px] sm:top-[75px] z-40 mb-4 pointer-events-none">
+          <div className="flex items-center bg-[#121212]/95 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.8)] pointer-events-auto">
             {filterData.map((filter) => {
               const isActive = currentFilter === filter.name;
               const Icon = filter.icon;
-              // Trend yazısındaki alevi kaldırdık çünkü ikonu zaten alev
               const displayText = filter.name === '🔥 Trend' ? 'Trend' : filter.name;
 
               return (
@@ -207,15 +230,15 @@ export default async function Home({ searchParams }: any) {
                   key={filter.name}
                   href={`/?f=${filter.name}${searchQuery ? `&q=${searchQuery}` : ''}`}
                   scroll={false}
-                  className={`flex items-center justify-center gap-2 transition-all duration-300 ease-out ${
+                  className={`flex items-center justify-center gap-1.5 transition-all duration-300 ease-out ${
                     isActive
-                      ? 'bg-[#2A2A2A] text-white px-4 py-2.5 rounded-full shadow-inner'
-                      : 'text-gray-500 hover:text-gray-300 px-3 py-2.5 hover:bg-white/5 rounded-full'
+                      ? 'bg-[#2A2A2A] text-white px-3.5 py-2 rounded-full shadow-inner'
+                      : 'text-gray-500 hover:text-gray-300 px-2.5 py-2 hover:bg-white/5 rounded-full'
                   }`}
                 >
-                  <Icon size={18} className={`${isActive ? 'text-white' : ''} ${filter.name === '🔥 Trend' && isActive ? 'text-amber-400' : ''}`} />
+                  <Icon size={16} className={`${isActive ? 'text-white' : ''} ${filter.name === '🔥 Trend' && isActive ? 'text-amber-400' : ''}`} />
                   {isActive && (
-                    <span className={`text-[13px] font-black tracking-wide whitespace-nowrap animate-in fade-in slide-in-from-right-2 duration-300 ${filter.name === '🔥 Trend' ? 'text-amber-400' : ''}`}>
+                    <span className={`text-[12px] font-bold tracking-wide whitespace-nowrap animate-in fade-in slide-in-from-right-2 duration-300 ${filter.name === '🔥 Trend' ? 'text-amber-400' : ''}`}>
                       {displayText}
                     </span>
                   )}
@@ -224,40 +247,12 @@ export default async function Home({ searchParams }: any) {
             })}
           </div>
         </div>
-        {/* 🔥 MENÜ BİTİŞ 🔥 */}
 
-        <Link href="/sohbet" className="block mb-6 relative group z-10 mx-1">
-          <div className="absolute inset-0 bg-gradient-to-r from-[#4DA3FF]/10 to-emerald-500/10 rounded-[20px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>
-          <div className="relative bg-[#121212]/90 backdrop-blur-xl border border-[#4DA3FF]/20 hover:border-[#4DA3FF]/40 rounded-[20px] p-4 flex items-center justify-between transition-all overflow-hidden shadow-lg">
-            
-            <div className="absolute right-0 top-0 w-32 h-32 bg-[#4DA3FF]/5 rounded-full blur-2xl -mr-10 -mt-10 pointer-events-none"></div>
-
-            <div className="flex items-center gap-4">
-              <div className="relative flex h-3 w-3 shrink-0">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
-              </div>
-              
-              <div>
-                <h3 className="text-white text-[15px] sm:text-base font-extrabold tracking-tight flex items-center gap-2">
-                  GLOBAL LOBİ <span className="bg-[#4DA3FF]/20 text-[#4DA3FF] text-[9px] px-1.5 py-0.5 rounded flex items-center tracking-widest font-black uppercase">Canlı</span>
-                </h3>
-                <p className="text-gray-400 text-[12px] sm:text-[13px] font-medium mt-0.5">
-                  Kampüs şimdi ne konuşuyor? Hemen sohbete katıl!
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-[#4DA3FF]/10 p-2.5 rounded-full text-[#4DA3FF] group-hover:bg-[#4DA3FF] group-hover:text-white transition-colors shrink-0">
-              <MessageCircle size={20} className="transform group-hover:scale-110 transition-transform" />
-            </div>
-          </div>
-        </Link>
-
-        <div className="space-y-5 relative z-10">
+        {/* GÖNDERİLER */}
+        <div className="space-y-4 relative z-10">
           {posts.length === 0 ? (
-            <div className="text-center py-20 bg-[#121212]/80 backdrop-blur-xl rounded-[24px] border border-white/5 flex flex-col items-center justify-center shadow-lg">
-              <p className="text-gray-400 font-medium text-[14px]">
+            <div className="text-center py-16 bg-[#121212]/80 backdrop-blur-xl rounded-2xl border border-white/5 flex flex-col items-center justify-center">
+              <p className="text-gray-400 font-medium text-[13px]">
                 {currentFilter === '🔥 Trend' 
                   ? 'Son 24 saatte henüz popülerleşen bir fısıltı yok.' 
                   : 'Aradığın kriterlerde gönderi bulunamadı.'}
@@ -280,11 +275,11 @@ export default async function Home({ searchParams }: any) {
               ))}
               
               {posts.length < totalPostsCount && (
-                <div className="flex justify-center pt-6">
+                <div className="flex justify-center pt-4">
                   <Link 
                     href={`/?f=${currentFilter}${searchQuery ? `&q=${searchQuery}` : ''}&page=${page + 1}`}
                     scroll={false}
-                    className="px-8 py-3 bg-[#121212]/80 backdrop-blur-xl border border-white/10 hover:border-white/20 rounded-full text-[13px] font-bold text-gray-300 transition-all hover:bg-white/10 hover:text-white shadow-lg"
+                    className="px-6 py-2.5 bg-[#121212]/80 backdrop-blur-xl border border-white/10 hover:border-white/20 rounded-full text-[12px] font-bold text-gray-300 transition-all hover:bg-white/10 hover:text-white"
                   >
                     Daha Fazla Göster
                   </Link>
