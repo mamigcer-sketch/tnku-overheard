@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, X, Bookmark, ShieldAlert, BookOpen, ExternalLink, Download, VenetianMask, AlertCircle, CheckCircle2, Loader2, User } from 'lucide-react'; // 🔥 Heart yerine Bookmark eklendi
+import { Menu, X, Bookmark, ShieldAlert, BookOpen, ExternalLink, Download, VenetianMask, AlertCircle, CheckCircle2, Loader2, User } from 'lucide-react';
 import Link from 'next/link';
 import { updateCustomNickname } from '@/app/profile/actions';
 
@@ -27,7 +27,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     };
   }, [isNickModalOpen]);
   
-  // 🔥 BURASI GÜNCELLENDİ: Beğendiklerim -> Kaydedilenler
+  // 🔥 BEĞENDİKLERİM YERİNE KAYDEDİLENLER EKLENDİ
   const menuItems = [
     { name: 'Kaydedilenler', icon: <Bookmark size={18} />, href: '/kaydedilenler', isExternal: false, hideOnDesktop: true },
     { name: 'Topluluk Kuralları', icon: <BookOpen size={18} />, href: '/rules', isExternal: false },
@@ -43,11 +43,9 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     const formData = new FormData();
     formData.append('nickname', nickname);
     
-    // 🔥 ÇÖZÜM BURADA: Eksik olan User UUID verisini forma ekliyoruz!
     if (userUuid) {
       formData.append('userUuid', userUuid);
     } else {
-      // Eğer prop boş gelirse, yedek olarak tarayıcıdan (localStorage) çekiyoruz
       const localId = localStorage.getItem('tnku_chat_anon_id') || localStorage.getItem('tnku_anon_id');
       if (localId) formData.append('userUuid', localId);
     }
@@ -65,7 +63,8 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
         router.refresh();
       }, 2000);
     }
-    setLoading(false); // GÜNCELLENEN KISIM
+    // 🔥 HATALI YAZIM DÜZELTİLDİ
+    setLoading(false);
   };
 
   return (
@@ -84,7 +83,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           <div className="absolute top-14 right-0 w-64 bg-[#121212]/90 backdrop-blur-2xl border border-white/10 rounded-[24px] p-2 shadow-2xl z-50 animate-in fade-in zoom-in-95 duration-200">
             <div className="space-y-0.5">
               
-              {/* 🔥 Doğrudan gerçek kimliğe yönlendiren /profil/ben rotası */}
               <Link 
                 href="/profil/ben"
                 onClick={() => setIsOpen(false)}
