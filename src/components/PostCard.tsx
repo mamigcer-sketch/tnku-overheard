@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import CommentForm from "./CommentForm";
 import AnonymousPlayer from "./AnonymousPlayer";
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ShieldAlert } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ShieldAlert, Eye } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"; 
 import { incrementView, submitReport } from "@/app/post/actions";
@@ -51,11 +50,9 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
   
   const [isSaved, setIsSaved] = useState(false);
-  const [reported, setReported] = useState(false); 
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
-  const [showComment, setShowComment] = useState(false);
   
   const [showBigHeart, setShowBigHeart] = useState(false);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -64,7 +61,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const isConfession = post.type === 'CONFESSION';
   const isBosYap = post.type === 'BOSYAP';
 
-  // 🔥 Sayfa açıldığında daha önce kaydedilmiş mi diye kontrol et
   useEffect(() => {
     const getCookie = (name: string) => {
       const value = `; ${document.cookie}`;
@@ -133,7 +129,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     triggerLike();
   };
 
-  // 🔥 KAYDETME SİSTEMİ
   const handleSaveToggle = (e: React.MouseEvent) => {
     e.stopPropagation();
     playClickSound();
@@ -183,7 +178,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     setIsSubmittingReport(true);
     try {
       await submitReport('POST', post.id, reportReason.trim());
-      setReported(true);
       setShowReportModal(false);
       setReportReason("");
     } catch (err) {
@@ -239,7 +233,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </button>
         </div>
 
-        {/* 2. ANA METİN (Çift Tıklama Alanı) */}
+        {/* 2. ANA METİN */}
         <div 
           onClick={handleDoubleTap}
           className="px-4 py-2 relative select-none cursor-pointer"
@@ -288,36 +282,35 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             </button>
           </div>
           
-          {/* 🔥 YENİ EKLENEN KAYDETME ÇALIŞAN BUTON 🔥 */}
           <button onClick={handleSaveToggle} className="transition-transform active:scale-75">
             <Bookmark size={22} className={isSaved ? 'fill-white text-white drop-shadow-md' : 'text-white hover:text-gray-400'} />
           </button>
         </div>
 
-        {/* 4. BEĞENİ VE SAAT */}
+        {/* 4. BEĞENİ, GÖRÜNTÜLENME VE SAAT */}
         <div className="px-4 pb-4">
-          <div className="font-semibold text-white text-[14px] mb-1.5 cursor-default">
-            {localLikesCount} beğenme
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="font-semibold text-white text-[14px] cursor-default">
+              {localLikesCount} beğenme
+            </div>
+            {/* 🔥 GÖRÜNTÜLENME SAYISI BURAYA EKLENDİ */}
+            <div className="flex items-center gap-1 text-gray-400 text-[13px] font-medium">
+              <Eye size={15} />
+              <span>{post.views || 0}</span>
+            </div>
           </div>
           
           {(post._count?.comments > 0 || post.comments?.length > 0) && (
             <button 
               onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }}
-              className="text-gray-400 text-[14px] font-medium hover:text-white transition-colors block"
+              className="text-gray-400 text-[14px] font-medium hover:text-white transition-colors block mb-1"
             >
               {post._count?.comments || post.comments?.length} yorumun tümünü gör
             </button>
           )}
 
-          <div className="text-gray-500 text-[10px] uppercase mt-1.5 tracking-widest font-medium">
+          <div className="text-gray-500 text-[10px] uppercase tracking-widest font-medium">
             {getRelativeTime(post.createdAt)}
-          </div>
-        </div>
-        
-        {/* YORUM FORMU (Açılır Kapanır) */}
-        <div className={`transition-all duration-300 ease-in-out overflow-hidden px-4 ${showComment ? 'max-h-[500px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
-          <div className="border-t border-white/10 pt-3">
-            <CommentForm postId={post.id} />
           </div>
         </div>
       </div>
