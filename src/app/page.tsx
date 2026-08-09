@@ -9,7 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
-import { MessageSquareHeart, Bell, MessageCircle, Trophy, Flame } from 'lucide-react';
+import { Bookmark, Bell, MessageCircle, Trophy, Flame } from 'lucide-react'; // 🔥 Bookmark eklendi
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -148,8 +148,9 @@ export default async function Home({ searchParams }: any) {
           <div className="flex items-center gap-2.5 shrink-0">
             <RefreshButton />
             
-            <Link href="/my-likes" className="hidden sm:flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] px-3 py-1.5 rounded-full transition-colors text-[12px] font-medium border border-white/[0.05] text-pink-400">
-              <MessageSquareHeart size={14} /> <span>Beğendiklerim</span>
+            {/* 🔥 BEĞENDİKLERİM YERİNE KAYDEDİLENLER GELDİ 🔥 */}
+            <Link href="/kaydedilenler" className="hidden sm:flex items-center gap-1.5 bg-white/[0.03] hover:bg-white/[0.08] px-3 py-1.5 rounded-full transition-colors text-[12px] font-medium border border-white/[0.05] text-gray-200">
+              <Bookmark size={14} className="text-gray-300" /> <span>Kaydedilenler</span>
             </Link>
 
             <Link href="/liderlik" className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1.5 rounded-full transition-all text-[12px] font-bold border border-amber-500/30 text-amber-400">
@@ -189,7 +190,7 @@ export default async function Home({ searchParams }: any) {
         {/* 2. APPLE/IOS TARZI WIDGET GRID (Lobi ve Duyuru Yan Yana) */}
         <div className={`grid gap-3 mb-4 ${activeAnnouncement ? 'grid-cols-2' : 'grid-cols-1'}`}>
           
-          {/* LOBİ WIDGET'I */}
+          {/* 🔥 LOBİ WIDGET'I (NKÜ CHAT OLARAK DEĞİŞTİ) 🔥 */}
           <Link href="/sohbet" className="bg-[#121212] hover:bg-[#181818] border border-white/5 rounded-2xl p-3.5 flex flex-col justify-between min-h-[95px] transition-colors group relative overflow-hidden">
             <div className="absolute top-0 right-0 w-16 h-16 bg-[#4DA3FF]/10 blur-xl rounded-full -mr-4 -mt-4"></div>
             <div className="flex items-start justify-between relative z-10">
@@ -202,7 +203,7 @@ export default async function Home({ searchParams }: any) {
               </div>
             </div>
             <div className="mt-2 relative z-10">
-              <h3 className="text-white font-extrabold text-[13px] tracking-tight">Global Lobi</h3>
+              <h3 className="text-white font-extrabold text-[13px] tracking-tight">NKÜ CHAT</h3>
               <p className="text-gray-400 text-[11px] mt-0.5 truncate">Kampüs ne konuşuyor?</p>
             </div>
           </Link>

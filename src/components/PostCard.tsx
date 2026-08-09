@@ -55,6 +55,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [showComment, setShowComment] = useState(false);
   
   const [showBigHeart, setShowBigHeart] = useState(false);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -62,6 +63,20 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const isEphemeral = !!post.expiresAt;
   const isConfession = post.type === 'CONFESSION';
   const isBosYap = post.type === 'BOSYAP';
+
+  // 🔥 Sayfa açıldığında daha önce kaydedilmiş mi diye kontrol et
+  useEffect(() => {
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift() || '';
+      return '';
+    };
+    const savedList = getCookie('saved_posts').split(',').filter(Boolean);
+    if (savedList.includes(post.id)) {
+      setIsSaved(true);
+    }
+  }, [post.id]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -116,6 +131,31 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const handleLikeClick = (e: React.FormEvent) => {
     e.preventDefault();
     triggerLike();
+  };
+
+  // 🔥 KAYDETME SİSTEMİ
+  const handleSaveToggle = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    playClickSound();
+    const newState = !isSaved;
+    setIsSaved(newState);
+
+    const getCookie = (name: string) => {
+      const value = `; ${document.cookie}`;
+      const parts = value.split(`; ${name}=`);
+      if (parts.length === 2) return parts.pop()?.split(';').shift() || '';
+      return '';
+    };
+    
+    let savedList = getCookie('saved_posts').split(',').filter(Boolean);
+    
+    if (newState) {
+      if (!savedList.includes(post.id)) savedList.push(post.id);
+    } else {
+      savedList = savedList.filter(id => id !== post.id);
+    }
+
+    document.cookie = `saved_posts=${savedList.join(',')}; path=/; max-age=${60 * 60 * 24 * 365}`;
   };
 
   const handleDoubleTap = (e: React.MouseEvent) => {
@@ -199,7 +239,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </button>
         </div>
 
-        {/* 2. ANA METİN */}
+        {/* 2. ANA METİN (Çift Tıklama Alanı) */}
         <div 
           onClick={handleDoubleTap}
           className="px-4 py-2 relative select-none cursor-pointer"
@@ -248,8 +288,9 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             </button>
           </div>
           
-          <button onClick={() => setIsSaved(!isSaved)} className="transition-transform active:scale-75">
-            <Bookmark size={22} className={isSaved ? 'fill-white text-white' : 'text-white hover:text-gray-400'} />
+          {/* 🔥 YENİ EKLENEN KAYDETME ÇALIŞAN BUTON 🔥 */}
+          <button onClick={handleSaveToggle} className="transition-transform active:scale-75">
+            <Bookmark size={22} className={isSaved ? 'fill-white text-white drop-shadow-md' : 'text-white hover:text-gray-400'} />
           </button>
         </div>
 
@@ -270,6 +311,13 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
           <div className="text-gray-500 text-[10px] uppercase mt-1.5 tracking-widest font-medium">
             {getRelativeTime(post.createdAt)}
+          </div>
+        </div>
+        
+        {/* YORUM FORMU (Açılır Kapanır) */}
+        <div className={`transition-all duration-300 ease-in-out overflow-hidden px-4 ${showComment ? 'max-h-[500px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
+          <div className="border-t border-white/10 pt-3">
+            <CommentForm postId={post.id} />
           </div>
         </div>
       </div>
