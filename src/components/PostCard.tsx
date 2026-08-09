@@ -3,30 +3,22 @@
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
 import AnonymousPlayer from "./AnonymousPlayer";
-import { Heart, Eye, MapPin, Clock, Users, User, MessageCircle, Share2, Flame, Flag, ShieldAlert, Quote } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, CheckCircle2, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"; 
 import { incrementView, submitReport } from "@/app/post/actions";
 import { playPopSound, playClickSound } from "@/utils/sounds";
 
-// 🔥 SÖZLÜK GÜNCELLENDİ (40 Sıfat, 40 Hayvan) - Artık profille ve adminle %100 eşleşecek!
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 
 const getAnonymousData = (id: string, customNickname?: string) => {
   if (!id) return { name: "Gizemli Yolcu" };
-  
-  if (customNickname) {
-    return { name: customNickname };
-  }
-
+  if (customNickname) return { name: customNickname };
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   const positiveHash = Math.abs(hash);
-  
-  return {
-    name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`
-  };
+  return { name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}` };
 };
 
 const getRelativeTime = (dateString: string) => {
@@ -34,15 +26,15 @@ const getRelativeTime = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (diffInSeconds < 60) return "Az önce";
+  if (diffInSeconds < 60) return "Saniyeler önce";
   const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) return `${diffInMinutes} dk önce`;
+  if (diffInMinutes < 60) return `${diffInMinutes} DAKİKA ÖNCE`;
   const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours} saat önce`;
+  if (diffInHours < 24) return `${diffInHours} SAAT ÖNCE`;
   const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays === 1) return "Dün";
-  if (diffInDays < 7) return `${diffInDays} gün önce`;
-  return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
+  if (diffInDays === 1) return "DÜN";
+  if (diffInDays < 7) return `${diffInDays} GÜN ÖNCE`;
+  return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }).toUpperCase();
 };
 
 export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge, customNicknamesMap = {}, userBadgesMap = {} }: any) {
@@ -53,13 +45,14 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const [isVisible, setIsVisible] = useState(false);
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const isLongText = post.content && post.content.length > 250; 
+  const isLongText = post.content && post.content.length > 150; 
 
   const [localLiked, setLocalLiked] = useState(isLiked);
   const [localLikesCount, setLocalLikesCount] = useState(post.likes);
   const [isLikingAnimation, setIsLikingAnimation] = useState(false);
-  const [reported, setReported] = useState(false); 
   
+  const [isSaved, setIsSaved] = useState(false);
+  const [reported, setReported] = useState(false); 
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
@@ -85,7 +78,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
       { threshold: 0.15 }
     );
     if (cardRef.current) observer.observe(cardRef.current);
-    
     return () => {
       observer.disconnect();
       if (clickTimeout.current) clearTimeout(clickTimeout.current);
@@ -97,32 +89,54 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     playClickSound();
     const shareData = {
       title: 'TNKU Overheard',
-      text: 'Şu paylaşıma bakmalısın!',
+      text: 'Şu fısıltıya bakmalısın!',
       url: `${window.location.origin}/post/${post.id}`,
     };
     try {
       if (navigator.share) await navigator.share(shareData);
       else {
         await navigator.clipboard.writeText(shareData.url);
-        alert('Link kopyalandı!');
+        alert('Bağlantı kopyalandı!');
       }
     } catch (err) { console.error('Paylaşım hatası:', err); }
   };
 
-  const handleLikeClick = (e: React.FormEvent) => {
+  const triggerLike = () => {
     if (localLiked) return;
     playPopSound();
     setLocalLiked(true);
     setLocalLikesCount((prev: number) => prev + 1);
     setIsLikingAnimation(true);
     setTimeout(() => setIsLikingAnimation(false), 1000);
+    
+    const formData = new FormData();
+    formData.append('id', post.id);
+    incrementLike(formData);
   };
 
-  const handleReportClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (reported) return;
-    playClickSound();
-    setShowReportModal(true);
+  const handleLikeClick = (e: React.FormEvent) => {
+    e.preventDefault();
+    triggerLike();
+  };
+
+  const handleDoubleTap = (e: React.MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('button') || target.closest('a')) return;
+
+    if (clickTimeout.current) {
+      clearTimeout(clickTimeout.current);
+      clickTimeout.current = null;
+      
+      playPopSound();
+      setShowBigHeart(true); 
+      setTimeout(() => setShowBigHeart(false), 900); 
+      triggerLike();
+    } else {
+      clickTimeout.current = setTimeout(() => {
+        router.push(`/post/${post.id}`);
+        clickTimeout.current = null;
+      }, 250);
+    }
   };
 
   const submitReportAction = async () => {
@@ -140,280 +154,187 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     }
   };
 
-  const handleCardInteraction = (e: React.MouseEvent) => {
-    const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('form') || target.closest('.interactive-zone') || target.closest('a') || showReportModal) return;
-
-    if (clickTimeout.current) {
-      clearTimeout(clickTimeout.current);
-      clickTimeout.current = null;
-      
-      playPopSound();
-      setShowBigHeart(true); 
-      setTimeout(() => setShowBigHeart(false), 900); 
-
-      if (!localLiked) {
-        setLocalLiked(true);
-        setLocalLikesCount((prev: number) => prev + 1);
-        setIsLikingAnimation(true);
-        setTimeout(() => setIsLikingAnimation(false), 1000);
-        
-        const formData = new FormData();
-        formData.append('id', post.id);
-        incrementLike(formData);
-      }
-    } else {
-      clickTimeout.current = setTimeout(() => {
-        router.push(`/post/${post.id}`);
-        clickTimeout.current = null;
-      }, 250);
-    }
-  };
-
-  const isTrending = post.likes >= 10; 
   const authorData = getAnonymousData(post.authorUuid || post.id, customNickname);
-
-  const firstComment = post.comments && post.comments.length > 0 ? post.comments[0] : null;
-  const commentAuthorUuid = firstComment ? (firstComment.authorId || firstComment.id) : null;
-  const commentCustomNick = commentAuthorUuid ? customNicknamesMap[commentAuthorUuid] : undefined;
-  const commentAuthorData = commentAuthorUuid ? getAnonymousData(commentAuthorUuid, commentCustomNick) : null;
+  const tagText = isConfession ? 'İtiraf' : isBosYap ? 'Boş Yap' : 'Overheard';
+  const subText = [tagText, post.location, post.time].filter(Boolean).join(' • ');
 
   return (
     <>
       <div 
         ref={cardRef} 
-        onClick={handleCardInteraction} 
-        className={`relative group bg-[#121212]/70 backdrop-blur-xl border border-white/5 hover:border-white/10 p-5 sm:p-6 rounded-[24px] overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 ease-out will-change-[opacity,transform] select-none cursor-pointer hover:-translate-y-1 ${
-          isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-[0.98]'
+        className={`w-full bg-[#000000] sm:bg-[#121212] sm:border sm:border-white/10 sm:rounded-xl mb-4 sm:mb-6 overflow-hidden transition-all duration-300 ease-out will-change-[opacity,transform] ${
+          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}
       >
-        
-        <div className="absolute right-4 top-2 text-white/[0.02] -z-10 pointer-events-none">
-          <Quote size={120} />
-        </div>
-
-        {isTrending && !isEphemeral && (
-          <div className={`absolute -inset-[1px] opacity-0 group-hover:opacity-100 transition-opacity duration-700 blur-md -z-20 bg-gradient-to-r ${
-            isConfession ? 'from-purple-500/20 to-pink-500/20' 
-            : isBosYap ? 'from-emerald-500/20 to-teal-500/20'
-            : 'from-[#4DA3FF]/20 to-blue-500/20'
-          }`} />
-        )}
-
-        {isEphemeral && (
-          <div className="absolute -inset-[1px] opacity-20 group-hover:opacity-40 transition-opacity duration-700 blur-md -z-20 bg-gradient-to-r from-amber-500/30 to-orange-500/30" />
-        )}
-
-        <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-500 ease-out ${
-          showBigHeart ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-[0.3] translate-y-8'
-        }`}>
-          <Heart size={100} className="text-pink-500 drop-shadow-[0_0_40px_rgba(236,72,153,0.8)] fill-pink-500" />
-        </div>
-
-        <div className="block relative z-10">
-          <div className="flex justify-between items-start gap-3 mb-4">
-            <div className="flex flex-wrap gap-2 text-[10px] font-bold tracking-wider items-center">
-              
-              {isEphemeral ? (
-                <span className="px-2.5 py-1 rounded-md uppercase flex items-center gap-1 bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-[0_0_10px_rgba(245,158,11,0.2)]">
-                  <Clock size={12} /> 24 Saatlik {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳
+        {/* 1. INSTAGRAM HEADER */}
+        <div className="flex items-center justify-between px-3 py-3">
+          <Link 
+            href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`}
+            onClick={(e) => { e.stopPropagation(); playClickSound(); }}
+            className="flex items-center gap-3 group"
+          >
+            {/* Story Ring (Eğer 24 saatlikse turuncu gradient, değilse sade gri) */}
+            <div className={`w-9 h-9 rounded-full p-[2px] ${isEphemeral ? 'bg-gradient-to-tr from-yellow-400 via-orange-500 to-pink-500' : 'bg-[#333333]'}`}>
+              <div className="w-full h-full rounded-full bg-[#121212] border border-black flex items-center justify-center overflow-hidden relative">
+                <span className="text-[14px] font-black opacity-50">{authorData.name.charAt(0)}</span>
+              </div>
+            </div>
+            <div className="flex flex-col">
+              <div className="flex items-center gap-1.5">
+                <span className="font-semibold text-white text-[13px] tracking-tight group-hover:text-gray-300 transition-colors">
+                  {authorData.name}
                 </span>
-              ) : (
-                <span className={`px-2.5 py-1 rounded-md uppercase flex items-center gap-1 shadow-sm ${
-                  isConfession ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20 shadow-[0_0_10px_rgba(168,85,247,0.15)]' 
-                  : isBosYap ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.15)]'
-                  : 'bg-[#4DA3FF]/10 text-[#4DA3FF] border border-[#4DA3FF]/20 shadow-[0_0_10px_rgba(77,163,255,0.15)]'
-                }`}>
-                  {isTrending && <Flame size={12} className="animate-pulse" />}
-                  {isConfession ? 'İTİRAF' : isBosYap ? 'BOŞ YAP' : 'OVERHEARD'}
-                </span>
-              )}
-
-              <div className="flex items-center gap-2">
                 {userBadge && (
-                  <span className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 text-yellow-400 border border-yellow-500/30 px-2 py-1 rounded-lg shadow-[0_0_10px_rgba(245,158,11,0.15)] flex items-center">
+                  <span className="bg-amber-500/20 text-amber-500 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
                     {userBadge}
                   </span>
                 )}
-                
-                <Link 
-                  href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`}
-                  onClick={(e) => { e.stopPropagation(); playClickSound(); }}
-                  className={`interactive-zone flex items-center gap-1.5 bg-white/[0.03] pr-3 pl-1.5 py-1 rounded-lg border shadow-sm hover:bg-white/[0.08] hover:scale-105 active:scale-95 transition-all ${customNickname ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}
-                >
-                  <div className="w-5 h-5 flex items-center justify-center rounded-md bg-white/10 text-gray-400 border border-white/15 shadow-inner">
-                    <User className="w-3.5 h-3.5 text-gray-400" />
-                  </div>
-                  <span className={`font-semibold text-[11px] tracking-wide transition-colors ${customNickname ? 'text-yellow-100 group-hover:text-yellow-50' : 'text-gray-200 group-hover:text-white'}`}>
-                    @{authorData.name}
-                  </span>
-                </Link>
               </div>
-              
-              {post.location && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><MapPin className="w-3 h-3" /> {post.location}</span>}
-              {post.time && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><Clock className="w-3 h-3" /> {post.time}</span>}
-              {post.people && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><Users className="w-3 h-3" /> {post.people}</span>}
-              {post.gender && <span className="flex items-center gap-1 bg-white/[0.03] text-gray-400 px-2.5 py-1 rounded-md"><User className="w-3 h-3" /> {post.gender}</span>}
+              <span className="text-[11px] text-gray-400 tracking-wide mt-0.5">
+                {subText}
+              </span>
             </div>
-            <span className="shrink-0 text-[11px] text-gray-500 font-medium">{getRelativeTime(post.createdAt)}</span>
-          </div>
-
-          <div className="mb-4 sm:mb-5 relative z-10 transition-all duration-300">
-            {post.content && (
-              <p className={`text-gray-200 text-[15px] sm:text-[16px] leading-relaxed font-normal break-words tracking-wide ${!isExpanded && isLongText ? 'line-clamp-4' : ''}`}>
-                {post.content}
-              </p>
-            )}
-            {!isExpanded && isLongText && (
-              <button
-                onClick={(e) => { 
-                  e.stopPropagation(); 
-                  playClickSound();
-                  setIsExpanded(true); 
-                }}
-                className={`font-semibold text-[13px] sm:text-[14px] mt-2 transition-colors active:scale-95 inline-block ${
-                  isEphemeral ? 'text-amber-400 hover:text-amber-300' : 'text-[#4DA3FF] hover:text-blue-400'
-                }`}
-              >
-                Devamını Oku...
-              </button>
-            )}
-
-            {post.audioUrl && (
-              <div onClick={(e) => e.stopPropagation()} className="mt-4 interactive-zone">
-                <AnonymousPlayer audioUrl={post.audioUrl} />
-              </div>
-            )}
-          </div>
+          </Link>
+          
+          <button onClick={() => setShowReportModal(true)} className="p-2 text-white hover:opacity-50 transition-opacity">
+            <MoreHorizontal size={20} />
+          </button>
         </div>
 
-        {firstComment && firstComment.content && commentAuthorData && (
-          <div 
-            onClick={(e) => {
-              e.stopPropagation();
-              playClickSound();
-              router.push(`/post/${post.id}`);
-            }}
-            className="mt-3 mb-3 bg-white/[0.02] border border-white/[0.04] rounded-xl p-3 flex gap-2.5 items-start cursor-pointer hover:bg-white/[0.06] transition-colors shadow-inner relative z-10"
-          >
-            <span className="text-[13px] opacity-60 mt-0.5">💬</span>
-            <div className="text-[13px] text-gray-300 line-clamp-2 leading-relaxed">
-              <Link 
-                href={`/profil/${encodeURIComponent(commentAuthorUuid || '')}`}
-                onClick={(e) => { e.stopPropagation(); playClickSound(); }}
-                className="interactive-zone font-semibold text-[#4DA3FF] hover:text-blue-400 hover:underline mr-1.5 transition-colors"
-              >
-                @{commentAuthorData.name}:
-              </Link>
-              {firstComment.content}
-            </div>
-          </div>
-        )}
-
+        {/* 2. INSTAGRAM MAIN CONTENT (Çift Tıklama Alanı) */}
         <div 
-          onClick={(e) => e.stopPropagation()} 
-          className="interactive-zone flex items-center justify-between border-t border-white/5 pt-4 text-gray-400 relative z-10 cursor-default"
+          onClick={handleDoubleTap}
+          className="w-full min-h-[320px] bg-[#1A1A1A] flex flex-col justify-center items-center px-6 py-10 relative select-none cursor-pointer"
         >
-          <div className="flex items-center gap-4 sm:gap-6">
+          {/* Çift tıklandığında çıkan dev kalp animasyonu */}
+          <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-300 ease-out ${
+            showBigHeart ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.3]'
+          }`}>
+            <Heart size={110} className="text-white drop-shadow-2xl fill-white" />
+          </div>
+
+          {post.content && (
+            <h2 className="text-white text-center text-[16px] sm:text-[18px] font-medium leading-relaxed tracking-wide drop-shadow-md break-words w-full">
+              {post.content}
+            </h2>
+          )}
+
+          {post.audioUrl && (
+            <div onClick={(e) => e.stopPropagation()} className="mt-8 w-full max-w-[250px]">
+              <AnonymousPlayer audioUrl={post.audioUrl} />
+            </div>
+          )}
+        </div>
+
+        {/* 3. INSTAGRAM ACTION BAR */}
+        <div className="px-3 pt-3 pb-2 flex items-center justify-between">
+          <div className="flex items-center gap-4">
             <form action={incrementLike} onSubmit={handleLikeClick}>
               <input type="hidden" name="id" value={post.id} />
-              <button 
-                type="submit" 
-                disabled={localLiked} 
-                className={`group/like relative flex items-center gap-2 transition-all duration-300 rounded-xl px-2 py-1 -ml-2 ${
-                  localLiked ? 'text-pink-500' : 'hover:text-pink-400 hover:bg-pink-500/10'
-                }`}
-              >
-                <div className="relative flex items-center justify-center">
-                  {isLikingAnimation && <span className="absolute w-8 h-8 bg-pink-500 rounded-full animate-ping opacity-60"></span>}
-                  <Heart size={18} className={`relative z-10 transition-all duration-500 ease-out ${isLikingAnimation ? 'fill-pink-500 scale-150 drop-shadow-[0_0_20px_rgba(236,72,153,1)]' : localLiked ? 'fill-pink-500 scale-110 drop-shadow-[0_0_10px_rgba(236,72,153,0.5)]' : 'active:scale-50 group-hover/like:scale-110'}`} /> 
-                </div>
-                <span className={`text-[13px] font-bold transition-all duration-300 ${isLikingAnimation ? 'scale-125 text-pink-400' : ''}`}>{localLikesCount}</span>
+              <button type="submit" disabled={localLiked} className="group relative transition-transform active:scale-75">
+                <Heart size={26} className={`transition-all duration-300 ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-red-500 text-red-500' : 'text-white hover:text-gray-400'}`} />
               </button>
             </form>
             
-            <button onClick={() => { playClickSound(); setShowComment(!showComment); }} className={`flex items-center gap-1.5 px-2 py-1 -ml-2 rounded-xl transition-all duration-300 ${showComment ? (isEphemeral ? 'text-amber-400 bg-amber-500/10' : 'text-[#4DA3FF] bg-[#4DA3FF]/10') : (isEphemeral ? 'hover:text-amber-400 hover:bg-amber-500/10' : 'hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10')} active:scale-90`}>
-              <MessageCircle size={18} className={`${showComment ? (isEphemeral ? 'fill-amber-400/20' : 'fill-[#4DA3FF]/20') : ''}`} /> 
-              <span className="text-[13px] font-bold">{post._count?.comments || post.comments?.length || 0}</span>
+            <button onClick={() => { playClickSound(); setShowComment(!showComment); }} className="transition-transform active:scale-75">
+              <MessageCircle size={26} className="text-white hover:text-gray-400 transform -scale-x-100" />
             </button>
-
-            <div className="flex items-center gap-1.5 opacity-70 cursor-default">
-              <Eye size={18} /> 
-              <span className="text-[13px] font-bold">{post.views}</span>
-            </div>
+            
+            <button onClick={handleShare} className="transition-transform active:scale-75">
+              <Send size={26} className="text-white hover:text-gray-400 transform -rotate-12 -mt-1" />
+            </button>
           </div>
+          
+          <button onClick={() => setIsSaved(!isSaved)} className="transition-transform active:scale-75">
+            <Bookmark size={26} className={isSaved ? 'fill-white text-white' : 'text-white hover:text-gray-400'} />
+          </button>
+        </div>
 
-          <div className="flex items-center gap-1 sm:gap-2">
+        {/* 4. INSTAGRAM CAPTION & LIKES */}
+        <div className="px-3 pb-3">
+          <div className="font-semibold text-white text-[14px] mb-1.5 cursor-default">
+            {localLikesCount} beğenme
+          </div>
+          
+          {post.content && (
+            <div className="text-white text-[14px] leading-snug">
+              <Link href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`} className="font-semibold mr-1.5 hover:text-gray-300 transition-colors">
+                {authorData.name}
+              </Link>
+              
+              <span className={`${!isExpanded && isLongText ? 'line-clamp-1 inline' : ''}`}>
+                {post.content}
+              </span>
+              
+              {!isExpanded && isLongText && (
+                <button onClick={() => setIsExpanded(true)} className="text-gray-400 text-[14px] ml-1 hover:text-white transition-colors">
+                  devamını gör
+                </button>
+              )}
+            </div>
+          )}
+          
+          {(post._count?.comments > 0 || post.comments?.length > 0) && (
             <button 
-              onClick={handleReportClick}
-              className={`flex items-center gap-1.5 transition-all duration-300 hover:text-red-400 hover:bg-red-500/10 rounded-full px-3 py-2 ${reported ? 'text-red-500 bg-red-500/10' : 'bg-white/[0.03] text-gray-400'}`}
+              onClick={() => setShowComment(!showComment)}
+              className="text-gray-400 text-[14px] mt-1.5 font-medium hover:text-white transition-colors block"
             >
-              <Flag size={14} />
-              <span className="text-[11px] font-bold hidden sm:inline">{reported ? 'İletildi' : 'Şikayet Et'}</span>
+              {post._count?.comments || post.comments?.length} yorumun tümünü gör
             </button>
+          )}
 
-            <button 
-              onClick={handleShare} 
-              className="group/share flex items-center justify-center text-gray-400 transition-all duration-300 bg-white/[0.03] p-2.5 rounded-full border border-transparent hover:text-emerald-400 hover:bg-emerald-500/10 hover:border-emerald-500/30 hover:shadow-[0_0_20px_rgba(52,211,153,0.3)] hover:scale-110 active:scale-75 shadow-sm"
-            >
-              <Share2 size={16} className="transition-transform duration-300 group-hover/share:-rotate-12" />
-            </button>
+          <div className="text-gray-500 text-[10px] uppercase mt-2 tracking-widest font-medium">
+            {getRelativeTime(post.createdAt)}
           </div>
         </div>
 
-        <div onClick={(e) => e.stopPropagation()} className={`interactive-zone grid transition-all duration-500 ease-in-out relative z-10 cursor-default ${showComment ? 'grid-rows-[1fr] opacity-100 mt-4' : 'grid-rows-[0fr] opacity-0 mt-0'}`}>
-          <div className="overflow-hidden">
-            <div className="border-t border-white/[0.04] pt-4">
-              <CommentForm postId={post.id} />
-            </div>
+        {/* YORUM FORMU (Açılır Kapanır) */}
+        <div className={`transition-all duration-300 ease-in-out overflow-hidden px-3 ${showComment ? 'max-h-[500px] opacity-100 pb-3' : 'max-h-0 opacity-0'}`}>
+          <div className="border-t border-white/10 pt-3">
+            <CommentForm postId={post.id} />
           </div>
         </div>
       </div>
 
+      {/* ŞİKAYET MODALI */}
       {showReportModal && (
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
-          onClick={(e) => { e.stopPropagation(); setShowReportModal(false); }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={() => setShowReportModal(false)}
         >
           <div 
-            className="bg-[#121212] border border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all"
+            className="bg-[#262626] rounded-2xl w-full max-w-sm overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-red-500/10 p-3 rounded-2xl border border-red-500/20">
-                <ShieldAlert className="text-red-500 w-6 h-6" />
-              </div>
-              <div>
-                <h3 className="text-white font-bold text-lg leading-tight">Şikayet Et</h3>
-                <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider">Gizli & Güvenli</p>
-              </div>
+            <div className="flex flex-col items-center p-6 border-b border-white/10">
+              <ShieldAlert className="text-red-500 w-12 h-12 mb-3" />
+              <h3 className="text-white font-semibold text-lg">Şikayet Et</h3>
+              <p className="text-gray-400 text-[13px] text-center mt-1">Bu gönderi neden kaldırılmalı?</p>
             </div>
             
-            <p className="text-gray-300 text-sm mb-4 leading-relaxed">
-              Bu gönderiyi neden şikayet ediyorsunuz? Lütfen kısaca belirtin. (Spam, Hakaret, vb.)
-            </p>
-            
-            <textarea
-              value={reportReason}
-              onChange={(e) => setReportReason(e.target.value)}
-              placeholder="Şikayet sebebiniz..."
-              className="w-full bg-[#0B0B0B] border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-red-500/50 resize-none h-28 mb-5"
-            />
-            
-            <div className="flex gap-3">
-              <button 
-                onClick={() => setShowReportModal(false)}
-                className="flex-1 py-3 rounded-2xl font-bold text-sm bg-white/5 text-gray-300 hover:bg-white/10 transition-colors"
-              >
-                İptal
-              </button>
-              <button 
-                onClick={submitReportAction}
-                disabled={!reportReason.trim() || isSubmittingReport}
-                className="flex-1 py-3 rounded-2xl font-bold text-sm bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-              >
-                {isSubmittingReport ? 'İletiliyor...' : 'Gönder'}
-              </button>
+            <div className="p-4">
+              <textarea
+                value={reportReason}
+                onChange={(e) => setReportReason(e.target.value)}
+                placeholder="Şikayet sebebiniz..."
+                className="w-full bg-[#121212] border border-white/10 rounded-xl p-3 text-[14px] text-white focus:outline-none focus:border-red-500/50 resize-none h-24 mb-4"
+              />
+              
+              <div className="flex flex-col gap-2">
+                <button 
+                  onClick={submitReportAction}
+                  disabled={!reportReason.trim() || isSubmittingReport}
+                  className="w-full py-3 rounded-xl font-semibold text-sm bg-red-500 text-white hover:bg-red-600 transition-colors disabled:opacity-50 flex items-center justify-center"
+                >
+                  {isSubmittingReport ? 'İletiliyor...' : 'Şikayeti Gönder'}
+                </button>
+                <button 
+                  onClick={() => setShowReportModal(false)}
+                  className="w-full py-3 rounded-xl font-semibold text-sm text-white hover:bg-white/5 transition-colors"
+                >
+                  İptal
+                </button>
+              </div>
             </div>
           </div>
         </div>
