@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import CommentForm from "./CommentForm";
 import AnonymousPlayer from "./AnonymousPlayer";
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, CheckCircle2, ShieldAlert } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"; 
 import { incrementView, submitReport } from "@/app/post/actions";
@@ -45,7 +45,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const [isVisible, setIsVisible] = useState(false);
 
   const [isExpanded, setIsExpanded] = useState(false);
-  const isLongText = post.content && post.content.length > 150; 
+  const isLongText = post.content && post.content.length > 250; 
 
   const [localLiked, setLocalLiked] = useState(isLiked);
   const [localLikesCount, setLocalLikesCount] = useState(post.likes);
@@ -121,7 +121,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const handleDoubleTap = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
-    if (target.closest('button') || target.closest('a')) return;
+    if (target.closest('button') || target.closest('a') || target.closest('.audio-player')) return;
 
     if (clickTimeout.current) {
       clearTimeout(clickTimeout.current);
@@ -166,31 +166,30 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}
       >
-        {/* 1. INSTAGRAM HEADER */}
-        <div className="flex items-center justify-between px-3 py-3">
+        {/* 1. HEADER */}
+        <div className="flex items-center justify-between px-4 py-3">
           <Link 
             href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`}
             onClick={(e) => { e.stopPropagation(); playClickSound(); }}
             className="flex items-center gap-3 group"
           >
-            {/* Story Ring (Eğer 24 saatlikse turuncu gradient, değilse sade gri) */}
-            <div className={`w-9 h-9 rounded-full p-[2px] ${isEphemeral ? 'bg-gradient-to-tr from-yellow-400 via-orange-500 to-pink-500' : 'bg-[#333333]'}`}>
-              <div className="w-full h-full rounded-full bg-[#121212] border border-black flex items-center justify-center overflow-hidden relative">
-                <span className="text-[14px] font-black opacity-50">{authorData.name.charAt(0)}</span>
+            <div className={`w-10 h-10 rounded-full p-[2px] ${isEphemeral ? 'bg-gradient-to-tr from-yellow-400 via-orange-500 to-pink-500' : 'bg-white/10'}`}>
+              <div className="w-full h-full rounded-full bg-[#121212] border border-black flex items-center justify-center overflow-hidden">
+                <span className="text-[15px] font-black opacity-60">{authorData.name.charAt(0)}</span>
               </div>
             </div>
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-white text-[13px] tracking-tight group-hover:text-gray-300 transition-colors">
+                <span className="font-semibold text-white text-[14px] tracking-tight group-hover:text-gray-300 transition-colors">
                   {authorData.name}
                 </span>
                 {userBadge && (
-                  <span className="bg-amber-500/20 text-amber-500 text-[9px] font-bold px-1.5 py-0.5 rounded uppercase">
+                  <span className="bg-amber-500/20 text-amber-500 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">
                     {userBadge}
                   </span>
                 )}
               </div>
-              <span className="text-[11px] text-gray-400 tracking-wide mt-0.5">
+              <span className="text-[12px] text-gray-400 tracking-wide mt-0.5">
                 {subText}
               </span>
             </div>
@@ -201,33 +200,39 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </button>
         </div>
 
-        {/* 2. INSTAGRAM MAIN CONTENT (Çift Tıklama Alanı) */}
+        {/* 2. ANA METİN (Çift Tıklama Alanı) */}
         <div 
           onClick={handleDoubleTap}
-          className="w-full min-h-[320px] bg-[#1A1A1A] flex flex-col justify-center items-center px-6 py-10 relative select-none cursor-pointer"
+          className="px-4 py-2 relative select-none cursor-pointer"
         >
-          {/* Çift tıklandığında çıkan dev kalp animasyonu */}
+          {/* Çift Tıklama Kalp Efekti */}
           <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-300 ease-out ${
             showBigHeart ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.3]'
           }`}>
-            <Heart size={110} className="text-white drop-shadow-2xl fill-white" />
+            <Heart size={80} className="text-white drop-shadow-2xl fill-white" />
           </div>
 
           {post.content && (
-            <h2 className="text-white text-center text-[16px] sm:text-[18px] font-medium leading-relaxed tracking-wide drop-shadow-md break-words w-full">
+            <p className={`text-white text-[15px] leading-relaxed break-words ${!isExpanded && isLongText ? 'line-clamp-6' : ''}`}>
               {post.content}
-            </h2>
+            </p>
+          )}
+
+          {!isExpanded && isLongText && (
+            <button onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }} className="text-gray-400 text-[14px] mt-1 hover:text-white transition-colors">
+              devamını gör
+            </button>
           )}
 
           {post.audioUrl && (
-            <div onClick={(e) => e.stopPropagation()} className="mt-8 w-full max-w-[250px]">
+            <div onClick={(e) => e.stopPropagation()} className="mt-4 w-full max-w-[250px] audio-player">
               <AnonymousPlayer audioUrl={post.audioUrl} />
             </div>
           )}
         </div>
 
-        {/* 3. INSTAGRAM ACTION BAR */}
-        <div className="px-3 pt-3 pb-2 flex items-center justify-between">
+        {/* 3. İKONLAR */}
+        <div className="px-4 pt-3 pb-2 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <form action={incrementLike} onSubmit={handleLikeClick}>
               <input type="hidden" name="id" value={post.id} />
@@ -250,46 +255,28 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </button>
         </div>
 
-        {/* 4. INSTAGRAM CAPTION & LIKES */}
-        <div className="px-3 pb-3">
+        {/* 4. BEĞENİ VE SAAT (Metin Tekrarı Silindi) */}
+        <div className="px-4 pb-4">
           <div className="font-semibold text-white text-[14px] mb-1.5 cursor-default">
             {localLikesCount} beğenme
           </div>
           
-          {post.content && (
-            <div className="text-white text-[14px] leading-snug">
-              <Link href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`} className="font-semibold mr-1.5 hover:text-gray-300 transition-colors">
-                {authorData.name}
-              </Link>
-              
-              <span className={`${!isExpanded && isLongText ? 'line-clamp-1 inline' : ''}`}>
-                {post.content}
-              </span>
-              
-              {!isExpanded && isLongText && (
-                <button onClick={() => setIsExpanded(true)} className="text-gray-400 text-[14px] ml-1 hover:text-white transition-colors">
-                  devamını gör
-                </button>
-              )}
-            </div>
-          )}
-          
           {(post._count?.comments > 0 || post.comments?.length > 0) && (
             <button 
               onClick={() => setShowComment(!showComment)}
-              className="text-gray-400 text-[14px] mt-1.5 font-medium hover:text-white transition-colors block"
+              className="text-gray-400 text-[14px] font-medium hover:text-white transition-colors block"
             >
               {post._count?.comments || post.comments?.length} yorumun tümünü gör
             </button>
           )}
 
-          <div className="text-gray-500 text-[10px] uppercase mt-2 tracking-widest font-medium">
+          <div className="text-gray-500 text-[10px] uppercase mt-1.5 tracking-widest font-medium">
             {getRelativeTime(post.createdAt)}
           </div>
         </div>
 
-        {/* YORUM FORMU (Açılır Kapanır) */}
-        <div className={`transition-all duration-300 ease-in-out overflow-hidden px-3 ${showComment ? 'max-h-[500px] opacity-100 pb-3' : 'max-h-0 opacity-0'}`}>
+        {/* YORUM FORMU */}
+        <div className={`transition-all duration-300 ease-in-out overflow-hidden px-4 ${showComment ? 'max-h-[500px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
           <div className="border-t border-white/10 pt-3">
             <CommentForm postId={post.id} />
           </div>
