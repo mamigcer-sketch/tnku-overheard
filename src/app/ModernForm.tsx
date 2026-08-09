@@ -14,7 +14,7 @@ export default function ModernForm() {
   const [gender, setGender] = useState(''); 
   const [time, setTime] = useState('');
   const [isEphemeral, setIsEphemeral] = useState(false);
-  const [audioBase64, setAudioBase64] = useState<string | null>(null); // 🔥 Base64 ses verisi
+  const [audioBase64, setAudioBase64] = useState<string | null>(null);
   const [isRecordingNow, setIsRecordingNow] = useState(false);
   
   const [loading, setLoading] = useState(false);
@@ -79,7 +79,6 @@ export default function ModernForm() {
       formData.append('time', type === 'OVERHEARD' ? time : '');
       formData.append('isEphemeral', (type === 'CONFESSION' && isEphemeral) ? 'true' : 'false');
       
-      // 🔥 Base64 ses string'ini formData'ya ekliyoruz
       if (audioBase64) {
         formData.append('audioUrl', audioBase64);
       }
@@ -100,7 +99,6 @@ export default function ModernForm() {
       setAudioBase64(null);
       
       setSuccessMsg(true);
-      // 🔥 Mesajı rahat okuyabilmeleri için süreyi 5 saniyeye çıkardık
       setTimeout(() => setSuccessMsg(false), 5000);
       router.refresh();
     } catch (error) {
@@ -111,116 +109,107 @@ export default function ModernForm() {
   };
 
   return (
-    <div className={`relative bg-white/[0.02] backdrop-blur-2xl border transition-all duration-700 p-3 sm:p-6 rounded-[20px] sm:rounded-[24px] mb-2 overflow-hidden group/form ${
-      isFocused && type === 'CONFESSION' ? 'shadow-[0_0_60px_rgba(168,85,247,0.3)] border-purple-500/50 scale-[1.01]' 
-      : isFocused && type === 'BOSYAP' ? 'shadow-[0_0_60px_rgba(16,185,129,0.3)] border-emerald-500/50 scale-[1.01]'
-      : isFocused && type === 'OVERHEARD' ? 'shadow-[0_0_60px_rgba(77,163,255,0.3)] border-[#4DA3FF]/50 scale-[1.01]'
-      : (type === 'CONFESSION' && isEphemeral) ? 'border-amber-500/40 shadow-[0_0_30px_rgba(245,158,11,0.15)] scale-100' 
-      : type === 'CONFESSION' ? 'border-purple-500/30 shadow-[0_0_30px_rgba(168,85,247,0.1)] scale-100'
-      : type === 'BOSYAP' ? 'border-emerald-500/30 shadow-[0_0_30px_rgba(16,185,129,0.1)] scale-100' 
-      : 'border-[#4DA3FF]/30 shadow-[0_0_30px_rgba(77,163,255,0.1)] scale-100'
-    }`}>
+    <div className="relative bg-[#0A0A0A] border border-white/10 transition-all duration-300 p-4 sm:p-6 rounded-[24px] mb-2 overflow-hidden shadow-2xl">
       
       {/* ÜÇLÜ SEKMELER */}
-      <div className="flex gap-1.5 sm:gap-2 mb-4 sm:mb-6 p-1 bg-white/[0.02] backdrop-blur-md rounded-[14px] sm:rounded-[16px] border border-white/[0.03] shadow-inner">
+      <div className="flex gap-2 mb-4 p-1 bg-black/40 rounded-xl border border-white/5">
         <button 
           type="button"
           onClick={(e) => {
-            triggerRipple(e, 'bg-purple-400/50 shadow-[0_0_25px_rgba(168,85,247,0.8)]');
+            triggerRipple(e, 'bg-purple-400/50');
             handleTabChange('CONFESSION');
           }} 
-          className={`relative overflow-hidden flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-xl text-[11px] sm:text-[13px] transition-all duration-300 ${
+          className={`relative overflow-hidden flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[12px] font-bold transition-all ${
             type === 'CONFESSION' 
-              ? 'bg-purple-500 text-white font-bold shadow-[0_0_25px_rgba(168,85,247,0.5)] scale-100' 
-              : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] scale-95 hover:scale-100'
+              ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/30' 
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
           }`}
         >
-          <VenetianMask size={14} className="sm:w-[16px] sm:h-[16px]" /> İtiraf
+          <VenetianMask size={15} /> İtiraf
         </button>
 
         <button 
           type="button"
           onClick={(e) => {
-            triggerRipple(e, 'bg-emerald-400/50 shadow-[0_0_25px_rgba(16,185,129,0.8)]');
+            triggerRipple(e, 'bg-emerald-400/50');
             handleTabChange('BOSYAP');
           }} 
-          className={`relative overflow-hidden flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-xl text-[11px] sm:text-[13px] transition-all duration-300 ${
+          className={`relative overflow-hidden flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[12px] font-bold transition-all ${
             type === 'BOSYAP' 
-              ? 'bg-emerald-500 text-black font-bold shadow-[0_0_25px_rgba(16,185,129,0.5)] scale-100' 
-              : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] scale-95 hover:scale-100'
+              ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-900/35' 
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Coffee size={14} className="sm:w-[16px] sm:h-[16px]" /> Boş Yap
+          <Coffee size={15} /> Boş Yap
         </button>
 
         <button 
           type="button"
           onClick={(e) => {
-            triggerRipple(e, 'bg-[#4DA3FF]/50 shadow-[0_0_25px_rgba(77,163,255,0.8)]');
+            triggerRipple(e, 'bg-[#4DA3FF]/50');
             handleTabChange('OVERHEARD');
           }} 
-          className={`relative overflow-hidden flex-1 flex items-center justify-center gap-1.5 py-2 sm:py-3 rounded-xl text-[11px] sm:text-[13px] transition-all duration-300 ${
+          className={`relative overflow-hidden flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[12px] font-bold transition-all ${
             type === 'OVERHEARD' 
-              ? 'bg-[#4DA3FF] text-black font-bold shadow-[0_0_25px_rgba(77,163,255,0.5)] scale-100' 
-              : 'bg-transparent text-gray-400 hover:text-gray-200 hover:bg-white/[0.04] scale-95 hover:scale-100'
+              ? 'bg-[#4DA3FF] text-black shadow-lg shadow-blue-900/30' 
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Headphones size={14} className="sm:w-[16px] sm:h-[16px]" /> <span className="hidden sm:inline">Overheard</span><span className="sm:hidden">Duyum</span>
+          <Headphones size={15} /> <span className="hidden sm:inline">Overheard</span><span className="sm:hidden">Duyum</span>
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} key={type} className="space-y-3 sm:space-y-5 relative z-10 animate-in fade-in duration-300">
+      <form onSubmit={handleSubmit} key={type} className="space-y-4 relative z-10 animate-in fade-in duration-200">
         
         {type === 'OVERHEARD' && (
-          <div className="bg-black/30 backdrop-blur-2xl rounded-2xl p-4 sm:p-5 border border-white/[0.04] shadow-[inset_0_2px_20px_rgba(0,0,0,0.5)] grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4 relative overflow-hidden">
-            
-            <div className="relative col-span-2 md:col-span-1 group">
-                <input 
-                  type="text" 
-                  id="location_field" 
-                  required 
-                  placeholder=" " 
-                  value={location} 
-                  onChange={(e) => setLocation(e.target.value)} 
-                  className="block px-3 sm:px-4 pb-2 pt-5 w-full text-base text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer" 
-                />
-                <label htmlFor="location_field" className={`absolute text-[10px] sm:text-xs duration-300 transform top-3.5 z-10 origin-[0] left-3.5 sm:left-4 peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 pointer-events-none ${location ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500 scale-100 translate-y-0'}`}>Konum (Örn: Yemekhane)</label>
+          <div className="bg-black/40 rounded-2xl p-3 sm:p-4 border border-white/5 grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="relative col-span-2 md:col-span-1">
+              <input 
+                type="text" 
+                id="location_field" 
+                required 
+                placeholder=" " 
+                value={location} 
+                onChange={(e) => setLocation(e.target.value)} 
+                className="block px-3 pb-2 pt-4 w-full text-sm text-white bg-white/5 rounded-xl border border-white/5 focus:border-[#4DA3FF] outline-none peer" 
+              />
+              <label htmlFor="location_field" className={`absolute text-[11px] duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 ${location ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500'}`}>Konum</label>
             </div>
             
-            <div className="relative col-span-1 group">
+            <div className="relative col-span-1">
                <select 
                 id="people_field"
                 required 
                 value={people} 
                 onChange={(e) => setPeople(e.target.value)} 
-                className="block px-3 sm:px-4 pb-2 pt-5 w-full text-base text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer cursor-pointer"
+                className="block px-3 pb-2 pt-4 w-full text-sm text-white bg-white/5 rounded-xl border border-white/5 focus:border-[#4DA3FF] outline-none peer cursor-pointer"
               >
                 <option value="" disabled hidden></option>
-                <option value="2 kişi" className="bg-[#1a1a1a] text-white">2 Kişi</option>
-                <option value="3 kişi" className="bg-[#1a1a1a] text-white">3 Kişi</option>
-                <option value="4 kişi" className="bg-[#1a1a1a] text-white">4 Kişi</option>
-                <option value="Kalabalık" className="bg-[#1a1a1a] text-white">Kalabalık</option>
+                <option value="2 kişi" className="bg-[#121212] text-white">2 Kişi</option>
+                <option value="3 kişi" className="bg-[#121212] text-white">3 Kişi</option>
+                <option value="4 kişi" className="bg-[#121212] text-white">4 Kişi</option>
+                <option value="Kalabalık" className="bg-[#121212] text-white">Kalabalık</option>
               </select>
-              <label htmlFor="people_field" className={`absolute text-[10px] sm:text-xs duration-300 transform top-3.5 z-10 origin-[0] left-3.5 sm:left-4 peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 pointer-events-none ${people ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500 scale-100 translate-y-0'}`}>Kişi Sayısı</label>
+              <label htmlFor="people_field" className={`absolute text-[11px] duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 ${people ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500'}`}>Kişi Sayısı</label>
             </div>
 
-            <div className="relative col-span-1 group">
+            <div className="relative col-span-1">
               <select 
                 id="gender_field"
                 required
                 value={gender} 
                 onChange={(e) => setGender(e.target.value)} 
-                className="block px-3 sm:px-4 pb-2 pt-5 w-full text-base text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer cursor-pointer"
+                className="block px-3 pb-2 pt-4 w-full text-sm text-white bg-white/5 rounded-xl border border-white/5 focus:border-[#4DA3FF] outline-none peer cursor-pointer"
               >
                 <option value="" disabled hidden></option>
-                <option value="Kız" className="bg-[#1a1a1a] text-white">Sadece Kız</option>
-                <option value="Erkek" className="bg-[#1a1a1a] text-white">Sadece Erkek</option>
-                <option value="Karışık" className="bg-[#1a1a1a] text-white">Karışık Grup</option>
+                <option value="Kız" className="bg-[#121212] text-white">Kız</option>
+                <option value="Erkek" className="bg-[#121212] text-white">Erkek</option>
+                <option value="Karışık" className="bg-[#121212] text-white">Karışık</option>
               </select>
-              <label htmlFor="gender_field" className={`absolute text-[10px] sm:text-xs duration-300 transform top-3.5 z-10 origin-[0] left-3.5 sm:left-4 peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 pointer-events-none ${gender ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500 scale-100 translate-y-0'}`}>Grup Türü</label>
+              <label htmlFor="gender_field" className={`absolute text-[11px] duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 ${gender ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500'}`}>Grup</label>
             </div>
 
-            <div className="relative col-span-2 md:col-span-1 group">
+            <div className="relative col-span-2 md:col-span-1">
               <input 
                 type="time" 
                 id="time_field"
@@ -228,14 +217,14 @@ export default function ModernForm() {
                 placeholder=" "
                 value={time} 
                 onChange={(e) => setTime(e.target.value)} 
-                className="block px-3 sm:px-4 pb-2 pt-5 w-full text-base text-white bg-white/[0.02] group-hover:bg-white/[0.04] rounded-xl border border-white/[0.05] focus:border-[#4DA3FF]/50 appearance-none focus:outline-none focus:ring-1 focus:ring-[#4DA3FF]/30 transition-all shadow-inner peer [color-scheme:dark]" 
+                className="block px-3 pb-2 pt-4 w-full text-sm text-white bg-white/5 rounded-xl border border-white/5 focus:border-[#4DA3FF] outline-none peer [color-scheme:dark]" 
               />
-              <label htmlFor="time_field" className={`absolute text-[10px] sm:text-xs duration-300 transform top-3.5 z-10 origin-[0] left-3.5 sm:left-4 peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 pointer-events-none ${time ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500 scale-100 translate-y-0'}`}>Olay Saati</label>
+              <label htmlFor="time_field" className={`absolute text-[11px] duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 ${time ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500'}`}>Saat</label>
             </div>
           </div>
         )}
 
-        <div className="relative group/textarea">
+        <div className="relative">
             <textarea 
               maxLength={maxChars}
               rows={3} 
@@ -248,20 +237,15 @@ export default function ModernForm() {
               } 
               value={content} 
               onChange={(e) => setContent(e.target.value)} 
-              className={`w-full bg-white/[0.03] backdrop-blur-md border border-white/[0.05] group-hover/textarea:border-white/[0.1] group-hover/textarea:bg-white/[0.05] p-3 sm:p-4 pb-7 sm:pb-8 rounded-xl text-base text-white outline-none resize-none transition-all shadow-inner placeholder:text-gray-500 ${
-                type === 'CONFESSION' ? 'focus:ring-2 focus:ring-purple-500/30 focus:border-purple-500/50' 
-                : type === 'BOSYAP' ? 'focus:ring-2 focus:ring-emerald-500/30 focus:border-emerald-500/50'
-                : 'focus:ring-2 focus:ring-[#4DA3FF]/30 focus:border-[#4DA3FF]/50'
-              }`} 
+              className="w-full bg-black/40 border border-white/5 p-4 pb-7 rounded-2xl text-sm text-white outline-none resize-none transition-all placeholder:text-gray-600 focus:border-white/20" 
             />
-            <div className={`absolute bottom-2 sm:bottom-3 right-3 sm:right-4 text-[9px] sm:text-xs font-bold transition-colors ${
-              content.length >= maxChars ? 'text-red-400' : content.length > maxChars * 0.8 ? 'text-yellow-400' : 'text-gray-600'
+            <div className={`absolute bottom-2.5 right-4 text-[10px] font-bold ${
+              content.length >= maxChars ? 'text-red-400' : 'text-gray-600'
             }`}>
                 {content.length} / {maxChars}
             </div>
         </div>
 
-       {/* 🔥 SES KAYDEDİCİ - Sadece Overheard seçili DEĞİLSE görünür */}
         {type !== 'OVERHEARD' && (
           <VoiceRecorder 
             onAudioReady={(base64) => setAudioBase64(base64)} 
@@ -272,19 +256,19 @@ export default function ModernForm() {
         {type === 'CONFESSION' && (
           <div 
             onClick={() => setIsEphemeral(!isEphemeral)}
-            className={`flex items-center justify-between p-3.5 sm:p-4 rounded-xl border backdrop-blur-md cursor-pointer transition-all duration-300 ${
-              isEphemeral ? 'bg-amber-500/10 border-amber-500/40 text-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)]' : 'bg-white/[0.02] border-white/[0.05] text-gray-400 hover:border-white/[0.1] hover:text-gray-200'
+            className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
+              isEphemeral ? 'bg-amber-500/10 border-amber-500/40 text-amber-300' : 'bg-black/30 border-white/5 text-gray-400 hover:border-white/10'
             }`}
           >
             <div className="flex items-center gap-2.5">
-              <Clock size={18} className={isEphemeral ? 'text-amber-400 animate-spin-slow' : 'text-gray-500'} />
+              <Clock size={16} className={isEphemeral ? 'text-amber-400' : 'text-gray-500'} />
               <div>
-                <div className="text-[12px] sm:text-[13px] font-bold">24 Saat Sonra Kendini İmha Etsin ⏳</div>
-                <div className="text-[10px] text-gray-500 font-medium">Bu seçenek açılırsa itiraf tam 24 saat sonra sistemden silinir.</div>
+                <div className="text-[12px] font-bold">24 Saat Sonra Kendini İmha Etsin ⏳</div>
+                <div className="text-[10px] text-gray-500">Bu seçenek açılırsa itiraf 24 saat sonra silinir.</div>
               </div>
             </div>
-            <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${
-              isEphemeral ? 'bg-amber-500 border-amber-400 text-black font-black' : 'border-white/20 bg-transparent'
+            <div className={`w-4 h-4 rounded border flex items-center justify-center text-xs ${
+              isEphemeral ? 'bg-amber-500 border-amber-400 text-black font-black' : 'border-white/20'
             }`}>
               {isEphemeral && '✓'}
             </div>
@@ -294,40 +278,34 @@ export default function ModernForm() {
         <button 
           type="submit" 
           disabled={loading || successMsg || isRecordingNow} 
-          onClick={(e) => !successMsg && !isRecordingNow && triggerRipple(e, 'bg-white/50 shadow-[0_0_30px_rgba(255,255,255,0.9)]')}
-          className={`relative overflow-hidden w-full py-3.5 sm:py-4 rounded-xl text-[13px] sm:text-base font-bold flex items-center justify-center gap-2 transition-all duration-500 disabled:shadow-none shadow-[0_4px_20px_rgba(0,0,0,0.2)] group/btn ${
-            successMsg ? 'bg-green-500 text-black scale-[1.02] shadow-[0_0_40px_rgba(34,197,94,0.6)] cursor-default' 
-            : (loading || isRecordingNow) ? 'bg-gray-700 text-gray-400 cursor-not-allowed opacity-70'
-            : (type === 'CONFESSION' && isEphemeral) ? 'bg-amber-500 hover:bg-amber-400 hover:shadow-[0_0_30px_rgba(245,158,11,0.5)] text-black active:scale-95'
-            : type === 'CONFESSION' ? 'bg-purple-600 hover:bg-purple-500 hover:shadow-[0_0_30px_rgba(168,85,247,0.5)] text-white active:scale-95' 
-            : type === 'BOSYAP' ? 'bg-emerald-500 hover:bg-emerald-400 hover:shadow-[0_0_30px_rgba(16,185,129,0.5)] text-black active:scale-95'
-            : 'bg-[#4DA3FF] hover:bg-blue-400 hover:shadow-[0_0_30px_rgba(77,163,255,0.5)] text-black active:scale-95'
+          onClick={(e) => !successMsg && !isRecordingNow && triggerRipple(e, 'bg-white/30')}
+          className={`relative overflow-hidden w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+            successMsg ? 'bg-green-500 text-black' 
+            : (loading || isRecordingNow) ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+            : (type === 'CONFESSION' && isEphemeral) ? 'bg-amber-500 hover:bg-amber-400 text-black'
+            : type === 'CONFESSION' ? 'bg-purple-600 hover:bg-purple-500 text-white' 
+            : type === 'BOSYAP' ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
+            : 'bg-[#4DA3FF] hover:bg-blue-400 text-black'
           }`}
         >
           {successMsg ? (
-            <span className="flex items-center gap-2.5 animate-in zoom-in duration-300">
-              <CheckCircle2 size={22} className="shrink-0" /> 
-              <span className="flex flex-col items-start text-left leading-tight">
-                <span>Başarıyla Fırlatıldı!</span>
-                <span className="text-[10px] font-medium opacity-80">Yönetici onayından sonra paylaşılacaktır.</span>
-              </span>
+            <span className="flex items-center gap-2">
+              <CheckCircle2 size={18} /> Başarıyla Fırlatıldı!
             </span>
           ) : isRecordingNow ? (
-            <span className="flex items-center gap-2 text-red-300">
-              🎙️ Önce Kaydı Durdurman Gerekiyor!
-            </span>
+            <span className="text-red-300">🎙️ Önce Kaydı Durdurman Gerekiyor!</span>
           ) : loading ? (
-            <span className="flex items-center gap-2 text-white">
-              <Loader2 size={18} className="animate-spin sm:w-[22px] sm:h-[22px]" /> Kapsüle Yükleniyor...
+            <span className="flex items-center gap-2">
+              <Loader2 size={16} className="animate-spin" /> Yükleniyor...
             </span>
-          ) : (type === 'CONFESSION' && isEphemeral) ? (
-            <span className="flex items-center gap-2"><Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1" /> Süreli İtirafı Fırlat ⏳</span>
-          ) : type === 'CONFESSION' ? (
-            <span className="flex items-center gap-2"><Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1" /> İtirafı Gönder</span>
-          ) : type === 'BOSYAP' ? (
-            <span className="flex items-center gap-2"><Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1" /> Boş Yap 🚀</span>
           ) : (
-            <span className="flex items-center gap-2"><Send size={16} className="sm:w-[20px] sm:h-[20px] drop-shadow-md transition-transform duration-300 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1" /> Fısıltıyı Gönder</span>
+            <span className="flex items-center gap-2">
+              <Send size={15} /> 
+              {type === 'CONFESSION' && isEphemeral ? 'Süreli İtirafı Fırlat ⏳' 
+               : type === 'CONFESSION' ? 'İtirafı Gönder' 
+               : type === 'BOSYAP' ? 'Boş Yap 🚀' 
+               : 'Fısıltıyı Gönder'}
+            </span>
           )}
         </button>
       </form>
