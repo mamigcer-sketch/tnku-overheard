@@ -36,6 +36,7 @@ export default function ModernForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
     if (isRecordingNow) {
       alert("Kral, önce ses kaydını durdurman gerekiyor!");
       return;
@@ -47,6 +48,7 @@ export default function ModernForm() {
       const formData = new FormData();
       formData.append('type', type);
       formData.append('content', content);
+      
       formData.append('location', type === 'OVERHEARD' ? (location || '') : '');
       formData.append('people', type === 'OVERHEARD' ? people : '');
       formData.append('gender', type === 'OVERHEARD' ? gender : '');
@@ -73,7 +75,7 @@ export default function ModernForm() {
       setAudioBase64(null);
       
       setSuccessMsg(true);
-      setTimeout(() => setSuccessMsg(false), 4000);
+      setTimeout(() => setSuccessMsg(false), 5000);
       router.refresh();
     } catch (error) {
       console.error("Hata:", error);
@@ -82,29 +84,18 @@ export default function ModernForm() {
     }
   };
 
-  const accentColor = type === 'CONFESSION' ? 'bg-purple-600 text-white shadow-purple-500/20' 
-    : type === 'BOSYAP' ? 'bg-emerald-500 text-black shadow-emerald-500/20' 
-    : 'bg-[#4DA3FF] text-black shadow-blue-500/20';
-
   return (
-    <div className="w-full bg-[#121212] text-white p-5 sm:p-6 rounded-t-[32px] sm:rounded-[32px] border-t sm:border border-white/10 shadow-[0_-10px_40px_rgba(0,0,0,0.8)]">
+    <div className="w-full text-white">
       
-      {/* ÜST TUTAMAK (Instagram Çizgisi) */}
-      <div className="w-10 h-1 bg-white/20 rounded-full mx-auto mb-5 sm:hidden"></div>
-
-      {/* BAŞLIK */}
-      <div className="mb-5">
-        <h3 className="text-lg font-extrabold tracking-tight">Yeni Paylaşım Yap ✨</h3>
-        <p className="text-xs text-gray-400 mt-0.5">Değirmenaltı'nda gizli kalmasın.</p>
-      </div>
-
-      {/* SEKMELER (Minimalist Hatlar) */}
-      <div className="grid grid-cols-3 gap-2 p-1 bg-black/40 rounded-2xl mb-5 border border-white/5">
+      {/* ÜÇLÜ SEKMELER */}
+      <div className="flex gap-2 mb-4 p-1 bg-black/40 rounded-xl border border-white/5">
         <button 
           type="button"
-          onClick={() => handleTabChange('CONFESSION')}
-          className={`py-2.5 rounded-xl text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 ${
-            type === 'CONFESSION' ? 'bg-purple-600 text-white shadow-md' : 'text-gray-400 hover:text-white'
+          onClick={() => handleTabChange('CONFESSION')} 
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[12px] font-bold transition-all ${
+            type === 'CONFESSION' 
+              ? 'bg-purple-600 text-white shadow-lg shadow-purple-900/30' 
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
           }`}
         >
           <VenetianMask size={15} /> İtiraf
@@ -112,9 +103,11 @@ export default function ModernForm() {
 
         <button 
           type="button"
-          onClick={() => handleTabChange('BOSYAP')}
-          className={`py-2.5 rounded-xl text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 ${
-            type === 'BOSYAP' ? 'bg-emerald-500 text-black shadow-md' : 'text-gray-400 hover:text-white'
+          onClick={() => handleTabChange('BOSYAP')} 
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[12px] font-bold transition-all ${
+            type === 'BOSYAP' 
+              ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-900/35' 
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
           }`}
         >
           <Coffee size={15} /> Boş Yap
@@ -122,111 +115,124 @@ export default function ModernForm() {
 
         <button 
           type="button"
-          onClick={() => handleTabChange('OVERHEARD')}
-          className={`py-2.5 rounded-xl text-[13px] font-bold transition-all flex items-center justify-center gap-1.5 ${
-            type === 'OVERHEARD' ? 'bg-[#4DA3FF] text-black shadow-md' : 'text-gray-400 hover:text-white'
+          onClick={() => handleTabChange('OVERHEARD')} 
+          className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-[12px] font-bold transition-all ${
+            type === 'OVERHEARD' 
+              ? 'bg-[#4DA3FF] text-black shadow-lg shadow-blue-900/30' 
+              : 'text-gray-400 hover:text-white hover:bg-white/5'
           }`}
         >
-          <Headphones size={15} /> Duyum
+          <Headphones size={15} /> <span className="hidden sm:inline">Overheard</span><span className="sm:hidden">Duyum</span>
         </button>
       </div>
 
-      <form onSubmit={handleSubmit} key={type} className="space-y-4">
+      <form onSubmit={handleSubmit} key={type} className="space-y-4 animate-in fade-in duration-200">
         
-        {/* OVERHEARD ALANLARI */}
         {type === 'OVERHEARD' && (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 bg-black/30 p-3 rounded-2xl border border-white/5">
-            <input 
-              type="text" 
-              required 
-              placeholder="Konum (Örn: Yemekhane)" 
-              value={location} 
-              onChange={(e) => setLocation(e.target.value)} 
-              className="col-span-2 sm:col-span-1 px-3 py-2.5 bg-white/5 rounded-xl text-xs text-white border border-white/5 focus:border-[#4DA3FF] outline-none" 
-            />
+          <div className="bg-black/40 rounded-2xl p-3 sm:p-4 border border-white/5 grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="relative col-span-2 md:col-span-1">
+              <input 
+                type="text" 
+                id="location_field" 
+                required 
+                placeholder=" " 
+                value={location} 
+                onChange={(e) => setLocation(e.target.value)} 
+                className="block px-3 pb-2 pt-4 w-full text-sm text-white bg-white/5 rounded-xl border border-white/5 focus:border-[#4DA3FF] outline-none peer" 
+              />
+              <label htmlFor="location_field" className={`absolute text-[11px] duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 ${location ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500'}`}>Konum</label>
+            </div>
             
-            <select 
-              required 
-              value={people} 
-              onChange={(e) => setPeople(e.target.value)} 
-              className="px-3 py-2.5 bg-white/5 rounded-xl text-xs text-white border border-white/5 focus:border-[#4DA3FF] outline-none cursor-pointer"
-            >
-              <option value="" disabled hidden>Kişi Sayısı</option>
-              <option value="2 kişi" className="bg-[#121212]">2 Kişi</option>
-              <option value="3 kişi" className="bg-[#121212]">3 Kişi</option>
-              <option value="4 kişi" className="bg-[#121212]">4 Kişi</option>
-              <option value="Kalabalık" className="bg-[#121212]">Kalabalık</option>
-            </select>
+            <div className="relative col-span-1">
+               <select 
+                id="people_field"
+                required 
+                value={people} 
+                onChange={(e) => setPeople(e.target.value)} 
+                className="block px-3 pb-2 pt-4 w-full text-sm text-white bg-white/5 rounded-xl border border-white/5 focus:border-[#4DA3FF] outline-none peer cursor-pointer"
+              >
+                <option value="" disabled hidden></option>
+                <option value="2 kişi" className="bg-[#121212] text-white">2 Kişi</option>
+                <option value="3 kişi" className="bg-[#121212] text-white">3 Kişi</option>
+                <option value="4 kişi" className="bg-[#121212] text-white">4 Kişi</option>
+                <option value="Kalabalık" className="bg-[#121212] text-white">Kalabalık</option>
+              </select>
+              <label htmlFor="people_field" className={`absolute text-[11px] duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 ${people ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500'}`}>Kişi Sayısı</label>
+            </div>
 
-            <select 
-              required
-              value={gender} 
-              onChange={(e) => setGender(e.target.value)} 
-              className="px-3 py-2.5 bg-white/5 rounded-xl text-xs text-white border border-white/5 focus:border-[#4DA3FF] outline-none cursor-pointer"
-            >
-              <option value="" disabled hidden>Grup Türü</option>
-              <option value="Kız" className="bg-[#121212]">Sadece Kız</option>
-              <option value="Erkek" className="bg-[#121212]">Sadece Erkek</option>
-              <option value="Karışık" className="bg-[#121212]">Karışık</option>
-            </select>
+            <div className="relative col-span-1">
+              <select 
+                id="gender_field"
+                required
+                value={gender} 
+                onChange={(e) => setGender(e.target.value)} 
+                className="block px-3 pb-2 pt-4 w-full text-sm text-white bg-white/5 rounded-xl border border-white/5 focus:border-[#4DA3FF] outline-none peer cursor-pointer"
+              >
+                <option value="" disabled hidden></option>
+                <option value="Kız" className="bg-[#121212] text-white">Kız</option>
+                <option value="Erkek" className="bg-[#121212] text-white">Erkek</option>
+                <option value="Karışık" className="bg-[#121212] text-white">Karışık</option>
+              </select>
+              <label htmlFor="gender_field" className={`absolute text-[11px] duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 ${gender ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500'}`}>Grup</label>
+            </div>
 
-            <input 
-              type="time" 
-              required 
-              value={time} 
-              onChange={(e) => setTime(e.target.value)} 
-              className="px-3 py-2.5 bg-white/5 rounded-xl text-xs text-white border border-white/5 focus:border-[#4DA3FF] outline-none [color-scheme:dark]" 
-            />
+            <div className="relative col-span-2 md:col-span-1">
+              <input 
+                type="time" 
+                id="time_field"
+                required 
+                placeholder=" "
+                value={time} 
+                onChange={(e) => setTime(e.target.value)} 
+                className="block px-3 pb-2 pt-4 w-full text-sm text-white bg-white/5 rounded-xl border border-white/5 focus:border-[#4DA3FF] outline-none peer [color-scheme:dark]" 
+              />
+              <label htmlFor="time_field" className={`absolute text-[11px] duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-[#4DA3FF] peer-focus:scale-75 peer-focus:-translate-y-2.5 ${time ? 'text-gray-400 scale-75 -translate-y-2.5' : 'text-gray-500'}`}>Saat</label>
+            </div>
           </div>
         )}
 
-        {/* METİN GİRİŞ ALANI (Kutusuz / Pürüzsüz) */}
-        <div className="relative bg-black/30 rounded-2xl border border-white/5 p-3.5 focus-within:border-white/20 transition-all">
-          <textarea 
-            maxLength={maxChars}
-            rows={4} 
-            placeholder={
-              type === 'OVERHEARD' ? "Duyduğun o efsane diyalog neydi? 🤫" 
-              : type === 'BOSYAP' ? "Boş yapma vakti... Ne düşünüyorsun? ☕"
-              : "Sırrını buraya fısılda... 🎭"
-            } 
-            value={content} 
-            onChange={(e) => setContent(e.target.value)} 
-            className="w-full bg-transparent text-sm sm:text-base text-white outline-none resize-none placeholder:text-gray-600" 
-          />
-          <div className="flex justify-end mt-1">
-            <span className={`text-[10px] font-bold ${content.length >= maxChars ? 'text-red-400' : 'text-gray-600'}`}>
-              {content.length} / {maxChars}
-            </span>
-          </div>
+        <div className="relative">
+            <textarea 
+              maxLength={maxChars}
+              rows={3} 
+              placeholder={
+                type === 'OVERHEARD' ? "Duyduğun o efsane diyalog neydi? 🤫" 
+                : type === 'BOSYAP' ? "Boş yapma vakti... Ne düşünüyorsun? ☕"
+                : "Sırrını buraya fısılda... 🎭"
+              } 
+              value={content} 
+              onChange={(e) => setContent(e.target.value)} 
+              className="w-full bg-black/40 border border-white/5 p-4 pb-7 rounded-2xl text-sm text-white outline-none resize-none transition-all placeholder:text-gray-600 focus:border-white/20" 
+            />
+            <div className={`absolute bottom-2.5 right-4 text-[10px] font-bold ${
+              content.length >= maxChars ? 'text-red-400' : 'text-gray-600'
+            }`}>
+                {content.length} / {maxChars}
+            </div>
         </div>
 
-        {/* SES KAYDI */}
         {type !== 'OVERHEARD' && (
-          <div className="bg-black/30 p-2 rounded-2xl border border-white/5">
-            <VoiceRecorder 
-              onAudioReady={(base64) => setAudioBase64(base64)} 
-              onRecordingStateChange={(recording) => setIsRecordingNow(recording)}
-            />
-          </div>
+          <VoiceRecorder 
+            onAudioReady={(base64) => setAudioBase64(base64)} 
+            onRecordingStateChange={(recording) => setIsRecordingNow(recording)}
+          />
         )}
 
-        {/* 24 SAAT İMHA SEÇENEĞİ */}
         {type === 'CONFESSION' && (
           <div 
             onClick={() => setIsEphemeral(!isEphemeral)}
-            className={`flex items-center justify-between p-3.5 rounded-2xl border cursor-pointer transition-all ${
+            className={`flex items-center justify-between p-3.5 rounded-xl border cursor-pointer transition-all ${
               isEphemeral ? 'bg-amber-500/10 border-amber-500/40 text-amber-300' : 'bg-black/30 border-white/5 text-gray-400 hover:border-white/10'
             }`}
           >
-            <div className="flex items-center gap-3">
-              <Clock size={18} className={isEphemeral ? 'text-amber-400' : 'text-gray-500'} />
+            <div className="flex items-center gap-2.5">
+              <Clock size={16} className={isEphemeral ? 'text-amber-400' : 'text-gray-500'} />
               <div>
-                <div className="text-xs font-bold">24 Saat Sonra Kendini İmha Etsin ⏳</div>
+                <div className="text-[12px] font-bold">24 Saat Sonra Kendini İmha Etsin ⏳</div>
                 <div className="text-[10px] text-gray-500">Bu seçenek açılırsa itiraf 24 saat sonra silinir.</div>
               </div>
             </div>
-            <div className={`w-5 h-5 rounded-md border flex items-center justify-center text-xs ${
+            <div className={`w-4 h-4 rounded border flex items-center justify-center text-xs ${
               isEphemeral ? 'bg-amber-500 border-amber-400 text-black font-black' : 'border-white/20'
             }`}>
               {isEphemeral && '✓'}
@@ -234,30 +240,31 @@ export default function ModernForm() {
           </div>
         )}
 
-        {/* GÖNDER BUTONU */}
         <button 
           type="submit" 
           disabled={loading || successMsg || isRecordingNow} 
-          className={`w-full py-4 rounded-2xl text-sm sm:text-base font-extrabold flex items-center justify-center gap-2 transition-all shadow-lg active:scale-[0.98] cursor-pointer ${
-            successMsg ? 'bg-green-500 text-black shadow-green-500/20' 
-            : (loading || isRecordingNow) ? 'bg-gray-800 text-gray-500 cursor-not-allowed shadow-none'
-            : (type === 'CONFESSION' && isEphemeral) ? 'bg-amber-500 hover:bg-amber-400 text-black shadow-amber-500/20'
-            : accentColor
+          className={`relative overflow-hidden w-full py-3.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all ${
+            successMsg ? 'bg-green-500 text-black' 
+            : (loading || isRecordingNow) ? 'bg-gray-800 text-gray-500 cursor-not-allowed'
+            : (type === 'CONFESSION' && isEphemeral) ? 'bg-amber-500 hover:bg-amber-400 text-black'
+            : type === 'CONFESSION' ? 'bg-purple-600 hover:bg-purple-500 text-white' 
+            : type === 'BOSYAP' ? 'bg-emerald-500 hover:bg-emerald-400 text-black'
+            : 'bg-[#4DA3FF] hover:bg-blue-400 text-black'
           }`}
         >
           {successMsg ? (
             <span className="flex items-center gap-2">
-              <CheckCircle2 size={18} /> Başarıyla Gönderildi!
+              <CheckCircle2 size={18} /> Başarıyla Fırlatıldı!
             </span>
           ) : isRecordingNow ? (
             <span className="text-red-300">🎙️ Önce Kaydı Durdurman Gerekiyor!</span>
           ) : loading ? (
             <span className="flex items-center gap-2">
-              <Loader2 size={18} className="animate-spin" /> Gönderiliyor...
+              <Loader2 size={16} className="animate-spin" /> Yükleniyor...
             </span>
           ) : (
             <span className="flex items-center gap-2">
-              <Send size={16} /> 
+              <Send size={15} /> 
               {type === 'CONFESSION' && isEphemeral ? 'Süreli İtirafı Fırlat ⏳' 
                : type === 'CONFESSION' ? 'İtirafı Gönder' 
                : type === 'BOSYAP' ? 'Boş Yap 🚀' 
@@ -265,7 +272,6 @@ export default function ModernForm() {
             </span>
           )}
         </button>
-
       </form>
     </div>
   );
