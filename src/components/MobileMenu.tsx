@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Menu, X, Heart, ShieldAlert, BookOpen, ExternalLink, Download, VenetianMask, AlertCircle, CheckCircle2, Loader2, User } from 'lucide-react';
+import { Menu, X, Bookmark, ShieldAlert, BookOpen, ExternalLink, Download, VenetianMask, AlertCircle, CheckCircle2, Loader2, User } from 'lucide-react'; // 🔥 Heart yerine Bookmark eklendi
 import Link from 'next/link';
 import { updateCustomNickname } from '@/app/profile/actions';
 
@@ -27,8 +27,9 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     };
   }, [isNickModalOpen]);
   
+  // 🔥 BURASI GÜNCELLENDİ: Beğendiklerim -> Kaydedilenler
   const menuItems = [
-    { name: 'Beğendiklerim', icon: <Heart size={18} />, href: '/my-likes', isExternal: false, hideOnDesktop: true },
+    { name: 'Kaydedilenler', icon: <Bookmark size={18} />, href: '/kaydedilenler', isExternal: false, hideOnDesktop: true },
     { name: 'Topluluk Kuralları', icon: <BookOpen size={18} />, href: '/rules', isExternal: false },
     { name: 'Instagram', icon: <ExternalLink size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
     { name: 'Bildir / Şikayet', icon: <ShieldAlert size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
@@ -64,7 +65,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
         router.refresh();
       }, 2000);
     }
-    setLoading(false);
+    setLoading(false); // GÜNCELLENEN KISIM
   };
 
   return (
