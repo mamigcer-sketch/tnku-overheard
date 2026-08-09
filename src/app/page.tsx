@@ -9,7 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
-import { MessageSquareHeart, Bell, MessageCircle, Trophy } from 'lucide-react'; // 🔥 Trophy (Kupa) eklendi!
+import { MessageSquareHeart, Bell, MessageCircle, Trophy, LayoutGrid, Coffee, Headphones, Flame } from 'lucide-react'; // 🔥 İkonları buraya ekledik!
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -130,7 +130,14 @@ export default async function Home({ searchParams }: any) {
     }
   }
 
-  const filters = ['Tümü', 'İtiraf', 'Boş Yap', 'Overheard', '🔥 Trend'];
+  // 🔥 Filtreler ve İkon Eşleştirmeleri
+  const filterData = [
+    { name: 'Tümü', icon: LayoutGrid },
+    { name: 'İtiraf', icon: MessageSquareHeart },
+    { name: 'Boş Yap', icon: Coffee },
+    { name: 'Overheard', icon: Headphones },
+    { name: '🔥 Trend', icon: Flame },
+  ];
 
   return (
     <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-20">
@@ -152,7 +159,6 @@ export default async function Home({ searchParams }: any) {
             <span>Beğendiklerim</span>
           </Link>
 
-          {/* 🔥 KAMPÜS SEFİRLERİ LİNKİ BURADA! Işıl Işıl Parıldıyor */}
           <Link 
             href="/liderlik" 
             className="flex items-center gap-1.5 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 sm:px-3.5 py-2 rounded-full transition-all duration-300 text-[13px] font-bold border border-amber-500/30 text-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.2)] hover:shadow-[0_0_25px_rgba(245,158,11,0.4)] hover:-translate-y-0.5"
@@ -162,7 +168,6 @@ export default async function Home({ searchParams }: any) {
           </Link>
 
           <NotificationBell notifications={notifications} />
-          {/* 🔥 userUuid prop'u eklendi */}
           <MobileMenu userUuid={userUuid} />
         </div>
       </header>
@@ -188,34 +193,38 @@ export default async function Home({ searchParams }: any) {
           <SearchBar />
         </div>
 
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-4 scrollbar-hide snap-x relative z-40 sticky top-[70px] sm:top-[80px] bg-transparent backdrop-blur-md pt-2 px-1">
-          {filters.map((filter) => {
-            const isActive = currentFilter === filter;
-            
-            let activeClass = 'bg-white/10 text-white border-white/20 shadow-sm scale-[1.02]';
-            if (isActive) {
-              if (filter === 'Overheard') activeClass = 'bg-[#4DA3FF]/15 text-[#4DA3FF] border-[#4DA3FF]/30 shadow-[0_0_15px_rgba(77,163,255,0.15)] scale-[1.02]';
-              else if (filter === 'İtiraf') activeClass = 'bg-purple-500/15 text-purple-400 border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] scale-[1.02]';
-              else if (filter === 'Boş Yap') activeClass = 'bg-emerald-500/15 text-emerald-400 border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] scale-[1.02]';
-              else if (filter === '🔥 Trend') activeClass = 'bg-amber-500/15 text-amber-400 border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.15)] scale-[1.02]';
-            }
+        {/* 🔥 YENİ NESİL YÜZEN FİLTRE MENÜSÜ (FLOATING PILL NAV) 🔥 */}
+        <div className="flex justify-center sticky top-[75px] sm:top-[85px] z-40 mb-6 pointer-events-none">
+          <div className="flex items-center bg-[#121212]/90 backdrop-blur-xl border border-white/10 p-1.5 rounded-full shadow-[0_15px_40px_rgba(0,0,0,0.6)] pointer-events-auto">
+            {filterData.map((filter) => {
+              const isActive = currentFilter === filter.name;
+              const Icon = filter.icon;
+              // Trend yazısındaki alevi kaldırdık çünkü ikonu zaten alev
+              const displayText = filter.name === '🔥 Trend' ? 'Trend' : filter.name;
 
-            const inactiveClass = 'bg-white/[0.02] border-white/5 text-gray-400 hover:text-gray-200 hover:bg-white/[0.05] hover:border-white/10';
-
-            return (
-              <Link 
-                key={filter} 
-                href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`} 
-                scroll={false}
-                className={`px-4 py-2 rounded-xl text-[13px] font-semibold whitespace-nowrap snap-start transition-all duration-300 backdrop-blur-xl flex items-center justify-center border ${
-                  isActive ? activeClass : inactiveClass
-                }`}
-              >
-                {filter}
-              </Link>
-            )
-          })}
+              return (
+                <Link
+                  key={filter.name}
+                  href={`/?f=${filter.name}${searchQuery ? `&q=${searchQuery}` : ''}`}
+                  scroll={false}
+                  className={`flex items-center justify-center gap-2 transition-all duration-300 ease-out ${
+                    isActive
+                      ? 'bg-[#2A2A2A] text-white px-4 py-2.5 rounded-full shadow-inner'
+                      : 'text-gray-500 hover:text-gray-300 px-3 py-2.5 hover:bg-white/5 rounded-full'
+                  }`}
+                >
+                  <Icon size={18} className={`${isActive ? 'text-white' : ''} ${filter.name === '🔥 Trend' && isActive ? 'text-amber-400' : ''}`} />
+                  {isActive && (
+                    <span className={`text-[13px] font-black tracking-wide whitespace-nowrap animate-in fade-in slide-in-from-right-2 duration-300 ${filter.name === '🔥 Trend' ? 'text-amber-400' : ''}`}>
+                      {displayText}
+                    </span>
+                  )}
+                </Link>
+              );
+            })}
+          </div>
         </div>
+        {/* 🔥 MENÜ BİTİŞ 🔥 */}
 
         <Link href="/sohbet" className="block mb-6 relative group z-10 mx-1">
           <div className="absolute inset-0 bg-gradient-to-r from-[#4DA3FF]/10 to-emerald-500/10 rounded-[20px] blur-xl opacity-50 group-hover:opacity-100 transition-opacity"></div>

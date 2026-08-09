@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import CommentForm from "./CommentForm";
 import AnonymousPlayer from "./AnonymousPlayer";
 import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ShieldAlert } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -39,7 +38,6 @@ const getRelativeTime = (dateString: string) => {
 
 export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge, customNicknamesMap = {}, userBadgesMap = {} }: any) {
   const router = useRouter();
-  const [showComment, setShowComment] = useState(false);
   const cardRef = useRef(null);
   const [hasViewed, setHasViewed] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -162,7 +160,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     <>
       <div 
         ref={cardRef} 
-        className={`w-full bg-[#000000] sm:bg-[#121212] sm:border sm:border-white/10 sm:rounded-xl mb-4 sm:mb-6 overflow-hidden transition-all duration-300 ease-out will-change-[opacity,transform] ${
+        className={`w-full bg-[#121212]/80 border border-white/5 rounded-2xl sm:rounded-3xl mb-5 overflow-hidden transition-all duration-300 ease-out will-change-[opacity,transform] shadow-[0_4px_20px_rgba(0,0,0,0.3)] ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
         }`}
       >
@@ -241,7 +239,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
               </button>
             </form>
             
-            <button onClick={() => { playClickSound(); setShowComment(!showComment); }} className="transition-transform active:scale-75">
+            <button onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }} className="transition-transform active:scale-75">
               <MessageCircle size={26} className="text-white hover:text-gray-400 transform -scale-x-100" />
             </button>
             
@@ -255,7 +253,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </button>
         </div>
 
-        {/* 4. BEĞENİ VE SAAT (Metin Tekrarı Silindi) */}
+        {/* 4. BEĞENİ VE SAAT */}
         <div className="px-4 pb-4">
           <div className="font-semibold text-white text-[14px] mb-1.5 cursor-default">
             {localLikesCount} beğenme
@@ -263,7 +261,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           
           {(post._count?.comments > 0 || post.comments?.length > 0) && (
             <button 
-              onClick={() => setShowComment(!showComment)}
+              onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }}
               className="text-gray-400 text-[14px] font-medium hover:text-white transition-colors block"
             >
               {post._count?.comments || post.comments?.length} yorumun tümünü gör
@@ -272,13 +270,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
           <div className="text-gray-500 text-[10px] uppercase mt-1.5 tracking-widest font-medium">
             {getRelativeTime(post.createdAt)}
-          </div>
-        </div>
-
-        {/* YORUM FORMU */}
-        <div className={`transition-all duration-300 ease-in-out overflow-hidden px-4 ${showComment ? 'max-h-[500px] opacity-100 pb-4' : 'max-h-0 opacity-0'}`}>
-          <div className="border-t border-white/10 pt-3">
-            <CommentForm postId={post.id} />
           </div>
         </div>
       </div>
