@@ -9,7 +9,7 @@ import SearchBar from '@/components/SearchBar';
 import NotificationBell from '@/components/NotificationBell';
 import RefreshButton from '@/components/RefreshButton';
 import CountdownWidget from '@/components/CountdownWidget';
-import { Bookmark, Bell, MessageCircle, Trophy, Flame } from 'lucide-react';
+import { Bookmark, Bell, MessageCircle, Trophy } from 'lucide-react';
 import ClientShareWidgetV2 from '@/components/ClientShareWidgetV2';
 
 export const dynamic = 'force-dynamic';
@@ -125,21 +125,21 @@ export default async function Home({ searchParams }: any) {
         orderBy: { createdAt: 'desc' },
         take: 15
       });
-    } catch (err) {
-      console.error("Bildirimler çekilemedi:", err);
-    }
+    } catch (err) {}
   }
 
   const filters = ['Tümü', 'İtiraf', 'Boş Yap', 'Overheard', '🔥 Trend'];
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30">
+    <main className="min-h-screen bg-black text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30">
       
-      {/* AMBİENT GLOW ARKA PLAN EFEKTİ */}
-      <div className="fixed inset-0 z-[-1] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-white/[0.03] via-[#050505] to-[#050505] pointer-events-none"></div>
+      {/* 🔥 İŞTE YENİ ARKA PLAN! GECE MAVİSİ/MOR DEGRADE 🔥 */}
+      <div className="fixed inset-0 z-[-1] bg-black pointer-events-none">
+        <div className="absolute top-0 left-0 right-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#2a1744] via-[#0a0a0a] to-transparent opacity-80"></div>
+      </div>
 
-      {/* 1. YAPIŞKAN ÜST BÖLÜM (HEADER + SEKMELER) */}
-      <div className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-2xl border-b border-white/[0.04]">
+      {/* 1. YAPIŞKAN ÜST BÖLÜM (HEADER + SEKMELER) - ŞİMDİ DAHA ŞEFFAF VE CAM GİBİ */}
+      <div className="sticky top-0 z-50 bg-black/30 backdrop-blur-3xl border-b border-white/[0.05] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         
         {/* LOGO VE İKONLAR */}
         <header className="px-4 py-3 flex items-center justify-between gap-2">
@@ -174,12 +174,12 @@ export default async function Home({ searchParams }: any) {
                 href={`/?f=${filter}${searchQuery ? `&q=${searchQuery}` : ''}`}
                 scroll={false}
                 className={`relative px-4 py-3 text-[14px] font-bold whitespace-nowrap transition-colors ${
-                  isActive ? (filter === '🔥 Trend' ? 'text-amber-500' : 'text-white') : 'text-gray-500 hover:text-gray-300'
+                  isActive ? (filter === '🔥 Trend' ? 'text-amber-500' : 'text-white') : 'text-gray-400 hover:text-gray-200'
                 }`}
               >
                 {filter === '🔥 Trend' ? 'Trend' : filter}
                 {isActive && (
-                  <div className={`absolute bottom-0 left-0 w-full h-[2px] rounded-t-full ${filter === '🔥 Trend' ? 'bg-amber-500 shadow-[0_-2px_10px_rgba(245,158,11,0.5)]' : 'bg-white shadow-[0_-2px_10px_rgba(255,255,255,0.3)]'}`} />
+                  <div className={`absolute bottom-0 left-0 w-full h-[2px] rounded-t-full ${filter === '🔥 Trend' ? 'bg-amber-500 shadow-[0_-2px_10px_rgba(245,158,11,0.5)]' : 'bg-[#4DA3FF] shadow-[0_-2px_10px_rgba(77,163,255,0.5)]'}`} />
                 )}
               </Link>
             );
@@ -189,14 +189,14 @@ export default async function Home({ searchParams }: any) {
 
       <div className="max-w-2xl mx-auto px-4 pt-5">
         
-        {/* 2. APPLE/IOS TARZI WIDGET GRID (PostCard ile uyumlu bg-[#0A0A0A]) */}
+        {/* 2. APPLE/IOS TARZI WIDGET GRID */}
         <div className={`grid gap-3 mb-5 ${activeAnnouncement ? 'grid-cols-2' : 'grid-cols-1'}`}>
           
           {/* LOBİ WIDGET'I */}
-          <Link href="/sohbet" className="bg-[#0A0A0A] hover:bg-[#121212] border border-white/[0.04] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] transition-all duration-300 group relative overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#4DA3FF]/10 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none"></div>
+          <Link href="/sohbet" className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] transition-all duration-300 group relative overflow-hidden backdrop-blur-md">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-[#4DA3FF]/15 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none"></div>
             <div className="flex items-start justify-between relative z-10">
-              <div className="bg-[#4DA3FF]/15 p-2 rounded-xl text-[#4DA3FF] group-hover:scale-110 transition-transform">
+              <div className="bg-[#4DA3FF]/15 p-2 rounded-xl text-[#4DA3FF] group-hover:scale-110 transition-transform shadow-inner">
                 <MessageCircle size={18} />
               </div>
               <div className="flex h-2.5 w-2.5 relative">
@@ -206,22 +206,22 @@ export default async function Home({ searchParams }: any) {
             </div>
             <div className="mt-3 relative z-10">
               <h3 className="text-white font-black text-[14px] tracking-tight">NKÜ CHAT</h3>
-              <p className="text-gray-500 text-[11px] mt-0.5 truncate font-medium">Kampüs ne konuşuyor?</p>
+              <p className="text-gray-400 text-[11px] mt-0.5 truncate font-medium">Kampüs ne konuşuyor?</p>
             </div>
           </Link>
 
           {/* DUYURU WIDGET'I */}
           {activeAnnouncement && (
-            <div className="bg-[#0A0A0A] border border-[#4DA3FF]/15 rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] relative overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
+            <div className="bg-[#4DA3FF]/[0.03] border border-[#4DA3FF]/20 rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] relative overflow-hidden backdrop-blur-md">
               <div className="absolute inset-0 bg-gradient-to-br from-[#4DA3FF]/5 to-transparent pointer-events-none"></div>
               <div className="flex items-start justify-between relative z-10">
-                <div className="bg-[#4DA3FF]/15 p-2 rounded-xl text-[#4DA3FF]">
+                <div className="bg-[#4DA3FF]/20 p-2 rounded-xl text-[#4DA3FF] shadow-inner">
                   <Bell size={18} className="animate-pulse" />
                 </div>
               </div>
               <div className="mt-3 relative z-10">
                 <h3 className="text-[#4DA3FF] font-black text-[14px] tracking-tight">Duyuru</h3>
-                <p className="text-gray-400 text-[11px] mt-0.5 truncate font-medium">{activeAnnouncement.content}</p>
+                <p className="text-gray-300 text-[11px] mt-0.5 truncate font-medium">{activeAnnouncement.content}</p>
               </div>
             </div>
           )}
@@ -242,8 +242,8 @@ export default async function Home({ searchParams }: any) {
         {/* 3. GÖNDERİLER */}
         <div className="space-y-0 relative z-10">
           {posts.length === 0 ? (
-            <div className="text-center py-20 bg-[#0A0A0A] rounded-[24px] border border-white/[0.04] flex flex-col items-center justify-center shadow-[0_4px_20px_rgba(0,0,0,0.3)]">
-              <p className="text-gray-500 font-bold text-[14px]">
+            <div className="text-center py-20 bg-white/[0.02] rounded-[24px] border border-white/[0.05] flex flex-col items-center justify-center backdrop-blur-md">
+              <p className="text-gray-400 font-bold text-[14px]">
                 {currentFilter === '🔥 Trend' 
                   ? 'Son 24 saatte henüz popülerleşen bir fısıltı yok.' 
                   : 'Aradığın kriterlerde gönderi bulunamadı.'}
@@ -270,7 +270,7 @@ export default async function Home({ searchParams }: any) {
                   <Link 
                     href={`/?f=${currentFilter}${searchQuery ? `&q=${searchQuery}` : ''}&page=${page + 1}`}
                     scroll={false}
-                    className="px-6 py-3 bg-[#0A0A0A] border border-white/[0.05] hover:border-white/20 rounded-full text-[13px] font-bold text-gray-400 transition-all hover:bg-white/10 hover:text-white shadow-lg"
+                    className="px-6 py-3 bg-white/[0.03] border border-white/[0.05] hover:border-white/20 rounded-full text-[13px] font-bold text-gray-300 transition-all hover:bg-white/10 hover:text-white shadow-lg backdrop-blur-md"
                   >
                     Daha Fazla Göster
                   </Link>
