@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
-import { ArrowLeft, Trophy, Flame, Crown, Medal, Award, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Trophy, Flame, Crown, ChevronRight } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,19 +58,23 @@ export default async function LeaderboardPage() {
             const isFirst = pos === 1;
 
             return (
-              <div key={rankedUser.userUuid} className={`flex flex-col items-center gap-2 ${isFirst ? 'scale-110 mb-2' : ''}`}>
-                <div className={`relative w-16 h-16 rounded-full border-2 flex items-center justify-center bg-[#121212] ${isFirst ? 'border-amber-400' : 'border-gray-700'}`}>
+              <Link 
+                key={rankedUser.userUuid} 
+                href={`/profil/${encodeURIComponent(rankedUser.userUuid)}`}
+                className={`flex flex-col items-center gap-2 group transition-transform hover:scale-105 cursor-pointer ${isFirst ? 'scale-110 mb-2 hover:scale-[1.15]' : ''}`}
+              >
+                <div className={`relative w-16 h-16 rounded-full border-2 flex items-center justify-center transition-colors bg-[#121212] group-hover:bg-[#1A1A1A] ${isFirst ? 'border-amber-400' : 'border-gray-700 group-hover:border-gray-500'}`}>
                   {isFirst && <Crown size={24} className="text-amber-400 absolute -top-3" />}
                   <span className="font-black text-xl opacity-60">{authorData.name.charAt(0)}</span>
                 </div>
                 <div className="text-center">
-                  <p className="text-[11px] font-bold truncate w-20">@{authorData.name}</p>
+                  <p className={`text-[11px] font-bold truncate w-20 transition-colors ${isFirst ? 'text-amber-400' : 'text-gray-300 group-hover:text-white'}`}>@{authorData.name}</p>
                   <p className="text-[10px] font-black text-amber-500">{rankedUser.points} XP</p>
                 </div>
-                <div className={`w-full py-1 text-center font-black rounded-t-lg ${isFirst ? 'bg-amber-400 text-black' : 'bg-gray-800 text-gray-400'}`}>
+                <div className={`w-full py-1 text-center font-black rounded-t-lg transition-colors ${isFirst ? 'bg-amber-400 text-black group-hover:bg-amber-300' : 'bg-gray-800 text-gray-400 group-hover:bg-gray-700 group-hover:text-gray-300'}`}>
                   {pos}
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

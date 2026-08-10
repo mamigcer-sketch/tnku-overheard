@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useRef } from "react";
 import AnonymousPlayer from "./AnonymousPlayer";
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ShieldAlert, Eye } from "lucide-react";
+import CommentForm from "./CommentForm";
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ShieldAlert, Eye, Repeat2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"; 
 import { incrementView, submitReport } from "@/app/post/actions";
@@ -12,28 +13,29 @@ const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "
 const animals = ["Kedi", "Köpek", "Panda", "Rakun", "Baykuş", "Hamster", "Martı", "Porsuk", "Salyangoz", "Pelikan", "Flamingo", "Kunduz", "Yarasa", "Deve", "Ördek", "Tavuk", "Maymun", "Keçi", "Sincap", "Kurbağa", "Kaplan", "Koala", "Tilki", "Kurt", "Aslan", "Şahin", "Karga", "Köstebek", "Koyun", "İnek", "At", "Eşek", "Fok", "Penguen", "Kirpi", "Sazan", "Yengeç", "Ahtapot", "Kertenkele", "Koala"];
 
 const getAnonymousData = (id: string, customNickname?: string) => {
-  if (!id) return { name: "Gizemli Yolcu" };
-  if (customNickname) return { name: customNickname };
+  if (!id) return { name: "Gizemli Yolcu", username: "gizemliyolcu" };
+  if (customNickname) return { name: customNickname, username: customNickname.toLowerCase().replace(/\s+/g, '_') };
   let hash = 0;
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   const positiveHash = Math.abs(hash);
-  return { name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}` };
+  const name = `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`;
+  return { name, username: name.toLowerCase().replace(/\s+/g, '_') };
 };
 
+// 🔥 Twitter Tarzı Kısa Zaman (5d, 2s, 1g)
 const getRelativeTime = (dateString: string) => {
   if (!dateString) return "";
   const date = new Date(dateString);
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
-  if (diffInSeconds < 60) return "Saniyeler önce";
+  if (diffInSeconds < 60) return `${diffInSeconds}sn`;
   const diffInMinutes = Math.floor(diffInSeconds / 60);
-  if (diffInMinutes < 60) return `${diffInMinutes} DAKİKA ÖNCE`;
+  if (diffInMinutes < 60) return `${diffInMinutes}d`;
   const diffInHours = Math.floor(diffInMinutes / 60);
-  if (diffInHours < 24) return `${diffInHours} SAAT ÖNCE`;
+  if (diffInHours < 24) return `${diffInHours}s`;
   const diffInDays = Math.floor(diffInHours / 24);
-  if (diffInDays === 1) return "DÜN";
-  if (diffInDays < 7) return `${diffInDays} GÜN ÖNCE`;
-  return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' }).toUpperCase();
+  if (diffInDays < 7) return `${diffInDays}g`;
+  return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
 export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge, customNicknamesMap = {}, userBadgesMap = {} }: any) {
@@ -53,8 +55,8 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const [showReportModal, setShowReportModal] = useState(false);
   const [reportReason, setReportReason] = useState("");
   const [isSubmittingReport, setIsSubmittingReport] = useState(false);
+  const [showComment, setShowComment] = useState(false);
   
-  const [showBigHeart, setShowBigHeart] = useState(false);
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const isEphemeral = !!post.expiresAt;
@@ -117,7 +119,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     setLocalLiked(true);
     setLocalLikesCount((prev: number) => prev + 1);
     setIsLikingAnimation(true);
-    setTimeout(() => setIsLikingAnimation(false), 1000);
+    setTimeout(() => setIsLikingAnimation(false), 500);
     
     const formData = new FormData();
     formData.append('id', post.id);
@@ -153,24 +155,10 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     document.cookie = `saved_posts=${savedList.join(',')}; path=/; max-age=${60 * 60 * 24 * 365}`;
   };
 
-  const handleDoubleTap = (e: React.MouseEvent) => {
+  const handleTap = (e: React.MouseEvent) => {
     const target = e.target as HTMLElement;
     if (target.closest('button') || target.closest('a') || target.closest('.audio-player')) return;
-
-    if (clickTimeout.current) {
-      clearTimeout(clickTimeout.current);
-      clickTimeout.current = null;
-      
-      playPopSound();
-      setShowBigHeart(true); 
-      setTimeout(() => setShowBigHeart(false), 900); 
-      triggerLike();
-    } else {
-      clickTimeout.current = setTimeout(() => {
-        router.push(`/post/${post.id}`);
-        clickTimeout.current = null;
-      }, 250);
-    }
+    router.push(`/post/${post.id}`);
   };
 
   const submitReportAction = async () => {
@@ -189,131 +177,142 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const authorData = getAnonymousData(post.authorUuid || post.id, customNickname);
   const tagText = isConfession ? 'İtiraf' : isBosYap ? 'Boş Yap' : 'Overheard';
-  const subText = [tagText, post.location, post.time].filter(Boolean).join(' • ');
+  const commentCount = post._count?.comments || post.comments?.length || 0;
 
   return (
     <>
-      <div 
+      <article 
         ref={cardRef} 
-        className={`w-full bg-[#121212]/80 border border-white/5 rounded-2xl sm:rounded-3xl mb-5 overflow-hidden transition-all duration-300 ease-out will-change-[opacity,transform] shadow-[0_4px_20px_rgba(0,0,0,0.3)] ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+        onClick={handleTap}
+        className={`w-full bg-transparent border-b border-white/10 px-4 py-3 sm:py-4 transition-all duration-200 cursor-pointer hover:bg-white/[0.02] flex gap-3 ${
+          isVisible ? 'opacity-100' : 'opacity-0 translate-y-4'
         }`}
       >
-        {/* 1. HEADER */}
-        <div className="flex items-center justify-between px-4 py-3">
-          <Link 
-            href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`}
-            onClick={(e) => { e.stopPropagation(); playClickSound(); }}
-            className="flex items-center gap-3 group"
-          >
-            <div className={`w-10 h-10 rounded-full p-[2px] ${isEphemeral ? 'bg-gradient-to-tr from-yellow-400 via-orange-500 to-pink-500' : 'bg-white/10'}`}>
-              <div className="w-full h-full rounded-full bg-[#121212] border border-black flex items-center justify-center overflow-hidden">
-                <span className="text-[15px] font-black opacity-60">{authorData.name.charAt(0)}</span>
-              </div>
+        {/* SOL: AVATAR */}
+        <Link 
+          href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`}
+          onClick={(e) => { e.stopPropagation(); playClickSound(); }}
+          className="shrink-0"
+        >
+          <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full p-[1.5px] ${isEphemeral ? 'bg-gradient-to-tr from-yellow-400 via-orange-500 to-pink-500' : 'bg-transparent'}`}>
+            <div className="w-full h-full rounded-full bg-[#1A1A1A] flex items-center justify-center overflow-hidden">
+              <span className="text-[16px] font-black opacity-70 text-white">{authorData.name.charAt(0)}</span>
             </div>
-            <div className="flex flex-col">
-              <div className="flex items-center gap-1.5">
-                <span className="font-semibold text-white text-[14px] tracking-tight group-hover:text-gray-300 transition-colors">
-                  {authorData.name}
+          </div>
+        </Link>
+
+        {/* SAĞ: İÇERİK BÖLÜMÜ */}
+        <div className="flex-1 min-w-0">
+          
+          {/* HEADER (İsim, Nickname, Süre, Tag) */}
+          <div className="flex items-start justify-between">
+            <div className="flex flex-wrap items-center gap-x-1.5 text-[14px] leading-tight mb-0.5">
+              <Link 
+                href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`}
+                onClick={(e) => e.stopPropagation()}
+                className="font-bold text-white hover:underline truncate max-w-[120px] sm:max-w-[200px]"
+              >
+                {authorData.name}
+              </Link>
+              
+              {userBadge && (
+                <span className="bg-amber-500/10 text-amber-500 text-[10px] font-bold px-1.5 rounded-sm uppercase tracking-wide">
+                  {userBadge}
                 </span>
-                {userBadge && (
-                  <span className="bg-amber-500/20 text-amber-500 text-[10px] font-bold px-1.5 py-0.5 rounded uppercase">
-                    {userBadge}
-                  </span>
-                )}
-              </div>
-              <span className="text-[12px] text-gray-400 tracking-wide mt-0.5">
-                {subText}
+              )}
+              
+              <span className="text-gray-500 text-[14px] hidden sm:inline">@{authorData.username}</span>
+              
+              <span className="text-gray-600">·</span>
+              <span className="text-gray-500 text-[13px] hover:underline">{getRelativeTime(post.createdAt)}</span>
+              
+              <span className="text-gray-600">·</span>
+              <span className={`text-[12px] font-medium ${isConfession ? 'text-purple-400' : isBosYap ? 'text-emerald-400' : 'text-[#4DA3FF]'}`}>
+                {tagText}
               </span>
             </div>
-          </Link>
-          
-          <button onClick={() => setShowReportModal(true)} className="p-2 text-white hover:opacity-50 transition-opacity">
-            <MoreHorizontal size={20} />
-          </button>
-        </div>
-
-        {/* 2. ANA METİN */}
-        <div 
-          onClick={handleDoubleTap}
-          className="px-4 py-2 relative select-none cursor-pointer"
-        >
-          <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-300 ease-out ${
-            showBigHeart ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.3]'
-          }`}>
-            <Heart size={80} className="text-white drop-shadow-2xl fill-white" />
+            
+            <button onClick={(e) => { e.stopPropagation(); setShowReportModal(true); }} className="text-gray-500 hover:text-[#1d9bf0] transition-colors p-1 -mr-2 -mt-1 rounded-full hover:bg-[#1d9bf0]/10">
+              <MoreHorizontal size={18} />
+            </button>
           </div>
 
-          {post.content && (
-            <p className={`text-white text-[15px] leading-relaxed break-words ${!isExpanded && isLongText ? 'line-clamp-6' : ''}`}>
-              {post.content}
-            </p>
-          )}
+          {/* İÇERİK METNİ */}
+          <div className="mt-1">
+            {post.content && (
+              <p className={`text-white text-[15px] sm:text-[16px] leading-snug sm:leading-relaxed break-words whitespace-pre-wrap ${!isExpanded && isLongText ? 'line-clamp-6' : ''}`}>
+                {post.content}
+              </p>
+            )}
 
-          {!isExpanded && isLongText && (
-            <button onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }} className="text-gray-400 text-[14px] mt-1 hover:text-white transition-colors">
-              devamını gör
+            {!isExpanded && isLongText && (
+              <button onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }} className="text-[#1d9bf0] text-[14px] mt-1 hover:underline transition-colors">
+                daha fazla göster
+              </button>
+            )}
+
+            {post.audioUrl && (
+              <div onClick={(e) => e.stopPropagation()} className="mt-3 w-full max-w-[250px] audio-player">
+                <AnonymousPlayer audioUrl={post.audioUrl} />
+              </div>
+            )}
+          </div>
+
+          {/* AKSİYON BUTONLARI (Twitter Stili) */}
+          <div className="flex justify-between items-center mt-3 max-w-[400px] w-full text-gray-500">
+            
+            <button 
+              onClick={(e) => { e.stopPropagation(); playClickSound(); router.push(`/post/${post.id}`); }}
+              className="flex items-center gap-1.5 group hover:text-[#1d9bf0] transition-colors"
+            >
+              <div className="p-1.5 sm:p-2 rounded-full group-hover:bg-[#1d9bf0]/10 transition-colors">
+                <MessageCircle size={17} className="transform -scale-x-100" />
+              </div>
+              <span className="text-[13px]">{commentCount > 0 ? commentCount : ''}</span>
             </button>
-          )}
-
-          {post.audioUrl && (
-            <div onClick={(e) => e.stopPropagation()} className="mt-4 w-full max-w-[250px] audio-player">
-              <AnonymousPlayer audioUrl={post.audioUrl} />
-            </div>
-          )}
-        </div>
-
-        {/* 3. İKONLAR */}
-        <div className="px-4 pt-3 pb-2 flex items-center justify-between">
-          <div className="flex items-center gap-3.5">
-            <form action={incrementLike} onSubmit={handleLikeClick}>
+            
+            <form action={incrementLike} onSubmit={handleLikeClick} className="flex items-center">
               <input type="hidden" name="id" value={post.id} />
-              <button type="submit" disabled={localLiked} className="group relative transition-transform active:scale-75">
-                <Heart size={22} className={`transition-all duration-300 ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-red-500 text-red-500' : 'text-white hover:text-gray-400'}`} />
+              <button 
+                type="submit" 
+                disabled={localLiked} 
+                className={`flex items-center gap-1.5 group transition-colors ${localLiked ? 'text-pink-500' : 'hover:text-pink-500'}`}
+              >
+                <div className="p-1.5 sm:p-2 rounded-full group-hover:bg-pink-500/10 transition-colors">
+                  <Heart size={17} className={`transition-transform ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-pink-500' : ''}`} />
+                </div>
+                <span className="text-[13px]">{localLikesCount > 0 ? localLikesCount : ''}</span>
               </button>
             </form>
             
-            <button onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }} className="transition-transform active:scale-75">
-              <MessageCircle size={22} className="text-white hover:text-gray-400 transform -scale-x-100" />
+            <button 
+              onClick={handleShare} 
+              className="flex items-center gap-1.5 group hover:text-emerald-500 transition-colors"
+            >
+              <div className="p-1.5 sm:p-2 rounded-full group-hover:bg-emerald-500/10 transition-colors">
+                <Repeat2 size={18} />
+              </div>
+            </button>
+
+            <div className="flex items-center gap-1.5 group hover:text-[#1d9bf0] transition-colors cursor-default">
+              <div className="p-1.5 sm:p-2 rounded-full group-hover:bg-[#1d9bf0]/10 transition-colors">
+                <Eye size={17} />
+              </div>
+              <span className="text-[13px]">{post.views || 0}</span>
+            </div>
+
+            <button 
+              onClick={handleSaveToggle} 
+              className={`flex items-center gap-1.5 group transition-colors ${isSaved ? 'text-[#1d9bf0]' : 'hover:text-[#1d9bf0]'}`}
+            >
+              <div className="p-1.5 sm:p-2 rounded-full group-hover:bg-[#1d9bf0]/10 transition-colors">
+                <Bookmark size={17} className={isSaved ? 'fill-[#1d9bf0]' : ''} />
+              </div>
             </button>
             
-            <button onClick={handleShare} className="transition-transform active:scale-75">
-              <Send size={22} className="text-white hover:text-gray-400 transform -rotate-12 -mt-1" />
-            </button>
-          </div>
-          
-          <button onClick={handleSaveToggle} className="transition-transform active:scale-75">
-            <Bookmark size={22} className={isSaved ? 'fill-white text-white drop-shadow-md' : 'text-white hover:text-gray-400'} />
-          </button>
-        </div>
-
-        {/* 4. BEĞENİ, GÖRÜNTÜLENME VE SAAT */}
-        <div className="px-4 pb-4">
-          <div className="flex items-center justify-between mb-1.5">
-            <div className="font-semibold text-white text-[14px] cursor-default">
-              {localLikesCount} beğenme
-            </div>
-            {/* 🔥 GÖRÜNTÜLENME SAYISI BURAYA EKLENDİ */}
-            <div className="flex items-center gap-1 text-gray-400 text-[13px] font-medium">
-              <Eye size={15} />
-              <span>{post.views || 0}</span>
-            </div>
-          </div>
-          
-          {(post._count?.comments > 0 || post.comments?.length > 0) && (
-            <button 
-              onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }}
-              className="text-gray-400 text-[14px] font-medium hover:text-white transition-colors block mb-1"
-            >
-              {post._count?.comments || post.comments?.length} yorumun tümünü gör
-            </button>
-          )}
-
-          <div className="text-gray-500 text-[10px] uppercase tracking-widest font-medium">
-            {getRelativeTime(post.createdAt)}
           </div>
         </div>
-      </div>
+      </article>
 
       {/* ŞİKAYET MODALI */}
       {showReportModal && (
