@@ -10,7 +10,7 @@ datasource db {
 model Post {
   id         String    @id @default(cuid())
   type       String
-  content    String?   // 🔥 DEĞİŞTİRİLDİ: Sadece ses atılabilmesi için opsiyonel (?) yapıldı
+  content    String?   // 🔥 Sadece ses atılabilmesi için opsiyonel (?) yapıldı
   status     String    @default("PENDING")
   likes      Int       @default(0)
   views      Int       @default(0)
@@ -18,9 +18,9 @@ model Post {
   people     String?
   gender     String?
   time       String?
-  authorUuid String?   
+  authorUuid String?
   
-  audioUrl   String?   // 🔥 YENİ EKLENDİ: Ses dosyasının linkini tutacak
+  audioUrl   String?   // 🔥 Ses dosyasının linkini tutacak
 
   // 🔥 24 saat sonra kaybolacak süreli postlar için bitiş zamanı
   expiresAt  DateTime? 
@@ -33,16 +33,16 @@ model Post {
 }
 
 model Comment {
-  id           String        @id @default(cuid())
+  id           String          @id @default(cuid())
   content      String
-  createdAt    DateTime      @default(now())
+  createdAt    DateTime        @default(now())
   postId       String
   authorId     String?   
-  likes        Int           @default(0)  
+  likes        Int             @default(0)  
   
   parentId     String?
-  parent       Comment?      @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
-  replies      Comment[]     @relation("CommentReplies")
+  parent       Comment?        @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies      Comment[]       @relation("CommentReplies")
 
   post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
   reactions    CommentReaction[]
@@ -108,13 +108,6 @@ model CustomNickname {
   userUuid  String   @unique
   nickname  String
   createdAt DateTime @default(now())
-  model UserAvatar {
-  id        String   @id @default(cuid())
-  userUuid  String   @unique
-  avatarUrl String   // Emojiyi veya Base64 fotoğraf verisini tutacak
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-}
 }
 
 model UserBadge {
@@ -132,7 +125,6 @@ model CommentReaction {
   userUuid  String   
   createdAt DateTime @default(now())
 
-  // Bir kişi aynı yoruma aynı emojiyi sadece 1 kez atabilsin diye:
   @@unique([commentId, userUuid, emoji])
 }
 
@@ -143,7 +135,6 @@ model ChatMessage {
   createdAt  DateTime @default(now())
 }
 
-// Kullanıcının puan ve seviye durumunu tutar
 model UserStats {
   userUuid  String   @id
   points    Int      @default(0)
@@ -151,12 +142,20 @@ model UserStats {
   updatedAt DateTime @updatedAt
 }
 
-// Kazanılan görev/başarım rozetlerini tutar
 model UnlockedBadge {
   id         String   @id @default(cuid())
   userUuid   String
   badgeName  String
   unlockedAt DateTime @default(now())
 
-  @@unique([userUuid, badgeName]) // Aynı rozeti iki kere almasını engeller
+  @@unique([userUuid, badgeName]) 
+}
+
+// 🔥 YENİ EKLENEN PROFİL RESMİ MODELİ (EN DIŞTA VE NİZAMİ)
+model UserAvatar {
+  id        String   @id @default(cuid())
+  userUuid  String   @unique
+  avatarUrl String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
