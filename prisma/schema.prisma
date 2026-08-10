@@ -108,6 +108,13 @@ model CustomNickname {
   userUuid  String   @unique
   nickname  String
   createdAt DateTime @default(now())
+  model UserAvatar {
+  id        String   @id @default(cuid())
+  userUuid  String   @unique
+  avatarUrl String   // Emojiyi veya Base64 fotoğraf verisini tutacak
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
 }
 
 model UserBadge {

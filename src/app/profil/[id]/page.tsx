@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 import { Heart, MessageCircle, ArrowRight, ArrowLeft, Flame, MoreHorizontal, User } from 'lucide-react';
 import Link from 'next/link';
 import ProfileNickEdit from '@/components/ProfileNickEdit'; 
+import EditableAvatar from '@/components/EditableAvatar';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,7 +54,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   
   const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
 
-  const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb, userStats] = await Promise.all([
+  // 🔥 Veritabanından userAvatarDb de çekiliyor
+  const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb, userStats, userAvatarDb] = await Promise.all([
     prisma.post.count({ where: { authorUuid: targetUuid, status: 'APPROVED' } }),
     prisma.comment.count({ where: { authorId: targetUuid } }),
     prisma.post.findMany({
@@ -79,7 +81,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
     (prisma as any).userBadge.findUnique({ where: { userUuid: targetUuid } }).catch(() => null),
     (prisma as any).customNickname.findMany().catch(() => []),
     (prisma as any).userBadge.findMany().catch(() => []),
-    (prisma as any).userStats.findUnique({ where: { userUuid: targetUuid } }).catch(() => null)
+    (prisma as any).userStats.findUnique({ where: { userUuid: targetUuid } }).catch(() => null),
+    (prisma as any).userAvatar.findUnique({ where: { userUuid: targetUuid } }).catch(() => null)
   ]);
 
   const customNicknamesMap = (allNicknamesDb || []).reduce((acc: any, curr: any) => {
@@ -93,8 +96,9 @@ export default async function ProfilePage({ params, searchParams }: { params: an
 
   const authorData = getAnonymousData(targetUuid, customNicknamesMap[targetUuid]);
   const displayNickname = authorData.name;
+  const currentAvatar = userAvatarDb?.avatarUrl;
   
-  const totalLikes = userPosts.reduce((acc, post) => acc + post.likes, 0);
+  const totalLikes = userPosts.reduce((acc: any, post: any) => acc + post.likes, 0);
   const userBadge = userBadgeDb?.badgeName;
   
   const likedPostsCookie = cookieStore.get('liked_posts')?.value || '';
@@ -147,12 +151,13 @@ export default async function ProfilePage({ params, searchParams }: { params: an
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center gap-6 sm:gap-8">
             
-            {/* Profil Avatarı */}
-            <div className="w-[84px] h-[84px] sm:w-[96px] sm:h-[96px] rounded-full p-[2px] bg-gradient-to-tr from-[#333] to-[#555] shrink-0">
-              <div className="w-full h-full rounded-full bg-[#121212] border-2 border-black flex items-center justify-center overflow-hidden relative">
-                <span className="text-[32px] font-black opacity-50">{displayNickname.charAt(0)}</span>
-              </div>
-            </div>
+            {/* 🔥 YENİ DİNAMİK PROFİL AVATARI 🔥 */}
+            <EditableAvatar 
+              userUuid={targetUuid}
+              currentAvatar={currentAvatar}
+              displayNickname={displayNickname}
+              isOwnProfile={isOwnProfile}
+            />
 
             {/* İstatistikler */}
             <div className="flex-1 flex justify-between sm:justify-around text-center">
@@ -195,14 +200,17 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                 <Flame size={12} className="animate-pulse" /> Seviye {level}
               </span>
             </div>
-
-            <div className="mt-4">
-              <ProfileNickEdit 
-                targetUuid={targetUuid} 
-                currentNick={displayNickname} 
-                isServerOwner={isOwnProfile} 
-              />
-            </div>
+            
+            {/* 🔥 PROFİLİ DÜZENLE (NICK) BUTONU 🔥 */}
+            {isOwnProfile && (
+              <div className="mt-5 w-full">
+                <ProfileNickEdit 
+                  targetUuid={targetUuid} 
+                  currentNick={displayNickname} 
+                  isServerOwner={isOwnProfile} 
+                />
+              </div>
+            )}
           </div>
         </div>
 

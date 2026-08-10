@@ -60,3 +60,39 @@ export async function updateCustomNickname(formData: FormData) {
     return { error: 'Veritabanı güncellenirken bir hata oluştu.' };
   }
 }
+
+export async function updateProfileAvatar(formData: FormData) {
+  try {
+    const avatarUrl = formData.get("avatarUrl") as string;
+    let userUuid = (formData.get('userUuid') as string)?.trim();
+
+    const cookieStore = await cookies();
+
+    // UUID yoksa çerezden al
+    if (!userUuid) {
+      userUuid = cookieStore.get('user_uuid')?.value || cookieStore.get('tnku_author_id')?.value || '';
+    }
+
+    if (!userUuid || !avatarUrl) {
+      return { error: "Eksik bilgi gönderildi." };
+    }
+
+    // 🔥 UPSERT: Veritabanında varsa avatarı güncelle, yoksa yeni oluştur
+    await (prisma as any).userAvatar.upsert({
+      where: { userUuid },
+      update: { avatarUrl },
+      create: { userUuid, avatarUrl },
+    });
+
+    revalidatePath('/');
+    revalidatePath(`/profil/${userUuid}`);
+    revalidatePath(`/profil/ben`);
+    revalidatePath('/liderlik');
+    revalidatePath('/sohbet');
+
+    return { success: true };
+  } catch (error) {
+    console.error("updateProfileAvatar hatası:", error);
+    return { error: "Profil resmi güncellenirken bir hata oluştu." };
+  }
+}
