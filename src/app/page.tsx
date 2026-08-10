@@ -131,15 +131,15 @@ export default async function Home({ searchParams }: any) {
   const filters = ['Tümü', 'İtiraf', 'Boş Yap', 'Overheard', '🔥 Trend'];
 
   return (
-    <main className="min-h-screen bg-black text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30">
+    <main className="min-h-screen text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30">
       
-      {/* 🔥 İŞTE YENİ ARKA PLAN! GECE MAVİSİ/MOR DEGRADE 🔥 */}
-      <div className="fixed inset-0 z-[-1] bg-black pointer-events-none">
-        <div className="absolute top-0 left-0 right-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-[#2a1744] via-[#0a0a0a] to-transparent opacity-80"></div>
+      {/* İŞTE GERÇEK VE GÖRÜNÜR ARKA PLAN BURADA */}
+      <div className="fixed inset-0 -z-10 bg-[#050505]">
+        <div className="absolute top-0 left-0 right-0 h-[700px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/30 via-[#050505] to-[#050505] pointer-events-none"></div>
       </div>
 
-      {/* 1. YAPIŞKAN ÜST BÖLÜM (HEADER + SEKMELER) - ŞİMDİ DAHA ŞEFFAF VE CAM GİBİ */}
-      <div className="sticky top-0 z-50 bg-black/30 backdrop-blur-3xl border-b border-white/[0.05] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
+      {/* 1. YAPIŞKAN ÜST BÖLÜM (HEADER + SEKMELER) */}
+      <div className="sticky top-0 z-50 bg-black/20 backdrop-blur-3xl border-b border-white/[0.05] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         
         {/* LOGO VE İKONLAR */}
         <header className="px-4 py-3 flex items-center justify-between gap-2">
@@ -193,7 +193,7 @@ export default async function Home({ searchParams }: any) {
         <div className={`grid gap-3 mb-5 ${activeAnnouncement ? 'grid-cols-2' : 'grid-cols-1'}`}>
           
           {/* LOBİ WIDGET'I */}
-          <Link href="/sohbet" className="bg-white/[0.03] hover:bg-white/[0.06] border border-white/[0.05] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] transition-all duration-300 group relative overflow-hidden backdrop-blur-md">
+          <Link href="/sohbet" className="bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.05] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] transition-all duration-300 group relative overflow-hidden backdrop-blur-md">
             <div className="absolute top-0 right-0 w-24 h-24 bg-[#4DA3FF]/15 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none"></div>
             <div className="flex items-start justify-between relative z-10">
               <div className="bg-[#4DA3FF]/15 p-2 rounded-xl text-[#4DA3FF] group-hover:scale-110 transition-transform shadow-inner">
@@ -212,7 +212,7 @@ export default async function Home({ searchParams }: any) {
 
           {/* DUYURU WIDGET'I */}
           {activeAnnouncement && (
-            <div className="bg-[#4DA3FF]/[0.03] border border-[#4DA3FF]/20 rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] relative overflow-hidden backdrop-blur-md">
+            <div className="bg-[#4DA3FF]/[0.02] border border-[#4DA3FF]/20 rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] relative overflow-hidden backdrop-blur-md">
               <div className="absolute inset-0 bg-gradient-to-br from-[#4DA3FF]/5 to-transparent pointer-events-none"></div>
               <div className="flex items-start justify-between relative z-10">
                 <div className="bg-[#4DA3FF]/20 p-2 rounded-xl text-[#4DA3FF] shadow-inner">
