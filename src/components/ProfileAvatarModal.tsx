@@ -64,25 +64,29 @@ export default function ProfileAvatarModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 p-6 rounded-[28px] shadow-2xl animate-in zoom-in-95 duration-200"
+        className="relative w-full max-w-sm max-h-[85vh] overflow-y-auto bg-[#0A0A0A] border border-white/10 p-6 sm:rounded-[28px] rounded-t-[32px] rounded-b-none shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
+        {/* Sürükleme Çubuğu (Sadece Mobil) */}
+        <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-5 sm:hidden" />
+
         <button 
           onClick={onClose}
-          className="absolute top-4 right-4 p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+          className="absolute top-4 sm:top-5 right-4 sm:right-5 p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors"
         >
           <X size={20} />
         </button>
 
         <h2 className="text-xl font-black text-white mb-1">Profil Resmi Seç</h2>
-        <p className="text-gray-400 text-xs mb-6">
+        <p className="text-gray-400 text-xs mb-6 pr-8">
           Karakterini belirle veya galerinden yükle.
         </p>
 
+        {/* ÖN İZLEME */}
         <div className="flex justify-center mb-6">
           <div className="relative w-24 h-24 rounded-full border-2 border-[#4DA3FF] p-1 bg-black/40 flex items-center justify-center overflow-hidden shadow-[0_0_25px_rgba(77,163,255,0.2)]">
             {selectedAvatar?.startsWith("data:image") ? (
@@ -95,6 +99,7 @@ export default function ProfileAvatarModal({
           </div>
         </div>
 
+        {/* HAZIR AVATARLAR */}
         <div className="grid grid-cols-6 gap-2 mb-6">
           {PRESET_AVATARS.map((emoji) => (
             <button
@@ -102,7 +107,7 @@ export default function ProfileAvatarModal({
               onClick={() => setSelectedAvatar(emoji)}
               className={`h-11 rounded-xl text-xl flex items-center justify-center transition-all ${
                 selectedAvatar === emoji 
-                  ? "bg-[#4DA3FF]/20 border-2 border-[#4DA3FF] scale-105" 
+                  ? "bg-[#4DA3FF]/20 border-2 border-[#4DA3FF] scale-105 shadow-[0_0_15px_rgba(77,163,255,0.3)]" 
                   : "bg-white/[0.04] hover:bg-white/10 border border-white/5"
               }`}
             >
@@ -111,8 +116,9 @@ export default function ProfileAvatarModal({
           ))}
         </div>
 
-        <div className="space-y-3">
-          <label className="w-full py-3 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-colors">
+        {/* GALERİDEN YÜKLE & KAYDET */}
+        <div className="space-y-3 mb-4 sm:mb-0">
+          <label className="w-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-colors active:scale-95">
             <Upload size={16} />
             <span>Galeriden Fotoğraf Seç</span>
             <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
@@ -123,7 +129,7 @@ export default function ProfileAvatarModal({
             disabled={loading || !selectedAvatar}
             className="w-full py-3.5 bg-[#4DA3FF] hover:bg-blue-400 text-black font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
           >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : <><Check size={18} /> Profil Resmini Güncelle</>}
+            {loading ? <Loader2 size={18} className="animate-spin" /> : <><Check size={18} /> Resmini Güncelle</>}
           </button>
         </div>
       </div>
