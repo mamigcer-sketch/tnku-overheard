@@ -75,7 +75,8 @@ export default async function Home({ searchParams }: any) {
 
   if (searchQuery) whereQuery.content = { contains: searchQuery, mode: 'insensitive' };
 
-  const [posts, totalPostsCount, activeAnnouncement, activeCountdown, customNicknamesDb, userBadgesDb] = await Promise.all([
+  // 🔥 YENİ: userAvatarsDb eklendi
+  const [posts, totalPostsCount, activeAnnouncement, activeCountdown, customNicknamesDb, userBadgesDb, userAvatarsDb] = await Promise.all([
     prisma.post.findMany({
       where: whereQuery,
       orderBy: orderQuery,
@@ -102,7 +103,8 @@ export default async function Home({ searchParams }: any) {
       orderBy: { createdAt: 'desc' }
     }),
     (prisma as any).customNickname.findMany().catch(() => []),
-    (prisma as any).userBadge.findMany().catch(() => [])
+    (prisma as any).userBadge.findMany().catch(() => []),
+    (prisma as any).userAvatar.findMany().catch(() => [])
   ]);
 
   const customNicknamesMap = (customNicknamesDb || []).reduce((acc: any, curr: any) => {
@@ -112,6 +114,12 @@ export default async function Home({ searchParams }: any) {
 
   const userBadgesMap = (userBadgesDb || []).reduce((acc: any, curr: any) => {
     acc[curr.userUuid] = curr.badgeName;
+    return acc;
+  }, {});
+
+  // 🔥 YENİ: Tüm avatarları haritalandırdık
+  const userAvatarsMap = (userAvatarsDb || []).reduce((acc: any, curr: any) => {
+    acc[curr.userUuid] = curr.avatarUrl;
     return acc;
   }, {});
 
@@ -133,15 +141,12 @@ export default async function Home({ searchParams }: any) {
   return (
     <main className="min-h-screen text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30">
       
-      {/* İŞTE GERÇEK VE GÖRÜNÜR ARKA PLAN BURADA */}
       <div className="fixed inset-0 -z-10 bg-[#050505]">
         <div className="absolute top-0 left-0 right-0 h-[700px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-purple-900/30 via-[#050505] to-[#050505] pointer-events-none"></div>
       </div>
 
-      {/* 1. YAPIŞKAN ÜST BÖLÜM (HEADER + SEKMELER) */}
       <div className="sticky top-0 z-50 bg-black/20 backdrop-blur-3xl border-b border-white/[0.05] shadow-[0_4px_30px_rgba(0,0,0,0.5)]">
         
-        {/* LOGO VE İKONLAR */}
         <header className="px-4 py-3 flex items-center justify-between gap-2">
           <Link href="https://instagram.com/tnkuoverheard" target="_blank" className="flex items-center gap-2 hover:opacity-80 transition-opacity shrink-0">
             <img src="/logo.jpg" alt="Logo" className="w-8 h-8 object-cover rounded-xl shadow-lg" />
@@ -164,7 +169,6 @@ export default async function Home({ searchParams }: any) {
           </div>
         </header>
 
-        {/* YATAY KAYDIRILABİLİR SEKMELER */}
         <div className="flex overflow-x-auto no-scrollbar px-2">
           {filters.map((filter) => {
             const isActive = currentFilter === filter;
@@ -189,10 +193,7 @@ export default async function Home({ searchParams }: any) {
 
       <div className="max-w-2xl mx-auto px-4 pt-5">
         
-        {/* 2. APPLE/IOS TARZI WIDGET GRID */}
         <div className={`grid gap-3 mb-5 ${activeAnnouncement ? 'grid-cols-2' : 'grid-cols-1'}`}>
-          
-          {/* LOBİ WIDGET'I */}
           <Link href="/sohbet" className="bg-white/[0.02] hover:bg-white/[0.05] border border-white/[0.05] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] transition-all duration-300 group relative overflow-hidden backdrop-blur-md">
             <div className="absolute top-0 right-0 w-24 h-24 bg-[#4DA3FF]/15 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none"></div>
             <div className="flex items-start justify-between relative z-10">
@@ -210,7 +211,6 @@ export default async function Home({ searchParams }: any) {
             </div>
           </Link>
 
-          {/* DUYURU WIDGET'I */}
           {activeAnnouncement && (
             <div className="bg-[#4DA3FF]/[0.02] border border-[#4DA3FF]/20 rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] relative overflow-hidden backdrop-blur-md">
               <div className="absolute inset-0 bg-gradient-to-br from-[#4DA3FF]/5 to-transparent pointer-events-none"></div>
@@ -225,7 +225,6 @@ export default async function Home({ searchParams }: any) {
               </div>
             </div>
           )}
-
         </div>
 
         {activeCountdown && (
@@ -234,12 +233,10 @@ export default async function Home({ searchParams }: any) {
           </div>
         )}
         
-        {/* ARAMA ÇUBUĞU */}
         <div className="mb-6 relative z-10">
           <SearchBar />
         </div>
 
-        {/* 3. GÖNDERİLER */}
         <div className="space-y-0 relative z-10">
           {posts.length === 0 ? (
             <div className="text-center py-20 bg-white/[0.02] rounded-[24px] border border-white/[0.05] flex flex-col items-center justify-center backdrop-blur-md">
@@ -260,8 +257,8 @@ export default async function Home({ searchParams }: any) {
                   userUuid={userUuid}
                   customNickname={customNicknamesMap[post.authorUuid]} 
                   userBadge={userBadgesMap[post.authorUuid]}
-                  customNicknamesMap={customNicknamesMap}
-                  userBadgesMap={userBadgesMap}
+                  // 🔥 YENİ: Avatarı da gönderiyoruz
+                  userAvatar={userAvatarsMap[post.authorUuid]}
                 />
               ))}
               

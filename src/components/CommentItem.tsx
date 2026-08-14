@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Heart, Reply, Flag, ShieldAlert, User } from "lucide-react";
-import Link from "next/link"; // 🔥 PROFİL LİNKLERİ İÇİN EKLENDİ
+import { Heart, Reply, Flag, ShieldAlert } from "lucide-react";
+import Link from "next/link"; 
 import { toggleCommentLike, submitReport } from "@/app/post/actions";
 import { playPopSound, playClickSound } from "@/utils/sounds";
 
@@ -24,14 +24,13 @@ const getRelativeTime = (dateString: string | Date) => {
 
 const formatCommentText = (text: string) => {
   if (!text) return null;
-  
   const mentionRegex = /(@(?:[A-ZÇĞİÖŞÜ][a-zçğıöşü]+\s[A-ZÇĞİÖŞÜ][a-zçğıöşü]+|[a-zA-Z0-9_çğıöşüÇĞİÖŞÜ]+))/g;
   const parts = text.split(mentionRegex);
   
   return parts.map((part, i) => {
     if (part.startsWith('@')) {
       return (
-        <span key={i} className="text-[#4DA3FF] font-bold drop-shadow-[0_0_8px_rgba(77,163,255,0.6)]">
+        <span key={i} className="text-[#4DA3FF] font-bold drop-shadow-[0_0_8px_rgba(77,163,255,0.4)]">
           {part}
         </span>
       );
@@ -49,7 +48,8 @@ export default function CommentItem({
   isReply = false, 
   hasCustomNick = false, 
   userBadge,
-  authorUuid // 🔥 PROFİL ID'Sİ YAKALANDI
+  authorUuid,
+  userAvatar // 🔥 AVATAR BURAYA EKLENDİ
 }: any) {
   const [localLiked, setLocalLiked] = useState(isInitiallyLiked);
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
@@ -71,7 +71,7 @@ export default function CommentItem({
 
     if (nextLikedState) {
       setIsLikingAnimation(true);
-      setTimeout(() => setIsLikingAnimation(false), 1000);
+      setTimeout(() => setIsLikingAnimation(false), 500);
     }
 
     try {
@@ -101,96 +101,127 @@ export default function CommentItem({
     }
   };
 
-  // Eğer authorUuid gelmezse fallback olarak id kullanılsın
   const finalProfileId = authorUuid || comment.authorId || comment.id;
 
   return (
     <>
-      <div className={`bg-[#121212]/75 backdrop-blur-xl border border-white/5 p-4 sm:p-5 rounded-[22px] shadow-md transition-all duration-300 hover:border-white/10 hover:bg-[#151515] ${
-        isReply ? 'ml-6 sm:ml-10 border-l-2 border-l-[#4DA3FF]/40 bg-[#121212]/50' : ''
-      }`}>
-        <div className="flex justify-between items-center mb-3">
-          <div className="flex flex-wrap items-center gap-2">
-            {userBadge && (
-              <span className="bg-gradient-to-r from-yellow-500/10 to-amber-500/10 text-yellow-400 border border-yellow-500/30 px-2 py-0.5 rounded-md shadow-sm flex items-center text-[9px] font-black uppercase tracking-wider">
-                {userBadge}
-              </span>
-            )}
-            
-            {/* 🔥 YORUM YAZARI (LİNK EKLENDİ VE TIKLANABİLİR OLDU) */}
-            <Link 
-              href={`/profil/${encodeURIComponent(finalProfileId)}`}
-              onClick={(e) => playClickSound()}
-              className={`group flex items-center gap-1.5 bg-white/[0.03] pr-3 pl-1.5 py-1 rounded-lg border shadow-sm transition-all hover:bg-white/[0.08] hover:scale-105 active:scale-95 ${hasCustomNick ? 'border-yellow-500/30 shadow-[0_0_10px_rgba(234,179,8,0.1)]' : 'border-white/[0.05]'}`}
-            >
-               <div className="w-5 h-5 flex items-center justify-center rounded-md bg-white/10 text-gray-400 border border-white/15 shadow-inner">
-                  <User className="w-3.5 h-3.5 text-gray-400" />
-               </div>
-               <span className={`font-semibold text-[11px] tracking-wide transition-colors ${hasCustomNick ? 'text-yellow-100 group-hover:text-yellow-50' : 'text-gray-200 group-hover:text-white'}`}>
-                 @{commentAuthor.name}
-               </span>
-            </Link>
-
-            {isPostAuthor && (
-              <span className="bg-[#4DA3FF]/10 text-[#4DA3FF] text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-md border border-[#4DA3FF]/20 shadow-sm">
-                Yazar
-              </span>
-            )}
-          </div>
-          <span className="text-[10px] text-gray-500 font-medium shrink-0 ml-2">{getRelativeTime(comment.createdAt)}</span>
-        </div>
-        
-        <p className="text-gray-200 text-[14px] leading-relaxed break-words mb-3 mt-1 font-normal">
-          {formatCommentText(comment.content)}
-        </p>
-        
-        <div className="flex items-center gap-4 pt-3 border-t border-white/5 text-gray-400">
-          <button 
-            onClick={handleLike}
-            className={`flex items-center gap-1.5 transition-all duration-300 rounded-xl px-2 py-1 -ml-2 ${localLiked ? 'text-pink-500' : 'hover:text-pink-400 hover:bg-pink-500/10'}`}
-          >
-            <div className="relative flex items-center justify-center">
-              {isLikingAnimation && <span className="absolute w-6 h-6 bg-pink-500 rounded-full animate-ping opacity-60"></span>}
-              <Heart size={16} className={`relative z-10 transition-all duration-500 ease-out ${isLikingAnimation ? 'fill-pink-500 scale-150 drop-shadow-[0_0_15px_rgba(236,72,153,1)]' : localLiked ? 'fill-pink-500 scale-110 drop-shadow-[0_0_8px_rgba(236,72,153,0.5)]' : 'active:scale-50'}`} />
+      <div className={`group flex gap-3 p-4 transition-all duration-300 ease-out mb-3 
+        ${isReply 
+          ? 'ml-8 sm:ml-12 mt-1 bg-white/[0.01] rounded-r-[24px] rounded-bl-[24px] border-l-2 border-l-[#4DA3FF]/40' 
+          : 'bg-white/[0.02] backdrop-blur-xl rounded-[24px] border border-white/[0.04] hover:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
+        }`}
+      >
+        {/* SOL: AVATAR */}
+        <Link 
+          href={`/profil/${encodeURIComponent(finalProfileId)}`}
+          onClick={() => playClickSound()}
+          className="shrink-0 mt-0.5"
+        >
+          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full p-[1.5px] bg-white/[0.1]`}>
+            <div className="w-full h-full rounded-full bg-[#121212] flex items-center justify-center overflow-hidden">
+              {userAvatar?.startsWith("data:image") ? (
+                <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
+              ) : userAvatar ? (
+                <span className="text-[18px]">{userAvatar}</span>
+              ) : (
+                <span className="text-[15px] font-black opacity-80 text-white">{commentAuthor.name.charAt(0)}</span>
+              )}
             </div>
-            <span className="text-[12px] font-bold">{localLikesCount}</span>
-          </button>
+          </div>
+        </Link>
 
-          {onReply && (
+        {/* SAĞ: İÇERİK BÖLÜMÜ */}
+        <div className="flex-1 min-w-0">
+          
+          {/* HEADER (İsim, Rozet, Süre) */}
+          <div className="flex items-center justify-between mb-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <Link 
+                href={`/profil/${encodeURIComponent(finalProfileId)}`} 
+                onClick={() => playClickSound()} 
+                className="font-bold text-white text-[13px] sm:text-[14px] tracking-tight hover:underline truncate max-w-[150px]"
+              >
+                {commentAuthor.name}
+              </Link>
+
+              {isPostAuthor && (
+                <span className="bg-[#4DA3FF]/10 text-[#4DA3FF] text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-[#4DA3FF]/20">
+                  Yazar
+                </span>
+              )}
+
+              {userBadge && (
+                <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-amber-500/20">
+                  {userBadge}
+                </span>
+              )}
+
+              <span className="text-[11px] text-gray-500 font-medium hidden sm:inline-block ml-1">
+                • {getRelativeTime(comment.createdAt)}
+              </span>
+            </div>
+            
+            {/* Mobil için sağ üstte süre */}
+            <span className="text-[10px] text-gray-500 font-medium sm:hidden shrink-0">
+              {getRelativeTime(comment.createdAt)}
+            </span>
+          </div>
+
+          {/* İÇERİK METNİ */}
+          <p className="text-gray-100 text-[14px] leading-relaxed break-words mt-1 mb-2.5">
+            {formatCommentText(comment.content)}
+          </p>
+
+          {/* AKSİYON BUTONLARI */}
+          <div className="flex items-center gap-4 text-gray-500 mt-1">
             <button 
-              onClick={() => { playClickSound(); onReply(comment.id, commentAuthor.name); }}
-              className="flex items-center gap-1.5 transition-all duration-300 hover:text-[#4DA3FF] hover:bg-[#4DA3FF]/10 rounded-xl px-2 py-1 -ml-2 active:scale-90"
+              onClick={handleLike} 
+              className={`flex items-center gap-1.5 transition-colors ${localLiked ? 'text-pink-500' : 'hover:text-pink-400'}`}
             >
-              <Reply size={16} />
-              <span className="text-[12px] font-bold">Yanıtla</span>
+              <Heart size={15} className={`transition-transform ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-pink-500' : ''}`} />
+              <span className="text-[12px] font-bold">{localLikesCount > 0 ? localLikesCount : ''}</span>
             </button>
-          )}
 
-          <button 
-            onClick={handleReportClick}
-            className={`ml-auto flex items-center gap-1.5 transition-all duration-300 hover:text-red-400 hover:bg-red-500/10 rounded-xl px-2.5 py-1.5 -mr-2 ${reported ? 'text-red-500 bg-red-500/10' : 'text-gray-500'}`}
-          >
-            <Flag size={14} />
-            <span className="text-[11px] font-bold hidden sm:inline">{reported ? 'İletildi' : 'Şikayet Et'}</span>
-          </button>
+            {onReply && (
+              <button 
+                onClick={() => { playClickSound(); onReply(comment.id, commentAuthor.name); }} 
+                className="flex items-center gap-1.5 hover:text-[#4DA3FF] transition-colors"
+              >
+                <Reply size={15} />
+                <span className="text-[12px] font-bold">Yanıtla</span>
+              </button>
+            )}
+
+            <button 
+              onClick={handleReportClick} 
+              className={`ml-auto flex items-center gap-1.5 transition-colors ${reported ? 'text-red-500' : 'hover:text-red-400'}`}
+            >
+              <Flag size={14} className={reported ? 'fill-red-500' : ''} />
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* ŞİKAYET MODALI */}
       {showReportModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); setShowReportModal(false); }}>
-          <div className="bg-[#121212] border border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-[0_0_50px_rgba(0,0,0,0.5)] transform transition-all" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); setShowReportModal(false); }}>
+          <div className="bg-[#1A1A1A] border border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-[0_4px_30px_rgba(0,0,0,0.5)] transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
-              <div className="bg-red-500/10 p-3 rounded-2xl border border-red-500/20"><ShieldAlert className="text-red-500 w-6 h-6" /></div>
+              <div className="bg-red-500/10 p-3 rounded-2xl border border-red-500/20">
+                <ShieldAlert className="text-red-500 w-6 h-6" />
+              </div>
               <div>
                 <h3 className="text-white font-bold text-lg leading-tight">Yorumu Şikayet Et</h3>
-                <p className="text-gray-500 text-[11px] font-bold uppercase tracking-wider">Gizli & Güvenli</p>
+                <p className="text-gray-400 text-[11px] font-bold uppercase tracking-wider">Gizli & Güvenli</p>
               </div>
             </div>
-            <p className="text-gray-300 text-sm mb-4 leading-relaxed">Bu yorumu neden şikayet ediyorsunuz? Lütfen kısaca belirtin. (Spam, Hakaret, vb.)</p>
-            <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Şikayet sebebiniz..." className="w-full bg-[#0B0B0B] border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-red-500/50 resize-none h-28 mb-5" />
+            <p className="text-gray-300 text-sm mb-4 leading-relaxed">Bu yorumu neden şikayet ediyorsunuz? Lütfen kısaca belirtin.</p>
+            <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Şikayet sebebiniz..." className="w-full bg-[#0A0A0A] border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-red-500/50 resize-none h-28 mb-5" />
             <div className="flex gap-3">
-              <button onClick={() => setShowReportModal(false)} className="flex-1 py-3 rounded-2xl font-bold text-sm bg-white/5 text-gray-300 hover:bg-white/10 transition-colors">İptal</button>
-              <button onClick={submitReportAction} disabled={!reportReason.trim() || isSubmittingReport} className="flex-1 py-3 rounded-2xl font-bold text-sm bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">{isSubmittingReport ? 'İletiliyor...' : 'Gönder'}</button>
+              <button onClick={() => setShowReportModal(false)} className="flex-1 py-3.5 rounded-2xl font-bold text-sm bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors">İptal</button>
+              <button onClick={submitReportAction} disabled={!reportReason.trim() || isSubmittingReport} className="flex-1 py-3.5 rounded-2xl font-bold text-sm bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                {isSubmittingReport ? 'İletiliyor...' : 'Gönder'}
+              </button>
             </div>
           </div>
         </div>

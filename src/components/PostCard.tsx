@@ -36,7 +36,8 @@ const getRelativeTime = (dateString: string) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge }: any) {
+// 🔥 PROPS KISMINA "userAvatar" EKLENDİ
+export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge, userAvatar }: any) {
   const router = useRouter();
   const cardRef = useRef(null);
   const [hasViewed, setHasViewed] = useState(false);
@@ -61,7 +62,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const isConfession = post.type === 'CONFESSION';
   const isBosYap = post.type === 'BOSYAP';
 
-  // Benzersiz Stil Ayarları
   const tagText = isConfession ? 'İtiraf' : isBosYap ? 'Boş Yap' : 'Overheard';
   const themeClasses = isConfession 
     ? { border: 'hover:border-purple-500/30', badge: 'text-purple-400 bg-purple-500/10 border-purple-500/20', text: 'text-purple-400' }
@@ -69,7 +69,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     ? { border: 'hover:border-emerald-500/30', badge: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', text: 'text-emerald-400' }
     : { border: 'hover:border-[#4DA3FF]/30', badge: 'text-[#4DA3FF] bg-[#4DA3FF]/10 border-[#4DA3FF]/20', text: 'text-[#4DA3FF]' };
 
-  // 🔥 24 Saatlik Postlar İçin Özel Stil
   const cardBorderClass = isEphemeral 
     ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)] hover:border-amber-500/50' 
     : `border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${themeClasses.border}`;
@@ -179,13 +178,19 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
         ref={cardRef} 
         className={`group w-full bg-white/[0.02] backdrop-blur-xl rounded-[24px] mb-5 p-4 sm:p-5 border transition-all duration-500 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${cardBorderClass}`}
       >
-        {/* 1. ÜST BİLGİ (HEADER) */}
         <div className="flex items-start justify-between mb-4 relative z-10">
           <Link href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`} onClick={(e) => { e.stopPropagation(); playClickSound(); }} className="flex items-center gap-3">
-            {/* 🔥 Avatar: Instagram halkası yerine zarif şeffaf arka plan */}
-            <div className={`w-11 h-11 rounded-full p-[1.5px] ${isEphemeral ? 'bg-amber-500/30' : 'bg-white/[0.1]'}`}>
-              <div className="w-full h-full rounded-full bg-[#121212] flex items-center justify-center">
-                <span className="text-[16px] font-black opacity-80 text-white">{authorData.name.charAt(0)}</span>
+            
+            {/* 🔥 AVATAR BURADA GÖSTERİLİYOR 🔥 */}
+            <div className={`w-11 h-11 shrink-0 rounded-full p-[1.5px] ${isEphemeral ? 'bg-amber-500/30' : 'bg-white/[0.1]'}`}>
+              <div className="w-full h-full rounded-full bg-[#121212] flex items-center justify-center overflow-hidden">
+                {userAvatar?.startsWith("data:image") ? (
+                  <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
+                ) : userAvatar ? (
+                  <span className="text-[22px]">{userAvatar}</span>
+                ) : (
+                  <span className="text-[16px] font-black opacity-80 text-white">{authorData.name.charAt(0)}</span>
+                )}
               </div>
             </div>
             
@@ -195,7 +200,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                 {userBadge && <span className="bg-amber-500/20 text-amber-500 text-[9px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">{userBadge}</span>}
               </div>
               <div className="flex items-center gap-1.5 text-[12px] font-medium mt-0.5">
-                {/* 24 Saatlik Post İndikatörü */}
                 {isEphemeral ? (
                   <span className="flex items-center gap-1 text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded text-[10px] tracking-wider uppercase font-bold border border-amber-500/20">
                     <Hourglass size={10} className="animate-pulse" /> 24s
@@ -214,7 +218,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             </div>
           </Link>
           
-          {/* SAĞ ÜST ROZET VE MENÜ */}
           <div className="flex items-center gap-2">
             <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-widest ${themeClasses.badge}`}>
               {tagText}
@@ -225,7 +228,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </div>
         </div>
 
-        {/* 2. İÇERİK */}
         <div onClick={handleDoubleTap} className="relative z-10 cursor-pointer select-none pl-1">
           <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-300 ease-out ${showBigHeart ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.3]'}`}>
             <Heart size={80} className="text-white drop-shadow-2xl fill-white" />
@@ -250,7 +252,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           )}
         </div>
 
-        {/* 3. YÜZEN AKSİYON KAPSÜLÜ (Pill Bar) - 🔥 Artık daha aydınlık ve belirgin! */}
         <div className="mt-5 flex items-center justify-between bg-white/[0.06] border border-white/[0.1] rounded-full px-4 py-3 shadow-inner">
           <div className="flex items-center gap-5">
             <form action={incrementLike} onSubmit={handleLikeClick} className="flex items-center">
@@ -284,7 +285,6 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
         </div>
       </article>
 
-      {/* ŞİKAYET MODALI */}
       {showReportModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowReportModal(false)}>
           <div className="bg-[#1A1A1A] rounded-3xl w-full max-w-sm overflow-hidden transform transition-all border border-white/10" onClick={(e) => e.stopPropagation()}>

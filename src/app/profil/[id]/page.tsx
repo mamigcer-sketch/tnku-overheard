@@ -48,7 +48,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const sParams = await searchParams;
   const cookieStore = await cookies();
   
-  // 🔥 DÜZELTME BURADA: Yönlendirme sayfasındaki gibi her iki çerezi de kontrol ediyoruz!
   const authorId = cookieStore.get('tnku_author_id')?.value;
   const generalUuid = cookieStore.get('user_uuid')?.value;
   const currentUserUuid = authorId || generalUuid || '';
@@ -58,7 +57,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   
   const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
 
-  const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb, userStats, userAvatarDb] = await Promise.all([
+  // 🔥 YENİ: findMany ile tüm avatarları çekiyoruz ki kullanıcının attığı postlarda resmi çıksın
+  const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb, userStats, allAvatarsDb] = await Promise.all([
     prisma.post.count({ where: { authorUuid: targetUuid, status: 'APPROVED' } }),
     prisma.comment.count({ where: { authorId: targetUuid } }),
     prisma.post.findMany({
@@ -85,7 +85,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
     (prisma as any).customNickname.findMany().catch(() => []),
     (prisma as any).userBadge.findMany().catch(() => []),
     (prisma as any).userStats.findUnique({ where: { userUuid: targetUuid } }).catch(() => null),
-    (prisma as any).userAvatar.findUnique({ where: { userUuid: targetUuid } }).catch(() => null)
+    (prisma as any).userAvatar.findMany().catch(() => [])
   ]);
 
   const customNicknamesMap = (allNicknamesDb || []).reduce((acc: any, curr: any) => {
@@ -97,9 +97,17 @@ export default async function ProfilePage({ params, searchParams }: { params: an
     return acc;
   }, {});
 
+  // 🔥 YENİ: Avatarları haritalandırdık
+  const userAvatarsMap = (allAvatarsDb || []).reduce((acc: any, curr: any) => {
+    acc[curr.userUuid] = curr.avatarUrl;
+    return acc;
+  }, {});
+
   const authorData = getAnonymousData(targetUuid, customNicknamesMap[targetUuid]);
   const displayNickname = authorData.name;
-  const currentAvatar = userAvatarDb?.avatarUrl;
+  
+  // Profil resmini haritadan al
+  const currentAvatar = userAvatarsMap[targetUuid];
   
   const totalLikes = userPosts.reduce((acc: any, post: any) => acc + post.likes, 0);
   const userBadge = userBadgeDb?.badgeName;
@@ -135,7 +143,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   return (
     <main className="min-h-screen bg-[#000000] text-white relative z-0 overflow-hidden pb-20 selection:bg-[#4DA3FF]/30">
       
-      {/* 1. HEADER */}
       <header className="sticky top-0 z-50 bg-[#000000]/90 backdrop-blur-xl border-b border-white/10 px-4 py-3 flex items-center justify-between">
         <Link href="/" className="text-white hover:opacity-70 transition-opacity p-1 -ml-1">
           <ArrowLeft size={24} />
@@ -149,12 +156,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
       </header>
 
       <div className="max-w-2xl mx-auto pt-2">
-        
-        {/* 2. PROFİL ÜST BİLGİ ALANI */}
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center gap-6 sm:gap-8">
-            
-            {/* 🔥 YENİ DİNAMİK PROFİL AVATARI 🔥 */}
             <EditableAvatar 
               userUuid={targetUuid}
               currentAvatar={currentAvatar}
@@ -162,7 +165,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               isOwnProfile={isOwnProfile}
             />
 
-            {/* İstatistikler */}
             <div className="flex-1 flex justify-between sm:justify-around text-center">
               <div className="flex flex-col">
                 <span className="text-[18px] sm:text-[20px] font-bold text-white">{postCount}</span>
@@ -179,7 +181,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
             </div>
           </div>
 
-          {/* Bio ve Detaylar */}
           <div className="mt-4">
             <h2 className="text-[14px] sm:text-[15px] font-bold text-white flex items-center gap-2">
               {displayNickname}
@@ -191,7 +192,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
             </h2>
             <p className="text-[13px] text-gray-400 mt-0.5">TNKUOVERHEARD TAKİPÇİSİ</p>
             
-            {/* İnce ve Zarif XP Barı */}
             <div className="mt-3 flex items-center gap-3 w-full sm:w-[85%]">
               <div className="flex-1 h-1.5 bg-white/10 rounded-full overflow-hidden">
                 <div 
@@ -204,7 +204,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               </span>
             </div>
             
-            {/* 🔥 PROFİLİ DÜZENLE (NICK) BUTONU 🔥 */}
             {isOwnProfile && (
               <div className="mt-5 w-full">
                 <ProfileNickEdit 
@@ -217,7 +216,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           </div>
         </div>
 
-        {/* 3. SEKMELER */}
         <div className="flex border-b border-white/10 mt-2 sticky top-[53px] bg-[#000000] z-40">
           <Link 
             href={`/profil/${id}?tab=gonderiler`} 
@@ -245,7 +243,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           </Link>
         </div>
 
-        {/* 4. İÇERİK ALANI */}
         <div className="pt-1">
           
           {activeTab === 'gonderiler' && (
@@ -268,8 +265,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                       userUuid={currentUserUuid}
                       customNickname={customNicknamesMap[post.authorUuid]} 
                       userBadge={userBadgesMap[post.authorUuid]}
-                      customNicknamesMap={customNicknamesMap}
-                      userBadgesMap={userBadgesMap}
+                      // 🔥 YENİ: Avatarı PostCard'a da gönderiyoruz
+                      userAvatar={userAvatarsMap[post.authorUuid]}
                     />
                   ))}
                 </div>
