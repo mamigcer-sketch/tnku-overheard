@@ -373,10 +373,10 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   return (
     <div className="flex h-screen bg-[#050505] text-white relative z-0 overflow-hidden">
-      <div className="fixed top-[-10%] left-[-10%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-[#4DA3FF]/10 blur-[100px] sm:blur-[150px] pointer-events-none -z-10" />
-      <div className="fixed bottom-[10%] right-[-10%] w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] rounded-full bg-purple-600/10 blur-[100px] sm:blur-[150px] pointer-events-none -z-10" />
+      <div className="fixed top-[-10%] left-[-10%] w-[300px] sm:w-[500px] h-[300px] sm:h-[500px] rounded-full bg-blue-900/10 blur-[120px] pointer-events-none -z-10" />
+      <div className="fixed bottom-[-10%] right-[-10%] w-[400px] sm:w-[600px] h-[400px] sm:h-[600px] rounded-full bg-purple-900/10 blur-[120px] pointer-events-none -z-10" />
 
-      <aside className="w-72 bg-[#0B0B0B]/80 backdrop-blur-3xl border-r border-white/5 p-6 hidden lg:flex flex-col relative z-20 shadow-[4px_0_24px_rgba(0,0,0,0.5)]">
+      <aside className="w-72 bg-[#0A0A0A] border-r border-white/[0.05] p-6 hidden lg:flex flex-col relative z-20 shadow-[4px_0_24px_rgba(0,0,0,0.5)]">
         <h1 className="text-2xl font-black mb-10 tracking-tighter">TNKU<span className="text-[#4DA3FF]">ADMIN</span></h1>
         <nav className="space-y-1.5 flex-1 overflow-y-auto scrollbar-hide pr-2">
           {menuItems.map((item, i) => (
@@ -386,19 +386,19 @@ export default async function AdminDashboard({ searchParams }: any) {
                 <span className={`font-semibold tracking-wide text-sm ${currentTab === item.label ? 'opacity-100' : 'opacity-80'}`}>{item.label}</span>
               </div>
               {item.badge !== undefined && item.badge > 0 ? (
-                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${item.label === 'Şikayetler' ? 'bg-red-500/20 text-red-400 border border-red-500/20' : 'bg-[#4DA3FF]/20 text-[#4DA3FF] border border-[#4DA3FF]/20'}`}>{item.badge}</span>
+                <span className={`text-[10px] font-black px-2 py-0.5 rounded-full ${item.label === 'Şikayetler' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-[#4DA3FF]/10 text-[#4DA3FF] border border-[#4DA3FF]/20'}`}>{item.badge}</span>
               ) : null}
             </Link>
           ))}
         </nav>
         <form action={logout} className="mt-6">
-          <button className="w-full flex items-center justify-center gap-2 text-red-400 font-bold py-4 rounded-2xl border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 hover:shadow-[0_0_15px_rgba(239,68,68,0.15)] transition-all">
+          <button className="w-full flex items-center justify-center gap-2 text-gray-400 font-bold py-4 rounded-2xl border border-white/[0.05] bg-white/[0.02] hover:bg-red-500/10 hover:text-red-400 hover:border-red-500/20 transition-all">
             <LogOut size={18} /> Sistemi Kapat
           </button>
         </form>
       </aside>
 
-      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0B0B0B]/90 backdrop-blur-3xl border-t border-white/10 px-2 py-2 flex justify-start z-50 overflow-x-auto gap-1 sm:gap-2 scrollbar-hide shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
+      <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/90 backdrop-blur-3xl border-t border-white/[0.05] px-2 py-2 flex justify-start z-50 overflow-x-auto gap-1 sm:gap-2 scrollbar-hide shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {menuItems.map((item, i) => (
           <Link href={`/admin?tab=${item.label}`} key={i} className={`flex flex-col items-center justify-center gap-1 min-w-[64px] sm:min-w-[72px] px-1 py-2 rounded-2xl transition-all relative ${currentTab === item.label ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
             <item.icon size={18} className={currentTab === item.label && item.label === 'Özel Nickler' ? 'text-purple-400' : currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
@@ -410,84 +410,84 @@ export default async function AdminDashboard({ searchParams }: any) {
         ))}
       </nav>
 
-      <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-12 scrollbar-hide pb-24 lg:pb-12 relative z-10">
+      <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-10 scrollbar-hide pb-24 lg:pb-12 relative z-10">
         
-        <header className="flex flex-col md:flex-row md:items-center justify-between mb-6 sm:mb-10 pb-4 sm:pb-6 border-b border-white/5 gap-3 sm:gap-4">
+        <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 sm:mb-10 pb-4 sm:pb-6 border-b border-white/[0.05] gap-3 sm:gap-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold flex items-center gap-3 sm:gap-4 tracking-tight">
-              <div className={`p-2.5 sm:p-3 rounded-xl sm:rounded-2xl border ${currentTab === 'Yorumlar' ? 'bg-blue-500/10 border-blue-500/20' : currentTab === 'Lobi Sohbet' ? 'bg-emerald-500/10 border-emerald-500/20' : currentTab === 'Özel Nickler' ? 'bg-purple-500/10 border-purple-500/20' : currentTab === 'Duyurular' ? 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20' : currentTab === 'Sayaç' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Banlar' ? 'bg-red-500/10 border-red-500/20' : currentTab === 'Şikayetler' ? 'bg-red-500/10 border-red-500/20' : 'bg-[#4DA3FF]/10 border-[#4DA3FF]/20'}`}>
+              <div className="p-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl shadow-inner">
                 {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Lobi Sohbet' ? <Radio className="text-emerald-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Özel Nickler' ? <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
               </div>
               {currentTab} Paneli
             </h2>
-            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-green-400 bg-green-500/10 px-4 py-2 sm:px-5 sm:py-2.5 rounded-full border border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)] self-start md:self-auto">
+            <div className="flex items-center gap-2 text-xs sm:text-sm font-bold text-gray-400 bg-white/[0.02] px-4 py-2 sm:px-5 sm:py-2.5 rounded-full border border-white/[0.05] shadow-inner self-start md:self-auto">
                 <span className="relative flex h-2 w-2 sm:h-2.5 sm:w-2.5 mr-1">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-green-500"></span>
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 sm:h-2.5 sm:w-2.5 bg-emerald-500"></span>
                 </span>
                 Sistem Aktif
             </div>
         </header>
 
-        <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
           
           {currentTab !== 'Yorumlar' && currentTab !== 'Lobi Sohbet' && currentTab !== 'Özel Nickler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
             <>
-              <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 sm:gap-8 mb-6 sm:mb-8 relative overflow-hidden group">
-                <div className="absolute top-0 right-0 w-32 sm:w-64 h-32 sm:h-64 bg-green-500/5 rounded-full blur-3xl -z-10 group-hover:bg-green-500/10 transition-colors duration-700" />
-                 
-                <div className="flex items-center gap-4 sm:gap-5 w-full xl:w-auto">
-                  <div className="relative flex items-center justify-center p-3 sm:p-4 bg-green-500/10 rounded-xl sm:rounded-2xl border border-green-500/20 shadow-[0_0_20px_rgba(34,197,94,0.15)] shrink-0">
-                    <Radio className="text-green-400 relative z-10 w-6 h-6 sm:w-7 sm:h-7" />
+              {/* Canlı Kampüs Nabzı - Black Card Versiyon */}
+              <div className="bg-[#0A0A0A] p-4 sm:p-6 md:p-8 rounded-[24px] sm:rounded-[32px] border border-white/[0.05] shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 sm:gap-8 mb-6 sm:mb-8 relative overflow-hidden">
+                <div className="flex items-center gap-4 sm:gap-5 w-full xl:w-auto z-10">
+                  <div className="flex items-center justify-center p-3 sm:p-4 bg-emerald-500/10 rounded-xl sm:rounded-2xl border border-emerald-500/20 shrink-0">
+                    <Radio className="text-emerald-400 w-6 h-6 sm:w-7 sm:h-7 animate-pulse" />
                   </div>
                   <div>
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1">
-                      <h3 className="text-white font-extrabold text-base sm:text-lg md:text-xl">Canlı Kampüs Nabzı</h3>
-                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-green-500/20 text-green-400 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md sm:rounded-lg border border-green-500/30">Son 1 Saat</span>
+                      <h3 className="text-white font-black text-base sm:text-lg">Canlı Kampüs Nabzı</h3>
+                      <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-widest bg-white/5 text-gray-400 px-2 sm:px-3 py-1 rounded-md border border-white/5">Son 1 Saat</span>
                     </div>
-                    <p className="text-gray-400 text-xs sm:text-sm font-medium leading-snug">Değirmenaltı'nda anlık hareketlilik ve okuyucu aktivitesi.</p>
+                    <p className="text-gray-500 text-xs sm:text-sm font-medium">Değirmenaltı'nda anlık hareketlilik ve okuyucu aktivitesi.</p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 sm:gap-4 w-full xl:w-auto">
-                  <div className="bg-black/30 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
+                <div className="grid grid-cols-3 gap-3 sm:gap-4 w-full xl:w-auto z-10">
+                  <div className="bg-[#050505] px-3 py-3 sm:px-6 sm:py-5 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
                     <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Yeni Post</p>
-                    <p className="text-xl sm:text-2xl font-black text-green-400">{recentPostsCount}</p>
+                    <p className="text-xl sm:text-2xl font-black text-white">{recentPostsCount}</p>
                   </div>
-                  <div className="bg-black/30 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
+                  <div className="bg-[#050505] px-3 py-3 sm:px-6 sm:py-5 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
                     <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Yeni Yorum</p>
-                    <p className="text-xl sm:text-2xl font-black text-[#4DA3FF]">{recentCommentsCount}</p>
+                    <p className="text-xl sm:text-2xl font-black text-white">{recentCommentsCount}</p>
                   </div>
-                  <div className="bg-black/30 backdrop-blur-md px-3 py-2 sm:px-5 sm:py-4 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
+                  <div className="bg-[#050505] px-3 py-3 sm:px-6 sm:py-5 rounded-xl sm:rounded-2xl border border-white/5 text-center shadow-inner">
                     <p className="text-[9px] sm:text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-1">Aktif Yazar</p>
-                    <p className="text-xl sm:text-2xl font-black text-purple-400">{activeAuthorsCount}</p>
+                    <p className="text-xl sm:text-2xl font-black text-white">{activeAuthorsCount}</p>
                   </div>
                 </div>
               </div>
 
+              {/* İstatistik Kartları */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 mb-6 sm:mb-8">
                   {[
-                      { label: 'TOPLAM GÖNDERİ', val: total, color: 'text-white', bg: 'bg-white/[0.02]', border: 'border-white/5' },
-                      { label: 'ONAY BEKLİYOR', val: pending, color: 'text-amber-400', bg: 'bg-amber-500/5', border: 'border-amber-500/20' },
-                      { label: 'YAYINDA OLAN', val: approved, color: 'text-green-400', bg: 'bg-green-500/5', border: 'border-green-500/20' },
-                      { label: 'REDDEDİLEN', val: rejected, color: 'text-red-400', bg: 'bg-red-500/5', border: 'border-red-500/20' },
+                      { label: 'TOPLAM GÖNDERİ', val: total, color: 'text-white' },
+                      { label: 'ONAY BEKLİYOR', val: pending, color: 'text-amber-400' },
+                      { label: 'YAYINDA OLAN', val: approved, color: 'text-emerald-400' },
+                      { label: 'REDDEDİLEN', val: rejected, color: 'text-red-400' },
                   ].map((stat, i) => (
-                      <div key={i} className={`${stat.bg} ${stat.border} p-4 sm:p-6 md:p-8 rounded-2xl sm:rounded-[24px] border backdrop-blur-xl transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl`}>
-                        <p className="text-gray-500 text-[9px] sm:text-[11px] font-black tracking-widest uppercase mb-1.5 sm:mb-3">{stat.label}</p>
+                      <div key={i} className={`bg-[#0A0A0A] border border-white/[0.05] p-5 sm:p-6 md:p-8 rounded-2xl sm:rounded-[24px] transition-all duration-300 hover:border-white/10 shadow-lg`}>
+                        <p className="text-gray-500 text-[10px] sm:text-[11px] font-black tracking-widest uppercase mb-2">{stat.label}</p>
                         <p className={`text-3xl sm:text-4xl lg:text-5xl font-black tracking-tighter ${stat.color}`}>{stat.val}</p>
                       </div>
                   ))}
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 mb-8 sm:mb-12">
-                  <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-row items-center gap-4 sm:gap-6 shadow-lg">
-                      <div className="p-3 sm:p-4 bg-pink-500/10 rounded-xl sm:rounded-2xl border border-pink-500/20 shadow-[0_0_20px_rgba(236,72,153,0.15)]"><Heart className="text-pink-400 w-6 h-6 sm:w-8 sm:h-8"/></div>
+                  <div className="bg-[#0A0A0A] p-5 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/[0.05] flex flex-row items-center gap-4 sm:gap-6 shadow-lg">
+                      <div className="p-3 sm:p-4 bg-white/[0.03] rounded-xl sm:rounded-2xl border border-white/[0.05]"><Heart className="text-pink-400 w-6 h-6 sm:w-8 sm:h-8"/></div>
                       <div>
                           <p className="text-gray-500 text-[10px] sm:text-[11px] font-black tracking-widest uppercase mb-0.5 sm:mb-1">Toplam Beğeni</p>
                           <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white">{totalLikes}</p>
                       </div>
                   </div>
-                  <div className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-row items-center gap-4 sm:gap-6 shadow-lg">
-                      <div className="p-3 sm:p-4 bg-[#4DA3FF]/10 rounded-xl sm:rounded-2xl border border-[#4DA3FF]/20 shadow-[0_0_20px_rgba(77,163,255,0.15)]"><Eye className="text-[#4DA3FF] w-6 h-6 sm:w-8 sm:h-8"/></div>
+                  <div className="bg-[#0A0A0A] p-5 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/[0.05] flex flex-row items-center gap-4 sm:gap-6 shadow-lg">
+                      <div className="p-3 sm:p-4 bg-white/[0.03] rounded-xl sm:rounded-2xl border border-white/[0.05]"><Eye className="text-[#4DA3FF] w-6 h-6 sm:w-8 sm:h-8"/></div>
                       <div>
                           <p className="text-gray-500 text-[10px] sm:text-[11px] font-black tracking-widest uppercase mb-0.5 sm:mb-1">Toplam Görüntülenme</p>
                           <p className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-white">{totalViews}</p>
@@ -502,47 +502,44 @@ export default async function AdminDashboard({ searchParams }: any) {
             {currentTab === 'Özel Nickler' ? (
               <div className="space-y-6 sm:space-y-8">
                  
-              <form action={updateUserMeta} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-purple-500/20 space-y-4 sm:space-y-5 shadow-[0_10px_40px_rgba(168,85,247,0.05)] relative overflow-hidden group">
-                  <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-purple-500/10 blur-3xl rounded-full -z-10 group-hover:bg-purple-500/20 transition-colors duration-700" />
-                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-purple-500/10 rounded-lg sm:rounded-xl border border-purple-500/30"><UserCog className="text-purple-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Kullanıcı Ekle / Rozet Ver</h3>
-                  <p className="text-gray-400 text-xs sm:text-sm font-medium mb-2">Kullanıcının UUID'sini buraya yapıştırıp ona manuel olarak özel nick veya VIP rozeti atayabilirsin.</p>
+              <form action={updateUserMeta} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] space-y-4 sm:space-y-5 shadow-xl relative overflow-hidden">
+                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/[0.03] rounded-lg sm:rounded-xl border border-white/[0.05]"><UserCog className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Kullanıcı Ekle / Rozet Ver</h3>
+                  <p className="text-gray-500 text-xs sm:text-sm font-medium mb-2">Kullanıcının UUID'sini buraya yapıştırıp ona manuel olarak özel nick veya VIP rozeti atayabilirsin.</p>
                    
                   <div className="grid lg:grid-cols-3 gap-4 sm:gap-5">
                     <div className="lg:col-span-3">
-                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Kullanıcı UUID (Kimlik)</label>
-                      <input type="text" name="userUuid" required placeholder="Örn: clxj12345..." className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-purple-400 focus:bg-black/60 transition-all shadow-inner font-mono" />
+                      <label className="text-[10px] sm:text-[11px] text-gray-500 block mb-1.5 font-black uppercase tracking-widest">Kullanıcı UUID (Kimlik)</label>
+                      <input type="text" name="userUuid" required placeholder="Örn: clxj12345..." className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-[#4DA3FF] transition-colors shadow-inner font-mono" />
                     </div>
                     <div>
-                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Özel Nickname</label>
-                      <input type="text" name="nickname" placeholder="Örn: Sitenin Sahibi" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-purple-400 focus:bg-black/60 transition-all shadow-inner" />
+                      <label className="text-[10px] sm:text-[11px] text-gray-500 block mb-1.5 font-black uppercase tracking-widest">Özel Nickname</label>
+                      <input type="text" name="nickname" placeholder="Örn: Sitenin Sahibi" className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-[#4DA3FF] transition-colors shadow-inner" />
                     </div>
                     <div>
-                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 font-black uppercase tracking-widest">Rozet</label>
-                      <input type="text" name="badge" placeholder="Örn: 👑 Yönetici" className="w-full bg-black/40 border border-yellow-500/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 outline-none focus:border-yellow-400 focus:bg-black/60 transition-all shadow-inner" />
+                      <label className="text-[10px] sm:text-[11px] text-gray-500 block mb-1.5 font-black uppercase tracking-widest">Rozet</label>
+                      <input type="text" name="badge" placeholder="Örn: 👑 VIP" className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 outline-none focus:border-[#4DA3FF] transition-colors shadow-inner" />
                     </div>
                     <div className="flex items-end">
-                      <button type="submit" className="w-full justify-center bg-gradient-to-r from-purple-500 to-pink-500 hover:to-pink-400 text-white font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-[10px] sm:text-xs transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(168,85,247,0.4)]"><Sparkles size={16}/> Ayrıcalık Tanımla</button>
+                      <button type="submit" className="w-full justify-center bg-white/10 hover:bg-white/15 text-white font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-4 rounded-xl text-[10px] sm:text-xs transition-all flex items-center gap-2 border border-white/10"><Sparkles size={16}/> Ayrıcalık Tanımla</button>
                     </div>
                   </div>
               </form>
 
               <div>
                   <div className="flex items-center justify-between mb-4 sm:mb-6">
-                    <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">Sistemdeki Özel Nickler <span className="bg-purple-500/20 text-purple-400 px-2 py-0.5 rounded-md text-xs border border-purple-500/30">{customUsers.length}</span></h3>
+                    <h3 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">Sistemdeki Özel Nickler <span className="bg-white/10 text-white px-2 py-0.5 rounded-md text-xs border border-white/10">{customUsers.length}</span></h3>
                   </div>
 
                   {customUsers.length === 0 ? (
-                    <div className="text-center py-12 sm:py-16 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Henüz kendine özel nick alan veya VIP olan kimse yok.</div>
+                    <div className="text-center py-12 sm:py-16 bg-[#0A0A0A] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Henüz kendine özel nick alan veya VIP olan kimse yok.</div>
                   ) : (
                     <div className="grid gap-4 sm:gap-6">
                       {customUsers.map((user, idx) => (
-                      <div key={idx} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-col xl:flex-row gap-4 sm:gap-6 xl:items-center justify-between shadow-lg">
+                      <div key={idx} className="bg-[#0A0A0A] p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/[0.05] flex flex-col xl:flex-row gap-4 sm:gap-6 xl:items-center justify-between shadow-lg">
                           
                         <div className="flex items-center gap-3 sm:gap-4 w-full md:w-auto">
-                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 p-[2px] shrink-0">
-                            <div className="w-full h-full bg-[#050505] rounded-full flex items-center justify-center">
-                              <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" />
-                            </div>
+                          <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/10 flex items-center justify-center shrink-0 border border-white/10">
+                              <Sparkles className="text-gray-400 w-5 h-5 sm:w-6 sm:h-6" />
                           </div>
                           <div className="overflow-hidden">
                             <div className="flex items-center gap-2 flex-wrap">
@@ -556,14 +553,14 @@ export default async function AdminDashboard({ searchParams }: any) {
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full xl:w-auto">
                           <form action={updateUserMeta} className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
                             <input type="hidden" name="userUuid" value={user.uuid} />
-                            <input type="text" name="nickname" defaultValue={user.nickname} placeholder="Nick Yok" className="bg-black/50 border border-white/10 text-xs sm:text-sm text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-[#4DA3FF] outline-none transition-colors shadow-inner w-full sm:w-32" />
-                            <input type="text" name="badge" defaultValue={user.badge} placeholder="Rozet Yok" className="bg-yellow-500/5 border border-yellow-500/20 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-yellow-500 focus:bg-yellow-500/10 outline-none transition-colors shadow-inner w-full sm:w-32" />
-                            <button type="submit" className="w-full sm:w-auto justify-center bg-[#4DA3FF]/10 text-[#4DA3FF] hover:bg-[#4DA3FF]/20 border border-[#4DA3FF]/20 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center gap-1.5"><Pencil size={14}/> Güncelle</button>
+                            <input type="text" name="nickname" defaultValue={user.nickname} placeholder="Nick Yok" className="bg-[#050505] border border-white/10 text-xs sm:text-sm text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-[#4DA3FF] outline-none transition-colors shadow-inner w-full sm:w-32" />
+                            <input type="text" name="badge" defaultValue={user.badge} placeholder="Rozet Yok" className="bg-[#050505] border border-white/10 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-yellow-500 outline-none transition-colors shadow-inner w-full sm:w-32" />
+                            <button type="submit" className="w-full sm:w-auto justify-center bg-white/5 text-white hover:bg-white/10 border border-white/10 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-1.5"><Pencil size={14}/> Güncelle</button>
                           </form>
 
                           <form action={removeUserMeta} className="w-full sm:w-auto">
                              <input type="hidden" name="userUuid" value={user.uuid} />
-                             <button type="submit" className="w-full sm:w-auto justify-center bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all flex items-center gap-1.5"><Trash2 size={14}/> Kaldır</button>
+                             <button type="submit" className="w-full sm:w-auto justify-center bg-red-500/10 text-red-400 hover:bg-red-500/20 border border-red-500/20 px-4 sm:px-5 py-2.5 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-colors flex items-center gap-1.5"><Trash2 size={14}/> Kaldır</button>
                           </form>
                         </div>
 
@@ -577,39 +574,39 @@ export default async function AdminDashboard({ searchParams }: any) {
 
             ) : currentTab === 'Yorumlar' ? (
               displayComments.map((comment) => (
-                <article key={comment.id} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-col gap-4 sm:gap-5 shadow-xl hover:border-white/10 transition-colors">
+                <article key={comment.id} className="bg-[#0A0A0A] p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/[0.05] flex flex-col gap-4 sm:gap-5 shadow-xl hover:border-white/10 transition-colors">
                   <div className="flex justify-between items-start gap-3 sm:gap-4">
                     <div className="flex-1">
-                      <div className="bg-white/[0.03] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5 mb-3 sm:mb-4">
-                        <p className="text-gray-400 text-[11px] sm:text-xs italic mb-1.5 sm:mb-2">"{comment.post?.content?.substring(0, 80) || ''}..." gönderisine yorum yaptı:</p>
+                      <div className="bg-[#050505] p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-white/5 mb-3 sm:mb-4 shadow-inner">
+                        <p className="text-gray-500 text-[11px] sm:text-xs italic mb-1.5 sm:mb-2">"{comment.post?.content?.substring(0, 80) || ''}..." gönderisine yorum yaptı:</p>
                         <p className="text-white text-base sm:text-lg leading-relaxed font-medium">{comment.content}</p>
                       </div>
-                      <span className="text-[10px] sm:text-xs font-semibold text-gray-500 bg-black/40 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg">{new Date(comment.createdAt).toLocaleString('tr-TR')}</span>
+                      <span className="text-[10px] sm:text-xs font-semibold text-gray-500 bg-white/5 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg border border-white/5">{new Date(comment.createdAt).toLocaleString('tr-TR')}</span>
                     </div>
                   </div>
 
-                  <div className="bg-black/30 border border-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl flex flex-col lg:flex-row gap-3 sm:gap-4 items-start lg:items-center justify-between">
+                  <div className="bg-[#050505] border border-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl flex flex-col lg:flex-row gap-3 sm:gap-4 items-start lg:items-center justify-between shadow-inner">
                     <div className="flex items-center gap-2 sm:gap-3 w-full lg:w-auto">
                       <div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/5 shrink-0"><Fingerprint className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5" /></div>
                       <div className="overflow-hidden w-full">
                         <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-wider block mb-0.5">Yazar Kimliği (UUID)</span>
-                        <code className="text-[10px] sm:text-xs text-white/90 font-mono bg-black/50 px-2 py-1 rounded-md block truncate">{comment.authorId || 'Bilinmiyor'}</code>
+                        <code className="text-[10px] sm:text-xs text-white/90 font-mono bg-white/5 px-2 py-1 rounded-md border border-white/5 block truncate">{comment.authorId || 'Bilinmiyor'}</code>
                       </div>
                     </div>
                       
                     {comment.authorId && (
                       <form action={updateUserMeta} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full lg:w-auto">
                         <input type="hidden" name="userUuid" value={comment.authorId} />
-                        <input type="text" name="nickname" defaultValue={customNicknamesMap[comment.authorId] || ''} placeholder="Nick (Örn: Kral)" className="bg-black/50 border border-white/10 text-xs sm:text-sm text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-[#4DA3FF] outline-none w-full sm:w-32 lg:w-36 transition-colors shadow-inner" />
-                        <input type="text" name="badge" defaultValue={userBadgesMap[comment.authorId] || ''} placeholder="Rozet (Örn: 👑 VIP)" className="bg-yellow-500/5 border border-yellow-500/20 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-yellow-500 focus:bg-yellow-500/10 outline-none w-full sm:w-36 lg:w-40 transition-colors shadow-inner" />
-                        <button type="submit" className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-pink-300 border border-pink-500/30 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest hover:from-purple-600/30 hover:to-pink-600/30 transition-all shrink-0 w-full sm:w-auto text-center">Kaydet</button>
+                        <input type="text" name="nickname" defaultValue={customNicknamesMap[comment.authorId] || ''} placeholder="Nick (Örn: Kral)" className="bg-black border border-white/10 text-xs sm:text-sm text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-[#4DA3FF] outline-none w-full sm:w-32 lg:w-36 transition-colors shadow-inner" />
+                        <input type="text" name="badge" defaultValue={userBadgesMap[comment.authorId] || ''} placeholder="Rozet (Örn: 👑 VIP)" className="bg-black border border-white/10 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-yellow-500 outline-none w-full sm:w-36 lg:w-40 transition-colors shadow-inner" />
+                        <button type="submit" className="bg-white/10 text-white border border-white/20 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-white/15 transition-all shrink-0 w-full sm:w-auto text-center">Kaydet</button>
                       </form>
                     )}
                   </div>
                     
                   <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-2 sm:pt-3">
                       {comment.authorId && (
-                        <form action={banUser} className="w-full sm:w-auto"><input type="hidden" name="userUuid" value={comment.authorId} /><button className="w-full sm:w-auto justify-center bg-red-500/10 text-red-400 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] flex items-center gap-1.5 sm:gap-2 transition-all"><Ban size={14}/> Yazarı Banla</button></form>
+                        <form action={banUser} className="w-full sm:w-auto"><input type="hidden" name="userUuid" value={comment.authorId} /><button className="w-full sm:w-auto justify-center bg-red-500/10 text-red-400 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1.5 sm:gap-2 transition-all"><Ban size={14}/> Yazarı Banla</button></form>
                       )}
                       <form action={deleteComment} className="w-full sm:w-auto"><input type="hidden" name="id" value={comment.id} /><button className="w-full sm:w-auto justify-center bg-white/5 text-gray-300 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-white/10 hover:bg-white/10 hover:text-white flex items-center gap-1.5 sm:gap-2 transition-all"><Trash2 size={14}/> Yorumu Sil</button></form>
                   </div>
@@ -618,17 +615,17 @@ export default async function AdminDashboard({ searchParams }: any) {
 
             ) : currentTab === 'Lobi Sohbet' ? (
               <div className="space-y-4">
-                <div className="bg-emerald-500/10 border border-emerald-500/20 p-4 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="bg-[#0A0A0A] border border-white/[0.05] p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
                   <div className="flex items-center gap-3">
-                    <Radio className="text-emerald-400 animate-pulse" size={24} />
+                    <div className="p-3 bg-white/5 rounded-xl border border-white/10"><Radio className="text-gray-400 animate-pulse" size={24} /></div>
                     <div>
                       <h3 className="text-white font-bold text-sm sm:text-base">Global Lobi Canlı Akış Yönetimi</h3>
-                      <p className="text-gray-400 text-xs">Buradan lobiye atılan son mesajları inceleyebilir, uygunsuz olanları silebilir veya yazarlarını banlayabilirsin.</p>
+                      <p className="text-gray-500 text-xs mt-1">Buradan lobiye atılan son mesajları inceleyebilir, silebilir veya yazarlarını banlayabilirsin.</p>
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-                    <span className="text-xs font-black bg-emerald-500/20 text-emerald-300 px-3 py-1.5 rounded-full">{displayChatMessages.length} Mesaj</span>
+                    <span className="text-xs font-black bg-white/10 text-white px-3 py-1.5 rounded-full border border-white/10">{displayChatMessages.length} Mesaj</span>
                     
                     <form action={clearAllChatMessages}>
                       <button 
@@ -642,7 +639,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                 </div>
 
                 {displayChatMessages.length === 0 ? (
-                  <div className="text-center py-16 bg-white/[0.01] rounded-[24px] border border-dashed border-white/10 text-gray-500 text-sm">
+                  <div className="text-center py-16 bg-[#0A0A0A] rounded-[24px] border border-dashed border-white/10 text-gray-500 text-sm">
                     Lobide henüz hiç mesaj atılmamış veya tablo boş.
                   </div>
                 ) : (
@@ -654,18 +651,18 @@ export default async function AdminDashboard({ searchParams }: any) {
                       const authorBadge = userBadgesMap[rawAuthorId];
 
                       return (
-                        <div key={msg.id} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-5 rounded-2xl border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-md">
-                          <div className="space-y-1.5 flex-1 overflow-hidden">
+                        <div key={msg.id} className="bg-[#0A0A0A] p-4 sm:p-5 rounded-2xl border border-white/[0.05] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
+                          <div className="space-y-2 flex-1 overflow-hidden">
                             <div className="flex items-center gap-2 text-xs flex-wrap">
-                              <span className="font-bold text-white bg-white/10 px-2 py-0.5 rounded-md">@{authorNick}</span>
-                              {authorBadge && <span className="bg-yellow-500/10 text-yellow-400 text-[10px] px-2 py-0.5 rounded-full font-bold">{authorBadge}</span>}
-                              <span className="text-gray-500">•</span>
-                              <span className="text-gray-400">{msg.createdAt ? new Date(msg.createdAt).toLocaleString('tr-TR') : 'Bilinmiyor'}</span>
+                              <span className="font-bold text-white bg-white/10 px-2 py-0.5 rounded-md border border-white/5">@{authorNick}</span>
+                              {authorBadge && <span className="bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-[10px] px-2 py-0.5 rounded-full font-bold">{authorBadge}</span>}
+                              <span className="text-gray-600">•</span>
+                              <span className="text-gray-500 font-medium">{msg.createdAt ? new Date(msg.createdAt).toLocaleString('tr-TR') : 'Bilinmiyor'}</span>
                             </div>
-                            <p className="text-sm text-gray-200 font-medium break-words bg-black/40 p-3 rounded-xl border border-white/5">
+                            <p className="text-sm text-gray-300 font-medium break-words bg-[#050505] p-3 rounded-xl border border-white/5 shadow-inner">
                               {rawContent ? rawContent : JSON.stringify(msg)}
                             </p>
-                            <code className="text-[10px] text-gray-500 font-mono block">UUID: {rawAuthorId}</code>
+                            <code className="text-[10px] text-gray-600 font-mono block pl-1">UUID: {rawAuthorId}</code>
                           </div>
 
                           <div className="flex items-center gap-2 w-full sm:w-auto justify-end shrink-0">
@@ -679,8 +676,8 @@ export default async function AdminDashboard({ searchParams }: any) {
                             )}
                             <form action={deleteChatMessage}>
                               <input type="hidden" name="id" value={msg.id} />
-                              <button type="submit" className="flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 rounded-xl text-xs font-bold transition-colors">
-                                <Trash2 size={14} /> Mesajı Sil
+                              <button type="submit" className="flex items-center gap-1.5 px-3 py-2 bg-white/5 hover:bg-white/10 text-gray-300 border border-white/10 rounded-xl text-xs font-bold transition-colors">
+                                <Trash2 size={14} /> Sil
                               </button>
                             </form>
                           </div>
@@ -693,28 +690,27 @@ export default async function AdminDashboard({ searchParams }: any) {
 
             ) : currentTab === 'Duyurular' ? (
               <div className="space-y-6 sm:space-y-8">
-                <form action={createAnnouncement} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 space-y-4 sm:space-y-5 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-[#4DA3FF]/10 blur-3xl rounded-full -z-10" />
-                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-[#4DA3FF]/10 rounded-lg sm:rounded-xl border border-[#4DA3FF]/20"><Bell className="text-[#4DA3FF] w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Duyuru Fırlat</h3>
-                  <textarea name="content" required placeholder="Kampüse duyurulacak efsane metin..." className="w-full bg-black/40 border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-sm sm:text-base text-white outline-none focus:border-[#4DA3FF] focus:bg-black/60 resize-none h-24 sm:h-32 shadow-inner transition-all"></textarea>
-                  <button type="submit" className="w-full sm:w-auto justify-center bg-[#4DA3FF] text-black font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[10px] sm:text-xs hover:bg-[#3b8ce0] transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(77,163,255,0.4)]"><Plus size={16}/> Yayına Al</button>
+                <form action={createAnnouncement} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] space-y-4 sm:space-y-5 shadow-2xl relative overflow-hidden">
+                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Bell className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Duyuru Fırlat</h3>
+                  <textarea name="content" required placeholder="Kampüse duyurulacak efsane metin..." className="w-full bg-[#050505] border border-white/10 rounded-xl sm:rounded-2xl p-4 sm:p-5 text-sm sm:text-base text-white outline-none focus:border-[#4DA3FF] resize-none h-24 sm:h-32 shadow-inner transition-colors"></textarea>
+                  <button type="submit" className="w-full sm:w-auto justify-center bg-white/10 text-white font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[10px] sm:text-xs hover:bg-white/15 border border-white/10 transition-colors flex items-center gap-2"><Plus size={16}/> Yayına Al</button>
                 </form>
 
                 <div className="space-y-3 sm:space-y-4">
                   {announcements.length === 0 ? (
-                    <div className="text-center py-12 sm:py-16 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Buralar sessiz. Aktif duyuru bulunmuyor.</div>
+                    <div className="text-center py-12 sm:py-16 bg-[#0A0A0A] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Buralar sessiz. Aktif duyuru bulunmuyor.</div>
                   ) : (
                     announcements.map((item: any) => (
-                      <div key={item.id} className="bg-white/[0.02] backdrop-blur-md p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5 shadow-lg">
+                      <div key={item.id} className="bg-[#0A0A0A] p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/[0.05] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5 shadow-lg">
                         <div>
                           <p className="text-white text-sm sm:text-base font-medium mb-1.5 sm:mb-2">{item.content}</p>
-                          <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 bg-black/30 px-2 sm:px-3 py-1 rounded-md">{new Date(item.createdAt).toLocaleString('tr-TR')}</span>
+                          <span className="text-[10px] sm:text-[11px] font-bold text-gray-500 bg-white/5 border border-white/5 px-2 sm:px-3 py-1 rounded-md">{new Date(item.createdAt).toLocaleString('tr-TR')}</span>
                         </div>
                         <div className="flex items-center gap-2 sm:gap-3 shrink-0 w-full sm:w-auto">
                           <form action={toggleAnnouncement} className="flex-1 sm:flex-none">
                             <input type="hidden" name="id" value={item.id} />
                             <input type="hidden" name="isActive" value={item.isActive.toString()} />
-                            <button className={`w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border transition-all ${item.isActive ? 'bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.1)]' : 'bg-gray-500/10 text-gray-400 border-gray-500/20'}`}>
+                            <button className={`w-full sm:w-auto px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border transition-colors ${item.isActive ? 'bg-green-500/10 text-green-400 border-green-500/20' : 'bg-white/5 text-gray-400 border-white/10'}`}>
                               {item.isActive ? 'Aktif 🟢' : 'Pasif ⚪'}
                             </button>
                           </form>
@@ -730,34 +726,33 @@ export default async function AdminDashboard({ searchParams }: any) {
               </div>
             ) : currentTab === 'Sayaç' ? (
               <div className="space-y-6 sm:space-y-8">
-                <form action={createCountdown} className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 space-y-4 sm:space-y-5 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-red-500/10 blur-3xl rounded-full -z-10" />
-                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-red-500/10 rounded-lg sm:rounded-xl border border-red-500/20"><Timer className="text-red-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Geri Sayım Kur</h3>
+                <form action={createCountdown} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] space-y-4 sm:space-y-5 shadow-2xl relative overflow-hidden">
+                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Timer className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Geri Sayım Kur</h3>
                   <div className="grid md:grid-cols-2 gap-4 sm:gap-5">
                     <div>
-                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 sm:mb-2 font-black uppercase tracking-widest">Başlık / Etkinlik Adı</label>
-                      <input type="text" name="title" required placeholder="Örn: Vize Haftası Başlıyor 📚" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-red-400 focus:bg-black/60 transition-all shadow-inner" />
+                      <label className="text-[10px] sm:text-[11px] text-gray-500 block mb-1.5 sm:mb-2 font-black uppercase tracking-widest">Başlık / Etkinlik Adı</label>
+                      <input type="text" name="title" required placeholder="Örn: Vize Haftası Başlıyor 📚" className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-[#4DA3FF] transition-colors shadow-inner" />
                     </div>
                     <div>
-                      <label className="text-[10px] sm:text-[11px] text-gray-400 block mb-1.5 sm:mb-2 font-black uppercase tracking-widest">Hedef Tarih ve Saat</label>
-                      <input type="datetime-local" name="targetDate" required className="w-full bg-black/40 border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-red-400 focus:bg-black/60 transition-all shadow-inner [color-scheme:dark]" />
+                      <label className="text-[10px] sm:text-[11px] text-gray-500 block mb-1.5 sm:mb-2 font-black uppercase tracking-widest">Hedef Tarih ve Saat</label>
+                      <input type="datetime-local" name="targetDate" required className="w-full bg-[#050505] border border-white/10 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-[#4DA3FF] transition-colors shadow-inner [color-scheme:dark]" />
                     </div>
                   </div>
-                  <button type="submit" className="w-full sm:w-auto justify-center bg-gradient-to-r from-red-500 to-orange-500 hover:to-orange-400 text-black font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[10px] sm:text-xs transition-all flex items-center gap-2 shadow-[0_0_20px_rgba(239,68,68,0.4)]"><Plus size={16}/> Sayacı Fırlat</button>
+                  <button type="submit" className="w-full sm:w-auto justify-center bg-white/10 text-white hover:bg-white/15 border border-white/10 font-black uppercase tracking-widest px-6 sm:px-8 py-3 sm:py-3.5 rounded-xl text-[10px] sm:text-xs transition-colors flex items-center gap-2"><Plus size={16}/> Sayacı Fırlat</button>
                 </form>
 
                 <div className="space-y-3 sm:space-y-4">
                   {countdowns.length === 0 ? (
-                    <div className="text-center py-12 sm:py-16 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Kayıtlı geri sayım bulunmuyor. Rahatız!</div>
+                    <div className="text-center py-12 sm:py-16 bg-[#0A0A0A] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Kayıtlı geri sayım bulunmuyor. Rahatız!</div>
                   ) : (
                     countdowns.map((item: any) => (
-                      <div key={item.id} className="bg-white/[0.02] backdrop-blur-md p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5 shadow-lg">
+                      <div key={item.id} className="bg-[#0A0A0A] p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border border-white/[0.05] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5 shadow-lg">
                         <div>
                           <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
                             <h4 className="text-white text-base sm:text-lg font-black">{item.title}</h4>
-                            {item.isActive && <span className="bg-red-500/10 text-red-400 border border-red-500/20 text-[9px] sm:text-[10px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest shadow-[0_0_10px_rgba(239,68,68,0.2)] flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse"></span> Yayında</span>}
+                            {item.isActive && <span className="bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[9px] sm:text-[10px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest flex items-center gap-1"><span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Yayında</span>}
                           </div>
-                          <p className="text-[11px] sm:text-xs font-semibold text-gray-500 bg-black/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg inline-block border border-white/5">Hedef: {new Date(item.targetDate).toLocaleString('tr-TR')}</p>
+                          <p className="text-[11px] sm:text-xs font-semibold text-gray-500 bg-white/5 border border-white/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg inline-block">Hedef: {new Date(item.targetDate).toLocaleString('tr-TR')}</p>
                         </div>
                         <form action={deleteCountdown} className="w-full sm:w-auto">
                           <input type="hidden" name="id" value={item.id} />
@@ -770,24 +765,23 @@ export default async function AdminDashboard({ searchParams }: any) {
               </div>
             ) : currentTab === 'Banlar' ? (
               <div className="space-y-6">
-                <div className="bg-white/[0.02] backdrop-blur-xl p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/5 shadow-2xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 sm:w-48 h-32 sm:h-48 bg-red-600/10 blur-3xl rounded-full -z-10" />
-                  <h3 className="text-lg sm:text-xl font-black text-white mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-red-500/10 rounded-lg sm:rounded-xl border border-red-500/20"><Ban className="text-red-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Engellenen Yazarlar <span className="text-xs sm:text-sm text-red-400 bg-red-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-red-500/20">{bannedUsers.length}</span></h3>
+                <div className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] shadow-2xl relative overflow-hidden">
+                  <h3 className="text-lg sm:text-xl font-black text-white mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Ban className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Engellenen Yazarlar <span className="text-xs sm:text-sm text-red-400 bg-red-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-red-500/20">{bannedUsers.length}</span></h3>
                    
                   {bannedUsers.length === 0 ? (
-                    <p className="text-center text-gray-500 text-sm font-medium py-8 sm:py-10 bg-black/30 rounded-xl sm:rounded-2xl border border-dashed border-white/10">Sistemde hiç banlı kullanıcı bulunmuyor. Herkes uslu!</p>
+                    <p className="text-center text-gray-500 text-sm font-medium py-8 sm:py-10 bg-[#050505] rounded-xl sm:rounded-2xl border border-dashed border-white/10">Sistemde hiç banlı kullanıcı bulunmuyor. Herkes uslu!</p>
                   ) : (
                     <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
                       {bannedUsers.map((item: any) => (
-                        <div key={item.id} className="bg-black/40 border border-red-500/10 p-4 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col gap-3 sm:gap-4 shadow-inner">
+                        <div key={item.id} className="bg-[#050505] border border-white/5 p-4 sm:p-5 rounded-xl sm:rounded-2xl flex flex-col gap-3 sm:gap-4 shadow-inner">
                           <div className="overflow-hidden">
                             <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest block mb-1">Yazar UUID (Parmak İzi)</span>
-                            <code className="text-xs sm:text-sm text-red-300 font-mono bg-red-500/5 px-2 sm:px-2.5 py-1 rounded-lg border border-red-500/10 block truncate">{item.userUuid}</code>
+                            <code className="text-xs sm:text-sm text-gray-300 font-mono bg-white/5 px-2 sm:px-2.5 py-1 rounded-lg border border-white/10 block truncate">{item.userUuid}</code>
                             <span className="text-[9px] sm:text-[10px] font-bold text-gray-600 block mt-1.5 sm:mt-2">Ban Tarihi: {new Date(item.createdAt).toLocaleString('tr-TR')}</span>
                           </div>
                           <form action={unbanUser}>
                             <input type="hidden" name="id" value={item.id} />
-                            <button className="w-full bg-green-500/10 text-green-400 border border-green-500/20 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-green-500/20 hover:shadow-[0_0_15px_rgba(34,197,94,0.15)] transition-all">Banı Kaldır / Affet</button>
+                            <button className="w-full bg-white/5 text-white border border-white/10 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-colors">Banı Kaldır / Affet</button>
                           </form>
                         </div>
                       ))}
@@ -800,18 +794,18 @@ export default async function AdminDashboard({ searchParams }: any) {
                 <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-3 bg-red-500/10 rounded-xl sm:rounded-2xl border border-red-500/20"><Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6"/></div> Bildirilen İçerikler <span className="text-xs sm:text-sm text-red-400 bg-red-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-red-500/20">{reports.length}</span></h3>
                  
                 {reports.length === 0 ? (
-                  <div className="text-center py-16 sm:py-20 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 font-medium text-sm sm:text-lg">Şikayet edilen içerik bulunmuyor. Kampüs tertemiz! 🎉</div>
+                  <div className="text-center py-16 sm:py-20 bg-[#0A0A0A] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 font-medium text-sm sm:text-lg">Şikayet edilen içerik bulunmuyor. Kampüs tertemiz! 🎉</div>
                 ) : (
                   reports.map((report: any) => (
-                    <div key={report.id} className="bg-white/[0.02] backdrop-blur-xl p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border border-red-500/20 space-y-4 sm:space-y-6 shadow-2xl relative overflow-hidden">
+                    <div key={report.id} className="bg-[#0A0A0A] p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border border-red-500/20 space-y-4 sm:space-y-6 shadow-2xl relative overflow-hidden">
                       <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-red-600/10 blur-3xl rounded-full -z-10" />
                        
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-white/5 pb-3 sm:pb-4">
                         <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                          <span className="bg-red-500/10 text-red-400 border border-red-500/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest shadow-[0_0_15px_rgba(239,68,68,0.15)] flex items-center gap-1.5">
+                          <span className="bg-red-500/10 text-red-400 border border-red-500/30 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg text-[10px] sm:text-xs font-black uppercase tracking-widest flex items-center gap-1.5">
                             <AlertTriangle size={12} className="sm:w-[14px] sm:h-[14px]"/> {report.reason}
                           </span>
-                          <span className="text-[10px] sm:text-xs font-bold text-gray-500 bg-black/40 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg">{new Date(report.createdAt).toLocaleString('tr-TR')}</span>
+                          <span className="text-[10px] sm:text-xs font-bold text-gray-500 bg-[#050505] border border-white/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg">{new Date(report.createdAt).toLocaleString('tr-TR')}</span>
                         </div>
                         <form action={dismissReport} className="w-full sm:w-auto">
                           <input type="hidden" name="id" value={report.id} />
@@ -820,21 +814,21 @@ export default async function AdminDashboard({ searchParams }: any) {
                       </div>
 
                       {report.post && (
-                        <div className="bg-black/40 border border-white/5 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-inner relative">
+                        <div className="bg-[#050505] border border-white/5 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-inner relative">
                           <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest block mb-2 sm:mb-3 border-b border-white/5 pb-1.5 sm:pb-2">🎯 Şikayet Edilen Gönderi</span>
                           <p className="text-white text-sm sm:text-base leading-relaxed font-medium">{report.post.content}</p>
                           <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-white/5">
-                            <form action={deletePost} className="w-full"><input type="hidden" name="id" value={report.post.id} /><button className="w-full justify-center bg-red-500/10 text-red-400 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] flex items-center gap-1.5 sm:gap-2 transition-all"><Trash2 size={14}/> Postu Kalıcı Sil</button></form>
+                            <form action={deletePost} className="w-full"><input type="hidden" name="id" value={report.post.id} /><button className="w-full justify-center bg-red-500/10 text-red-400 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1.5 sm:gap-2 transition-colors"><Trash2 size={14}/> Postu Kalıcı Sil</button></form>
                           </div>
                         </div>
                       )}
 
                       {report.comment && (
-                        <div className="bg-black/40 border border-white/5 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-inner relative">
+                        <div className="bg-[#050505] border border-white/5 p-4 sm:p-5 rounded-xl sm:rounded-2xl shadow-inner relative">
                           <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-widest block mb-2 sm:mb-3 border-b border-white/5 pb-1.5 sm:pb-2">💬 Şikayet Edilen Yorum</span>
                           <p className="text-white text-sm sm:text-base leading-relaxed font-medium">{report.comment.content}</p>
                           <div className="flex gap-2 sm:gap-3 mt-4 sm:mt-5 pt-3 sm:pt-4 border-t border-white/5">
-                            <form action={deleteComment} className="w-full"><input type="hidden" name="id" value={report.comment.id} /><button className="w-full justify-center bg-red-500/10 text-red-400 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] flex items-center gap-1.5 sm:gap-2 transition-all"><Trash2 size={14}/> Yorumu Kalıcı Sil</button></form>
+                            <form action={deleteComment} className="w-full"><input type="hidden" name="id" value={report.comment.id} /><button className="w-full justify-center bg-red-500/10 text-red-400 px-4 sm:px-5 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 hover:bg-red-500/20 flex items-center gap-1.5 sm:gap-2 transition-colors"><Trash2 size={14}/> Yorumu Kalıcı Sil</button></form>
                           </div>
                         </div>
                       )}
@@ -844,9 +838,9 @@ export default async function AdminDashboard({ searchParams }: any) {
               </div>
             ) : (
               displayPosts.length === 0 ? (
-                <div className="text-center py-16 sm:py-24 bg-white/[0.01] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 flex flex-col items-center justify-center px-4">
+                <div className="text-center py-16 sm:py-24 bg-[#0A0A0A] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 flex flex-col items-center justify-center px-4">
                   <div className="bg-white/5 p-4 sm:p-5 rounded-2xl sm:rounded-3xl mb-4 sm:mb-5 border border-white/5 shadow-inner"><Inbox className="text-gray-500 w-8 h-8 sm:w-10 sm:h-10"/></div>
-                  <p className="text-gray-400 font-bold text-sm sm:text-lg tracking-wide text-center">Bu sekmede gösterilecek gönderi bulunmuyor.</p>
+                  <p className="text-gray-500 font-bold text-sm sm:text-lg tracking-wide text-center">Bu sekmede gösterilecek gönderi bulunmuyor.</p>
                 </div>
               ) : (
                 <div className="grid gap-4 sm:gap-6">
@@ -855,34 +849,27 @@ export default async function AdminDashboard({ searchParams }: any) {
                     const isConfession = post.type === 'CONFESSION';
                     const isBosYap = post.type === 'BOSYAP';
 
-                    const cardGlow = isEphemeral ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)] bg-amber-500/[0.02]' 
-                      : post.status === 'PENDING' ? 'border-orange-500/40 hover:border-orange-500/60 shadow-[0_0_20px_rgba(249,115,22,0.1)] bg-orange-500/[0.03] animate-[pulse_4s_ease-in-out_infinite]'
-                      : isConfession ? 'border-purple-500/20 hover:border-purple-500/40 bg-white/[0.02]'
-                      : isBosYap ? 'border-emerald-500/20 hover:border-emerald-500/40 bg-white/[0.02]'
-                      : 'border-white/10 hover:border-white/20 bg-white/[0.02]';
+                    // Black Card tarzı temiz kart stili
+                    const cardStyle = post.status === 'PENDING' ? 'border-amber-500/30 bg-amber-500/[0.02]' 
+                      : post.status === 'APPROVED' ? 'border-white/[0.05] bg-[#0A0A0A]' 
+                      : 'border-white/[0.05] bg-[#0A0A0A]';
 
                     const finalAuthorName = getAuthorName(post.authorUuid || post.id, customNicknamesMap[post.authorUuid]);
 
                     return (
-                      <article key={post.id} className={`${cardGlow} p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border backdrop-blur-xl transition-all duration-300 flex flex-col gap-4 sm:gap-5 hover:shadow-2xl relative overflow-hidden group/post`}>
-                        {isEphemeral && <div className="absolute top-0 right-0 w-24 sm:w-32 h-24 sm:h-32 bg-amber-500/10 blur-3xl rounded-full -z-10" />}
-                         
+                      <article key={post.id} className={`${cardStyle} p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[32px] border transition-all duration-300 flex flex-col gap-4 sm:gap-5 shadow-lg relative overflow-hidden`}>
                         <div className="flex flex-wrap justify-between items-center pb-3 sm:pb-5 border-b border-white/5 gap-2 sm:gap-3">
                           <div className="flex flex-wrap gap-2 items-center">
                             {isEphemeral ? (
-                              <span className="text-[9px] sm:text-[10px] font-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg flex items-center gap-1 sm:gap-1.5 uppercase tracking-widest bg-amber-500/15 text-amber-400 border border-amber-500/30 animate-pulse shadow-[0_0_15px_rgba(245,158,11,0.2)]"><Clock size={10} className="sm:w-3 sm:h-3"/> 24s {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳</span>
+                              <span className="text-[9px] sm:text-[10px] font-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg flex items-center gap-1 sm:gap-1.5 uppercase tracking-widest bg-white/5 text-gray-300 border border-white/10"><Clock size={10} className="sm:w-3 sm:h-3"/> 24s {isConfession ? 'İtiraf' : 'Fısıltı'} ⏳</span>
                             ) : (
-                              <span className={`text-[9px] sm:text-[10px] font-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg flex items-center gap-1 sm:gap-1.5 uppercase tracking-widest border ${
-                                isConfession ? 'bg-purple-500/10 text-purple-400 border-purple-500/20' 
-                                : isBosYap ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' 
-                                : 'bg-[#4DA3FF]/10 text-[#4DA3FF] border-[#4DA3FF]/20'
-                              }`}>
+                              <span className="text-[9px] sm:text-[10px] font-black px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg flex items-center gap-1 sm:gap-1.5 uppercase tracking-widest border bg-white/5 text-gray-300 border-white/10">
                                 <Tag size={10} className="sm:w-3 sm:h-3"/> {isConfession ? 'İtiraf' : isBosYap ? 'Boş Yap' : 'Overheard'}
                               </span>
                             )}
-                            <span className="text-[9px] sm:text-[11px] font-bold px-2 sm:px-3 py-1 sm:py-1.5 bg-black/40 rounded-md sm:rounded-lg text-gray-400 border border-white/5 flex items-center gap-1 sm:gap-1.5"><Calendar size={10} className="sm:w-3 sm:h-3"/> {new Date(post.createdAt).toLocaleDateString('tr-TR')}</span>
+                            <span className="text-[9px] sm:text-[11px] font-bold px-2 sm:px-3 py-1 sm:py-1.5 bg-[#050505] rounded-md sm:rounded-lg text-gray-500 border border-white/5 flex items-center gap-1 sm:gap-1.5"><Calendar size={10} className="sm:w-3 sm:h-3"/> {new Date(post.createdAt).toLocaleDateString('tr-TR')}</span>
                           </div>
-                          <span className={`text-[9px] sm:text-[10px] font-black px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full uppercase tracking-widest border ${post.status === 'PENDING' ? 'bg-orange-500/20 text-orange-400 border-orange-500/40 shadow-[0_0_20px_rgba(249,115,22,0.3)] animate-pulse' : post.status === 'APPROVED' ? 'bg-green-500/10 text-green-400 border-green-500/20 shadow-[0_0_15px_rgba(34,197,94,0.15)]' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
+                          <span className={`text-[9px] sm:text-[10px] font-black px-2.5 sm:px-4 py-1 sm:py-1.5 rounded-full uppercase tracking-widest border ${post.status === 'PENDING' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : post.status === 'APPROVED' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-red-500/10 text-red-400 border-red-500/20'}`}>
                             {post.status === 'PENDING' ? '🔥 BEKLİYOR' : post.status === 'APPROVED' ? 'YAYINDA' : 'RED'}
                           </span>
                         </div>
@@ -891,43 +878,43 @@ export default async function AdminDashboard({ searchParams }: any) {
                           <summary className="list-none cursor-pointer">
                             <div className="flex justify-between items-start gap-4">
                               <p className="text-white text-base sm:text-lg leading-relaxed py-1 sm:py-2 font-medium break-words flex-1">{post.content}</p>
-                              <span className="shrink-0 text-xs text-[#4DA3FF] hover:underline flex items-center gap-1 bg-[#4DA3FF]/10 px-3 py-1.5 rounded-xl border border-[#4DA3FF]/20 font-bold"><Pencil size={12}/> Düzenle</span>
+                              <span className="shrink-0 text-xs text-gray-400 hover:text-white flex items-center gap-1 bg-white/5 px-3 py-1.5 rounded-xl border border-white/10 font-bold transition-colors"><Pencil size={12}/> Düzenle</span>
                             </div>
                           </summary>
-                          <form action={updatePostContent} className="mt-4 pt-4 border-t border-white/10 space-y-4 bg-black/40 p-4 sm:p-5 rounded-2xl border border-white/5">
+                          <form action={updatePostContent} className="mt-4 pt-4 border-t border-white/5 space-y-4 bg-[#050505] p-4 sm:p-5 rounded-2xl border border-white/5 shadow-inner">
                             <input type="hidden" name="postId" value={post.id} />
                             <div>
-                              <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block mb-1.5">Gönderi Metni</label>
-                              <textarea name="content" defaultValue={post.content} className="w-full bg-black/60 border border-white/15 rounded-xl p-3.5 text-sm text-white outline-none focus:border-[#4DA3FF] resize-none h-28 shadow-inner"></textarea>
+                              <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block mb-1.5">Gönderi Metni</label>
+                              <textarea name="content" defaultValue={post.content} className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-sm text-white outline-none focus:border-gray-500 resize-none h-28 transition-colors"></textarea>
                             </div>
-                             
+                              
                             <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2 border-t border-white/5">
                               <div className="flex items-center gap-2">
-                                <label className="text-xs text-gray-300 font-extrabold uppercase tracking-wider">Kategori Seç:</label>
-                                <select name="type" defaultValue={post.type} className="bg-black border border-[#4DA3FF]/50 text-xs text-white px-3 py-2 rounded-xl outline-none focus:border-[#4DA3FF] font-bold cursor-pointer">
+                                <label className="text-xs text-gray-400 font-extrabold uppercase tracking-wider">Kategori:</label>
+                                <select name="type" defaultValue={post.type} className="bg-black border border-white/10 text-xs text-white px-3 py-2 rounded-xl outline-none focus:border-white/30 font-bold cursor-pointer transition-colors">
                                   <option value="OVERHEARD">🎧 Overheard</option>
                                   <option value="CONFESSION">🎭 İtiraf</option>
                                   <option value="BOSYAP">☕ Boş Yap</option>
                                 </select>
                               </div>
-                              <button type="submit" className="bg-[#4DA3FF] hover:bg-[#3b8fd8] text-black font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-all shadow-[0_0_15px_rgba(77,163,255,0.3)]">Metni Kaydet</button>
+                              <button type="submit" className="bg-white/10 hover:bg-white/15 text-white font-black px-6 py-2.5 rounded-xl text-xs uppercase tracking-wider transition-colors border border-white/10">Metni Kaydet</button>
                             </div>
                           </form>
 
-                          <form action={updatePostStats} className="mt-3 pt-3 border-t border-white/10 flex flex-wrap items-center gap-3 bg-black/40 p-3 rounded-xl border border-white/5">
+                          <form action={updatePostStats} className="mt-3 pt-3 border-t border-white/5 flex flex-wrap items-center gap-3 bg-[#050505] p-3 rounded-xl border border-white/5 shadow-inner">
                             <input type="hidden" name="postId" value={post.id} />
-                             
+                              
                             <div className="flex items-center gap-1.5">
-                              <label className="text-[10px] text-pink-400 font-bold uppercase tracking-wider">Beğeni:</label>
-                              <input type="number" name="likes" defaultValue={post.likes} className="bg-black border border-white/15 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-pink-500 w-20 font-bold text-center shadow-inner" />
+                              <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">Beğeni:</label>
+                              <input type="number" name="likes" defaultValue={post.likes} className="bg-[#0A0A0A] border border-white/10 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-white/30 w-20 font-bold text-center transition-colors" />
                             </div>
 
                             <div className="flex items-center gap-1.5">
-                              <label className="text-[10px] text-[#4DA3FF] font-bold uppercase tracking-wider">İzlenme:</label>
-                              <input type="number" name="views" defaultValue={post.views} className="bg-black border border-white/15 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-[#4DA3FF] w-20 font-bold text-center shadow-inner" />
+                              <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider">İzlenme:</label>
+                              <input type="number" name="views" defaultValue={post.views} className="bg-[#0A0A0A] border border-white/10 text-xs text-white px-2.5 py-1.5 rounded-lg outline-none focus:border-white/30 w-20 font-bold text-center transition-colors" />
                             </div>
 
-                            <button type="submit" className="bg-white/10 hover:bg-white/20 text-white font-black px-4 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-all border border-white/10 ml-auto cursor-pointer">
+                            <button type="submit" className="bg-white/5 hover:bg-white/10 text-gray-300 hover:text-white font-black px-4 py-1.5 rounded-lg text-[10px] uppercase tracking-wider transition-colors border border-white/10 ml-auto cursor-pointer">
                               Sayıları Çak 🎯
                             </button>
                           </form>
@@ -939,25 +926,27 @@ export default async function AdminDashboard({ searchParams }: any) {
                           </div>
                         )}
 
-                        <div className="bg-black/30 border border-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl flex flex-col xl:flex-row gap-3 sm:gap-4 items-start xl:items-center justify-between shadow-inner w-full relative z-10">
+                        {/* Yazar Bilgileri ve Hızlı Aksiyonlar */}
+                        <div className="bg-[#050505] border border-white/5 p-3 sm:p-4 rounded-xl sm:rounded-2xl flex flex-col xl:flex-row gap-3 sm:gap-4 items-start xl:items-center justify-between shadow-inner w-full relative z-10">
                           <div className="flex items-center gap-2 sm:gap-3 w-full lg:w-auto">
-                            <div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/5 shrink-0"><Fingerprint className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5" /></div>
+                            <div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10 shrink-0"><Fingerprint className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5" /></div>
                             <div className="overflow-hidden w-full">
                               <span className="text-[9px] sm:text-[10px] text-gray-500 uppercase font-black tracking-wider block mb-0.5">Yazar Kimliği (UUID)</span>
-                              <code className="text-[10px] sm:text-xs text-white/90 font-mono bg-black/50 px-2 py-1 rounded-md border border-white/5 block truncate">{post.authorUuid || 'Bilinmiyor'}</code>
+                              <code className="text-[10px] sm:text-xs text-gray-300 font-mono bg-white/5 px-2 py-1 rounded-md border border-white/5 block truncate">{post.authorUuid || 'Bilinmiyor'}</code>
                             </div>
                           </div>
                             
                           {post.authorUuid && (
                             <form action={updateUserMeta} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-3 w-full xl:w-auto">
                               <input type="hidden" name="userUuid" value={post.authorUuid} />
-                              <input type="text" name="nickname" defaultValue={customNicknamesMap[post.authorUuid] || ''} placeholder="Nick (Örn: Kral)" className="bg-black/50 border border-white/10 text-xs sm:text-sm text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-[#4DA3FF] outline-none w-full sm:w-32 lg:w-36 transition-colors shadow-inner" />
-                              <input type="text" name="badge" defaultValue={userBadgesMap[post.authorUuid] || ''} placeholder="Rozet (Örn: 👑 VIP)" className="bg-yellow-500/5 border border-yellow-500/20 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-yellow-500 focus:bg-yellow-500/10 outline-none w-full sm:w-36 lg:w-40 transition-colors shadow-inner" />
-                              <button type="submit" className="bg-gradient-to-r from-purple-600/20 to-pink-600/20 text-pink-300 border border-pink-500/30 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest hover:from-purple-600/30 hover:to-pink-600/30 transition-all shrink-0 w-full sm:w-auto text-center">Kaydet</button>
+                              <input type="text" name="nickname" defaultValue={customNicknamesMap[post.authorUuid] || ''} placeholder="Nick (Örn: Kral)" className="bg-[#0A0A0A] border border-white/10 text-xs sm:text-sm text-white px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-gray-500 outline-none w-full sm:w-32 lg:w-36 transition-colors" />
+                              <input type="text" name="badge" defaultValue={userBadgesMap[post.authorUuid] || ''} placeholder="Rozet (Örn: 👑 VIP)" className="bg-[#0A0A0A] border border-white/10 text-xs sm:text-sm text-yellow-400 placeholder-yellow-700/50 px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl focus:border-yellow-500 outline-none w-full sm:w-36 lg:w-40 transition-colors" />
+                              <button type="submit" className="bg-white/10 text-white border border-white/20 px-4 sm:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest hover:bg-white/15 transition-colors shrink-0 w-full sm:w-auto text-center">Kaydet</button>
                             </form>
                           )}
                         </div>
                           
+                        {/* Onay/Red/Sil Butonları */}
                         <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full justify-between items-stretch sm:items-center pt-3 sm:pt-4 border-t border-white/5 mt-1 relative z-10">
                             <AdminStoryExporter 
                               postContent={post.content} 
@@ -970,22 +959,22 @@ export default async function AdminDashboard({ searchParams }: any) {
                                   <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3 w-full sm:w-auto">
                                     <form action={approvePost} className="w-full sm:w-auto">
                                       <input type="hidden" name="id" value={post.id} />
-                                      <button className="w-full justify-center bg-green-500/20 text-green-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-green-500/40 flex gap-1.5 sm:gap-2 hover:bg-green-500/30 shadow-[0_0_20px_rgba(34,197,94,0.3)] transition-all"><Check size={16} className="sm:w-4 sm:h-4"/> Onayla Yolla</button>
+                                      <button className="w-full justify-center bg-emerald-500/10 text-emerald-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-emerald-500/20 flex gap-1.5 sm:gap-2 hover:bg-emerald-500/20 transition-colors"><Check size={16} className="sm:w-4 sm:h-4"/> Onayla Yolla</button>
                                     </form>
                                     <form action={rejectPost} className="w-full sm:w-auto">
                                       <input type="hidden" name="id" value={post.id} />
-                                      <button className="w-full justify-center bg-orange-500/10 text-orange-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-orange-500/20 flex gap-1.5 sm:gap-2 hover:bg-orange-500/20 transition-all"><X size={14} className="sm:w-4 sm:h-4"/> Çöpe At</button>
+                                      <button className="w-full justify-center bg-white/5 text-gray-300 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-white/10 flex gap-1.5 sm:gap-2 hover:bg-white/10 hover:text-white transition-colors"><X size={14} className="sm:w-4 sm:h-4"/> Çöpe At</button>
                                     </form>
                                   </div>
                                 ) : null}
                                 <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-3 w-full sm:w-auto mt-2 sm:mt-0">
                                   <form action={banUser} className="w-full sm:w-auto">
                                     <input type="hidden" name="userUuid" value={post.authorUuid || 'bilinmiyor'} />
-                                    <button className="w-full justify-center bg-red-500/10 text-red-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 flex gap-1.5 sm:gap-2 hover:bg-red-500/20 hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] transition-all"><Ban size={14} className="sm:w-4 sm:h-4"/> Banla</button>
+                                    <button className="w-full justify-center bg-red-500/10 text-red-400 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-red-500/20 flex gap-1.5 sm:gap-2 hover:bg-red-500/20 transition-colors"><Ban size={14} className="sm:w-4 sm:h-4"/> Banla</button>
                                   </form>
                                   <form action={deletePost} className="w-full sm:w-auto">
                                     <input type="hidden" name="id" value={post.id} />
-                                    <button className="w-full justify-center bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-white/10 flex gap-1.5 sm:gap-2 transition-all"><Trash2 size={14} className="sm:w-4 sm:h-4"/> Sil</button>
+                                    <button className="w-full justify-center bg-white/5 text-gray-300 hover:text-white hover:bg-white/10 py-2.5 sm:py-3 px-3 sm:px-6 rounded-lg sm:rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-wider border border-white/10 flex gap-1.5 sm:gap-2 transition-colors"><Trash2 size={14} className="sm:w-4 sm:h-4"/> Sil</button>
                                   </form>
                                 </div>
                             </div>
