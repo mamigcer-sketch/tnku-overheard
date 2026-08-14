@@ -47,14 +47,17 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const { id } = await params;
   const sParams = await searchParams;
   const cookieStore = await cookies();
-  const currentUserUuid = cookieStore.get('user_uuid')?.value || '';
+  
+  // 🔥 DÜZELTME BURADA: Yönlendirme sayfasındaki gibi her iki çerezi de kontrol ediyoruz!
+  const authorId = cookieStore.get('tnku_author_id')?.value;
+  const generalUuid = cookieStore.get('user_uuid')?.value;
+  const currentUserUuid = authorId || generalUuid || '';
 
   const targetUuid = id === 'ben' ? (currentUserUuid || 'ben') : decodeURIComponent(id);
   const isOwnProfile = Boolean(id === 'ben' || (currentUserUuid && targetUuid === currentUserUuid));
   
   const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
 
-  // 🔥 Veritabanından userAvatarDb de çekiliyor
   const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb, userStats, userAvatarDb] = await Promise.all([
     prisma.post.count({ where: { authorUuid: targetUuid, status: 'APPROVED' } }),
     prisma.comment.count({ where: { authorId: targetUuid } }),
@@ -147,7 +150,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
 
       <div className="max-w-2xl mx-auto pt-2">
         
-        {/* 2. PROFİL ÜST BİLGİ ALANI (INSTAGRAM TARZI) */}
+        {/* 2. PROFİL ÜST BİLGİ ALANI */}
         <div className="px-4 pt-4 pb-2">
           <div className="flex items-center gap-6 sm:gap-8">
             
@@ -214,7 +217,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           </div>
         </div>
 
-        {/* 3. SEKMELER (X/TWITTER TARZI ÇİZGİLİ) */}
+        {/* 3. SEKMELER */}
         <div className="flex border-b border-white/10 mt-2 sticky top-[53px] bg-[#000000] z-40">
           <Link 
             href={`/profil/${id}?tab=gonderiler`} 
