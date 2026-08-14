@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 import BackButton from '@/components/BackButton';
 import CommentSection from '@/components/CommentSection';
-import PostCard from '@/components/PostCard'; // 🔥 Ana sayfadaki efsane kartı direkt import ediyoruz!
+import PostCard from '@/components/PostCard'; 
 import { Home } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
@@ -13,7 +13,7 @@ export default async function PostPage({ params }: any) {
   const resolvedParams = await params;
   const postId = resolvedParams?.id;
 
-  if (!postId) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-white font-medium">Yükleniyor...</div>;
+  if (!postId) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-white font-medium">Yükleniyor...</div>;
 
   const post = await prisma.post.findUnique({
     where: { id: String(postId) },
@@ -23,17 +23,21 @@ export default async function PostPage({ params }: any) {
     }
   });
 
-  if (!post) return <div className="min-h-screen bg-[#0B0B0B] flex items-center justify-center text-gray-500 font-medium">Post bulunamadı...</div>;
+  if (!post) return <div className="min-h-screen bg-[#050505] flex items-center justify-center text-gray-500 font-medium">Post bulunamadı...</div>;
 
   let customNicknamesDb: any[] = [];
   let userBadgesDb: any[] = [];
+  let userAvatarsDb: any[] = []; // 🔥 AVATARLAR İÇİN EKLENDİ
+
   try {
-    const [nicks, badges] = await Promise.all([
+    const [nicks, badges, avatars] = await Promise.all([
       (prisma as any).customNickname.findMany(),
-      (prisma as any).userBadge.findMany()
+      (prisma as any).userBadge.findMany(),
+      (prisma as any).userAvatar.findMany() // 🔥 AVATARLAR ÇEKİLDİ
     ]);
     customNicknamesDb = nicks;
     userBadgesDb = badges;
+    userAvatarsDb = avatars;
   } catch (e) {}
 
   const customNicknamesMap = customNicknamesDb.reduce((acc: any, curr: any) => {
@@ -46,12 +50,17 @@ export default async function PostPage({ params }: any) {
     return acc;
   }, {});
 
+  // 🔥 AVATARLARI HARİTALANDIRDIK
+  const userAvatarsMap = userAvatarsDb.reduce((acc: any, curr: any) => {
+    acc[curr.userUuid] = curr.avatarUrl;
+    return acc;
+  }, {});
+
   const cookieStore = await cookies();
   const authorId = cookieStore.get('tnku_author_id')?.value;
   const userUuid = cookieStore.get('user_uuid')?.value || authorId;
   let userLikedCommentIds: string[] = [];
 
-  // Cookieden kullanıcının bu postu beğenip beğenmediğini kontrol edelim
   const likedPostsCookie = cookieStore.get('liked_posts')?.value || '';
   const likedPosts = likedPostsCookie.split(',');
   const isLikedByCurrentUser = likedPosts.includes(postId);
@@ -68,7 +77,6 @@ export default async function PostPage({ params }: any) {
     }
   }
 
-  // Beğeni işlemini Server Action olarak burada da tanımlıyoruz
   async function incrementLike(formData: FormData) {
     'use server';
     const id = formData.get('id') as string;
@@ -90,15 +98,19 @@ export default async function PostPage({ params }: any) {
   }
 
   return (
-    <main className="min-h-screen bg-[#0B0B0B] text-white relative z-0 overflow-hidden pb-24">
+    <main className="min-h-screen text-white relative z-0 overflow-hidden pb-24 selection:bg-[#4DA3FF]/30">
       
-      {/* 1. KUSURSUZ HİZALANMIŞ HEADER */}
-      <header className="sticky top-0 z-50 bg-[#0B0B0B]/90 backdrop-blur-xl border-b border-white/5 px-4 py-3 flex items-center shadow-sm mb-4 sm:mb-6">
+      {/* YENİ PREMIUM ARKA PLAN */}
+      <div className="fixed inset-0 -z-10 bg-[#050505]">
+        <div className="absolute top-0 left-0 right-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#050505] to-[#050505] pointer-events-none"></div>
+      </div>
+
+      <header className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-3xl border-b border-white/[0.05] px-4 py-3 flex items-center shadow-sm mb-4 sm:mb-6">
         <div className="flex-1 flex justify-start">
           <BackButton />
         </div>
         
-        <h1 className="text-[16px] font-bold tracking-tight flex-1 text-center text-gray-200">
+        <h1 className="text-[16px] font-black tracking-widest flex-1 text-center text-white uppercase">
           Gönderi
         </h1>
         
@@ -109,10 +121,9 @@ export default async function PostPage({ params }: any) {
         </div>
       </header>
 
-      <div className="max-w-2xl mx-auto px-2 sm:px-4">
+      <div className="max-w-2xl mx-auto px-4 sm:px-4">
         
-        {/* 2. POSTCARD BİLEŞENİ (Ana sayfadakiyle %100 aynı görünüm ve özellikler) */}
-        <div className="mb-2">
+        <div className="mb-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
           <PostCard 
             post={post} 
             isLiked={isLikedByCurrentUser} 
@@ -122,18 +133,19 @@ export default async function PostPage({ params }: any) {
             userBadge={userBadgesMap[post.authorUuid || post.id]}
             customNicknamesMap={customNicknamesMap}
             userBadgesMap={userBadgesMap}
+            userAvatar={userAvatarsMap[post.authorUuid || post.id]} // 🔥 AVATAR BURADAN GİDİYOR
           />
         </div>
 
-        {/* 3. YORUMLAR SEKMESİ */}
-        <div className="pt-2">
+        <div className="pt-2 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-150">
           <CommentSection 
             postId={post.id} 
             comments={post.comments} 
             postAuthorUuid={post.authorUuid || post.id} 
             userLikedCommentIds={userLikedCommentIds} 
             customNicknamesMap={customNicknamesMap}
-            userBadgesMap={userBadgesMap} 
+            userBadgesMap={userBadgesMap}
+            userAvatarsMap={userAvatarsMap} // 🔥 YORUMLAR İÇİN AVATARLAR DA GİDİYOR
           />
         </div>
 
