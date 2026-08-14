@@ -159,3 +159,8 @@ model UserAvatar {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+model SystemSetting {
+  id        String   @id @default("global")
+  isActive  Boolean  @default(true) // true = site açık, false = bakım modu (middleware devrede)
+  updatedAt DateTime @updatedAt
+}

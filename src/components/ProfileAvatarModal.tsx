@@ -64,25 +64,22 @@ export default function ProfileAvatarModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[99999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div 
-        className="relative w-full max-w-sm max-h-[85vh] overflow-y-auto bg-[#0A0A0A] border border-white/10 p-6 sm:rounded-[28px] rounded-t-[32px] rounded-b-none shadow-2xl animate-in slide-in-from-bottom-10 sm:zoom-in-95 duration-200"
+        className="relative w-full max-w-sm max-h-[90vh] overflow-y-auto bg-[#0A0A0A] border border-white/10 p-6 rounded-[28px] shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Sürükleme Çubuğu (Sadece Mobil) */}
-        <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto mb-5 sm:hidden" />
-
         <button 
           onClick={onClose}
-          className="absolute top-4 sm:top-5 right-4 sm:right-5 p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors"
+          className="absolute top-5 right-5 p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors z-10 cursor-pointer"
         >
           <X size={20} />
         </button>
 
-        <h2 className="text-xl font-black text-white mb-1">Profil Resmi Seç</h2>
-        <p className="text-gray-400 text-xs mb-6 pr-8">
+        <h2 className="text-xl font-black text-white mb-1 tracking-tight">Profil Resmi Seç</h2>
+        <p className="text-gray-400 text-xs mb-6 pr-8 leading-relaxed">
           Karakterini belirle veya galerinden yükle.
         </p>
 
@@ -117,7 +114,7 @@ export default function ProfileAvatarModal({
         </div>
 
         {/* GALERİDEN YÜKLE & KAYDET */}
-        <div className="space-y-3 mb-4 sm:mb-0">
+        <div className="space-y-3">
           <label className="w-full py-3.5 bg-white/5 hover:bg-white/10 border border-white/10 text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-colors active:scale-95">
             <Upload size={16} />
             <span>Galeriden Fotoğraf Seç</span>
@@ -127,7 +124,7 @@ export default function ProfileAvatarModal({
           <button
             onClick={handleSubmit}
             disabled={loading || !selectedAvatar}
-            className="w-full py-3.5 bg-[#4DA3FF] hover:bg-blue-400 text-black font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95"
+            className="w-full py-3.5 bg-[#4DA3FF] hover:bg-blue-400 text-black font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 cursor-pointer"
           >
             {loading ? <Loader2 size={18} className="animate-spin" /> : <><Check size={18} /> Resmini Güncelle</>}
           </button>
