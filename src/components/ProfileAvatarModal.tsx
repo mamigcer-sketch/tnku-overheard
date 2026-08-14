@@ -64,11 +64,12 @@ export default function ProfileAvatarModal({
 
   return (
     <div 
-      className="fixed inset-0 z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200"
+      className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-sm overflow-y-auto flex p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
+      {/* 🔥 ÇÖZÜM BURADA: m-auto sayesinde kutu her zaman ekrana sığacak şekilde davranır, sığmazsa aşağı kayar ama üstü asla kesilmez! */}
       <div 
-        className="relative w-full max-w-sm max-h-[90vh] overflow-y-auto bg-[#0A0A0A] border border-white/10 p-6 rounded-[28px] shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200"
+        className="m-auto relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 p-6 rounded-[28px] shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         <button 
@@ -78,7 +79,8 @@ export default function ProfileAvatarModal({
           <X size={20} />
         </button>
 
-        <h2 className="text-xl font-black text-white mb-1 tracking-tight">Profil Resmi Seç</h2>
+        {/* X butonuyla çakışmaması için mt-2 eklendi */}
+        <h2 className="text-xl font-black text-white mt-2 mb-1 tracking-tight">Profil Resmi Seç</h2>
         <p className="text-gray-400 text-xs mb-6 pr-8 leading-relaxed">
           Karakterini belirle veya galerinden yükle.
         </p>
