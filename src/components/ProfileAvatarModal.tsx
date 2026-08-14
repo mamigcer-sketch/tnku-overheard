@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, Camera, Check, Upload, Loader2 } from "lucide-react";
 import { updateProfileAvatar } from "@/app/profile/actions";
 import { useRouter } from "next/navigation";
@@ -21,11 +22,25 @@ export default function ProfileAvatarModal({
   isOpen: boolean;
   onClose: () => void;
 }) {
+  const [mounted, setMounted] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar || "");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  if (!isOpen) return null;
+  // 🔥 PORTAL İÇİN MOUNT KONTROLÜ VE ARKA PLAN KAYDIRMA KİLİDİ
+  useEffect(() => {
+    setMounted(true);
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => {
+      document.body.style.overflow = "unset";
+    };
+  }, [isOpen]);
+
+  if (!isOpen || !mounted) return null;
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -62,12 +77,12 @@ export default function ProfileAvatarModal({
     setLoading(false);
   };
 
-  return (
+  // 🔥 MODALI CREATEPORTAL İLE DİREKT BODY'YE IŞINLIYORUZ (Asla kesilmez)
+  return createPortal(
     <div 
       className="fixed inset-0 z-[99999] bg-black/85 backdrop-blur-sm overflow-y-auto flex p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
-      {/* 🔥 ÇÖZÜM BURADA: m-auto sayesinde kutu her zaman ekrana sığacak şekilde davranır, sığmazsa aşağı kayar ama üstü asla kesilmez! */}
       <div 
         className="m-auto relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 p-6 rounded-[28px] shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
@@ -79,7 +94,6 @@ export default function ProfileAvatarModal({
           <X size={20} />
         </button>
 
-        {/* X butonuyla çakışmaması için mt-2 eklendi */}
         <h2 className="text-xl font-black text-white mt-2 mb-1 tracking-tight">Profil Resmi Seç</h2>
         <p className="text-gray-400 text-xs mb-6 pr-8 leading-relaxed">
           Karakterini belirle veya galerinden yükle.
@@ -132,6 +146,7 @@ export default function ProfileAvatarModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
