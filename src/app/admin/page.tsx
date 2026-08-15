@@ -7,7 +7,7 @@ import AnonymousPlayer from '@/components/AnonymousPlayer';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, Coffee,
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles, ExternalLink, Crown, Award, UserMinus, UserCog
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles, ExternalLink, Crown, Award, UserMinus, UserCog, Ghost, Brain, Crosshair
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -74,7 +74,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
   let total = 0, pending = 0, approved = 0, rejected = 0, totalLikes = 0, totalViews = 0, reportsCount = 0, recentPostsCount = 0, recentCommentsCount = 0, chatCount = 0;
   let activeAuthorsCount = 0;
-  let isSystemActive = true; // 🔥 ŞALTER DURUMU İÇİN DEĞİŞKEN
+  let isSystemActive = true; 
 
   try {
     const [t, p, a, r, agg, repC, rPosts, rComms, rAuthors, cCount, sysSet] = await Promise.all([
@@ -109,6 +109,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   let announcements: any[] = [];
   let countdowns: any[] = [];
   let bannedUsers: any[] = [];
+  let bannedIPs: any[] = [];
   let reports: any[] = [];
 
   let customNicknamesDb: any[] = [];
@@ -135,18 +136,19 @@ export default async function AdminDashboard({ searchParams }: any) {
   if (currentTab === 'Yorumlar') {
     try { displayComments = await prisma.comment.findMany({ orderBy: { createdAt: 'desc' }, include: { post: { select: { content: true, type: true } } } }); } catch (e) {}
   } else if (currentTab === 'Lobi Sohbet') {
-    try {
-      displayChatMessages = await (prisma as any).chatMessage.findMany({ orderBy: { createdAt: 'desc' }, take: 100 });
-    } catch (e) {}
+    try { displayChatMessages = await (prisma as any).chatMessage.findMany({ orderBy: { createdAt: 'desc' }, take: 100 }); } catch (e) {}
   } else if (currentTab === 'Duyurular') {
     try { announcements = await (prisma as any).announcement.findMany({ orderBy: { createdAt: 'desc' } }); } catch (e) {}
   } else if (currentTab === 'Sayaç') {
     try { countdowns = await (prisma as any).countdown.findMany({ orderBy: { createdAt: 'desc' } }); } catch (e) {}
   } else if (currentTab === 'Banlar') {
-    try { bannedUsers = await (prisma as any).bannedUser.findMany({ orderBy: { createdAt: 'desc' } }); } catch (e) {}
+    try { 
+      bannedUsers = await (prisma as any).bannedUser.findMany({ orderBy: { createdAt: 'desc' } }); 
+      bannedIPs = await (prisma as any).bannedIP.findMany({ orderBy: { createdAt: 'desc' } }).catch(() => []);
+    } catch (e) {}
   } else if (currentTab === 'Şikayetler') {
     try { reports = await (prisma as any).report.findMany({ orderBy: { createdAt: 'desc' }, include: { post: true, comment: true } }); } catch (e) {}
-  } else if (currentTab !== 'Özel Nickler') { 
+  } else if (currentTab !== 'Özel Nickler' && currentTab !== 'Kukla Ustası' && currentTab !== 'Zihin Kontrolü') { 
     let queryFilter: any = { status: 'PENDING' };
     if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
     if (currentTab === 'Overheard') queryFilter = { status: 'APPROVED', type: { in: ['OVERHEARD', 'OVERHED'] } };
@@ -156,31 +158,24 @@ export default async function AdminDashboard({ searchParams }: any) {
     try { displayPosts = await prisma.post.findMany({ where: queryFilter, orderBy: { createdAt: 'desc' } }); } catch (e) {}
   }
   
+  // ================= SERVER ACTIONS =================
+
   async function approvePost(formData: FormData) { 
     'use server'; 
-    await prisma.post.update({ 
-      where: { id: formData.get('id') as string }, 
-      data: { status: 'APPROVED', createdAt: new Date() } 
-    }); 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
+    await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'APPROVED', createdAt: new Date() } }); 
+    revalidatePath('/admin'); revalidatePath('/'); 
   }
 
   async function rejectPost(formData: FormData) { 
     'use server'; 
-    await prisma.post.update({ 
-      where: { id: formData.get('id') as string }, 
-      data: { status: 'REJECTED' } 
-    }); 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
+    await prisma.post.update({ where: { id: formData.get('id') as string }, data: { status: 'REJECTED' } }); 
+    revalidatePath('/admin'); revalidatePath('/'); 
   }
 
   async function deletePost(formData: FormData) { 
     'use server'; 
     await prisma.post.delete({ where: { id: formData.get('id') as string } }).catch(() => {}); 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
+    revalidatePath('/admin'); revalidatePath('/'); 
   }
   
   async function updatePostContent(formData: FormData) { 
@@ -189,14 +184,11 @@ export default async function AdminDashboard({ searchParams }: any) {
     const content = formData.get('content') as string;
     const type = formData.get('type') as string;
     if (!id) return;
-
     const updateData: any = {};
     if (content) updateData.content = content.trim();
     if (type) updateData.type = type;
-
     await prisma.post.update({ where: { id }, data: updateData }).catch(() => {}); 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
+    revalidatePath('/admin'); revalidatePath('/'); 
   }
 
   async function updatePostStats(formData: FormData) {
@@ -204,12 +196,74 @@ export default async function AdminDashboard({ searchParams }: any) {
     const postId = formData.get('postId') as string;
     const likes = parseInt(formData.get('likes') as string) || 0;
     const views = parseInt(formData.get('views') as string) || 0;
-
     if (!postId) return;
-
     await prisma.post.update({ where: { id: postId }, data: { likes, views } }).catch(() => {});
+    revalidatePath('/admin'); revalidatePath('/');
+  }
+
+  // 🔥 YENİ GÜÇ: KUKLA USTASI (GHOST POSTING) 🔥
+  async function createGhostPost(formData: FormData) {
+    'use server';
+    const content = formData.get('content') as string;
+    const type = formData.get('type') as string;
+    let authorUuid = formData.get('authorUuid') as string;
+    const likes = parseInt(formData.get('likes') as string) || 0;
+    const views = parseInt(formData.get('views') as string) || 0;
+
+    if (!authorUuid || authorUuid.trim() === '') {
+      authorUuid = 'ghost_' + Math.random().toString(36).substring(2, 10);
+    }
+
+    try {
+      await prisma.post.create({
+        data: {
+          content,
+          type,
+          authorUuid,
+          status: 'APPROVED',
+          likes,
+          views,
+          createdAt: new Date()
+        }
+      });
+    } catch (e) {}
+    revalidatePath('/admin'); revalidatePath('/');
+  }
+
+  // 🔥 YENİ GÜÇ: ZİHİN KONTROLÜ (DIRECT NOTIFICATION) 🔥
+  async function sendDirectNotification(formData: FormData) {
+    'use server';
+    const targetUuid = formData.get('targetUuid') as string;
+    const message = formData.get('message') as string;
+
+    if (!message || !targetUuid) return;
+
+    try {
+      if (targetUuid === 'ALL') {
+        const distinctUsers = await prisma.post.findMany({ distinct: ['authorUuid'], select: { authorUuid: true }});
+        const data = distinctUsers.map(u => ({ userUuid: u.authorUuid, message, isRead: false }));
+        await (prisma as any).notification.createMany({ data, skipDuplicates: true });
+      } else {
+        await (prisma as any).notification.create({ data: { userUuid: targetUuid, message, isRead: false } });
+      }
+    } catch (e) {}
     revalidatePath('/admin');
-    revalidatePath('/');
+  }
+
+  // 🔥 YENİ GÜÇ: IP BANLA 🔥
+  async function banIpAddress(formData: FormData) {
+    'use server';
+    const ipAddress = formData.get('ipAddress') as string;
+    if (!ipAddress) return;
+    try { await (prisma as any).bannedIP.create({ data: { ipAddress } }); } catch (e) {}
+    revalidatePath('/admin');
+  }
+
+  async function unbanIpAddress(formData: FormData) {
+    'use server';
+    const id = formData.get('id') as string;
+    try { await (prisma as any).bannedIP.delete({ where: { id } }); } catch (e) {}
+    revalidatePath('/admin');
   }
 
   async function deleteComment(formData: FormData) { 
@@ -223,17 +277,13 @@ export default async function AdminDashboard({ searchParams }: any) {
     const id = formData.get('id') as string;
     if (!id) return;
     try { await (prisma as any).chatMessage.delete({ where: { id } }); } catch (e) {}
-    revalidatePath('/admin');
-    revalidatePath('/sohbet');
+    revalidatePath('/admin'); revalidatePath('/sohbet');
   }
 
   async function clearAllChatMessages() {
     'use server';
-    try {
-      await (prisma as any).chatMessage.deleteMany({});
-    } catch (e) {}
-    revalidatePath('/admin');
-    revalidatePath('/sohbet');
+    try { await (prisma as any).chatMessage.deleteMany({}); } catch (e) {}
+    revalidatePath('/admin'); revalidatePath('/sohbet');
   }
 
   async function banUser(formData: FormData) { 
@@ -256,8 +306,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     const content = formData.get('content') as string; 
     if (!content) return; 
     try { await (prisma as any).announcement.create({ data: { content, isActive: true } }); } catch (e) {} 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
+    revalidatePath('/admin'); revalidatePath('/'); 
   }
 
   async function toggleAnnouncement(formData: FormData) { 
@@ -265,15 +314,13 @@ export default async function AdminDashboard({ searchParams }: any) {
     const id = formData.get('id') as string; 
     const currentState = formData.get('isActive') === 'true'; 
     try { await (prisma as any).announcement.update({ where: { id }, data: { isActive: !currentState } }); } catch (e) {} 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
+    revalidatePath('/admin'); revalidatePath('/'); 
   }
 
   async function deleteAnnouncement(formData: FormData) { 
     'use server'; 
     try { await (prisma as any).announcement.delete({ where: { id: formData.get('id') as string } }); } catch (e) {} 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
+    revalidatePath('/admin'); revalidatePath('/'); 
   }
 
   async function createCountdown(formData: FormData) { 
@@ -282,20 +329,17 @@ export default async function AdminDashboard({ searchParams }: any) {
     const dateStr = formData.get('targetDate') as string;
     if (!title || !dateStr) return;
     const targetDate = new Date(dateStr);
-    
     try {
       await (prisma as any).countdown.updateMany({ data: { isActive: false } });
       await (prisma as any).countdown.create({ data: { title, targetDate, isActive: true } }); 
     } catch (e) {}
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
+    revalidatePath('/admin'); revalidatePath('/'); 
   }
 
   async function deleteCountdown(formData: FormData) { 
     'use server'; 
     try { await (prisma as any).countdown.delete({ where: { id: formData.get('id') as string } }); } catch (e) {} 
-    revalidatePath('/admin'); 
-    revalidatePath('/'); 
+    revalidatePath('/admin'); revalidatePath('/'); 
   }
 
   async function dismissReport(formData: FormData) { 
@@ -317,7 +361,6 @@ export default async function AdminDashboard({ searchParams }: any) {
     const badge = formData.get('badge') as string;
 
     if (!userUuid) return;
-
     try {
       if (!nickname || !nickname.trim()) {
         await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
@@ -341,9 +384,7 @@ export default async function AdminDashboard({ searchParams }: any) {
         }
       }
     } catch (e) {}
-    
-    revalidatePath('/admin');
-    revalidatePath('/');
+    revalidatePath('/admin'); revalidatePath('/');
   }
 
   async function removeUserMeta(formData: FormData) {
@@ -354,34 +395,29 @@ export default async function AdminDashboard({ searchParams }: any) {
       await (prisma as any).customNickname.deleteMany({ where: { userUuid } });
       await (prisma as any).userBadge.deleteMany({ where: { userUuid } });
     } catch (e) {}
-    revalidatePath('/admin');
-    revalidatePath('/');
+    revalidatePath('/admin'); revalidatePath('/');
   }
 
-  // 🔥 ŞALTER İÇİN YENİ ACTION 🔥
   async function toggleSystemState() {
     'use server';
     try {
       const setting = await (prisma as any).systemSetting.findUnique({ where: { id: "global" } });
       const currentStatus = setting ? setting.isActive : true;
-
       await (prisma as any).systemSetting.upsert({
         where: { id: "global" },
         update: { isActive: !currentStatus },
         create: { id: "global", isActive: !currentStatus }
       });
-
-      revalidatePath('/admin');
-      revalidatePath('/');
-    } catch (e) {
-      console.error("Şalter değiştirilirken hata oluştu:", e);
-    }
+      revalidatePath('/admin'); revalidatePath('/');
+    } catch (e) {}
   }
 
   const menuItems = [
     { icon: LayoutDashboard, label: 'Dashboard' }, 
     { icon: Rss, label: 'Akış' }, 
     { icon: Sparkles, label: 'Özel Nickler' }, 
+    { icon: Ghost, label: 'Kukla Ustası' }, // 🔥 YENİ
+    { icon: Brain, label: 'Zihin Kontrolü' }, // 🔥 YENİ
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Coffee, label: 'Boş Yap' }, 
@@ -405,7 +441,7 @@ export default async function AdminDashboard({ searchParams }: any) {
           {menuItems.map((item, i) => (
             <Link href={`/admin?tab=${item.label}`} key={i} className={`flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${currentTab === item.label ? 'bg-white/[0.06] text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.02)]' : 'text-gray-400 border border-transparent hover:text-white hover:bg-white/[0.03]'}`}>
               <div className="flex items-center gap-3.5">
-                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? (item.label === 'Özel Nickler' ? 'text-purple-400' : 'text-[#4DA3FF]') : 'text-gray-500 group-hover:text-gray-300'}`} /> 
+                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? (item.label === 'Kukla Ustası' ? 'text-teal-400' : item.label === 'Zihin Kontrolü' ? 'text-pink-400' : item.label === 'Özel Nickler' ? 'text-purple-400' : 'text-[#4DA3FF]') : 'text-gray-500 group-hover:text-gray-300'}`} /> 
                 <span className={`font-semibold tracking-wide text-sm ${currentTab === item.label ? 'opacity-100' : 'opacity-80'}`}>{item.label}</span>
               </div>
               {item.badge !== undefined && item.badge > 0 ? (
@@ -424,7 +460,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/90 backdrop-blur-3xl border-t border-white/[0.05] px-2 py-2 flex justify-start z-50 overflow-x-auto gap-1 sm:gap-2 scrollbar-hide shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {menuItems.map((item, i) => (
           <Link href={`/admin?tab=${item.label}`} key={i} className={`flex flex-col items-center justify-center gap-1 min-w-[64px] sm:min-w-[72px] px-1 py-2 rounded-2xl transition-all relative ${currentTab === item.label ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
-            <item.icon size={18} className={currentTab === item.label && item.label === 'Özel Nickler' ? 'text-purple-400' : currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
+            <item.icon size={18} className={currentTab === item.label && item.label === 'Kukla Ustası' ? 'text-teal-400' : currentTab === item.label && item.label === 'Zihin Kontrolü' ? 'text-pink-400' : currentTab === item.label && item.label === 'Özel Nickler' ? 'text-purple-400' : currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
             {item.badge !== undefined && item.badge > 0 && (
               <span className={`absolute top-0 right-2 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-black ${item.label === 'Şikayetler' ? 'bg-red-500 text-white' : 'bg-[#4DA3FF] text-black'}`}>{item.badge}</span>
             )}
@@ -435,16 +471,14 @@ export default async function AdminDashboard({ searchParams }: any) {
 
       <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-10 scrollbar-hide pb-24 lg:pb-12 relative z-10">
         
-        {/* 🔥 GÜNCELLENMİŞ HEADER VE ŞALTER BURADA 🔥 */}
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 sm:mb-10 pb-4 sm:pb-6 border-b border-white/[0.05] gap-3 sm:gap-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold flex items-center gap-3 sm:gap-4 tracking-tight">
               <div className="p-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl shadow-inner">
-                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Lobi Sohbet' ? <Radio className="text-emerald-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Özel Nickler' ? <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
+                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Kukla Ustası' ? <Ghost className="text-teal-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Zihin Kontrolü' ? <Brain className="text-pink-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Lobi Sohbet' ? <Radio className="text-emerald-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Özel Nickler' ? <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
               </div>
               {currentTab} Paneli
             </h2>
             
-            {/* ETKİLEŞİMLİ ŞALTER FORMU */}
             <form action={toggleSystemState} className="self-start md:self-auto">
               <button type="submit" className={`flex items-center gap-2 text-xs sm:text-sm font-bold px-4 py-2 sm:px-5 sm:py-2.5 rounded-full border shadow-inner transition-all hover:scale-105 active:scale-95 cursor-pointer ${
                 isSystemActive 
@@ -462,8 +496,9 @@ export default async function AdminDashboard({ searchParams }: any) {
 
         <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
           
-          {currentTab !== 'Yorumlar' && currentTab !== 'Lobi Sohbet' && currentTab !== 'Özel Nickler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && (
+          {currentTab !== 'Yorumlar' && currentTab !== 'Lobi Sohbet' && currentTab !== 'Özel Nickler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && currentTab !== 'Kukla Ustası' && currentTab !== 'Zihin Kontrolü' && (
             <>
+              {/* DASHBOARD İSTATİSTİKLERİ (ESKİ KODUN AYNISI - SAKLANDI) */}
               <div className="bg-[#0A0A0A] p-4 sm:p-6 md:p-8 rounded-[24px] sm:rounded-[32px] border border-white/[0.05] shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 sm:gap-8 mb-6 sm:mb-8 relative overflow-hidden">
                 <div className="flex items-center gap-4 sm:gap-5 w-full xl:w-auto z-10">
                   <div className="flex items-center justify-center p-3 sm:p-4 bg-emerald-500/10 rounded-xl sm:rounded-2xl border border-emerald-500/20 shrink-0">
@@ -529,9 +564,77 @@ export default async function AdminDashboard({ searchParams }: any) {
 
           <div className="space-y-4 sm:space-y-6">
               
-            {currentTab === 'Özel Nickler' ? (
+            {/* 🔥 YENİ GÜÇ: KUKLA USTASI (GHOST POSTING) 🔥 */}
+            {currentTab === 'Kukla Ustası' ? (
+              <div className="space-y-6 sm:space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                <form action={createGhostPost} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-teal-500/20 space-y-4 sm:space-y-5 shadow-[0_0_50px_rgba(20,184,166,0.1)] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 blur-[80px] -z-10 rounded-full"></div>
+                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide">
+                    <div className="p-2 sm:p-2.5 bg-teal-500/10 rounded-lg sm:rounded-xl border border-teal-500/20"><Ghost className="text-teal-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Gündemi Sen Belirle
+                  </h3>
+                  <p className="text-gray-400 text-xs sm:text-sm font-medium mb-4">Sanki sıradan bir öğrenciymiş gibi anında "Yayında" olan gönderi fırlat. İstersen belirli bir UUID ile, istersen rastgele bir hayalet olarak.</p>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-[10px] sm:text-[11px] text-teal-500 block mb-1.5 font-black uppercase tracking-widest">Kategori Seç</label>
+                      <select name="type" className="w-full bg-[#050505] border border-teal-500/20 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-teal-400 cursor-pointer">
+                        <option value="CONFESSION">🎭 İtiraf</option>
+                        <option value="BOSYAP">☕ Boş Yap</option>
+                        <option value="OVERHEARD">🎧 Overheard</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="text-[10px] sm:text-[11px] text-teal-500 block mb-1.5 font-black uppercase tracking-widest">Gönderi Metni</label>
+                      <textarea name="content" required placeholder="Kampüsü karıştıracak o fısıltı..." className="w-full bg-[#050505] border border-teal-500/20 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-teal-400 transition-colors shadow-inner resize-none h-28"></textarea>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="text-[10px] sm:text-[11px] text-teal-500 block mb-1.5 font-black uppercase tracking-widest">Yazar UUID (Opsiyonel)</label>
+                        <input type="text" name="authorUuid" placeholder="Boş = Rastgele Hayalet" className="w-full bg-[#050505] border border-teal-500/20 rounded-xl p-3 text-xs text-white outline-none focus:border-teal-400 font-mono" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] sm:text-[11px] text-teal-500 block mb-1.5 font-black uppercase tracking-widest">Başlangıç Beğenisi</label>
+                        <input type="number" name="likes" defaultValue="5" className="w-full bg-[#050505] border border-teal-500/20 rounded-xl p-3 text-xs text-white outline-none focus:border-teal-400" />
+                      </div>
+                      <div>
+                        <label className="text-[10px] sm:text-[11px] text-teal-500 block mb-1.5 font-black uppercase tracking-widest">Başlangıç Görüntülenme</label>
+                        <input type="number" name="views" defaultValue="120" className="w-full bg-[#050505] border border-teal-500/20 rounded-xl p-3 text-xs text-white outline-none focus:border-teal-400" />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button type="submit" className="w-full justify-center bg-teal-500/10 hover:bg-teal-500/20 text-teal-400 font-black uppercase tracking-widest px-6 py-4 rounded-xl text-xs transition-all flex items-center gap-2 border border-teal-500/20 mt-4"><Ghost size={16}/> Hayaleti Fırlat</button>
+                </form>
+              </div>
+
+            // 🔥 YENİ GÜÇ: ZİHİN KONTROLÜ (DIRECT NOTIFICATION) 🔥
+            ) : currentTab === 'Zihin Kontrolü' ? (
+              <div className="space-y-6 sm:space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                <form action={sendDirectNotification} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-pink-500/20 space-y-4 sm:space-y-5 shadow-[0_0_50px_rgba(236,72,153,0.1)] relative overflow-hidden">
+                  <div className="absolute top-0 left-0 w-64 h-64 bg-pink-500/10 blur-[80px] -z-10 rounded-full"></div>
+                  <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide">
+                    <div className="p-2 sm:p-2.5 bg-pink-500/10 rounded-lg sm:rounded-xl border border-pink-500/20"><Brain className="text-pink-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Zihin Kontrolü
+                  </h3>
+                  <p className="text-gray-400 text-xs sm:text-sm font-medium mb-4">Kullanıcıların bildirim çanına (🔔) doğrudan sistem mesajı gönder. İster tek kişiyi uyar, ister "ALL" yazıp herkese fırlat.</p>
+                  
+                  <div className="space-y-4">
+                    <div>
+                      <label className="text-[10px] sm:text-[11px] text-pink-500 block mb-1.5 font-black uppercase tracking-widest">Hedef UUID</label>
+                      <input type="text" name="targetUuid" required placeholder="Örn: clxj12... VEYA herkese atmak için: ALL" className="w-full bg-[#050505] border border-pink-500/20 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-pink-400 font-mono transition-colors shadow-inner" />
+                    </div>
+                    <div>
+                      <label className="text-[10px] sm:text-[11px] text-pink-500 block mb-1.5 font-black uppercase tracking-widest">Sinyal / Mesaj</label>
+                      <textarea name="message" required placeholder="Bildirim kutularına düşecek mesaj..." className="w-full bg-[#050505] border border-pink-500/20 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-pink-400 transition-colors shadow-inner resize-none h-24"></textarea>
+                    </div>
+                  </div>
+                  
+                  <button type="submit" className="w-full justify-center bg-pink-500/10 hover:bg-pink-500/20 text-pink-400 font-black uppercase tracking-widest px-6 py-4 rounded-xl text-xs transition-all flex items-center gap-2 border border-pink-500/20 mt-4"><Crosshair size={16}/> Beyinlerine Sinyal Gönder</button>
+                </form>
+              </div>
+
+            ) : currentTab === 'Özel Nickler' ? (
+              // ÖZEL NİCKLER (ESKİ KOD - SAKLANDI)
               <div className="space-y-6 sm:space-y-8">
-                 
               <form action={updateUserMeta} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] space-y-4 sm:space-y-5 shadow-xl relative overflow-hidden">
                   <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/[0.03] rounded-lg sm:rounded-xl border border-white/[0.05]"><UserCog className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Kullanıcı Ekle / Rozet Ver</h3>
                   <p className="text-gray-500 text-xs sm:text-sm font-medium mb-2">Kullanıcının UUID'sini buraya yapıştırıp ona manuel olarak özel nick veya VIP rozeti atayabilirsin.</p>
@@ -603,6 +706,7 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
 
             ) : currentTab === 'Yorumlar' ? (
+              // YORUMLAR (ESKİ KOD - SAKLANDI)
               displayComments.map((comment) => (
                 <article key={comment.id} className="bg-[#0A0A0A] p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/[0.05] flex flex-col gap-4 sm:gap-5 shadow-xl hover:border-white/10 transition-colors">
                   <div className="flex justify-between items-start gap-3 sm:gap-4">
@@ -644,6 +748,7 @@ export default async function AdminDashboard({ searchParams }: any) {
               ))
 
             ) : currentTab === 'Lobi Sohbet' ? (
+              // LOBİ SOHBET (ESKİ KOD - SAKLANDI)
               <div className="space-y-4">
                 <div className="bg-[#0A0A0A] border border-white/[0.05] p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
                   <div className="flex items-center gap-3">
@@ -719,6 +824,7 @@ export default async function AdminDashboard({ searchParams }: any) {
               </div>
 
             ) : currentTab === 'Duyurular' ? (
+              // DUYURULAR (ESKİ KOD - SAKLANDI)
               <div className="space-y-6 sm:space-y-8">
                 <form action={createAnnouncement} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] space-y-4 sm:space-y-5 shadow-2xl relative overflow-hidden">
                   <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Bell className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Duyuru Fırlat</h3>
@@ -755,6 +861,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                 </div>
               </div>
             ) : currentTab === 'Sayaç' ? (
+              // SAYAÇ (ESKİ KOD - SAKLANDI)
               <div className="space-y-6 sm:space-y-8">
                 <form action={createCountdown} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] space-y-4 sm:space-y-5 shadow-2xl relative overflow-hidden">
                   <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Timer className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Geri Sayım Kur</h3>
@@ -793,10 +900,49 @@ export default async function AdminDashboard({ searchParams }: any) {
                   )}
                 </div>
               </div>
+
+            // 🔥 YENİ GÜÇ: IP BAN KONTROL PANELİ EKLENDİ 🔥
             ) : currentTab === 'Banlar' ? (
-              <div className="space-y-6">
+              <div className="space-y-8">
+                
+                {/* 1. KISIM: IP BAN (HER ŞEYİ GÖREN GÖZ) */}
+                <div className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-red-500/20 shadow-[0_0_40px_rgba(220,38,38,0.1)] relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 blur-[80px] -z-10 rounded-full"></div>
+                  <h3 className="text-lg sm:text-xl font-black text-white mb-2 flex items-center gap-2 sm:gap-3 tracking-wide">
+                    <div className="p-2 sm:p-2.5 bg-red-500/10 rounded-lg sm:rounded-xl border border-red-500/20"><Eye className="text-red-500 w-4 h-4 sm:w-5 sm:h-5"/></div> Her Şeyi Gören Göz (IP Ban)
+                  </h3>
+                  <p className="text-gray-400 text-xs sm:text-sm font-medium mb-6">Sadece bir hesabı değil, bağlı olduğu ağı kalıcı olarak cehennem çukuruna gönder.</p>
+                  
+                  <form action={banIpAddress} className="flex flex-col sm:flex-row gap-3 mb-6">
+                    <input type="text" name="ipAddress" required placeholder="Örn: 192.168.1.1" className="flex-1 bg-[#050505] border border-red-500/20 rounded-xl p-3 sm:p-4 text-xs sm:text-sm text-white outline-none focus:border-red-500 font-mono shadow-inner" />
+                    <button type="submit" className="bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black uppercase tracking-widest px-6 py-3.5 rounded-xl text-xs transition-all border border-red-500/20 flex items-center justify-center gap-2 shrink-0">
+                      <Ban size={16} /> IP Engelle
+                    </button>
+                  </form>
+
+                  <div className="space-y-3">
+                    {bannedIPs.length === 0 ? (
+                      <p className="text-center text-gray-500 text-sm font-medium py-6 bg-[#050505] rounded-xl border border-dashed border-red-500/10">Kayıtlı IP Ban yok.</p>
+                    ) : (
+                      bannedIPs.map((ipBan: any) => (
+                        <div key={ipBan.id} className="flex items-center justify-between p-3 sm:p-4 bg-[#050505] border border-red-500/10 rounded-xl">
+                          <div>
+                            <code className="text-sm font-bold text-red-400 block">{ipBan.ipAddress}</code>
+                            <span className="text-[10px] text-gray-500">{new Date(ipBan.createdAt).toLocaleString('tr-TR')}</span>
+                          </div>
+                          <form action={unbanIpAddress}>
+                            <input type="hidden" name="id" value={ipBan.id} />
+                            <button className="text-[10px] font-black uppercase bg-white/5 hover:bg-white/10 border border-white/10 px-3 py-2 rounded-lg transition-colors">Affet</button>
+                          </form>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+
+                {/* 2. KISIM: UUID BAN (ESKİ KOD) */}
                 <div className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] shadow-2xl relative overflow-hidden">
-                  <h3 className="text-lg sm:text-xl font-black text-white mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Ban className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Engellenen Yazarlar <span className="text-xs sm:text-sm text-red-400 bg-red-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-red-500/20">{bannedUsers.length}</span></h3>
+                  <h3 className="text-lg sm:text-xl font-black text-white mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Ban className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Engellenen Yazarlar (UUID) <span className="text-xs sm:text-sm text-red-400 bg-red-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-red-500/20">{bannedUsers.length}</span></h3>
                    
                   {bannedUsers.length === 0 ? (
                     <p className="text-center text-gray-500 text-sm font-medium py-8 sm:py-10 bg-[#050505] rounded-xl sm:rounded-2xl border border-dashed border-white/10">Sistemde hiç banlı kullanıcı bulunmuyor. Herkes uslu!</p>
@@ -819,7 +965,9 @@ export default async function AdminDashboard({ searchParams }: any) {
                   )}
                 </div>
               </div>
+
             ) : currentTab === 'Şikayetler' ? (
+              // ŞİKAYETLER (ESKİ KOD - SAKLANDI)
               <div className="space-y-4 sm:space-y-6">
                 <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-3 bg-red-500/10 rounded-xl sm:rounded-2xl border border-red-500/20"><Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6"/></div> Bildirilen İçerikler <span className="text-xs sm:text-sm text-red-400 bg-red-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-red-500/20">{reports.length}</span></h3>
                  
@@ -868,6 +1016,7 @@ export default async function AdminDashboard({ searchParams }: any) {
               </div>
             ) : (
               displayPosts.length === 0 ? (
+                // NORMAL POST AKIŞI (ESKİ KOD - SAKLANDI)
                 <div className="text-center py-16 sm:py-24 bg-[#0A0A0A] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 flex flex-col items-center justify-center px-4">
                   <div className="bg-white/5 p-4 sm:p-5 rounded-2xl sm:rounded-3xl mb-4 sm:mb-5 border border-white/5 shadow-inner"><Inbox className="text-gray-500 w-8 h-8 sm:w-10 sm:h-10"/></div>
                   <p className="text-gray-500 font-bold text-sm sm:text-lg tracking-wide text-center">Bu sekmede gösterilecek gönderi bulunmuyor.</p>
@@ -1007,11 +1156,11 @@ export default async function AdminDashboard({ searchParams }: any) {
                             </div>
                         </div>
                       </article>
-                      );
-                    })}
-                  </div>
-                )
-              )}
+                    );
+                  })}
+                </div>
+              )
+            )}
           </div>
         </div>
       </main>

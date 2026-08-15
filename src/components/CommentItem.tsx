@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Heart, Reply, Flag, ShieldAlert } from "lucide-react";
+import { Heart, Reply, Flag, ShieldAlert, Sparkles } from "lucide-react";
 import Link from "next/link"; 
 import { toggleCommentLike, submitReport } from "@/app/post/actions";
 import { playPopSound, playClickSound } from "@/utils/sounds";
@@ -102,23 +102,37 @@ export default function CommentItem({
   };
 
   const finalProfileId = authorUuid || comment.authorId || comment.id;
+  
+  // 🔥 TANRI PARÇACIĞI (GOD MODE) 🔥
+  const isGodMode = ["KURUCU", "GOD", "SİSTEM"].includes(userBadge?.toUpperCase());
+
+  // 🔥 ALTIN LOCA KUTUSU EFEKTİ 🔥
+  const baseClass = isReply 
+    ? 'ml-8 sm:ml-12 mt-1 rounded-r-[24px] rounded-bl-[24px] border-l-2' 
+    : 'rounded-[24px] border';
+  
+  const commentBoxClass = isGodMode
+    ? `${baseClass} ${isReply ? 'border-l-yellow-400 bg-gradient-to-r from-yellow-50/50 to-transparent dark:from-yellow-500/10 dark:to-transparent' : 'bg-gradient-to-br from-yellow-50/80 to-white dark:from-yellow-500/[0.05] dark:to-white/[0.02] border-yellow-400/50 shadow-[0_0_30px_rgba(234,179,8,0.15)] ring-1 ring-yellow-400/30'}`
+    : `${baseClass} ${isReply ? 'bg-gray-50 dark:bg-white/[0.01] border-l-blue-400/50 dark:border-l-[#4DA3FF]/40' : 'bg-white dark:bg-white/[0.02] backdrop-blur-xl border-gray-200 dark:border-white/[0.04] hover:border-gray-300 dark:hover:border-white/10 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)]'}`;
 
   return (
     <>
-      <div className={`group flex gap-3 p-4 transition-all duration-300 ease-out mb-3 
-        ${isReply 
-          ? 'ml-8 sm:ml-12 mt-1 bg-gray-50 dark:bg-white/[0.01] rounded-r-[24px] rounded-bl-[24px] border-l-2 border-l-blue-400/50 dark:border-l-[#4DA3FF]/40' 
-          : 'bg-white dark:bg-white/[0.02] backdrop-blur-xl rounded-[24px] border border-gray-200 dark:border-white/[0.04] hover:border-gray-300 dark:hover:border-white/10 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
-        }`}
-      >
+      <div className={`group flex gap-3 p-4 transition-all duration-300 ease-out mb-3 ${commentBoxClass}`}>
+        
         {/* SOL: AVATAR */}
         <Link 
           href={`/profil/${encodeURIComponent(finalProfileId)}`}
           onClick={() => playClickSound()}
           className="shrink-0 mt-0.5"
         >
-          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full p-[1.5px] bg-gray-200 dark:bg-white/[0.1] transition-colors duration-300`}>
-            <div className="w-full h-full rounded-full bg-gray-100 dark:bg-[#121212] flex items-center justify-center overflow-hidden transition-colors duration-300">
+          {/* 🔥 GOD MODE AVATAR HALKASI 🔥 */}
+          <div className={`relative w-9 h-9 sm:w-10 sm:h-10 rounded-full p-[2px]`}>
+            {isGodMode ? (
+              <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 animate-[spin_3s_linear_infinite] opacity-80 shadow-[0_0_10px_rgba(234,179,8,0.5)]" />
+            ) : (
+              <div className="absolute inset-0 rounded-full bg-gray-200 dark:bg-white/[0.1] transition-colors duration-300" />
+            )}
+            <div className="relative w-full h-full rounded-full bg-gray-100 dark:bg-[#121212] flex items-center justify-center overflow-hidden z-10 transition-colors duration-300">
               {userAvatar?.startsWith("data:image") ? (
                 <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
               ) : userAvatar ? (
@@ -136,10 +150,11 @@ export default function CommentItem({
           {/* HEADER (İsim, Rozet, Süre) */}
           <div className="flex items-center justify-between mb-1">
             <div className="flex flex-wrap items-center gap-1.5">
+              {/* 🔥 GOD MODE HOLOGRAFİK İSİM 🔥 */}
               <Link 
                 href={`/profil/${encodeURIComponent(finalProfileId)}`} 
                 onClick={() => playClickSound()} 
-                className="font-bold text-gray-900 dark:text-white text-[13px] sm:text-[14px] tracking-tight hover:underline truncate max-w-[150px] transition-colors duration-300"
+                className={`text-[13px] sm:text-[14px] tracking-tight hover:underline truncate max-w-[150px] transition-colors duration-300 ${isGodMode ? 'bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-amber-500 dark:from-yellow-300 dark:via-amber-400 dark:to-yellow-300 animate-pulse drop-shadow-md font-black' : 'font-bold text-gray-900 dark:text-white'}`}
               >
                 {commentAuthor.name}
               </Link>
@@ -150,25 +165,25 @@ export default function CommentItem({
                 </span>
               )}
 
+              {/* 🔥 GOD MODE GLITCH ROZET 🔥 */}
               {userBadge && (
-                <span className="bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-500/20 transition-colors duration-300">
-                  {userBadge}
+                <span className={`${isGodMode ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.5)] animate-pulse' : 'bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500 border border-amber-200 dark:border-amber-500/20'} text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded transition-colors duration-300 flex items-center gap-1`}>
+                  {isGodMode && <Sparkles size={8} />} {userBadge}
                 </span>
               )}
 
-              <span className="text-[11px] text-gray-500 font-medium hidden sm:inline-block ml-1">
+              <span className={`text-[11px] font-medium hidden sm:inline-block ml-1 ${isGodMode ? 'text-yellow-600/70 dark:text-yellow-500/70' : 'text-gray-500'}`}>
                 • {getRelativeTime(comment.createdAt)}
               </span>
             </div>
             
-            {/* Mobil için sağ üstte süre */}
-            <span className="text-[10px] text-gray-500 font-medium sm:hidden shrink-0">
+            <span className={`text-[10px] font-medium sm:hidden shrink-0 ${isGodMode ? 'text-yellow-600/70 dark:text-yellow-500/70' : 'text-gray-500'}`}>
               {getRelativeTime(comment.createdAt)}
             </span>
           </div>
 
           {/* İÇERİK METNİ */}
-          <p className="text-gray-800 dark:text-gray-100 text-[14px] leading-relaxed break-words mt-1 mb-2.5 transition-colors duration-300">
+          <p className={`text-[14px] leading-relaxed break-words mt-1 mb-2.5 transition-colors duration-300 ${isGodMode ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-800 dark:text-gray-100'}`}>
             {formatCommentText(comment.content)}
           </p>
 
@@ -176,16 +191,16 @@ export default function CommentItem({
           <div className="flex items-center gap-4 text-gray-500 mt-1">
             <button 
               onClick={handleLike} 
-              className={`flex items-center gap-1.5 transition-colors ${localLiked ? 'text-pink-500' : 'hover:text-pink-500 dark:hover:text-pink-400'}`}
+              className={`flex items-center gap-1.5 transition-colors ${localLiked ? (isGodMode ? 'text-yellow-500' : 'text-pink-500') : (isGodMode ? 'text-yellow-600/50 hover:text-yellow-500 dark:text-yellow-500/50 dark:hover:text-yellow-400' : 'hover:text-pink-500 dark:hover:text-pink-400')}`}
             >
-              <Heart size={15} className={`transition-transform ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-pink-500' : ''}`} />
+              <Heart size={15} className={`transition-transform ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? (isGodMode ? 'fill-yellow-500' : 'fill-pink-500') : ''}`} />
               <span className="text-[12px] font-bold">{localLikesCount > 0 ? localLikesCount : ''}</span>
             </button>
 
             {onReply && (
               <button 
                 onClick={() => { playClickSound(); onReply(comment.id, commentAuthor.name); }} 
-                className="flex items-center gap-1.5 hover:text-blue-500 dark:hover:text-[#4DA3FF] transition-colors"
+                className={`flex items-center gap-1.5 transition-colors ${isGodMode ? 'text-yellow-600/50 hover:text-yellow-600 dark:text-yellow-500/50 dark:hover:text-yellow-400' : 'hover:text-blue-500 dark:hover:text-[#4DA3FF]'}`}
               >
                 <Reply size={15} />
                 <span className="text-[12px] font-bold">Yanıtla</span>
@@ -194,7 +209,7 @@ export default function CommentItem({
 
             <button 
               onClick={handleReportClick} 
-              className={`ml-auto flex items-center gap-1.5 transition-colors ${reported ? 'text-red-500' : 'hover:text-red-500 dark:hover:text-red-400'}`}
+              className={`ml-auto flex items-center gap-1.5 transition-colors ${reported ? 'text-red-500' : (isGodMode ? 'text-yellow-600/50 hover:text-red-500 dark:text-yellow-500/50 dark:hover:text-red-400' : 'hover:text-red-500 dark:hover:text-red-400')}`}
             >
               <Flag size={14} className={reported ? 'fill-red-500' : ''} />
             </button>

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from "react";
 import AnonymousPlayer from "./AnonymousPlayer";
-import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ShieldAlert, Eye, Hourglass } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, MoreHorizontal, ShieldAlert, Eye, Hourglass, Sparkles } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Link from "next/link"; 
 import { incrementView, submitReport } from "@/app/post/actions";
@@ -63,7 +63,10 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
   const tagText = isConfession ? 'İtiraf' : isBosYap ? 'Boş Yap' : 'Overheard';
   
-  // 🔥 TEMALAR DİNAMİK YAPILDI (Gündüz/Gece uyumlu)
+  // 🔥 TANRI PARÇACIĞI KONTROLÜ (GOD MODE) 🔥
+  const isGodMode = ["KURUCU", "GOD", "SİSTEM"].includes(userBadge?.toUpperCase());
+
+  // TEMALAR (Gündüz/Gece uyumlu)
   const themeClasses = isConfession 
     ? { 
         border: 'hover:border-purple-300 dark:hover:border-purple-500/30', 
@@ -82,9 +85,12 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
         text: 'text-blue-600 dark:text-[#4DA3FF]' 
       };
 
-  const cardBorderClass = isEphemeral 
-    ? 'border-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:border-amber-400 dark:border-amber-500/30 dark:shadow-[0_0_20px_rgba(245,158,11,0.08)] dark:hover:border-amber-500/50' 
-    : `border-gray-200 shadow-sm hover:shadow-md dark:border-white/[0.04] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${themeClasses.border}`;
+  // 🔥 GOD MODE ARKA PLAN EFEKTİ 🔥
+  const cardBorderClass = isGodMode 
+    ? 'border-transparent shadow-[0_0_30px_rgba(234,179,8,0.25)] dark:shadow-[0_0_40px_rgba(234,179,8,0.15)] ring-1 ring-yellow-400/50 bg-gradient-to-br from-yellow-50/50 to-white dark:from-yellow-500/5 dark:to-white/[0.02]'
+    : isEphemeral 
+    ? 'border-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:border-amber-400 dark:border-amber-500/30 dark:shadow-[0_0_20px_rgba(245,158,11,0.08)] dark:hover:border-amber-500/50 bg-white dark:bg-white/[0.02]' 
+    : `border-gray-200 shadow-sm hover:shadow-md dark:border-white/[0.04] bg-white dark:bg-white/[0.02] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${themeClasses.border}`;
 
   useEffect(() => {
     const getCookie = (name: string) => {
@@ -189,15 +195,19 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     <>
       <article 
         ref={cardRef} 
-        // 🔥 ANA KART RENGİ DİNAMİK YAPILDI
-        className={`group w-full bg-white dark:bg-white/[0.02] backdrop-blur-xl rounded-[24px] mb-5 p-4 sm:p-5 border transition-all duration-500 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${cardBorderClass}`}
+        className={`group w-full backdrop-blur-xl rounded-[24px] mb-5 p-4 sm:p-5 border transition-all duration-500 ease-out relative ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${cardBorderClass}`}
       >
         <div className="flex items-start justify-between mb-4 relative z-10">
           <Link href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`} onClick={(e) => { e.stopPropagation(); playClickSound(); }} className="flex items-center gap-3">
             
-            {/* AVATAR DİNAMİK YAPILDI */}
-            <div className={`w-11 h-11 shrink-0 rounded-full p-[1.5px] ${isEphemeral ? 'bg-amber-300 dark:bg-amber-500/30' : 'bg-gray-200 dark:bg-white/[0.1]'}`}>
-              <div className="w-full h-full rounded-full bg-gray-100 dark:bg-[#121212] flex items-center justify-center overflow-hidden">
+            {/* 🔥 GOD MODE AVATAR HALKASI 🔥 */}
+            <div className={`relative w-11 h-11 shrink-0 rounded-full p-[2px]`}>
+              {isGodMode ? (
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-500 animate-[spin_3s_linear_infinite] opacity-90 shadow-[0_0_15px_rgba(234,179,8,0.5)]" />
+              ) : (
+                <div className={`absolute inset-0 rounded-full ${isEphemeral ? 'bg-amber-300 dark:bg-amber-500/30' : 'bg-gray-200 dark:bg-white/[0.1]'}`} />
+              )}
+              <div className="relative w-full h-full rounded-full bg-gray-100 dark:bg-[#121212] flex items-center justify-center overflow-hidden z-10">
                 {userAvatar?.startsWith("data:image") ? (
                   <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
                 ) : userAvatar ? (
@@ -210,8 +220,17 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-gray-900 dark:text-white text-[15px] tracking-tight">{authorData.name}</span>
-                {userBadge && <span className="bg-amber-100 text-amber-600 border border-amber-200 dark:bg-amber-500/20 dark:text-amber-500 dark:border-transparent text-[9px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">{userBadge}</span>}
+                {/* 🔥 GOD MODE HOLOGRAFİK İSİM 🔥 */}
+                <span className={`text-[15px] tracking-tight ${isGodMode ? 'bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-amber-500 dark:from-yellow-300 dark:via-amber-400 dark:to-yellow-300 animate-pulse drop-shadow-md font-black' : 'font-bold text-gray-900 dark:text-white'}`}>
+                  {authorData.name}
+                </span>
+                
+                {/* 🔥 GOD MODE GLITCH ROZET 🔥 */}
+                {userBadge && (
+                  <span className={`${isGodMode ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.5)] animate-pulse' : 'bg-amber-100 text-amber-600 border border-amber-200 dark:bg-amber-500/20 dark:text-amber-500 dark:border-transparent'} text-[9px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider flex items-center gap-1`}>
+                    {isGodMode && <Sparkles size={8} />} {userBadge}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-1.5 text-[12px] font-medium mt-0.5">
                 {isEphemeral ? (
@@ -219,13 +238,13 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                     <Hourglass size={10} className="animate-pulse" /> 24s
                   </span>
                 ) : (
-                  <span className="text-gray-500">{getRelativeTime(post.createdAt)}</span>
+                  <span className={`${isGodMode ? 'text-yellow-600/70 dark:text-yellow-400/70 font-bold' : 'text-gray-500'}`}>{getRelativeTime(post.createdAt)}</span>
                 )}
                 
                 {subText && (
                   <>
-                    <span className="w-1 h-1 bg-gray-400 dark:bg-gray-600 rounded-full"></span>
-                    <span className="truncate max-w-[150px] text-gray-500">{subText}</span>
+                    <span className={`w-1 h-1 rounded-full ${isGodMode ? 'bg-yellow-400/50' : 'bg-gray-400 dark:bg-gray-600'}`}></span>
+                    <span className={`truncate max-w-[150px] ${isGodMode ? 'text-yellow-600/70 dark:text-yellow-400/70 font-bold' : 'text-gray-500'}`}>{subText}</span>
                   </>
                 )}
               </div>
@@ -245,11 +264,11 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
         <div onClick={handleDoubleTap} className="relative z-10 cursor-pointer select-none pl-1">
           <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-300 ease-out ${showBigHeart ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.3]'}`}>
             {/* Çift tıklama kalbi (Gündüz pembe, gece beyaz) */}
-            <Heart size={80} className="text-pink-500 dark:text-white drop-shadow-2xl fill-pink-500 dark:fill-white" />
+            <Heart size={80} className={`${isGodMode ? 'text-yellow-400 fill-yellow-400' : 'text-pink-500 dark:text-white drop-shadow-2xl fill-pink-500 dark:fill-white'}`} />
           </div>
 
           {post.content && (
-            <p className={`text-gray-800 dark:text-gray-100 text-[15.5px] leading-relaxed break-words whitespace-pre-wrap ${!isExpanded && isLongText ? 'line-clamp-6' : ''}`}>
+            <p className={`text-[15.5px] leading-relaxed break-words whitespace-pre-wrap ${isGodMode ? 'text-gray-900 dark:text-white font-medium' : 'text-gray-800 dark:text-gray-100'} ${!isExpanded && isLongText ? 'line-clamp-6' : ''}`}>
               {post.content}
             </p>
           )}
@@ -267,41 +286,40 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           )}
         </div>
 
-        {/* ALT BAR DİNAMİK YAPILDI */}
-        <div className="mt-5 flex items-center justify-between bg-gray-50 dark:bg-white/[0.06] border border-gray-100 dark:border-white/[0.1] rounded-full px-4 py-3 shadow-inner dark:shadow-none">
+        <div className={`mt-5 flex items-center justify-between border rounded-full px-4 py-3 transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 border-yellow-200/50 dark:bg-yellow-500/10 dark:border-yellow-500/20' : 'bg-gray-50 dark:bg-white/[0.06] border-gray-100 dark:border-white/[0.1] shadow-inner dark:shadow-none'}`}>
           <div className="flex items-center gap-5">
             <form action={incrementLike} onSubmit={handleLikeClick} className="flex items-center">
               <input type="hidden" name="id" value={post.id} />
-              <button type="submit" disabled={localLiked} className={`flex items-center gap-1.5 transition-colors ${localLiked ? 'text-pink-500' : 'text-gray-500 hover:text-pink-500 dark:text-gray-300 dark:hover:text-pink-500'}`}>
-                <Heart size={19} className={`transition-transform ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-pink-500' : ''}`} />
+              <button type="submit" disabled={localLiked} className={`flex items-center gap-1.5 transition-colors ${localLiked ? (isGodMode ? 'text-yellow-500' : 'text-pink-500') : (isGodMode ? 'text-yellow-600/50 hover:text-yellow-500 dark:text-yellow-500/50 dark:hover:text-yellow-400' : 'text-gray-500 hover:text-pink-500 dark:text-gray-300 dark:hover:text-pink-500')}`}>
+                <Heart size={19} className={`transition-transform ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? (isGodMode ? 'fill-yellow-500' : 'fill-pink-500') : ''}`} />
                 <span className="text-[13px] font-bold">{localLikesCount > 0 ? localLikesCount : ''}</span>
               </button>
             </form>
             
-            <button onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+            <button onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }} className={`flex items-center gap-1.5 transition-colors ${isGodMode ? 'text-yellow-600/50 hover:text-yellow-600 dark:text-yellow-500/50 dark:hover:text-yellow-400' : 'text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'}`}>
               <MessageCircle size={19} className="transform -scale-x-100" />
               <span className="text-[13px] font-bold">{commentCount > 0 ? commentCount : ''}</span>
             </button>
             
-            <button onClick={handleShare} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
+            <button onClick={handleShare} className={`flex items-center gap-1.5 transition-colors ${isGodMode ? 'text-yellow-600/50 hover:text-yellow-600 dark:text-yellow-500/50 dark:hover:text-yellow-400' : 'text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'}`}>
               <Send size={19} className="transform -rotate-12 -mt-0.5" />
             </button>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-400 cursor-default">
+            <div className={`flex items-center gap-1.5 cursor-default ${isGodMode ? 'text-yellow-600/50 dark:text-yellow-500/50' : 'text-gray-400 dark:text-gray-400'}`}>
               <Eye size={18} />
               <span className="text-[13px] font-bold">{post.views || 0}</span>
             </div>
             
-            <button onClick={handleSaveToggle} className={`transition-colors ${isSaved ? 'text-gray-900 dark:text-white' : 'text-gray-400 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'}`}>
-              <Bookmark size={19} className={isSaved ? 'fill-gray-900 dark:fill-white' : ''} />
+            <button onClick={handleSaveToggle} className={`transition-colors ${isSaved ? (isGodMode ? 'text-yellow-500 dark:text-yellow-400' : 'text-gray-900 dark:text-white') : (isGodMode ? 'text-yellow-600/50 hover:text-yellow-600 dark:text-yellow-500/50 dark:hover:text-yellow-400' : 'text-gray-400 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white')}`}>
+              <Bookmark size={19} className={isSaved ? (isGodMode ? 'fill-yellow-500 dark:fill-yellow-400' : 'fill-gray-900 dark:fill-white') : ''} />
             </button>
           </div>
         </div>
       </article>
 
-      {/* ŞİKAYET MODALI DİNAMİK YAPILDI */}
+      {/* ŞİKAYET MODALI */}
       {showReportModal && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm" onClick={() => setShowReportModal(false)}>
           <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl w-full max-w-sm overflow-hidden transform transition-all border border-gray-200 dark:border-white/10" onClick={(e) => e.stopPropagation()}>

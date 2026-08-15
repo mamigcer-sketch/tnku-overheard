@@ -2,10 +2,10 @@ import prisma from '@/lib/prisma';
 
 // 🔥 RÜTBE VE ROZET SİSTEMİ (Puan Sınırları)
 const BADGE_THRESHOLDS = [
-  { points: 50, name: "Çırak İtirafçı 🐣" },
-  { points: 150, name: "Laf Ebesi 💬" },
-  { points: 300, name: "Ortamın Arananı 🔥" },
-  { points: 500, name: "Kampüs Sefiri 👑" },
+  { points: 50, name: "Çırak 🐣" },
+  { points: 150, name: "Çenesiz 💬" },
+  { points: 300, name: "Dedikodu Makinesi 🔥" },
+  { points: 500, name: "Mekanın Sahibi👑" },
   { points: 1000, name: "Efsanevi Ruh 👻" }
 ];
 

@@ -164,3 +164,8 @@ model SystemSetting {
   isActive  Boolean  @default(true) // true = site açık, false = bakım modu (middleware devrede)
   updatedAt DateTime @updatedAt
 }
+model BannedIP {
+  id        String   @id @default(cuid())
+  ipAddress String   @unique
+  createdAt DateTime @default(now())
+}
