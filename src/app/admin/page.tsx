@@ -240,7 +240,6 @@ export default async function AdminDashboard({ searchParams }: any) {
 
     try {
       if (targetUuid === 'ALL') {
-        // null olmayan tüm yazarları bul
         const distinctUsers = await prisma.post.findMany({ 
           where: { authorUuid: { not: null } },
           distinct: ['authorUuid'], 
@@ -267,17 +266,27 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/admin');
   }
 
-  // 🔥 KAMPÜS RADARI (ETKİNLİK EKLEME) 🔥
+  // 🔥 KAMPÜS RADARI (ETKİNLİK EKLEME & FOTOĞRAF YÜKLEME) 🔥
   async function createEvent(formData: FormData) {
     'use server';
     const title = formData.get('title')?.toString().trim();
     const description = formData.get('description')?.toString().trim();
     const dateStr = formData.get('date')?.toString(); 
     const location = formData.get('location')?.toString().trim();
-    const imageUrl = formData.get('imageUrl')?.toString().trim();
     const actionLink = formData.get('actionLink')?.toString().trim();
     const actionText = formData.get('actionText')?.toString().trim();
     const isSponsored = formData.get('isSponsored') === 'on';
+
+    let finalImageUrl = null;
+
+    // 🔥 DİREKT FOTOĞRAF YÜKLEME VE ÇEVİRME İŞLEMİ 🔥
+    const imageFile = formData.get('imageFile') as File | null;
+    if (imageFile && imageFile.size > 0) {
+      const bytes = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(bytes);
+      // Gelen resmi direkt kodlanmış bir string'e çevirip veritabanına hazır hale getirir
+      finalImageUrl = `data:${imageFile.type};base64,${buffer.toString('base64')}`;
+    }
 
     if (!title || !description || !dateStr) return;
 
@@ -288,7 +297,7 @@ export default async function AdminDashboard({ searchParams }: any) {
           description,
           date: new Date(dateStr),
           location: location || null,
-          imageUrl: imageUrl || null,
+          imageUrl: finalImageUrl,
           actionLink: actionLink || null,
           actionText: actionText || null,
           isSponsored,
@@ -470,7 +479,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: Sparkles, label: 'Özel Nickler' }, 
     { icon: Ghost, label: 'Kukla Ustası' }, 
     { icon: Brain, label: 'Zihin Kontrolü' }, 
-    { icon: Flame, label: 'Kampüs Radarı' }, // 🔥 ETKİNLİKLER (KAMPÜS RADARI)
+    { icon: Flame, label: 'Kampüs Radarı' }, 
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Coffee, label: 'Boş Yap' }, 
@@ -656,8 +665,8 @@ export default async function AdminDashboard({ searchParams }: any) {
                         <input type="text" name="location" className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-[14px] text-white focus:border-amber-500 outline-none transition-colors" placeholder="Örn: Değirmenaltı Meydan" />
                       </div>
                       <div>
-                        <label className="block text-[11px] font-black text-gray-400 mb-1 uppercase tracking-wider">Afiş Görseli URL (Opsiyonel)</label>
-                        <input type="url" name="imageUrl" className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-[14px] text-white focus:border-amber-500 outline-none transition-colors" placeholder="https://resimlinki.com/afis.jpg" />
+                        <label className="block text-[11px] font-black text-gray-400 mb-1 uppercase tracking-wider">Afiş Görseli Yükle (Opsiyonel)</label>
+                        <input type="file" name="imageFile" accept="image/png, image/jpeg, image/jpg, image/webp" className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-2 text-[14px] text-white focus:border-amber-500 outline-none transition-colors file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-[11px] file:font-black file:uppercase file:tracking-wider file:bg-amber-500/10 file:text-amber-500 hover:file:bg-amber-500/20 cursor-pointer" />
                       </div>
                     </div>
 

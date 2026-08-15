@@ -18,8 +18,8 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const menuItems = [
     { name: 'NKÜ Chat', icon: <MessageCircle size={18} />, href: '/sohbet', isExternal: false },
     // 🔥 ETKİNLİKLER BUTONU EKLENDİ 🔥
-    { name: 'Kampüs Radarı', icon: <Flame size={18} />, href: '/etkinlikler', isExternal: false },
-    { name: 'Sefirler', icon: <Trophy size={18} />, href: '/liderlik', isExternal: false, hideOnDesktop: true },
+    { name: 'Etkinlikler', icon: <Flame size={18} />, href: '/etkinlikler', isExternal: false },
+    { name: 'Leaderboard', icon: <Trophy size={18} />, href: '/liderlik', isExternal: false, hideOnDesktop: true },
     { name: 'Kaydedilenler', icon: <Bookmark size={18} />, href: '/kaydedilenler', isExternal: false, hideOnDesktop: true },
     { name: 'Topluluk Kuralları', icon: <BookOpen size={18} />, href: '/rules', isExternal: false },
     { name: 'Instagram', icon: <ExternalLink size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
