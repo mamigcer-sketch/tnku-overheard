@@ -2,9 +2,8 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { Headphones, VenetianMask, Coffee, Send, CheckCircle2, Loader2, Clock, Sparkles } from 'lucide-react';
+import { Headphones, VenetianMask, Coffee, Send, CheckCircle2, Loader2, Clock } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
-import VoiceRecorder from "@/components/VoiceRecorder";
 
 export default function ModernForm() {
   const [type, setType] = useState<'CONFESSION' | 'BOSYAP' | 'OVERHEARD'>('CONFESSION'); 
@@ -14,8 +13,6 @@ export default function ModernForm() {
   const [gender, setGender] = useState(''); 
   const [time, setTime] = useState('');
   const [isEphemeral, setIsEphemeral] = useState(false);
-  const [audioBase64, setAudioBase64] = useState<string | null>(null);
-  const [isRecordingNow, setIsRecordingNow] = useState(false);
   
   const [loading, setLoading] = useState(false);
   const [successMsg, setSuccessMsg] = useState(false);
@@ -36,12 +33,6 @@ export default function ModernForm() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    if (isRecordingNow) {
-      alert("Kral, önce ses kaydını durdurman gerekiyor!");
-      return;
-    }
-
     setLoading(true);
 
     try {
@@ -54,10 +45,6 @@ export default function ModernForm() {
       formData.append('gender', type === 'OVERHEARD' ? gender : '');
       formData.append('time', type === 'OVERHEARD' ? time : '');
       formData.append('isEphemeral', (type === 'CONFESSION' && isEphemeral) ? 'true' : 'false');
-      
-      if (audioBase64) {
-        formData.append('audioUrl', audioBase64);
-      }
 
       const res = await createPost(formData);
 
@@ -72,7 +59,6 @@ export default function ModernForm() {
       setGender(''); 
       setTime('');
       setIsEphemeral(false);
-      setAudioBase64(null);
       
       setSuccessMsg(true);
       setTimeout(() => setSuccessMsg(false), 5000);
@@ -85,25 +71,11 @@ export default function ModernForm() {
   };
 
   return (
-    <div className="w-full bg-white dark:bg-[#0A0A0A] rounded-[32px] border border-gray-200 dark:border-white/5 shadow-xl dark:shadow-[0_10px_50px_rgba(0,0,0,0.5)] p-5 sm:p-6 transition-colors duration-300 relative overflow-hidden">
-      
-      {/* İnce arka plan parlaması (Gece modunda daha belirgin) */}
-      <div className={`absolute top-0 right-0 w-64 h-64 blur-[80px] -z-10 rounded-full transition-colors duration-700 opacity-50 dark:opacity-30 pointer-events-none ${
-        type === 'CONFESSION' ? 'bg-purple-400' : type === 'BOSYAP' ? 'bg-emerald-400' : 'bg-blue-400'
-      }`}></div>
-
-      {/* BAŞLIK KISMI */}
-      <div className="mb-6">
-        <h2 className="text-xl sm:text-2xl font-black text-gray-900 dark:text-white flex items-center gap-2 tracking-tight transition-colors duration-300">
-          Yeni Paylaşım Yap <Sparkles size={20} className="text-amber-400 animate-pulse"/>
-        </h2>
-        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 font-medium transition-colors duration-300">
-          Değirmenaltı'nda gizli kalmasın.
-        </p>
-      </div>
+    // 🔥 DIŞ KUTU SIFIRLANDI: Artık parent modalın içine kusursuz entegre olacak.
+    <div className="w-full transition-colors duration-300 relative">
 
       {/* YENİ NESİL iOS SEKMELERİ */}
-      <div className="flex bg-gray-100 dark:bg-[#121212] p-1.5 rounded-2xl mb-5 border border-gray-200/50 dark:border-white/5 transition-colors duration-300">
+      <div className="flex bg-gray-100 dark:bg-white/[0.04] p-1.5 rounded-2xl mb-5 border border-gray-200/50 dark:border-white/5 transition-colors duration-300">
         <button 
           type="button"
           onClick={() => handleTabChange('CONFESSION')} 
@@ -145,8 +117,8 @@ export default function ModernForm() {
         
         {/* OVERHEARD (DUYUM) EK ALANLARI */}
         {type === 'OVERHEARD' && (
-          <div className="bg-gray-50 dark:bg-[#121212] rounded-2xl p-4 border border-gray-200 dark:border-white/5 grid grid-cols-2 md:grid-cols-4 gap-3 transition-colors duration-300">
-            <div className="relative col-span-2 md:col-span-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-transparent transition-colors">
+          <div className="bg-gray-50 dark:bg-white/5 rounded-2xl p-4 border border-gray-200 dark:border-white/5 grid grid-cols-2 md:grid-cols-4 gap-3 transition-colors duration-300">
+            <div className="relative col-span-2 md:col-span-1 bg-white dark:bg-black/20 rounded-xl border border-gray-200 dark:border-transparent transition-colors">
               <input 
                 type="text" 
                 id="location_field" 
@@ -159,7 +131,7 @@ export default function ModernForm() {
               <label htmlFor="location_field" className={`absolute text-[11px] font-bold duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-blue-500 dark:peer-focus:text-[#4DA3FF] peer-focus:scale-90 peer-focus:-translate-y-2.5 ${location ? 'text-gray-500 scale-90 -translate-y-2.5' : 'text-gray-400 dark:text-gray-500'}`}>Nerede?</label>
             </div>
             
-            <div className="relative col-span-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-transparent transition-colors">
+            <div className="relative col-span-1 bg-white dark:bg-black/20 rounded-xl border border-gray-200 dark:border-transparent transition-colors">
                <select 
                 id="people_field"
                 required 
@@ -176,7 +148,7 @@ export default function ModernForm() {
               <label htmlFor="people_field" className={`absolute text-[11px] font-bold duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-blue-500 dark:peer-focus:text-[#4DA3FF] peer-focus:scale-90 peer-focus:-translate-y-2.5 ${people ? 'text-gray-500 scale-90 -translate-y-2.5' : 'text-gray-400 dark:text-gray-500'}`}>Kaç Kişi?</label>
             </div>
 
-            <div className="relative col-span-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-transparent transition-colors">
+            <div className="relative col-span-1 bg-white dark:bg-black/20 rounded-xl border border-gray-200 dark:border-transparent transition-colors">
               <select 
                 id="gender_field"
                 required
@@ -192,7 +164,7 @@ export default function ModernForm() {
               <label htmlFor="gender_field" className={`absolute text-[11px] font-bold duration-200 transform top-3.5 left-3 pointer-events-none peer-focus:text-blue-500 dark:peer-focus:text-[#4DA3FF] peer-focus:scale-90 peer-focus:-translate-y-2.5 ${gender ? 'text-gray-500 scale-90 -translate-y-2.5' : 'text-gray-400 dark:text-gray-500'}`}>Grup</label>
             </div>
 
-            <div className="relative col-span-2 md:col-span-1 bg-white dark:bg-white/5 rounded-xl border border-gray-200 dark:border-transparent transition-colors">
+            <div className="relative col-span-2 md:col-span-1 bg-white dark:bg-black/20 rounded-xl border border-gray-200 dark:border-transparent transition-colors">
               <input 
                 type="time" 
                 id="time_field"
@@ -208,7 +180,7 @@ export default function ModernForm() {
         )}
 
         {/* ANA YAZI ALANI */}
-        <div className="relative bg-gray-50 dark:bg-[#121212] border border-gray-200 dark:border-white/5 rounded-2xl transition-colors duration-300 focus-within:ring-2 focus-within:ring-purple-500/20 dark:focus-within:ring-purple-500/30 focus-within:border-purple-300 dark:focus-within:border-purple-500/50">
+        <div className="relative bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-2xl transition-colors duration-300 focus-within:ring-2 focus-within:ring-purple-500/20 dark:focus-within:ring-purple-500/30 focus-within:border-purple-300 dark:focus-within:border-purple-500/50 shadow-sm dark:shadow-none">
             <textarea 
               maxLength={maxChars}
               rows={4} 
@@ -228,21 +200,11 @@ export default function ModernForm() {
             </div>
         </div>
 
-        {/* SES KAYDEDİCİ */}
-        {type !== 'OVERHEARD' && (
-          <div className="rounded-2xl overflow-hidden border border-gray-200 dark:border-white/5 transition-colors">
-            <VoiceRecorder 
-              onAudioReady={(base64) => setAudioBase64(base64)} 
-              onRecordingStateChange={(recording) => setIsRecordingNow(recording)}
-            />
-          </div>
-        )}
-
         {/* SÜRELİ İTİRAF ANAHTARI */}
         {type === 'CONFESSION' && (
-          <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-[#121212] border border-gray-200 dark:border-white/5 rounded-2xl cursor-pointer hover:bg-gray-100 dark:hover:bg-white/[0.04] transition-all duration-300 group">
+          <label className="flex items-center justify-between p-4 bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-2xl cursor-pointer hover:bg-gray-100 dark:hover:bg-white/[0.04] transition-all duration-300 shadow-sm dark:shadow-none group">
             <div className="flex items-center gap-3">
-              <div className={`p-2.5 rounded-xl transition-colors ${isEphemeral ? 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 shadow-inner' : 'bg-white text-gray-400 border border-gray-200 dark:bg-white/5 dark:text-gray-500 dark:border-transparent'}`}>
+              <div className={`p-2.5 rounded-xl transition-colors ${isEphemeral ? 'bg-purple-100 text-purple-600 dark:bg-purple-500/20 dark:text-purple-400 shadow-inner' : 'bg-white text-gray-400 border border-gray-200 dark:bg-black/30 dark:text-gray-400 dark:border-white/5'}`}>
                 <Clock size={20} />
               </div>
               <div>
@@ -251,6 +213,7 @@ export default function ModernForm() {
               </div>
             </div>
             
+            {/* iOS Tarzı Şık Switch */}
             <div className="relative ml-2 shrink-0">
               <input 
                 type="checkbox" 
@@ -268,21 +231,20 @@ export default function ModernForm() {
         {/* GÖNDER BUTONU */}
         <button 
           type="submit" 
-          disabled={loading || successMsg || isRecordingNow} 
-          className={`relative w-full py-4 rounded-2xl text-[15px] font-black flex items-center justify-center gap-2 transition-all duration-300 shadow-lg ${
+          disabled={loading || successMsg} 
+          className={`relative w-full py-4 rounded-2xl text-[15px] font-black flex items-center justify-center gap-2 transition-all duration-300 shadow-md ${
             successMsg ? 'bg-emerald-500 text-white shadow-emerald-500/30' 
-            : (loading || isRecordingNow) ? 'bg-gray-200 text-gray-400 dark:bg-white/5 dark:text-gray-500 cursor-not-allowed shadow-none'
-            : type === 'CONFESSION' ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-500/30 hover:shadow-purple-500/40 hover:-translate-y-0.5' 
-            : type === 'BOSYAP' ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30 hover:shadow-emerald-500/40 hover:-translate-y-0.5'
-            : 'bg-[#4DA3FF] hover:bg-blue-400 text-white shadow-blue-500/30 hover:shadow-blue-500/40 hover:-translate-y-0.5'
+            : loading ? 'bg-gray-200 text-gray-400 dark:bg-white/5 dark:text-gray-600 cursor-not-allowed shadow-none'
+            : (type === 'CONFESSION' && isEphemeral) ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-500/30 dark:shadow-purple-900/40'
+            : type === 'CONFESSION' ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-500/30 dark:shadow-purple-900/40' 
+            : type === 'BOSYAP' ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30 dark:shadow-emerald-900/40'
+            : 'bg-[#4DA3FF] hover:bg-blue-400 text-white shadow-blue-500/30 dark:shadow-blue-900/40'
           }`}
         >
           {successMsg ? (
             <span className="flex items-center gap-2 animate-in zoom-in">
               <CheckCircle2 size={18} /> Başarıyla Fırlatıldı!
             </span>
-          ) : isRecordingNow ? (
-            <span className="text-red-500 dark:text-red-400 animate-pulse">🎙️ Önce Kaydı Durdurman Gerekiyor!</span>
           ) : loading ? (
             <span className="flex items-center gap-2">
               <Loader2 size={18} className="animate-spin" /> Yükleniyor...
