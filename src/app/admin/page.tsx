@@ -7,7 +7,7 @@ import AnonymousPlayer from '@/components/AnonymousPlayer';
 import { 
   LayoutDashboard, Rss, Headphones, VenetianMask, Coffee,
   Inbox, Check, X, Trash2, Lock, KeyRound, LogOut,
-  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles, ExternalLink, Crown, Award, UserMinus, UserCog, Ghost, Brain, Crosshair
+  BarChart3, Heart, Eye, Calendar, Tag, Activity, MessageSquare, Bell, CheckCircle, XCircle, Plus, Ban, ShieldAlert, Pencil, Flag, AlertTriangle, Clock, Radio, Timer, Fingerprint, Sparkles, ExternalLink, Crown, Award, UserMinus, UserCog, Ghost, Brain, Crosshair, Flame
 } from 'lucide-react';
 
 const globalForPrisma = global as unknown as { prisma: PrismaClient };
@@ -148,7 +148,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     } catch (e) {}
   } else if (currentTab === 'Şikayetler') {
     try { reports = await (prisma as any).report.findMany({ orderBy: { createdAt: 'desc' }, include: { post: true, comment: true } }); } catch (e) {}
-  } else if (currentTab !== 'Özel Nickler' && currentTab !== 'Kukla Ustası' && currentTab !== 'Zihin Kontrolü') { 
+  } else if (currentTab !== 'Özel Nickler' && currentTab !== 'Kukla Ustası' && currentTab !== 'Zihin Kontrolü' && currentTab !== 'Kampüs Radarı') { 
     let queryFilter: any = { status: 'PENDING' };
     if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
     if (currentTab === 'Overheard') queryFilter = { status: 'APPROVED', type: { in: ['OVERHEARD', 'OVERHED'] } };
@@ -260,12 +260,45 @@ export default async function AdminDashboard({ searchParams }: any) {
         });
       }
     } catch (e) {
-      // EĞER VERİTABANINDA BİR UYUMSUZLUK VARSA VS CODE TERMİNALİNE KIRMIZI YAZACAK
       console.error("🔥 ZİHİN KONTROLÜ VERİTABANI HATASI:", e);
     }
     
-    // İşlem bitince tüm sitedeki (Layout dahil) bildirim çanlarını yenile!
     revalidatePath('/', 'layout');
+    revalidatePath('/admin');
+  }
+
+  // 🔥 KAMPÜS RADARI (ETKİNLİK EKLEME) 🔥
+  async function createEvent(formData: FormData) {
+    'use server';
+    const title = formData.get('title')?.toString().trim();
+    const description = formData.get('description')?.toString().trim();
+    const dateStr = formData.get('date')?.toString(); 
+    const location = formData.get('location')?.toString().trim();
+    const imageUrl = formData.get('imageUrl')?.toString().trim();
+    const actionLink = formData.get('actionLink')?.toString().trim();
+    const actionText = formData.get('actionText')?.toString().trim();
+    const isSponsored = formData.get('isSponsored') === 'on';
+
+    if (!title || !description || !dateStr) return;
+
+    try {
+      await (prisma as any).event.create({
+        data: {
+          title,
+          description,
+          date: new Date(dateStr),
+          location: location || null,
+          imageUrl: imageUrl || null,
+          actionLink: actionLink || null,
+          actionText: actionText || null,
+          isSponsored,
+        }
+      });
+    } catch(e) {
+      console.error("Etkinlik ekleme hatası:", e);
+    }
+
+    revalidatePath('/etkinlikler');
     revalidatePath('/admin');
   }
 
@@ -435,8 +468,9 @@ export default async function AdminDashboard({ searchParams }: any) {
     { icon: LayoutDashboard, label: 'Dashboard' }, 
     { icon: Rss, label: 'Akış' }, 
     { icon: Sparkles, label: 'Özel Nickler' }, 
-    { icon: Ghost, label: 'Kukla Ustası' }, // 🔥 YENİ
-    { icon: Brain, label: 'Zihin Kontrolü' }, // 🔥 YENİ
+    { icon: Ghost, label: 'Kukla Ustası' }, 
+    { icon: Brain, label: 'Zihin Kontrolü' }, 
+    { icon: Flame, label: 'Kampüs Radarı' }, // 🔥 ETKİNLİKLER (KAMPÜS RADARI)
     { icon: Headphones, label: 'Overheard' }, 
     { icon: VenetianMask, label: 'İtiraflar' }, 
     { icon: Coffee, label: 'Boş Yap' }, 
@@ -460,7 +494,7 @@ export default async function AdminDashboard({ searchParams }: any) {
           {menuItems.map((item, i) => (
             <Link href={`/admin?tab=${item.label}`} key={i} className={`flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group ${currentTab === item.label ? 'bg-white/[0.06] text-white border border-white/10 shadow-[0_0_20px_rgba(255,255,255,0.02)]' : 'text-gray-400 border border-transparent hover:text-white hover:bg-white/[0.03]'}`}>
               <div className="flex items-center gap-3.5">
-                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? (item.label === 'Kukla Ustası' ? 'text-teal-400' : item.label === 'Zihin Kontrolü' ? 'text-pink-400' : item.label === 'Özel Nickler' ? 'text-purple-400' : 'text-[#4DA3FF]') : 'text-gray-500 group-hover:text-gray-300'}`} /> 
+                <item.icon size={18} className={`transition-colors ${currentTab === item.label ? (item.label === 'Kukla Ustası' ? 'text-teal-400' : item.label === 'Zihin Kontrolü' ? 'text-pink-400' : item.label === 'Özel Nickler' ? 'text-purple-400' : item.label === 'Kampüs Radarı' ? 'text-amber-500' : 'text-[#4DA3FF]') : 'text-gray-500 group-hover:text-gray-300'}`} /> 
                 <span className={`font-semibold tracking-wide text-sm ${currentTab === item.label ? 'opacity-100' : 'opacity-80'}`}>{item.label}</span>
               </div>
               {item.badge !== undefined && item.badge > 0 ? (
@@ -479,7 +513,7 @@ export default async function AdminDashboard({ searchParams }: any) {
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-[#0A0A0A]/90 backdrop-blur-3xl border-t border-white/[0.05] px-2 py-2 flex justify-start z-50 overflow-x-auto gap-1 sm:gap-2 scrollbar-hide shadow-[0_-8px_30px_rgba(0,0,0,0.5)]">
         {menuItems.map((item, i) => (
           <Link href={`/admin?tab=${item.label}`} key={i} className={`flex flex-col items-center justify-center gap-1 min-w-[64px] sm:min-w-[72px] px-1 py-2 rounded-2xl transition-all relative ${currentTab === item.label ? 'bg-white/10 text-white' : 'text-gray-500 hover:text-gray-300'}`}>
-            <item.icon size={18} className={currentTab === item.label && item.label === 'Kukla Ustası' ? 'text-teal-400' : currentTab === item.label && item.label === 'Zihin Kontrolü' ? 'text-pink-400' : currentTab === item.label && item.label === 'Özel Nickler' ? 'text-purple-400' : currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
+            <item.icon size={18} className={currentTab === item.label && item.label === 'Kukla Ustası' ? 'text-teal-400' : currentTab === item.label && item.label === 'Zihin Kontrolü' ? 'text-pink-400' : currentTab === item.label && item.label === 'Özel Nickler' ? 'text-purple-400' : currentTab === item.label && item.label === 'Kampüs Radarı' ? 'text-amber-500' : currentTab === item.label ? 'text-[#4DA3FF]' : ''} />
             {item.badge !== undefined && item.badge > 0 && (
               <span className={`absolute top-0 right-2 w-3.5 h-3.5 rounded-full flex items-center justify-center text-[8px] font-black ${item.label === 'Şikayetler' ? 'bg-red-500 text-white' : 'bg-[#4DA3FF] text-black'}`}>{item.badge}</span>
             )}
@@ -493,7 +527,7 @@ export default async function AdminDashboard({ searchParams }: any) {
         <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 sm:mb-10 pb-4 sm:pb-6 border-b border-white/[0.05] gap-3 sm:gap-4">
             <h2 className="text-xl sm:text-2xl md:text-3xl font-extrabold flex items-center gap-3 sm:gap-4 tracking-tight">
               <div className="p-3 bg-white/[0.02] border border-white/[0.05] rounded-2xl shadow-inner">
-                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Kukla Ustası' ? <Ghost className="text-teal-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Zihin Kontrolü' ? <Brain className="text-pink-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Lobi Sohbet' ? <Radio className="text-emerald-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Özel Nickler' ? <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
+                {currentTab === 'Yorumlar' ? <MessageSquare className="text-blue-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Kukla Ustası' ? <Ghost className="text-teal-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Zihin Kontrolü' ? <Brain className="text-pink-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Kampüs Radarı' ? <Flame className="text-amber-500 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Lobi Sohbet' ? <Radio className="text-emerald-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Özel Nickler' ? <Sparkles className="text-purple-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Duyurular' ? <Bell className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Sayaç' ? <Timer className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Banlar' ? <Ban className="text-red-400 w-5 h-5 sm:w-6 sm:h-6" /> : currentTab === 'Şikayetler' ? <Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6" /> : <BarChart3 className="text-[#4DA3FF] w-5 h-5 sm:w-6 sm:h-6" />} 
               </div>
               {currentTab} Paneli
             </h2>
@@ -515,9 +549,9 @@ export default async function AdminDashboard({ searchParams }: any) {
 
         <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
           
-          {currentTab !== 'Yorumlar' && currentTab !== 'Lobi Sohbet' && currentTab !== 'Özel Nickler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && currentTab !== 'Kukla Ustası' && currentTab !== 'Zihin Kontrolü' && (
+          {currentTab !== 'Yorumlar' && currentTab !== 'Lobi Sohbet' && currentTab !== 'Özel Nickler' && currentTab !== 'Duyurular' && currentTab !== 'Sayaç' && currentTab !== 'Banlar' && currentTab !== 'Şikayetler' && currentTab !== 'Kukla Ustası' && currentTab !== 'Zihin Kontrolü' && currentTab !== 'Kampüs Radarı' && (
             <>
-              {/* DASHBOARD İSTATİSTİKLERİ (ESKİ KODUN AYNISI - SAKLANDI) */}
+              {/* DASHBOARD İSTATİSTİKLERİ */}
               <div className="bg-[#0A0A0A] p-4 sm:p-6 md:p-8 rounded-[24px] sm:rounded-[32px] border border-white/[0.05] shadow-2xl flex flex-col xl:flex-row items-start xl:items-center justify-between gap-5 sm:gap-8 mb-6 sm:mb-8 relative overflow-hidden">
                 <div className="flex items-center gap-4 sm:gap-5 w-full xl:w-auto z-10">
                   <div className="flex items-center justify-center p-3 sm:p-4 bg-emerald-500/10 rounded-xl sm:rounded-2xl border border-emerald-500/20 shrink-0">
@@ -583,8 +617,77 @@ export default async function AdminDashboard({ searchParams }: any) {
 
           <div className="space-y-4 sm:space-y-6">
               
-            {/* 🔥 YENİ GÜÇ: KUKLA USTASI (GHOST POSTING) 🔥 */}
-            {currentTab === 'Kukla Ustası' ? (
+            {/* 🔥 KAMPÜS RADARI (ETKİNLİK & REKLAM EKLEME) 🔥 */}
+            {currentTab === 'Kampüs Radarı' ? (
+              <div className="space-y-6 sm:space-y-8 animate-in fade-in zoom-in-95 duration-500">
+                <div className="bg-[#1A1A1A] border border-white/5 rounded-[24px] p-6 sm:p-8 shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-3xl rounded-full pointer-events-none"></div>
+                  
+                  <div className="flex items-center gap-3 mb-6 relative z-10">
+                    <div className="bg-amber-500/20 p-3 rounded-xl border border-amber-500/30 text-amber-500 shadow-inner">
+                      <Flame size={24} className="animate-pulse" />
+                    </div>
+                    <div>
+                      <h2 className="text-xl font-black text-white">Etkinlik & Reklam Yayınla</h2>
+                      <p className="text-sm font-medium text-gray-400 mt-1">Kampüs Radarı sayfasına yeni bir parti veya sponsorlu ilan ekle.</p>
+                    </div>
+                  </div>
+                  
+                  <form action={createEvent} className="space-y-4 relative z-10">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-black text-gray-400 mb-1 uppercase tracking-wider">Etkinlik Adı *</label>
+                        <input type="text" name="title" required className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-[14px] text-white focus:border-amber-500 outline-none transition-colors" placeholder="Örn: Cherry Mood 90's Party" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-black text-gray-400 mb-1 uppercase tracking-wider">Tarih ve Saat *</label>
+                        <input type="datetime-local" name="date" required className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-[14px] text-white focus:border-amber-500 outline-none transition-colors [color-scheme:dark]" />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-black text-gray-400 mb-1 uppercase tracking-wider">Açıklama *</label>
+                      <textarea name="description" required rows={3} className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-[14px] text-white focus:border-amber-500 outline-none resize-none transition-colors" placeholder="Mekan, giriş ücreti, konsept gibi detayları yazın..."></textarea>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-black text-gray-400 mb-1 uppercase tracking-wider">Konum</label>
+                        <input type="text" name="location" className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-[14px] text-white focus:border-amber-500 outline-none transition-colors" placeholder="Örn: Değirmenaltı Meydan" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-black text-gray-400 mb-1 uppercase tracking-wider">Afiş Görseli URL (Opsiyonel)</label>
+                        <input type="url" name="imageUrl" className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-[14px] text-white focus:border-amber-500 outline-none transition-colors" placeholder="https://resimlinki.com/afis.jpg" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-black text-gray-400 mb-1 uppercase tracking-wider">Buton Metni (Reklamlar için)</label>
+                        <input type="text" name="actionText" className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-[14px] text-white focus:border-amber-500 outline-none transition-colors" placeholder="Örn: Bilet Al" />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-black text-gray-400 mb-1 uppercase tracking-wider">Yönlendirme Linki (Reklamlar için)</label>
+                        <input type="url" name="actionLink" className="w-full bg-[#0A0A0A] border border-white/10 rounded-xl p-3.5 text-[14px] text-white focus:border-amber-500 outline-none transition-colors" placeholder="https://biletino.com/..." />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-3 bg-amber-500/10 border border-amber-500/30 p-4 rounded-xl mt-2 transition-colors hover:bg-amber-500/20 cursor-pointer">
+                      <input type="checkbox" name="isSponsored" id="isSponsored" className="w-5 h-5 accent-amber-500 cursor-pointer" />
+                      <label htmlFor="isSponsored" className="text-[13px] font-bold text-amber-500 cursor-pointer select-none flex-1">
+                        Bu sponsorlu bir reklamdır (En üste altın rengiyle sabitler ve REKLAM yazar)
+                      </label>
+                    </div>
+
+                    <button type="submit" className="w-full bg-gradient-to-r from-amber-500 to-yellow-400 hover:from-amber-400 hover:to-yellow-300 text-black font-black py-4 rounded-xl transition-all mt-4 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_rgba(245,158,11,0.5)]">
+                      <Flame size={20} /> Kampüs Radarına Fırlat!
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+            // 🔥 DİĞER EKRANLAR 🔥
+            ) : currentTab === 'Kukla Ustası' ? (
               <div className="space-y-6 sm:space-y-8 animate-in fade-in zoom-in-95 duration-500">
                 <form action={createGhostPost} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-teal-500/20 space-y-4 sm:space-y-5 shadow-[0_0_50px_rgba(20,184,166,0.1)] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-teal-500/10 blur-[80px] -z-10 rounded-full"></div>
@@ -626,7 +729,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                 </form>
               </div>
 
-            // 🔥 YENİ GÜÇ: ZİHİN KONTROLÜ (DIRECT NOTIFICATION) 🔥
             ) : currentTab === 'Zihin Kontrolü' ? (
               <div className="space-y-6 sm:space-y-8 animate-in fade-in zoom-in-95 duration-500">
                 <form action={sendDirectNotification} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-pink-500/20 space-y-4 sm:space-y-5 shadow-[0_0_50px_rgba(236,72,153,0.1)] relative overflow-hidden">
@@ -652,7 +754,6 @@ export default async function AdminDashboard({ searchParams }: any) {
               </div>
 
             ) : currentTab === 'Özel Nickler' ? (
-              // ÖZEL NİCKLER (ESKİ KOD - SAKLANDI)
               <div className="space-y-6 sm:space-y-8">
               <form action={updateUserMeta} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] space-y-4 sm:space-y-5 shadow-xl relative overflow-hidden">
                   <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/[0.03] rounded-lg sm:rounded-xl border border-white/[0.05]"><UserCog className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Kullanıcı Ekle / Rozet Ver</h3>
@@ -725,7 +826,6 @@ export default async function AdminDashboard({ searchParams }: any) {
             </div>
 
             ) : currentTab === 'Yorumlar' ? (
-              // YORUMLAR (ESKİ KOD - SAKLANDI)
               displayComments.map((comment) => (
                 <article key={comment.id} className="bg-[#0A0A0A] p-4 sm:p-6 md:p-8 rounded-[20px] sm:rounded-[24px] border border-white/[0.05] flex flex-col gap-4 sm:gap-5 shadow-xl hover:border-white/10 transition-colors">
                   <div className="flex justify-between items-start gap-3 sm:gap-4">
@@ -767,7 +867,6 @@ export default async function AdminDashboard({ searchParams }: any) {
               ))
 
             ) : currentTab === 'Lobi Sohbet' ? (
-              // LOBİ SOHBET (ESKİ KOD - SAKLANDI)
               <div className="space-y-4">
                 <div className="bg-[#0A0A0A] border border-white/[0.05] p-5 rounded-2xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 shadow-lg">
                   <div className="flex items-center gap-3">
@@ -843,7 +942,6 @@ export default async function AdminDashboard({ searchParams }: any) {
               </div>
 
             ) : currentTab === 'Duyurular' ? (
-              // DUYURULAR (ESKİ KOD - SAKLANDI)
               <div className="space-y-6 sm:space-y-8">
                 <form action={createAnnouncement} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] space-y-4 sm:space-y-5 shadow-2xl relative overflow-hidden">
                   <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Bell className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Duyuru Fırlat</h3>
@@ -880,7 +978,6 @@ export default async function AdminDashboard({ searchParams }: any) {
                 </div>
               </div>
             ) : currentTab === 'Sayaç' ? (
-              // SAYAÇ (ESKİ KOD - SAKLANDI)
               <div className="space-y-6 sm:space-y-8">
                 <form action={createCountdown} className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] space-y-4 sm:space-y-5 shadow-2xl relative overflow-hidden">
                   <h3 className="text-lg sm:text-xl font-black text-white flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Timer className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Yeni Geri Sayım Kur</h3>
@@ -920,11 +1017,10 @@ export default async function AdminDashboard({ searchParams }: any) {
                 </div>
               </div>
 
-            // 🔥 YENİ GÜÇ: IP BAN KONTROL PANELİ EKLENDİ 🔥
             ) : currentTab === 'Banlar' ? (
               <div className="space-y-8">
                 
-                {/* 1. KISIM: IP BAN (HER ŞEYİ GÖREN GÖZ) */}
+                {/* 1. KISIM: IP BAN */}
                 <div className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-red-500/20 shadow-[0_0_40px_rgba(220,38,38,0.1)] relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-64 h-64 bg-red-500/10 blur-[80px] -z-10 rounded-full"></div>
                   <h3 className="text-lg sm:text-xl font-black text-white mb-2 flex items-center gap-2 sm:gap-3 tracking-wide">
@@ -959,7 +1055,7 @@ export default async function AdminDashboard({ searchParams }: any) {
                   </div>
                 </div>
 
-                {/* 2. KISIM: UUID BAN (ESKİ KOD) */}
+                {/* 2. KISIM: UUID BAN */}
                 <div className="bg-[#0A0A0A] p-5 sm:p-8 rounded-[20px] sm:rounded-[32px] border border-white/[0.05] shadow-2xl relative overflow-hidden">
                   <h3 className="text-lg sm:text-xl font-black text-white mb-6 sm:mb-8 flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-2.5 bg-white/5 rounded-lg sm:rounded-xl border border-white/10"><Ban className="text-gray-400 w-4 h-4 sm:w-5 sm:h-5"/></div> Engellenen Yazarlar (UUID) <span className="text-xs sm:text-sm text-red-400 bg-red-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-red-500/20">{bannedUsers.length}</span></h3>
                    
@@ -986,7 +1082,6 @@ export default async function AdminDashboard({ searchParams }: any) {
               </div>
 
             ) : currentTab === 'Şikayetler' ? (
-              // ŞİKAYETLER (ESKİ KOD - SAKLANDI)
               <div className="space-y-4 sm:space-y-6">
                 <h3 className="text-xl sm:text-2xl font-black text-white mb-3 sm:mb-4 flex items-center gap-2 sm:gap-3 tracking-wide"><div className="p-2 sm:p-3 bg-red-500/10 rounded-xl sm:rounded-2xl border border-red-500/20"><Flag className="text-red-500 w-5 h-5 sm:w-6 sm:h-6"/></div> Bildirilen İçerikler <span className="text-xs sm:text-sm text-red-400 bg-red-500/10 px-2 sm:px-3 py-0.5 sm:py-1 rounded-full border border-red-500/20">{reports.length}</span></h3>
                  
@@ -1035,7 +1130,6 @@ export default async function AdminDashboard({ searchParams }: any) {
               </div>
             ) : (
               displayPosts.length === 0 ? (
-                // NORMAL POST AKIŞI (ESKİ KOD - SAKLANDI)
                 <div className="text-center py-16 sm:py-24 bg-[#0A0A0A] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 flex flex-col items-center justify-center px-4">
                   <div className="bg-white/5 p-4 sm:p-5 rounded-2xl sm:rounded-3xl mb-4 sm:mb-5 border border-white/5 shadow-inner"><Inbox className="text-gray-500 w-8 h-8 sm:w-10 sm:h-10"/></div>
                   <p className="text-gray-500 font-bold text-sm sm:text-lg tracking-wide text-center">Bu sekmede gösterilecek gönderi bulunmuyor.</p>
