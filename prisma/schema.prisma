@@ -172,3 +172,28 @@ model BannedIP {
   ipAddress String   @unique
   createdAt DateTime @default(now())
 }
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String
+  date        DateTime
+  location    String?
+  imageUrl    String?  // Etkinlik afişi (opsiyonel)
+  actionLink  String?  // Bilet al / İncele butonu linki (reklamlar için)
+  actionText  String?  // Örn: "Bilet Al", "Kaydol"
+  isSponsored Boolean  @default(false) // Parayı basanlar için true yapacağız
+  createdAt   DateTime @default(now())
+
+  attendees   EventAttendee[]
+}
+
+model EventAttendee {
+  id        String   @id @default(cuid())
+  eventId   String
+  userUuid  String
+  createdAt DateTime @default(now())
+
+  event     Event    @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userUuid])
+}
