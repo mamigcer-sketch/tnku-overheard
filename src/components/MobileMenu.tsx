@@ -5,7 +5,7 @@ import { Menu, X, Bookmark, ShieldAlert, BookOpen, ExternalLink, Download, User,
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 
-export default function MobileMenu({ userUuid }: { userUuid?: string }) {
+export default function MobileMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -13,35 +13,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   useEffect(() => {
     setMounted(true);
   }, []);
-
-  // 🔥 ANA SAYFAYA ATMA SORUNUNUN KESİN ÇÖZÜMÜ 🔥
-  const handleProfileClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    setIsOpen(false);
-    
-    // 🔥 TİP HATASI (TYPE ERROR) ÇÖZÜLDÜ: null alabilmesine izin verdik 🔥
-    let targetId: string | null | undefined = userUuid;
-    
-    // 2. Eğer sunucu seni tanımıyorsa (ilk defa girdiysen veya post atmadıysan)
-    if (!targetId && typeof window !== 'undefined') {
-      
-      // Önce tarayıcının hafızasına bakar
-      targetId = localStorage.getItem('tnku_anon_id') || localStorage.getItem('tnku_chat_anon_id');
-      
-      // Orada da yoksan sana yepyeni bir kimlik üretir
-      if (!targetId) {
-        targetId = 'user_' + Math.random().toString(36).substr(2, 9);
-        localStorage.setItem('tnku_anon_id', targetId);
-      }
-      
-      // SADECE yeni kullanıcıysan çerez oluşturulur ki ana sayfaya fırlatılma! (Eski hesaplar ezilmez)
-      document.cookie = `user_uuid=${targetId}; path=/; max-age=31536000`;
-      document.cookie = `tnku_author_id=${targetId}; path=/; max-age=31536000`;
-    }
-    
-    // 3. /profil/ben yerine doğrudan senin asıl kimliğinin sayfasına fırlatır!
-    window.location.href = `/profil/${targetId}`;
-  };
 
   const menuItems = [
     { name: 'NKÜ Chat', icon: <MessageCircle size={18} />, href: '/sohbet', isExternal: false },
@@ -68,13 +39,14 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           <div className="absolute top-14 right-0 w-[260px] bg-white/95 dark:bg-[#0A0A0A]/95 backdrop-blur-3xl border border-gray-200 dark:border-white/10 rounded-[24px] p-2.5 shadow-xl dark:shadow-[0_10px_50px_rgba(0,0,0,0.7)] z-50 animate-in fade-in zoom-in-95 duration-200 transition-colors">
             <div className="space-y-1">
               
-              {/* 🔥 AKILLI PROFİL BUTONU 🔥 */}
-              <button 
-                onClick={handleProfileClick}
+              {/* 🔥 TERTEMİZ PROFİL BAĞLANTISI (SUNUCU HALLEDECEK) 🔥 */}
+              <a 
+                href="/profil/ben"
+                onClick={() => setIsOpen(false)}
                 className="w-full flex items-center gap-3 p-3.5 rounded-xl transition-all font-bold text-[15px] cursor-pointer mb-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 dark:bg-[#4DA3FF]/10 dark:hover:bg-[#4DA3FF]/15 dark:text-[#4DA3FF] dark:border-[#4DA3FF]/20 shadow-inner dark:shadow-none"
               >
                 <User size={18} className="stroke-[2.5]" /> Profilim
-              </button>
+              </a>
 
               {menuItems.map((item) => (
                 item.isExternal ? (

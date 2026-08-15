@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma';
 import PostCard from '@/components/PostCard';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
+import { redirect } from 'next/navigation'; // 🔥 EKLENDİ
 import { Heart, MessageCircle, ArrowRight, ArrowLeft, Flame, MoreHorizontal, User, Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import ProfileNickEdit from '@/components/ProfileNickEdit'; 
@@ -52,30 +53,34 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const generalUuid = cookieStore.get('user_uuid')?.value;
   const currentUserUuid = authorId || generalUuid || '';
 
-  // 🔥 1. KESİN ÇÖZÜM: EĞER ÇEREZ YOKSA VE "BEN" SAYFASINDAYSA ASLA İŞLEME DEVAM ETME! 🔥
-  // Kullanıcıyı hayali "ben" profiline sokmak yerine gerçek kimliğini bulup oraya fırlatıyoruz.
-  if (id === 'ben' && !currentUserUuid) {
-    return (
-      <main className="min-h-screen bg-slate-50 dark:bg-[#050505] flex flex-col items-center justify-center">
-        <script dangerouslySetInnerHTML={{ __html: `
-          let realId = localStorage.getItem('tnku_anon_id') || localStorage.getItem('tnku_chat_anon_id');
-          if (!realId) {
-            realId = 'user_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('tnku_anon_id', realId);
-          }
-          document.cookie = 'user_uuid=' + realId + '; path=/; max-age=31536000; SameSite=Lax';
-          document.cookie = 'tnku_author_id=' + realId + '; path=/; max-age=31536000; SameSite=Lax';
-          window.location.replace('/profil/' + realId);
-        `}} />
-        <div className="w-10 h-10 border-4 border-[#4DA3FF] border-t-transparent rounded-full animate-spin"></div>
-        <p className="mt-4 text-xs font-bold text-gray-500 uppercase tracking-widest animate-pulse">Kimlik Eşitleniyor...</p>
-      </main>
-    );
+  // 🔥 YÜZDE YÜZ ÇÖZÜM: DOĞRU PROFİLE SUNUCU YÖNLENDİRMESİ 🔥
+  if (id === 'ben') {
+    if (currentUserUuid) {
+      // 1. Post attığın asıl kimliğin (çerezin) varsa, seni direkt KENDİ GÖNDERİLERİNİN olduğu profiline fırlat!
+      redirect(`/profil/${currentUserUuid}`);
+    } else {
+      // 2. Eğer çerezin hiç yoksa (ilk defa giriyorsan veya çerezi sildiysen) sana gizlice doğru ID'yi verir.
+      return (
+        <main className="min-h-screen bg-slate-50 dark:bg-[#050505] flex flex-col items-center justify-center">
+          <script dangerouslySetInnerHTML={{ __html: `
+            var realId = localStorage.getItem('tnku_author_id') || localStorage.getItem('user_uuid') || localStorage.getItem('tnku_anon_id') || localStorage.getItem('tnku_chat_anon_id');
+            if (!realId) {
+              realId = 'user_' + Math.random().toString(36).substr(2, 9);
+              localStorage.setItem('tnku_author_id', realId);
+              localStorage.setItem('user_uuid', realId);
+            }
+            document.cookie = 'user_uuid=' + realId + '; path=/; max-age=31536000; SameSite=Lax';
+            document.cookie = 'tnku_author_id=' + realId + '; path=/; max-age=31536000; SameSite=Lax';
+            window.location.replace('/profil/' + realId);
+          `}} />
+          <div className="w-10 h-10 border-4 border-[#4DA3FF] border-t-transparent rounded-full animate-spin"></div>
+          <p className="mt-4 text-xs font-bold text-gray-500 uppercase tracking-widest animate-pulse">Kimlik Doğrulanıyor...</p>
+        </main>
+      );
+    }
   }
 
-  // 🔥 2. HEDEF KİMLİK BELİRLEME 🔥
-  // Artık id === 'ben' ise currentUserUuid KESİNLİKLE doludur (çünkü boşsa yukarıda yakaladık).
-  const targetUuid = id === 'ben' ? currentUserUuid : decodeURIComponent(id);
+  const targetUuid = decodeURIComponent(id);
   const isOwnProfile = Boolean(currentUserUuid && targetUuid === currentUserUuid);
   
   const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
@@ -172,18 +177,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   return (
     <main className="min-h-screen text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
       
-      {/* 🔥 KENDİ PROFİLİNDE ÇEREZİ SİLİNENLERE TUŞLARI GERİ VEREN SİHİRBAZ 🔥 */}
-      {!currentUserUuid && (
-        <script dangerouslySetInnerHTML={{ __html: `
-          var localId = localStorage.getItem('tnku_anon_id') || localStorage.getItem('tnku_chat_anon_id');
-          if (localId && localId === '${targetUuid}') {
-            document.cookie = 'user_uuid=' + localId + '; path=/; max-age=31536000; SameSite=Lax';
-            document.cookie = 'tnku_author_id=' + localId + '; path=/; max-age=31536000; SameSite=Lax';
-            window.location.reload();
-          }
-        `}} />
-      )}
-
       <div className="fixed inset-0 -z-10 bg-slate-50 dark:bg-[#050505] transition-colors duration-300">
         {isGodMode ? (
           <div className="absolute top-0 left-0 right-0 h-[800px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-yellow-100/60 via-slate-50 to-slate-50 dark:from-yellow-900/30 dark:via-[#050505] dark:to-[#050505] pointer-events-none transition-colors duration-700 animate-pulse"></div>
@@ -279,7 +272,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               <span className={`text-[10px] font-bold ${isGodMode ? 'text-yellow-600 dark:text-yellow-500' : 'text-gray-500'}`}>{points} XP</span>
             </div>
             
-            {/* 🔥 EĞER KİŞİ KENDİ PROFİLİNDEYSE DÜZENLEME TUŞLARI BURADA KESİN ÇIKAR 🔥 */}
             {isOwnProfile && (
               <div className="mt-4 w-full">
                 <ProfileNickEdit 
