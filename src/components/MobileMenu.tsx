@@ -7,7 +7,6 @@ import { useTheme } from 'next-themes';
 
 export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [isOpen, setIsOpen] = useState(false);
-  
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -15,54 +14,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     setMounted(true);
   }, []);
 
-  // 🔥 KESİN ÇÖZÜM: AKILLI PROFİL YÖNLENDİRİCİSİ 🔥
-  const handleProfileClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Next.js'in yönlendirme hatalarını engelle
-    setIsOpen(false);
-    
-    // 1. Tarayıcıdan ve Prop'tan gerçek kimliği bul
-    let realId = null;
-    if (typeof window !== 'undefined') {
-      realId = localStorage.getItem('tnku_anon_id') || 
-               localStorage.getItem('user_uuid') || 
-               localStorage.getItem('tnku_chat_anon_id');
-    }
-    
-    // Eğer LocalStorage boşsa prop'tan geleni kullan
-    if (!realId && userUuid) {
-      realId = userUuid;
-    }
-    
-    // Çerezlere de bak (garanti olsun)
-    if (!realId && typeof document !== 'undefined') {
-      const cookies = document.cookie.split(';');
-      for (let c of cookies) {
-        const [name, val] = c.trim().split('=');
-        if (name === 'user_uuid' || name === 'tnku_author_id') {
-          realId = val;
-          break;
-        }
-      }
-    }
-    
-    // Eğer hiçbir şey yoksa (ilk girişse) kimlik yarat
-    if (!realId || realId === 'ben') {
-      realId = 'user_' + Math.random().toString(36).substr(2, 9);
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('tnku_anon_id', realId);
-      }
-    }
-
-    // 2. Sunucunun kafası karışmasın diye bu kimliği ANINDA çerezlere zorla kazı
-    if (typeof document !== 'undefined') {
-      document.cookie = `user_uuid=${realId}; path=/; max-age=31536000`;
-      document.cookie = `tnku_author_id=${realId}; path=/; max-age=31536000`;
-    }
-    
-    // 3. HARD REDIRECT: Sayfayı yenileyerek sunucuya yeni çerezleri zorla gönder
-    window.location.href = `/profil/${realId}`;
-  };
-  
   const menuItems = [
     { name: 'NKÜ Chat', icon: <MessageCircle size={18} />, href: '/sohbet', isExternal: false },
     { name: 'Sefirler', icon: <Trophy size={18} />, href: '/liderlik', isExternal: false, hideOnDesktop: true },
@@ -76,7 +27,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     <div className="relative z-50">
       <button 
         onClick={() => setIsOpen(!isOpen)} 
-        // 🔥 MENÜ İKONU GÜNDÜZ/GECE UYUMLU
         className="p-2 rounded-full transition-colors cursor-pointer active:scale-90 text-gray-600 hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
       >
         {isOpen ? <X size={26} /> : <Menu size={26} />}
@@ -84,20 +34,20 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
 
       {isOpen && (
         <>
-          {/* 🔥 ARKA PLAN FLULAŞTIRMASI GÜNDÜZ/GECE UYUMLU */}
           <div className="fixed inset-0 z-40 bg-gray-900/20 dark:bg-black/60 backdrop-blur-sm transition-colors duration-300" onClick={() => setIsOpen(false)}></div>
           
-          {/* 🔥 MENÜ KUTUSU GÜNDÜZ/GECE UYUMLU */}
           <div className="absolute top-14 right-0 w-[260px] bg-white/95 dark:bg-[#0A0A0A]/95 backdrop-blur-3xl border border-gray-200 dark:border-white/10 rounded-[24px] p-2.5 shadow-xl dark:shadow-[0_10px_50px_rgba(0,0,0,0.7)] z-50 animate-in fade-in zoom-in-95 duration-200 transition-colors">
             <div className="space-y-1">
               
-              {/* 🔥 Link yerine BUTTON kullanıldı. Hatasız profil yönlendirmesi burada. 🔥 */}
-              <button 
-                onClick={handleProfileClick}
+              {/* 🔥 KESİN VE ZARARSIZ ÇÖZÜM: NATIVE ANCHOR (<a>) KULLANIMI 🔥 */}
+              {/* Next.js Link hatasını ve Instagram kusmasını engellemek için doğrudan sunucuya istek atan <a> etiketi kullanıldı. Kimlik bozmaz! */}
+              <a 
+                href="/profil/ben"
+                onClick={() => setIsOpen(false)}
                 className="w-full flex items-center gap-3 p-3.5 rounded-xl transition-all font-bold text-[15px] cursor-pointer mb-2 bg-blue-50 hover:bg-blue-100 text-blue-600 border border-blue-200 dark:bg-[#4DA3FF]/10 dark:hover:bg-[#4DA3FF]/15 dark:text-[#4DA3FF] dark:border-[#4DA3FF]/20 shadow-inner dark:shadow-none"
               >
                 <User size={18} className="stroke-[2.5]" /> Profilim
-              </button>
+              </a>
 
               {menuItems.map((item) => (
                 item.isExternal ? (
@@ -125,7 +75,6 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
 
               <div className="h-px w-full my-2 bg-gray-200 dark:bg-white/10 transition-colors"></div>
 
-              {/* 🔥 GÜNDÜZ / GECE MODU ŞALTERİ */}
               {mounted && (
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
