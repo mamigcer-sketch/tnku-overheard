@@ -108,6 +108,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   let displayChatMessages: any[] = [];
   let announcements: any[] = [];
   let countdowns: any[] = [];
+  let events: any[] = []; // 🔥 ETKİNLİKLER (KAMPÜS RADARI) LİSTESİ 🔥
   let bannedUsers: any[] = [];
   let bannedIPs: any[] = [];
   let reports: any[] = [];
@@ -141,6 +142,8 @@ export default async function AdminDashboard({ searchParams }: any) {
     try { announcements = await (prisma as any).announcement.findMany({ orderBy: { createdAt: 'desc' } }); } catch (e) {}
   } else if (currentTab === 'Sayaç') {
     try { countdowns = await (prisma as any).countdown.findMany({ orderBy: { createdAt: 'desc' } }); } catch (e) {}
+  } else if (currentTab === 'Kampüs Radarı') {
+    try { events = await (prisma as any).event.findMany({ orderBy: { date: 'desc' } }); } catch (e) {}
   } else if (currentTab === 'Banlar') {
     try { 
       bannedUsers = await (prisma as any).bannedUser.findMany({ orderBy: { createdAt: 'desc' } }); 
@@ -148,7 +151,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     } catch (e) {}
   } else if (currentTab === 'Şikayetler') {
     try { reports = await (prisma as any).report.findMany({ orderBy: { createdAt: 'desc' }, include: { post: true, comment: true } }); } catch (e) {}
-  } else if (currentTab !== 'Özel Nickler' && currentTab !== 'Kukla Ustası' && currentTab !== 'Zihin Kontrolü' && currentTab !== 'Kampüs Radarı') { 
+  } else if (currentTab !== 'Özel Nickler' && currentTab !== 'Kukla Ustası' && currentTab !== 'Zihin Kontrolü') { 
     let queryFilter: any = { status: 'PENDING' };
     if (currentTab === 'Akış') queryFilter = { status: 'APPROVED' };
     if (currentTab === 'Overheard') queryFilter = { status: 'APPROVED', type: { in: ['OVERHEARD', 'OVERHED'] } };
@@ -266,7 +269,7 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/admin');
   }
 
-  // 🔥 KAMPÜS RADARI (ETKİNLİK EKLEME & FOTOĞRAF YÜKLEME) 🔥
+  // 🔥 KAMPÜS RADARI (ETKİNLİK EKLEME & SİLME) 🔥
   async function createEvent(formData: FormData) {
     'use server';
     const title = formData.get('title')?.toString().trim();
@@ -279,12 +282,10 @@ export default async function AdminDashboard({ searchParams }: any) {
 
     let finalImageUrl = null;
 
-    // 🔥 DİREKT FOTOĞRAF YÜKLEME VE ÇEVİRME İŞLEMİ 🔥
     const imageFile = formData.get('imageFile') as File | null;
     if (imageFile && imageFile.size > 0) {
       const bytes = await imageFile.arrayBuffer();
       const buffer = Buffer.from(bytes);
-      // Gelen resmi direkt kodlanmış bir string'e çevirip veritabanına hazır hale getirir
       finalImageUrl = `data:${imageFile.type};base64,${buffer.toString('base64')}`;
     }
 
@@ -309,6 +310,12 @@ export default async function AdminDashboard({ searchParams }: any) {
 
     revalidatePath('/etkinlikler');
     revalidatePath('/admin');
+  }
+
+  async function deleteEvent(formData: FormData) { 
+    'use server'; 
+    try { await (prisma as any).event.delete({ where: { id: formData.get('id') as string } }); } catch (e) {} 
+    revalidatePath('/etkinlikler'); revalidatePath('/admin'); 
   }
 
   // 🔥 YENİ GÜÇ: IP BANLA 🔥
@@ -626,7 +633,7 @@ export default async function AdminDashboard({ searchParams }: any) {
 
           <div className="space-y-4 sm:space-y-6">
               
-            {/* 🔥 KAMPÜS RADARI (ETKİNLİK & REKLAM EKLEME) 🔥 */}
+            {/* 🔥 KAMPÜS RADARI (ETKİNLİK EKLEME & LİSTELEME) 🔥 */}
             {currentTab === 'Kampüs Radarı' ? (
               <div className="space-y-6 sm:space-y-8 animate-in fade-in zoom-in-95 duration-500">
                 <div className="bg-[#1A1A1A] border border-white/5 rounded-[24px] p-6 sm:p-8 shadow-2xl relative overflow-hidden">
@@ -692,6 +699,29 @@ export default async function AdminDashboard({ searchParams }: any) {
                       <Flame size={20} /> Kampüs Radarına Fırlat!
                     </button>
                   </form>
+                </div>
+
+                {/* 🔥 ETKİNLİK SİLME LİSTESİ 🔥 */}
+                <div className="space-y-3 sm:space-y-4">
+                  {events.length === 0 ? (
+                    <div className="text-center py-12 sm:py-16 bg-[#0A0A0A] rounded-[20px] sm:rounded-[32px] border border-dashed border-white/10 text-gray-500 text-sm sm:text-base font-medium">Buralar sessiz. Kayıtlı etkinlik bulunmuyor.</div>
+                  ) : (
+                    events.map((item: any) => (
+                      <div key={item.id} className={`bg-[#0A0A0A] p-4 sm:p-6 rounded-[20px] sm:rounded-[24px] border ${item.isSponsored ? 'border-amber-500/30 shadow-[0_0_15px_rgba(245,158,11,0.1)]' : 'border-white/[0.05]'} flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-5 shadow-lg`}>
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-1.5 sm:mb-2">
+                            <h4 className={`text-base sm:text-lg font-black ${item.isSponsored ? 'text-amber-500' : 'text-white'}`}>{item.title}</h4>
+                            {item.isSponsored && <span className="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] sm:text-[10px] font-black px-2 sm:px-3 py-0.5 sm:py-1 rounded-full uppercase tracking-widest flex items-center gap-1"><Sparkles size={10}/> Reklam</span>}
+                          </div>
+                          <p className="text-[11px] sm:text-xs font-semibold text-gray-500 bg-white/5 border border-white/5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-md sm:rounded-lg inline-block">Tarih: {new Date(item.date).toLocaleString('tr-TR')}</p>
+                        </div>
+                        <form action={deleteEvent} className="w-full sm:w-auto">
+                          <input type="hidden" name="id" value={item.id} />
+                          <button type="submit" className="w-full sm:w-auto bg-red-500/10 text-red-400 px-4 sm:px-5 py-2.5 sm:py-3 rounded-lg sm:rounded-xl border border-red-500/20 hover:bg-red-500/20 transition-colors flex items-center justify-center gap-1.5 sm:gap-2 font-bold text-[10px] sm:text-xs uppercase"><Trash2 size={14}/> Kaldır</button>
+                        </form>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
 
