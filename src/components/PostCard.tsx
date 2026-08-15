@@ -36,7 +36,6 @@ const getRelativeTime = (dateString: string) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
-// 🔥 PROPS KISMINA "userAvatar" EKLENDİ
 export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge, userAvatar }: any) {
   const router = useRouter();
   const cardRef = useRef(null);
@@ -63,15 +62,29 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const isBosYap = post.type === 'BOSYAP';
 
   const tagText = isConfession ? 'İtiraf' : isBosYap ? 'Boş Yap' : 'Overheard';
+  
+  // 🔥 TEMALAR DİNAMİK YAPILDI (Gündüz/Gece uyumlu)
   const themeClasses = isConfession 
-    ? { border: 'hover:border-purple-500/30', badge: 'text-purple-400 bg-purple-500/10 border-purple-500/20', text: 'text-purple-400' }
+    ? { 
+        border: 'hover:border-purple-300 dark:hover:border-purple-500/30', 
+        badge: 'text-purple-600 bg-purple-100 border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20', 
+        text: 'text-purple-600 dark:text-purple-400' 
+      }
     : isBosYap 
-    ? { border: 'hover:border-emerald-500/30', badge: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20', text: 'text-emerald-400' }
-    : { border: 'hover:border-[#4DA3FF]/30', badge: 'text-[#4DA3FF] bg-[#4DA3FF]/10 border-[#4DA3FF]/20', text: 'text-[#4DA3FF]' };
+    ? { 
+        border: 'hover:border-emerald-300 dark:hover:border-emerald-500/30', 
+        badge: 'text-emerald-600 bg-emerald-100 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20', 
+        text: 'text-emerald-600 dark:text-emerald-400' 
+      }
+    : { 
+        border: 'hover:border-blue-300 dark:hover:border-[#4DA3FF]/30', 
+        badge: 'text-blue-600 bg-blue-100 border-blue-200 dark:text-[#4DA3FF] dark:bg-[#4DA3FF]/10 dark:border-[#4DA3FF]/20', 
+        text: 'text-blue-600 dark:text-[#4DA3FF]' 
+      };
 
   const cardBorderClass = isEphemeral 
-    ? 'border-amber-500/30 shadow-[0_0_20px_rgba(245,158,11,0.08)] hover:border-amber-500/50' 
-    : `border-white/[0.04] shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${themeClasses.border}`;
+    ? 'border-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:border-amber-400 dark:border-amber-500/30 dark:shadow-[0_0_20px_rgba(245,158,11,0.08)] dark:hover:border-amber-500/50' 
+    : `border-gray-200 shadow-sm hover:shadow-md dark:border-white/[0.04] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${themeClasses.border}`;
 
   useEffect(() => {
     const getCookie = (name: string) => {
@@ -176,32 +189,33 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
     <>
       <article 
         ref={cardRef} 
-        className={`group w-full bg-white/[0.02] backdrop-blur-xl rounded-[24px] mb-5 p-4 sm:p-5 border transition-all duration-500 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${cardBorderClass}`}
+        // 🔥 ANA KART RENGİ DİNAMİK YAPILDI
+        className={`group w-full bg-white dark:bg-white/[0.02] backdrop-blur-xl rounded-[24px] mb-5 p-4 sm:p-5 border transition-all duration-500 ease-out ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'} ${cardBorderClass}`}
       >
         <div className="flex items-start justify-between mb-4 relative z-10">
           <Link href={`/profil/${encodeURIComponent(post.authorUuid || post.id)}`} onClick={(e) => { e.stopPropagation(); playClickSound(); }} className="flex items-center gap-3">
             
-            {/* 🔥 AVATAR BURADA GÖSTERİLİYOR 🔥 */}
-            <div className={`w-11 h-11 shrink-0 rounded-full p-[1.5px] ${isEphemeral ? 'bg-amber-500/30' : 'bg-white/[0.1]'}`}>
-              <div className="w-full h-full rounded-full bg-[#121212] flex items-center justify-center overflow-hidden">
+            {/* AVATAR DİNAMİK YAPILDI */}
+            <div className={`w-11 h-11 shrink-0 rounded-full p-[1.5px] ${isEphemeral ? 'bg-amber-300 dark:bg-amber-500/30' : 'bg-gray-200 dark:bg-white/[0.1]'}`}>
+              <div className="w-full h-full rounded-full bg-gray-100 dark:bg-[#121212] flex items-center justify-center overflow-hidden">
                 {userAvatar?.startsWith("data:image") ? (
                   <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
                 ) : userAvatar ? (
                   <span className="text-[22px]">{userAvatar}</span>
                 ) : (
-                  <span className="text-[16px] font-black opacity-80 text-white">{authorData.name.charAt(0)}</span>
+                  <span className="text-[16px] font-black opacity-80 text-gray-500 dark:text-white">{authorData.name.charAt(0)}</span>
                 )}
               </div>
             </div>
             
             <div className="flex flex-col">
               <div className="flex items-center gap-1.5">
-                <span className="font-bold text-white text-[15px] tracking-tight">{authorData.name}</span>
-                {userBadge && <span className="bg-amber-500/20 text-amber-500 text-[9px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">{userBadge}</span>}
+                <span className="font-bold text-gray-900 dark:text-white text-[15px] tracking-tight">{authorData.name}</span>
+                {userBadge && <span className="bg-amber-100 text-amber-600 border border-amber-200 dark:bg-amber-500/20 dark:text-amber-500 dark:border-transparent text-[9px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider">{userBadge}</span>}
               </div>
               <div className="flex items-center gap-1.5 text-[12px] font-medium mt-0.5">
                 {isEphemeral ? (
-                  <span className="flex items-center gap-1 text-amber-400 bg-amber-500/10 px-1.5 py-0.5 rounded text-[10px] tracking-wider uppercase font-bold border border-amber-500/20">
+                  <span className="flex items-center gap-1 text-amber-600 bg-amber-100 border border-amber-200 dark:text-amber-400 dark:bg-amber-500/10 dark:border-amber-500/20 px-1.5 py-0.5 rounded text-[10px] tracking-wider uppercase font-bold">
                     <Hourglass size={10} className="animate-pulse" /> 24s
                   </span>
                 ) : (
@@ -210,7 +224,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
                 
                 {subText && (
                   <>
-                    <span className="w-1 h-1 bg-gray-600 rounded-full"></span>
+                    <span className="w-1 h-1 bg-gray-400 dark:bg-gray-600 rounded-full"></span>
                     <span className="truncate max-w-[150px] text-gray-500">{subText}</span>
                   </>
                 )}
@@ -222,7 +236,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
             <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-widest ${themeClasses.badge}`}>
               {tagText}
             </span>
-            <button onClick={() => setShowReportModal(true)} className="p-1.5 text-gray-500 hover:text-white transition-colors bg-white/5 rounded-full hover:bg-white/10">
+            <button onClick={() => setShowReportModal(true)} className="p-1.5 text-gray-400 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-500 dark:hover:text-white transition-colors dark:bg-white/5 rounded-full dark:hover:bg-white/10">
               <MoreHorizontal size={16} />
             </button>
           </div>
@@ -230,11 +244,12 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
 
         <div onClick={handleDoubleTap} className="relative z-10 cursor-pointer select-none pl-1">
           <div className={`absolute inset-0 flex items-center justify-center pointer-events-none z-50 transition-all duration-300 ease-out ${showBigHeart ? 'opacity-100 scale-100' : 'opacity-0 scale-[0.3]'}`}>
-            <Heart size={80} className="text-white drop-shadow-2xl fill-white" />
+            {/* Çift tıklama kalbi (Gündüz pembe, gece beyaz) */}
+            <Heart size={80} className="text-pink-500 dark:text-white drop-shadow-2xl fill-pink-500 dark:fill-white" />
           </div>
 
           {post.content && (
-            <p className={`text-gray-100 text-[15.5px] leading-relaxed break-words whitespace-pre-wrap ${!isExpanded && isLongText ? 'line-clamp-6' : ''}`}>
+            <p className={`text-gray-800 dark:text-gray-100 text-[15.5px] leading-relaxed break-words whitespace-pre-wrap ${!isExpanded && isLongText ? 'line-clamp-6' : ''}`}>
               {post.content}
             </p>
           )}
@@ -252,54 +267,56 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           )}
         </div>
 
-        <div className="mt-5 flex items-center justify-between bg-white/[0.06] border border-white/[0.1] rounded-full px-4 py-3 shadow-inner">
+        {/* ALT BAR DİNAMİK YAPILDI */}
+        <div className="mt-5 flex items-center justify-between bg-gray-50 dark:bg-white/[0.06] border border-gray-100 dark:border-white/[0.1] rounded-full px-4 py-3 shadow-inner dark:shadow-none">
           <div className="flex items-center gap-5">
             <form action={incrementLike} onSubmit={handleLikeClick} className="flex items-center">
               <input type="hidden" name="id" value={post.id} />
-              <button type="submit" disabled={localLiked} className={`flex items-center gap-1.5 transition-colors ${localLiked ? 'text-pink-500' : 'text-gray-300 hover:text-pink-500'}`}>
+              <button type="submit" disabled={localLiked} className={`flex items-center gap-1.5 transition-colors ${localLiked ? 'text-pink-500' : 'text-gray-500 hover:text-pink-500 dark:text-gray-300 dark:hover:text-pink-500'}`}>
                 <Heart size={19} className={`transition-transform ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-pink-500' : ''}`} />
                 <span className="text-[13px] font-bold">{localLikesCount > 0 ? localLikesCount : ''}</span>
               </button>
             </form>
             
-            <button onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }} className="flex items-center gap-1.5 text-gray-300 hover:text-white transition-colors">
+            <button onClick={() => { playClickSound(); router.push(`/post/${post.id}`); }} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
               <MessageCircle size={19} className="transform -scale-x-100" />
               <span className="text-[13px] font-bold">{commentCount > 0 ? commentCount : ''}</span>
             </button>
             
-            <button onClick={handleShare} className="flex items-center gap-1.5 text-gray-300 hover:text-white transition-colors">
+            <button onClick={handleShare} className="flex items-center gap-1.5 text-gray-500 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white transition-colors">
               <Send size={19} className="transform -rotate-12 -mt-0.5" />
             </button>
           </div>
 
           <div className="flex items-center gap-4">
-            <div className="flex items-center gap-1.5 text-gray-400 cursor-default">
+            <div className="flex items-center gap-1.5 text-gray-400 dark:text-gray-400 cursor-default">
               <Eye size={18} />
               <span className="text-[13px] font-bold">{post.views || 0}</span>
             </div>
             
-            <button onClick={handleSaveToggle} className={`transition-colors ${isSaved ? 'text-white' : 'text-gray-300 hover:text-white'}`}>
-              <Bookmark size={19} className={isSaved ? 'fill-white' : ''} />
+            <button onClick={handleSaveToggle} className={`transition-colors ${isSaved ? 'text-gray-900 dark:text-white' : 'text-gray-400 hover:text-gray-900 dark:text-gray-300 dark:hover:text-white'}`}>
+              <Bookmark size={19} className={isSaved ? 'fill-gray-900 dark:fill-white' : ''} />
             </button>
           </div>
         </div>
       </article>
 
+      {/* ŞİKAYET MODALI DİNAMİK YAPILDI */}
       {showReportModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowReportModal(false)}>
-          <div className="bg-[#1A1A1A] rounded-3xl w-full max-w-sm overflow-hidden transform transition-all border border-white/10" onClick={(e) => e.stopPropagation()}>
-            <div className="flex flex-col items-center p-6 border-b border-white/5">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm" onClick={() => setShowReportModal(false)}>
+          <div className="bg-white dark:bg-[#1A1A1A] rounded-3xl w-full max-w-sm overflow-hidden transform transition-all border border-gray-200 dark:border-white/10" onClick={(e) => e.stopPropagation()}>
+            <div className="flex flex-col items-center p-6 border-b border-gray-100 dark:border-white/5">
               <ShieldAlert className="text-red-500 w-12 h-12 mb-3" />
-              <h3 className="text-white font-bold text-lg">Şikayet Et</h3>
-              <p className="text-gray-400 text-[13px] text-center mt-1">Bu gönderi neden kaldırılmalı?</p>
+              <h3 className="text-gray-900 dark:text-white font-bold text-lg">Şikayet Et</h3>
+              <p className="text-gray-500 dark:text-gray-400 text-[13px] text-center mt-1">Bu gönderi neden kaldırılmalı?</p>
             </div>
             <div className="p-4">
-              <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Şikayet sebebiniz..." className="w-full bg-[#0A0A0A] border border-white/10 rounded-2xl p-4 text-[14px] text-white focus:outline-none focus:border-red-500/50 resize-none h-24 mb-4" />
+              <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Şikayet sebebiniz..." className="w-full bg-gray-50 dark:bg-[#0A0A0A] border border-gray-200 dark:border-white/10 rounded-2xl p-4 text-[14px] text-gray-900 dark:text-white focus:outline-none focus:border-red-500/50 resize-none h-24 mb-4" />
               <div className="flex flex-col gap-2">
-                <button onClick={submitReportAction} disabled={!reportReason.trim() || isSubmittingReport} className="w-full py-3.5 rounded-2xl font-bold text-sm bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50">
+                <button onClick={submitReportAction} disabled={!reportReason.trim() || isSubmittingReport} className="w-full py-3.5 rounded-2xl font-bold text-sm bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50">
                   {isSubmittingReport ? 'İletiliyor...' : 'Şikayeti Gönder'}
                 </button>
-                <button onClick={() => setShowReportModal(false)} className="w-full py-3.5 rounded-2xl font-bold text-sm text-gray-400 hover:bg-white/5 hover:text-white transition-colors">İptal</button>
+                <button onClick={() => setShowReportModal(false)} className="w-full py-3.5 rounded-2xl font-bold text-sm text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-white transition-colors">İptal</button>
               </div>
             </div>
           </div>

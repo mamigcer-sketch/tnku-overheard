@@ -5,6 +5,7 @@ import ScrollToTopV2 from '@/components/ScrollToTopV2';
 import InstallModal from '@/components/InstallModal';
 import SyncAuth from '@/components/SyncAuth'; // 🔥 Instagram kimlik sabitleme bileşeni eklendi
 import SplashScreen from '@/components/SplashScreen'; // 🔥 EFSANE AÇILIŞ EKRANI EKLENDİ
+import { Providers } from './providers'; // 🔥 TEMA HAFIZASI BEYNİ EKLENDİ
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -48,22 +49,27 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="tr">
+    // 🔥 suppressHydrationWarning EKLENDİ (Tema değişirken React'in hata vermesini engeller)
+    <html lang="tr" suppressHydrationWarning>
       <body className={inter.className}>
         
-        {/* 🔥 ŞELALE GİBİ AKACAK İNTRO EKRANI */}
-        <SplashScreen />
+        {/* 🔥 TÜM SİTEYİ SARMALAYAN TEMA BEYNİ */}
+        <Providers>
+          {/* 🔥 ŞELALE GİBİ AKACAK İNTRO EKRANI */}
+          <SplashScreen />
 
-        {children}
-        
-        {/* 🔥 YUKARI ÇIK BUTONU */}
-        <ScrollToTopV2 />
+          {children}
+          
+          {/* 🔥 YUKARI ÇIK BUTONU */}
+          <ScrollToTopV2 />
 
-        {/* 🔥 UYGULAMAYI YÜKLE MODALI */}
-        <InstallModal />
+          {/* 🔥 UYGULAMAYI YÜKLE MODALI */}
+          <InstallModal />
 
-        {/* 🔥 İNSTAGRAM TARAYICI KİMLİK SABİTLEME KÖPRÜSÜ */}
-        <SyncAuth />
+          {/* 🔥 İNSTAGRAM TARAYICI KİMLİK SABİTLEME KÖPRÜSÜ */}
+          <SyncAuth />
+        </Providers>
+
       </body>
     </html>
   );
