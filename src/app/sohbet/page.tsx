@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import { sendMessage, getChatData } from "./actions";
-import { Home, Send, User, ShieldAlert, CheckCircle2, BookOpen, X, Sparkles } from "lucide-react"; 
+import { Home, Send, ShieldAlert, CheckCircle2, BookOpen, X, Sparkles } from "lucide-react"; 
 import Link from "next/link";
 
 const adjectives = ["Delirmiş", "Uykusuz", "Borçlu", "İşsiz", "Paranoyak", "Şizo", "Yorgun", "Düşünceli", "Tripli", "Sarhoş", "Kafacı", "Perişan", "Bunalımlı", "Huysuz", "Şaşkın", "Zavallı", "Cin", "Depresif", "Tuzlu", "Avare", "Deli", "Çılgın", "Bıkkın", "Dalgın", "Ters", "Şüpheli", "Kuşkulu", "Durgun", "Hızlı", "Yavaş", "Donuk", "Parlak", "Sinsi", "Kurnaz", "Tatlı", "Sert", "Yabani", "Yalnız", "Suskun", "Coşkulu"];
@@ -17,17 +17,12 @@ const getAnonymousData = (id: string) => {
   return `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`;
 };
 
-// 🔥 YENİ EKLENDİ VE SAAT FARKI ÇÖZÜLDÜ: Bugün, Dün ve Saat formatlayıcı
 const formatMessageTime = (dateInput: string | Date) => {
   if (!dateInput) return "";
-  
-  // 🔥 Supabase Realtime (Canlı) verisi Z (UTC) takısı olmadan gelir, bu da saati 3 saat geri gösterir.
-  // Gelen veride saat dilimi yoksa sonuna 'Z' ekleyerek tarayıcının Türkiye saatine (+3) çevirmesini sağlıyoruz!
   let safeDate = dateInput;
   if (typeof safeDate === 'string' && !safeDate.endsWith('Z') && !safeDate.includes('+')) {
     safeDate += 'Z';
   }
-  
   const date = new Date(safeDate);
   const now = new Date();
 
@@ -56,6 +51,7 @@ export default function GlobalChatPage() {
   const [myId, setMyId] = useState("");
   const [nicknames, setNicknames] = useState<any>({});
   const [badges, setBadges] = useState<any>({});
+  const [avatars, setAvatars] = useState<any>({}); // 🔥 AVATARLAR İÇİN STATE EKLENDİ
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -78,8 +74,9 @@ export default function GlobalChatPage() {
       }
       
       setMyId(finalId);
-      setNicknames(data.customNicknamesMap);
-      setBadges(data.userBadgesMap);
+      setNicknames(data.customNicknamesMap || {});
+      setBadges(data.userBadgesMap || {});
+      setAvatars(data.userAvatarsMap || {}); // 🔥 AVATARLAR ÇEKİLİYOR
       
       if (data.initialMessages) {
         setMessages(data.initialMessages);
@@ -121,19 +118,20 @@ export default function GlobalChatPage() {
   };
 
   return (
-    <main className="fixed inset-0 w-full h-full bg-[#0B0B0B] text-white flex flex-col justify-between overflow-hidden selection:bg-[#4DA3FF]/30">
+    <main className="fixed inset-0 w-full h-full bg-[#050505] text-white flex flex-col justify-between overflow-hidden selection:bg-[#4DA3FF]/30">
       
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-[#4DA3FF]/5 rounded-full blur-[100px] pointer-events-none z-0"></div>
+      {/* PREMIUM GECE MAVİSİ ARKA PLAN EFEKTİ */}
+      <div className="absolute top-0 left-0 right-0 h-[500px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-900/20 via-[#050505] to-transparent pointer-events-none z-0"></div>
 
       {/* HEADER */}
-      <header className="shrink-0 relative z-50 bg-[#0B0B0B]/90 backdrop-blur-2xl border-b border-white/5 px-4 py-3 flex items-center justify-between shadow-md">
-        <div className="max-w-3xl mx-auto flex items-center justify-between w-full">
+      <header className="shrink-0 relative z-50 bg-[#050505]/80 backdrop-blur-3xl border-b border-white/[0.05] px-4 py-3 flex items-center justify-between shadow-sm">
+        <div className="max-w-4xl mx-auto flex items-center justify-between w-full">
           <Link href="/" className="hover:opacity-80 transition-opacity flex items-center gap-2.5">
             <div className="relative flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
               <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.8)]"></span>
             </div>
-            <h1 className="text-base sm:text-lg font-black tracking-tighter">GLOBAL <span className="text-[#4DA3FF]">LOBİ</span></h1>
+            <h1 className="text-base sm:text-lg font-black tracking-widest uppercase">GLOBAL <span className="text-[#4DA3FF]">LOBİ</span></h1>
           </Link>
           
           <div className="flex items-center gap-2">
@@ -144,21 +142,18 @@ export default function GlobalChatPage() {
         </div>
       </header>
 
-      {/* MESAJLAR AKIŞI */}
-      <div className="flex-1 min-h-0 overflow-y-auto px-4 py-6 space-y-2 max-w-3xl mx-auto w-full custom-scrollbar relative z-10">
+      {/* MESAJLAR AKIŞI (Scrollbar gizlendi) */}
+      <div className="flex-1 min-h-0 overflow-y-auto px-2 sm:px-4 py-6 space-y-1 max-w-4xl mx-auto w-full relative z-10 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         
         {!nicknames[myId] && (
-          <div className="bg-[#4DA3FF]/10 border border-[#4DA3FF]/20 p-3 rounded-2xl flex items-center justify-between text-white text-xs font-semibold gap-3 mb-4">
+          <div className="bg-gradient-to-r from-[#4DA3FF]/10 to-transparent border-l-2 border-[#4DA3FF] p-3 rounded-r-2xl flex items-center justify-between text-white text-xs font-semibold gap-3 mb-6 shadow-sm mx-2">
             <div className="flex items-center gap-2">
               <Sparkles size={16} className="text-[#4DA3FF] shrink-0" />
-              <span>Özel nickin yok! Rastgele hayvan ismiyle görünüyorsun.</span>
+              <span className="opacity-90">Sıradan görünüyorsun. Lobiye havalı bir giriş yapmak ister misin?</span>
             </div>
-            <button 
-              onClick={() => window.dispatchEvent(new Event('trigger-nick-modal'))}
-              className="bg-[#4DA3FF] hover:bg-blue-500 text-white px-3 py-1 rounded-xl font-bold text-xs transition-colors shrink-0 cursor-pointer"
-            >
-              Nick Al
-            </button>
+            <Link href="/profil/ben" className="bg-[#4DA3FF]/20 hover:bg-[#4DA3FF] hover:text-black text-[#4DA3FF] border border-[#4DA3FF]/30 px-3 py-1.5 rounded-xl font-black uppercase tracking-wider text-[10px] transition-all shrink-0 cursor-pointer">
+              Profiline Git
+            </Link>
           </div>
         )}
 
@@ -171,98 +166,105 @@ export default function GlobalChatPage() {
         {messages.map((msg, index) => {
           const rawAuthorId = msg.authorUuid || msg.authoruuid || msg.author_uuid || "";
           const rawContent = msg.content || msg.message || msg.text || "";
-          // Hem Prisma hem Supabase formatlarını yakalar
           const rawTimestamp = msg.createdAt || msg.created_at || new Date(); 
           
           const isMe = rawAuthorId === myId;
           const displayName = nicknames[rawAuthorId] || getAnonymousData(rawAuthorId);
           const userBadge = badges[rawAuthorId];
+          const currentAvatar = avatars[rawAuthorId]; // 🔥 AVATAR ÇEKİLDİ
 
           const prevMsg = index > 0 ? messages[index - 1] : null;
           const prevAuthorId = prevMsg ? (prevMsg.authorUuid || prevMsg.authoruuid || prevMsg.author_uuid || "") : null;
           const isSameAuthor = prevAuthorId === rawAuthorId;
           
           return (
-            <div key={msg.id || index} className={`flex flex-col ${isMe ? 'items-end' : 'items-start'} ${isSameAuthor ? 'mt-1' : 'mt-3'}`}>
+            <div key={msg.id || index} className={`flex w-full ${isMe ? 'justify-end' : 'justify-start'} ${isSameAuthor ? 'mt-1' : 'mt-4'}`}>
               
-              {/* Yazar Bilgisi */}
-              {!isSameAuthor && !isMe && (
-                <Link 
-                  href={`/profil/${encodeURIComponent(rawAuthorId)}`}
-                  className="flex items-center gap-1.5 ml-1 mb-1 group w-fit cursor-pointer"
-                >
-                  <span className="text-[11px] text-gray-400 font-bold group-hover:text-gray-200 transition-colors">
-                    {displayName}
-                  </span>
-                  {userBadge && (
-                    <span className="bg-[#4DA3FF]/15 text-[#4DA3FF] border border-[#4DA3FF]/20 px-1.5 py-0.2 rounded text-[9px] uppercase tracking-wider font-black">
-                      {userBadge}
-                    </span>
-                  )}
-                </Link>
-              )}
-
-              {!isSameAuthor && isMe && (
-                <div className="flex items-center gap-1.5 mr-1 mb-1">
-                  {userBadge && (
-                    <span className="bg-[#4DA3FF]/15 text-[#4DA3FF] border border-[#4DA3FF]/20 px-1.5 py-0.2 rounded text-[9px] uppercase tracking-wider font-black">
-                      {userBadge}
-                    </span>
-                  )}
-                  <span className="text-[11px] text-[#4DA3FF] font-bold">Sen</span>
-                </div>
-              )}
-
-              {/* 🔥 Mesaj Baloncuğu ve Zaman Damgası */}
-              <div 
-                className={`px-3.5 py-2.5 max-w-[85%] sm:max-w-[70%] shadow-sm flex flex-col ${
-                  isMe 
-                    ? `bg-gradient-to-tr from-[#2563EB] to-[#4DA3FF] text-white shadow-blue-500/10 ${
-                        isSameAuthor 
-                          ? 'rounded-[22px] rounded-tr-[8px] rounded-br-[22px]' 
-                          : 'rounded-[22px] rounded-tr-[4px]'
-                      }` 
-                    : `bg-[#18181B] border border-white/5 ${
-                        isSameAuthor 
-                          ? 'rounded-[22px] rounded-tl-[8px] rounded-bl-[22px]' 
-                          : 'rounded-[22px] rounded-tl-[4px]'
-                      }`
-                }`}
-              >
-                <span className={`text-[14.5px] sm:text-[15px] leading-relaxed break-words font-medium ${isMe ? 'text-white' : 'text-gray-100'}`}>
-                  {rawContent ? rawContent : JSON.stringify(msg)}
-                </span>
+              <div className={`flex gap-2.5 max-w-[85%] sm:max-w-[70%] ${isMe ? 'flex-row-reverse' : 'flex-row'}`}>
                 
-                {/* SAAT YAZISI */}
-                <span className={`text-[9.5px] self-end mt-1 font-bold whitespace-nowrap ${isMe ? 'text-white/70' : 'text-gray-500'}`}>
-                  {formatMessageTime(rawTimestamp)}
-                </span>
-              </div>
+                {/* 🔥 SOL TARAF: AVATAR (Sadece başkalarının mesajında ve ilk mesajda görünür) */}
+                {!isMe && (
+                  <div className="w-8 sm:w-9 shrink-0 flex flex-col justify-end pb-1">
+                    {!isSameAuthor ? (
+                      <Link href={`/profil/${encodeURIComponent(rawAuthorId)}`} className="block w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-[#1A1A1A] border border-white/10 flex items-center justify-center overflow-hidden shadow-inner hover:scale-105 transition-transform">
+                        {currentAvatar?.startsWith("data:image") ? (
+                          <img src={currentAvatar} alt="Profil" className="w-full h-full object-cover" />
+                        ) : currentAvatar ? (
+                          <span className="text-lg">{currentAvatar}</span>
+                        ) : (
+                          <span className="font-black text-xs opacity-80 text-white">{displayName.charAt(0)}</span>
+                        )}
+                      </Link>
+                    ) : (
+                      <div className="w-8 sm:w-9" /> /* Hizalama boşluğu */
+                    )}
+                  </div>
+                )}
 
+                {/* 🔥 SAĞ TARAF: MESAJ İÇERİĞİ */}
+                <div className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}>
+                  
+                  {/* İsim ve Rozet (Sadece ilk mesajda) */}
+                  {!isSameAuthor && !isMe && (
+                    <div className="flex items-center gap-1.5 mb-1 ml-1">
+                      <Link href={`/profil/${encodeURIComponent(rawAuthorId)}`} className="text-[11px] text-gray-400 font-bold hover:text-white transition-colors">
+                        {displayName}
+                      </Link>
+                      {userBadge && (
+                        <span className="bg-amber-500/10 text-amber-500 border border-amber-500/20 px-1.5 py-0.5 rounded text-[9px] uppercase tracking-widest font-black">
+                          {userBadge}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Mesaj Baloncuğu */}
+                  <div 
+                    className={`px-4 py-2.5 shadow-sm relative group flex flex-col ${
+                      isMe 
+                        ? `bg-gradient-to-tr from-[#0057FF] to-[#4DA3FF] text-white shadow-[0_4px_15px_rgba(77,163,255,0.2)] ${
+                            isSameAuthor ? 'rounded-[20px] rounded-tr-[4px]' : 'rounded-[20px] rounded-tr-[4px] rounded-br-[4px]'
+                          }` 
+                        : `bg-white/[0.04] backdrop-blur-xl border border-white/[0.05] text-gray-100 ${
+                            isSameAuthor ? 'rounded-[20px] rounded-tl-[4px]' : 'rounded-[20px] rounded-tl-[4px] rounded-bl-[4px]'
+                          }`
+                    }`}
+                  >
+                    <span className="text-[14.5px] sm:text-[15px] leading-relaxed break-words font-medium">
+                      {rawContent ? rawContent : JSON.stringify(msg)}
+                    </span>
+                    
+                    <span className={`text-[9px] self-end mt-1 font-bold whitespace-nowrap opacity-60`}>
+                      {formatMessageTime(rawTimestamp)}
+                    </span>
+                  </div>
+
+                </div>
+              </div>
             </div>
           );
         })}
-        <div ref={messagesEndRef} />
+        <div ref={messagesEndRef} className="h-4" />
       </div>
 
-      {/* ALT YAZMA ALANI */}
-      <div className="shrink-0 w-full bg-[#0B0B0B]/95 backdrop-blur-2xl border-t border-white/5 pt-3 pb-4 sm:pb-6 px-3 sm:px-4 relative z-50">
-        <form onSubmit={handleSend} className="max-w-3xl mx-auto flex items-center w-full">
-          <div className="w-full bg-[#141417] border border-white/10 rounded-full flex items-center p-1 shadow-lg transition-all focus-within:border-[#4DA3FF]/50">
+      {/* 🔥 PREMIUM YAZMA ALANI */}
+      <div className="shrink-0 w-full bg-[#050505]/80 backdrop-blur-3xl border-t border-white/[0.05] pt-3 pb-4 sm:pb-6 px-3 sm:px-4 relative z-50">
+        <form onSubmit={handleSend} className="max-w-4xl mx-auto flex items-center w-full relative">
+          <div className="w-full bg-white/[0.03] border border-white/10 hover:border-white/20 rounded-full flex items-center p-1.5 shadow-[0_10px_40px_rgba(0,0,0,0.3)] transition-all focus-within:border-[#4DA3FF]/50 focus-within:bg-white/[0.05]">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               placeholder="Lobiye bir şeyler fısılda..."
               maxLength={250}
-              className="flex-1 bg-transparent text-white py-2.5 pl-4 pr-3 outline-none text-[16px] placeholder:text-gray-500"
+              className="flex-1 bg-transparent text-white py-2 pl-4 pr-3 outline-none text-[15px] placeholder-gray-500"
             />
             <button 
               type="submit" 
               disabled={!inputValue.trim()}
-              className="p-2.5 mr-0.5 bg-gradient-to-r from-[#4DA3FF] to-blue-600 text-white rounded-full hover:scale-105 disabled:opacity-40 disabled:hover:scale-100 disabled:grayscale transition-all shadow-md shrink-0 cursor-pointer"
+              className="p-2.5 bg-[#4DA3FF] text-black rounded-full hover:scale-105 disabled:opacity-30 disabled:hover:scale-100 transition-all shadow-[0_0_15px_rgba(77,163,255,0.4)] shrink-0 cursor-pointer flex items-center justify-center"
             >
-              <Send size={16} className="ml-0.5" />
+              <Send size={16} className="translate-x-[1px] translate-y-[-1px] stroke-[2.5]" />
             </button>
           </div>
         </form>
@@ -270,14 +272,14 @@ export default function GlobalChatPage() {
 
       {/* KURALLAR POP-UP */}
       {isRulesModalOpen && (
-        <div className="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-in fade-in duration-200">
+        <div className="fixed inset-0 w-screen h-screen z-[99999] flex items-center justify-center p-4 bg-black/85 backdrop-blur-sm animate-in fade-in duration-200">
           <div 
-            className="relative w-full max-w-md bg-[#121212]/95 backdrop-blur-2xl border border-white/10 p-6 sm:p-8 rounded-[32px] shadow-2xl animate-in zoom-in-95 fade-in duration-200 max-h-[90vh] overflow-y-auto"
+            className="m-auto relative w-full max-w-sm bg-[#0A0A0A] border border-white/10 p-6 sm:p-8 rounded-[32px] shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200"
             onClick={(e) => e.stopPropagation()}
           >
             <button 
               onClick={acceptRules}
-              className="absolute top-5 right-5 p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
+              className="absolute top-5 right-5 p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-colors cursor-pointer"
             >
               <X size={20} />
             </button>
@@ -286,31 +288,31 @@ export default function GlobalChatPage() {
               <BookOpen size={24} />
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-black mb-2 tracking-tight text-white">Global Lobi Kuralları</h2>
+            <h2 className="text-xl sm:text-2xl font-black mb-2 tracking-tight text-white">Lobi Kuralları</h2>
             <p className="text-gray-400 text-xs sm:text-sm mb-6 leading-relaxed">
-              TNKU Lobi ortamının huzurunu ve neşesini korumak için uyman gereken temel kurallar aşağıdadır:
+              TNKU Lobi ortamının huzurunu ve neşesini korumak için uyman gereken temel kurallar:
             </p>
 
             <div className="space-y-3 mb-8 text-left text-xs sm:text-sm text-gray-300">
-              <div className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 p-3 rounded-xl">
-                <span className="text-[#4DA3FF] font-bold">01.</span>
+              <div className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 p-3 rounded-xl shadow-inner">
+                <span className="text-[#4DA3FF] font-black">01.</span>
                 <p>Küfür, hakaret, nefret söylemi ve kişisel hedef gösterme kesinlikle yasaktır.</p>
               </div>
-              <div className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 p-3 rounded-xl">
-                <span className="text-[#4DA3FF] font-bold">02.</span>
-                <p>Spam yapmak, aynı mesajı sürekli göndermek veya sohbet akışını bozmak engellenme sebebidir.</p>
+              <div className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 p-3 rounded-xl shadow-inner">
+                <span className="text-[#4DA3FF] font-black">02.</span>
+                <p>Spam yapmak, aynı mesajı sürekli göndermek veya sohbet akışını bozmak yasaktır.</p>
               </div>
-              <div className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 p-3 rounded-xl">
-                <span className="text-[#4DA3FF] font-bold">03.</span>
+              <div className="flex items-start gap-2.5 bg-white/[0.02] border border-white/5 p-3 rounded-xl shadow-inner">
+                <span className="text-[#4DA3FF] font-black">03.</span>
                 <p>Kişisel gizliliğe saygı duyulmalı, kimsenin özel bilgileri paylaşılmamalıdır.</p>
               </div>
             </div>
 
             <button
               onClick={acceptRules}
-              className="w-full bg-gradient-to-r from-[#4DA3FF] to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white font-bold py-3.5 rounded-2xl transition-all shadow-[0_0_20px_rgba(77,163,255,0.3)] hover:shadow-[0_0_30px_rgba(77,163,255,0.5)] flex items-center justify-center gap-2 active:scale-95 text-sm cursor-pointer"
+              className="w-full bg-[#4DA3FF] text-black font-black uppercase tracking-widest py-3.5 rounded-2xl transition-all shadow-[0_0_20px_rgba(77,163,255,0.3)] hover:shadow-[0_0_30px_rgba(77,163,255,0.5)] flex items-center justify-center gap-2 active:scale-95 text-xs cursor-pointer"
             >
-              <CheckCircle2 size={18} /> Kuralları Okudum, Anladım
+              <CheckCircle2 size={16} /> Okudum, Anladım
             </button>
           </div>
         </div>
