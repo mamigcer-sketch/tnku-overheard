@@ -5,7 +5,8 @@ import { Menu, X, Bookmark, ShieldAlert, BookOpen, ExternalLink, Download, User,
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 
-export default function MobileMenu() {
+// 🔥 TİP HATASI (TYPE ERROR) ÇÖZÜLDÜ: userUuid'yi tekrar kabul ediyoruz 🔥
+export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
