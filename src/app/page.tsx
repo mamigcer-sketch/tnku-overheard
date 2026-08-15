@@ -137,7 +137,6 @@ export default async function Home({ searchParams }: any) {
   const filters = ['Tümü', 'İtiraf', 'Boş Yap', 'Overheard', '🔥 Trend'];
 
   return (
-    // 🔥 EKSİK OLAN ARKA PLAN RENGİ MAIN ETİKETİNE EKLENDİ!
     <main className="min-h-screen bg-slate-50 dark:bg-[#050505] text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
       
       {/* 🔥 ARKA PLAN GÜNDÜZ/GECE MODUNA UYARLANDI */}
@@ -209,7 +208,7 @@ export default async function Home({ searchParams }: any) {
             </div>
             <div className="mt-3 relative z-10">
               <h3 className="text-gray-900 dark:text-white font-black text-[14px] tracking-tight">NKÜ CHAT</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-[11px] mt-0.5 truncate font-medium">Kampüs ne konuşuyor?</p>
+              <p className="text-gray-500 dark:text-gray-400 text-[11px] mt-0.5 font-medium">Kampüs ne konuşuyor?</p>
             </div>
           </Link>
 
@@ -223,7 +222,8 @@ export default async function Home({ searchParams }: any) {
               </div>
               <div className="mt-3 relative z-10">
                 <h3 className="text-[#4DA3FF] font-black text-[14px] tracking-tight">Duyuru</h3>
-                <p className="text-gray-600 dark:text-gray-300 text-[11px] mt-0.5 truncate font-medium">{activeAnnouncement.content}</p>
+                {/* 🔥 BURADAKİ TRUNCATE SİLİNDİ, YERİNE whitespace-pre-wrap EKLENDİ */}
+                <p className="text-gray-600 dark:text-gray-300 text-[11px] mt-0.5 font-medium whitespace-pre-wrap break-words leading-relaxed">{activeAnnouncement.content}</p>
               </div>
             </div>
           )}
