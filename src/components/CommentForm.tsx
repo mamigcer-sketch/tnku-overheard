@@ -59,18 +59,18 @@ export default function CommentForm({
           name="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          // 🔥 YAZILAR GÜNCELLENDİ: Daha doğal ve davetkar
           placeholder={parentId ? "Anonim olarak yanıtla..." : "Bu paylaşıma anonim bir yorum bırak..."}
           rows={3}
-          // 🔥 text-sm yerine text-base yapıldı, iPhone zoom sorunu çözüldü!
-          className="w-full bg-white/[0.03] border border-white/[0.08] focus:border-[#4DA3FF]/50 rounded-[20px] px-4 py-3.5 pr-14 text-base text-gray-100 placeholder-gray-500 focus:outline-none transition-all resize-none shadow-inner"
+          // 🔥 GÜNDÜZ/GECE UYUMLU STİLLER EKLENDİ
+          className="w-full bg-gray-50 dark:bg-white/[0.03] border border-gray-200 dark:border-white/[0.08] focus:border-blue-400 dark:focus:border-[#4DA3FF]/50 rounded-[20px] px-4 py-3.5 pr-14 text-base text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none transition-colors duration-300 resize-none shadow-inner dark:shadow-none"
         />
         <button
           type="submit"
           disabled={loading || !content.trim()}
-          className="absolute right-3 bottom-4 bg-[#4DA3FF] hover:bg-[#3b8fd8] text-black p-2.5 rounded-xl transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(77,163,255,0.4)]"
+          // 🔥 BUTON VE GÖLGESİ DİNAMİK YAPILDI
+          className="absolute right-3 bottom-4 bg-[#4DA3FF] hover:bg-[#3b8fd8] text-white dark:text-black p-2.5 rounded-xl transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed shadow-md dark:shadow-[0_0_15px_rgba(77,163,255,0.4)] flex items-center justify-center cursor-pointer"
         >
-          <Send size={15} />
+          <Send size={15} className="translate-x-[1px] translate-y-[-1px]" />
         </button>
       </div>
     </form>

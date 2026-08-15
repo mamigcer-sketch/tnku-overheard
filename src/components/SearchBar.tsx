@@ -28,10 +28,8 @@ export default function SearchBar() {
 
   return (
     <div className="relative group w-full">
-      {/* 🔥 Eski mor/mavi abartılı arka plan parlaması tamamen silindi */}
-      
       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none z-10">
-        <Search className="text-gray-500 group-focus-within:text-[#4DA3FF] transition-colors duration-300" size={18} />
+        <Search className="text-gray-400 dark:text-gray-500 group-focus-within:text-blue-500 dark:group-focus-within:text-[#4DA3FF] transition-colors duration-300" size={18} />
       </div>
       
       <input 
@@ -39,8 +37,8 @@ export default function SearchBar() {
         placeholder="Bir şeyler ara..." 
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        // 🔥 Premium Dark Glassmorphism eklendi (PostCard'lar ile aynı renk tonu)
-        className="relative w-full bg-[#121212]/80 backdrop-blur-xl border border-white/5 hover:border-white/10 text-gray-200 text-[13px] sm:text-[15px] rounded-[20px] pl-11 pr-4 py-3.5 sm:py-4 focus:outline-none focus:border-[#4DA3FF]/30 focus:ring-1 focus:ring-[#4DA3FF]/30 focus:bg-[#151515] transition-all shadow-sm placeholder:text-gray-600"
+        // 🔥 GÜNDÜZ/GECE UYUMLU PREMIUM GLASSMORPHISM
+        className="relative w-full bg-white dark:bg-[#121212]/80 backdrop-blur-xl border border-gray-200 dark:border-white/5 hover:border-gray-300 dark:hover:border-white/10 text-gray-900 dark:text-gray-200 text-[13px] sm:text-[15px] rounded-[20px] pl-11 pr-4 py-3.5 sm:py-4 focus:outline-none focus:border-blue-400 dark:focus:border-[#4DA3FF]/30 focus:ring-1 focus:ring-blue-400/30 dark:focus:ring-[#4DA3FF]/30 focus:bg-gray-50 dark:focus:bg-[#151515] transition-all duration-300 shadow-sm placeholder-gray-400 dark:placeholder-gray-600"
       />
     </div>
   );
