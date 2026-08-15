@@ -19,8 +19,8 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     e.preventDefault();
     setIsOpen(false);
     
-    // 1. Sunucunun tanıdığı eski bir kullanıcı mısın? (Eski hesapları korur!)
-    let targetId = userUuid;
+    // 🔥 TİP HATASI (TYPE ERROR) ÇÖZÜLDÜ: null alabilmesine izin verdik 🔥
+    let targetId: string | null | undefined = userUuid;
     
     // 2. Eğer sunucu seni tanımıyorsa (ilk defa girdiysen veya post atmadıysan)
     if (!targetId && typeof window !== 'undefined') {
