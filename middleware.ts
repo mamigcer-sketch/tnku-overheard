@@ -24,7 +24,7 @@ export async function middleware(request: NextRequest) {
     if (res.ok) {
       const data = await res.json();
       
-      // 3. EĞER ŞALTER KAPALIYSA (BAKIM MODU): Ve kullanıcı bakım sayfasında değilse, oraya fırlat!
+      // 3. EĞER ŞALTER KAPALIYSA (BAKIM MODU): Ve kullanıcı bakım ssayfasında değilse, oraya fırlat!
       if (data.isActive === false && url.pathname !== '/bakim') {
         return NextResponse.redirect(new URL('/bakim', request.url));
       }
