@@ -84,15 +84,16 @@ model Report {
   comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
 }
 
+// 🔥 İKİ TABLO BİRLEŞTİRİLDİ: Hem sistem mesajı hem post bildirimi atılabilir 🔥
 model Notification {
   id        String   @id @default(cuid())
   userUuid  String   
   message   String   
-  postId    String   
+  postId    String?  // Zihin Kontrolü için opsiyonel (?) yapıldı!
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post      Post?    @relation(fields: [postId], references: [id], onDelete: Cascade)
 }
 
 model Countdown {
@@ -159,11 +160,13 @@ model UserAvatar {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
 model SystemSetting {
   id        String   @id @default("global")
   isActive  Boolean  @default(true) // true = site açık, false = bakım modu (middleware devrede)
   updatedAt DateTime @updatedAt
 }
+
 model BannedIP {
   id        String   @id @default(cuid())
   ipAddress String   @unique

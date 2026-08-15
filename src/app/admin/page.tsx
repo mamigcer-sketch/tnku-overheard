@@ -230,23 +230,42 @@ export default async function AdminDashboard({ searchParams }: any) {
     revalidatePath('/admin'); revalidatePath('/');
   }
 
-  // 🔥 YENİ GÜÇ: ZİHİN KONTROLÜ (DIRECT NOTIFICATION) 🔥
+  // 🔥 GÜÇLENDİRİLMİŞ ZİHİN KONTROLÜ 🔥
   async function sendDirectNotification(formData: FormData) {
     'use server';
-    const targetUuid = formData.get('targetUuid') as string;
-    const message = formData.get('message') as string;
+    const targetUuid = formData.get('targetUuid')?.toString().trim();
+    const message = formData.get('message')?.toString().trim();
 
     if (!message || !targetUuid) return;
 
     try {
       if (targetUuid === 'ALL') {
-        const distinctUsers = await prisma.post.findMany({ distinct: ['authorUuid'], select: { authorUuid: true }});
-        const data = distinctUsers.map(u => ({ userUuid: u.authorUuid, message, isRead: false }));
+        // null olmayan tüm yazarları bul
+        const distinctUsers = await prisma.post.findMany({ 
+          where: { authorUuid: { not: null } },
+          distinct: ['authorUuid'], 
+          select: { authorUuid: true }
+        });
+        
+        const data = distinctUsers.map(u => ({ 
+          userUuid: u.authorUuid as string, 
+          message: message, 
+          isRead: false 
+        }));
+        
         await (prisma as any).notification.createMany({ data, skipDuplicates: true });
       } else {
-        await (prisma as any).notification.create({ data: { userUuid: targetUuid, message, isRead: false } });
+        await (prisma as any).notification.create({ 
+          data: { userUuid: targetUuid, message: message, isRead: false } 
+        });
       }
-    } catch (e) {}
+    } catch (e) {
+      // EĞER VERİTABANINDA BİR UYUMSUZLUK VARSA VS CODE TERMİNALİNE KIRMIZI YAZACAK
+      console.error("🔥 ZİHİN KONTROLÜ VERİTABANI HATASI:", e);
+    }
+    
+    // İşlem bitince tüm sitedeki (Layout dahil) bildirim çanlarını yenile!
+    revalidatePath('/', 'layout');
     revalidatePath('/admin');
   }
 
