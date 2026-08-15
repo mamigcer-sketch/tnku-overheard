@@ -25,7 +25,6 @@ export default async function LeaderboardPage() {
   let userAvatarsMap: any = {};
 
   try {
-    // 🔥 AVATARLAR DA VERİTABANINDAN ÇEKİLİYOR
     const [fetchedStats, nicknamesDb, badgesDb, avatarsDb] = await Promise.all([
       (prisma as any).userStats.findMany({ orderBy: { points: 'desc' }, take: 50 }).catch(() => []),
       (prisma as any).customNickname.findMany().catch(() => []),
@@ -39,19 +38,20 @@ export default async function LeaderboardPage() {
   } catch (err) { console.error(err); }
 
   return (
-    <main className="min-h-screen text-white relative z-0 pb-20 selection:bg-amber-500/30">
+    // 🔥 ANA METİN VE GEÇİŞ
+    <main className="min-h-screen text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-amber-500/30 transition-colors duration-300">
       
-      {/* PREMIUM ARKA PLAN (Liderliğe Özel Kehribar Parlaması) */}
-      <div className="fixed inset-0 -z-10 bg-[#050505]">
-        <div className="absolute top-0 left-0 right-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-900/20 via-[#050505] to-[#050505] pointer-events-none"></div>
+      {/* 🔥 ARKA PLAN (Gündüz/Gece Uyumlu) */}
+      <div className="fixed inset-0 -z-10 bg-slate-50 dark:bg-[#050505] transition-colors duration-300">
+        <div className="absolute top-0 left-0 right-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-100/50 via-slate-50 to-slate-50 dark:from-amber-900/20 dark:via-[#050505] dark:to-[#050505] pointer-events-none transition-colors duration-300"></div>
       </div>
 
       {/* HEADER */}
-      <header className="sticky top-0 z-50 bg-[#050505]/80 backdrop-blur-3xl border-b border-white/[0.05] px-4 py-3 flex items-center gap-4 shadow-sm">
-        <Link href="/" className="p-1.5 hover:bg-white/10 text-gray-400 hover:text-white rounded-full transition-colors bg-white/5">
+      <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-3xl border-b border-gray-200 dark:border-white/[0.05] px-4 py-3 flex items-center gap-4 shadow-sm transition-colors duration-300">
+        <Link href="/" className="p-1.5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full transition-colors bg-gray-100 dark:bg-white/5">
           <ArrowLeft size={20} />
         </Link>
-        <h1 className="font-black text-[15px] tracking-widest uppercase flex items-center gap-2">
+        <h1 className="font-black text-[15px] tracking-widest uppercase flex items-center gap-2 text-gray-900 dark:text-white transition-colors duration-300">
           <Trophy size={16} className="text-amber-500" /> Sefirlik Tablosu
         </h1>
       </header>
@@ -71,12 +71,33 @@ export default async function LeaderboardPage() {
             const badge = userBadgesMap[rankedUser.userUuid];
             const isFirst = pos === 1;
 
-            // Dereceye göre renk ve stil ayarları
+            // 🔥 DERECEYE GÖRE GÜNDÜZ/GECE UYUMLU STİLLER
             const rankStyles = pos === 1 
-              ? { border: 'border-amber-400', shadow: 'shadow-[0_0_30px_rgba(251,191,36,0.3)]', text: 'text-amber-400', bg: 'bg-gradient-to-t from-amber-500/20 to-transparent', rankBg: 'bg-amber-400 text-black', rankShadow: 'shadow-[0_-5px_15px_rgba(251,191,36,0.4)]' }
+              ? { 
+                  border: 'border-amber-400 dark:border-amber-400', 
+                  shadow: 'shadow-[0_0_20px_rgba(251,191,36,0.3)] dark:shadow-[0_0_30px_rgba(251,191,36,0.3)]', 
+                  text: 'text-amber-600 dark:text-amber-400', 
+                  bg: 'bg-gradient-to-t from-amber-100 to-transparent dark:from-amber-500/20 dark:to-transparent', 
+                  rankBg: 'bg-amber-400 text-black', 
+                  rankShadow: 'shadow-[0_-5px_15px_rgba(251,191,36,0.3)] dark:shadow-[0_-5px_15px_rgba(251,191,36,0.4)]' 
+                }
               : pos === 2 
-              ? { border: 'border-slate-300', shadow: 'shadow-[0_0_20px_rgba(203,213,225,0.1)]', text: 'text-slate-300', bg: 'bg-gradient-to-t from-slate-500/10 to-transparent', rankBg: 'bg-slate-300 text-black', rankShadow: '' }
-              : { border: 'border-orange-400', shadow: 'shadow-[0_0_20px_rgba(251,146,60,0.1)]', text: 'text-orange-400', bg: 'bg-gradient-to-t from-orange-500/10 to-transparent', rankBg: 'bg-orange-400 text-black', rankShadow: '' };
+              ? { 
+                  border: 'border-slate-300 dark:border-slate-400', 
+                  shadow: 'shadow-[0_0_20px_rgba(203,213,225,0.4)] dark:shadow-[0_0_20px_rgba(203,213,225,0.1)]', 
+                  text: 'text-slate-600 dark:text-slate-300', 
+                  bg: 'bg-gradient-to-t from-slate-200 to-transparent dark:from-slate-500/10 dark:to-transparent', 
+                  rankBg: 'bg-slate-200 dark:bg-slate-300 text-slate-800 dark:text-black', 
+                  rankShadow: '' 
+                }
+              : { 
+                  border: 'border-orange-300 dark:border-orange-400', 
+                  shadow: 'shadow-[0_0_20px_rgba(251,146,60,0.2)] dark:shadow-[0_0_20px_rgba(251,146,60,0.1)]', 
+                  text: 'text-orange-600 dark:text-orange-400', 
+                  bg: 'bg-gradient-to-t from-orange-100 to-transparent dark:from-orange-500/10 dark:to-transparent', 
+                  rankBg: 'bg-orange-300 dark:bg-orange-400 text-black', 
+                  rankShadow: '' 
+                };
 
             return (
               <Link 
@@ -84,19 +105,19 @@ export default async function LeaderboardPage() {
                 href={`/profil/${encodeURIComponent(rankedUser.userUuid)}`}
                 className={`flex flex-col items-center gap-2 group transition-transform duration-300 hover:scale-105 cursor-pointer relative ${isFirst ? 'scale-110 mb-4 hover:scale-[1.15] z-10' : 'z-0'}`}
               >
-                {/* 1. olan kişiye özel arkadan parlama */}
-                {isFirst && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-amber-500/20 blur-2xl rounded-full -z-10"></div>}
+                {/* 1. olan kişiye özel arkadan parlama (Gündüz/Gece uyumlu) */}
+                {isFirst && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-amber-400/30 dark:bg-amber-500/20 blur-2xl rounded-full -z-10"></div>}
 
                 {/* AVATAR */}
-                <div className={`relative w-[68px] h-[68px] rounded-full border-[3px] flex items-center justify-center bg-[#121212] overflow-hidden ${rankStyles.border} ${rankStyles.shadow} transition-all`}>
-                  {isFirst && <Crown size={28} className="text-amber-400 absolute -top-4 drop-shadow-lg z-20" />}
+                <div className={`relative w-[68px] h-[68px] rounded-full border-[3px] flex items-center justify-center bg-gray-50 dark:bg-[#121212] overflow-hidden ${rankStyles.border} ${rankStyles.shadow} transition-all`}>
+                  {isFirst && <Crown size={28} className="text-amber-500 dark:text-amber-400 absolute -top-4 drop-shadow-lg z-20" />}
                   
                   {currentAvatar?.startsWith("data:image") ? (
                     <img src={currentAvatar} alt="Profil" className="w-full h-full object-cover" />
                   ) : currentAvatar ? (
                     <span className="text-[28px]">{currentAvatar}</span>
                   ) : (
-                    <span className="font-black text-xl opacity-80 text-white">{authorData.name.charAt(0)}</span>
+                    <span className="font-black text-xl opacity-80 text-gray-400 dark:text-white">{authorData.name.charAt(0)}</span>
                   )}
                 </div>
 
@@ -111,10 +132,10 @@ export default async function LeaderboardPage() {
 
                 {/* KÜRSÜ BASAMAĞI */}
                 <div className={`w-full pt-1.5 pb-1 text-center font-black rounded-t-xl transition-colors ${rankStyles.rankBg} ${rankStyles.rankShadow} relative overflow-hidden`}>
-                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                  <div className="absolute inset-0 bg-black/5 dark:bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                   {pos}
                 </div>
-                <div className={`w-full h-12 rounded-b-xl ${rankStyles.bg} border-x border-b border-white/[0.05] backdrop-blur-sm -mt-2 -z-10`}></div>
+                <div className={`w-full h-12 rounded-b-xl ${rankStyles.bg} border-x border-b border-gray-300 dark:border-white/[0.05] backdrop-blur-sm -mt-2 -z-10 transition-colors`}></div>
               </Link>
             );
           })}
@@ -132,37 +153,37 @@ export default async function LeaderboardPage() {
               <Link 
                 key={user.userUuid} 
                 href={`/profil/${encodeURIComponent(user.userUuid)}`} 
-                className="group flex items-center gap-3 sm:gap-4 p-3.5 bg-white/[0.02] backdrop-blur-xl hover:bg-white/[0.05] rounded-[20px] border border-white/[0.05] hover:border-white/10 transition-all shadow-sm hover:shadow-lg"
+                className="group flex items-center gap-3 sm:gap-4 p-3.5 bg-white dark:bg-white/[0.02] backdrop-blur-xl hover:bg-gray-50 dark:hover:bg-white/[0.05] rounded-[20px] border border-gray-200 dark:border-white/[0.05] hover:border-gray-300 dark:hover:border-white/10 transition-all shadow-sm dark:shadow-none hover:shadow-md dark:hover:shadow-lg"
               >
                 <div className="w-8 flex justify-center shrink-0">
-                  <span className="text-[15px] font-black text-gray-500 group-hover:text-white transition-colors">{rank}</span>
+                  <span className="text-[15px] font-black text-gray-400 dark:text-gray-500 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{rank}</span>
                 </div>
                 
                 {/* AVATAR */}
                 <div className="flex-1 flex items-center gap-3 overflow-hidden">
-                  <div className="w-10 h-10 rounded-full border border-white/10 bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
+                  <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
                     {currentAvatar?.startsWith("data:image") ? (
                       <img src={currentAvatar} alt="Profil" className="w-full h-full object-cover" />
                     ) : currentAvatar ? (
                       <span className="text-[20px]">{currentAvatar}</span>
                     ) : (
-                      <span className="font-black text-sm opacity-80 text-white">{authorData.name.charAt(0)}</span>
+                      <span className="font-black text-sm opacity-80 text-gray-500 dark:text-white">{authorData.name.charAt(0)}</span>
                     )}
                   </div>
                   <div className="overflow-hidden pr-2">
                     <div className="flex items-center gap-2">
-                      <p className="text-[14px] font-bold text-gray-200 group-hover:text-white transition-colors truncate">@{authorData.name}</p>
-                      {badge && <span className="hidden sm:inline-block bg-amber-500/10 text-amber-500 border border-amber-500/20 text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0">{badge}</span>}
+                      <p className="text-[14px] font-bold text-gray-900 dark:text-gray-200 group-hover:text-black dark:group-hover:text-white transition-colors truncate">@{authorData.name}</p>
+                      {badge && <span className="hidden sm:inline-block bg-amber-100 text-amber-600 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-500 dark:border-amber-500/20 text-[9px] font-black px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 transition-colors">{badge}</span>}
                     </div>
                     <p className="text-[11px] text-gray-500 font-medium tracking-wide">Seviye {user.level}</p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-1.5 text-amber-500 bg-amber-500/10 border border-amber-500/10 px-3 py-1.5 rounded-full text-[12px] font-black shrink-0 shadow-inner group-hover:bg-amber-500/20 transition-colors">
-                  <Flame size={12} className="animate-pulse" /> {user.points}
+                <div className="flex items-center gap-1.5 text-amber-600 bg-amber-50 dark:bg-amber-500/10 border border-amber-200 dark:border-amber-500/10 px-3 py-1.5 rounded-full text-[12px] font-black shrink-0 shadow-sm dark:shadow-inner group-hover:bg-amber-100 dark:group-hover:bg-amber-500/20 transition-colors">
+                  <Flame size={12} className="animate-pulse text-amber-500" /> {user.points}
                 </div>
                 
-                <ChevronRight size={16} className="text-gray-600 group-hover:text-white transition-colors shrink-0 hidden sm:block" />
+                <ChevronRight size={16} className="text-gray-400 group-hover:text-gray-600 dark:text-gray-600 dark:group-hover:text-white transition-colors shrink-0 hidden sm:block" />
               </Link>
             );
           })}

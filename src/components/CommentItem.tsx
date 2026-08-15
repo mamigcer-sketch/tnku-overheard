@@ -30,7 +30,7 @@ const formatCommentText = (text: string) => {
   return parts.map((part, i) => {
     if (part.startsWith('@')) {
       return (
-        <span key={i} className="text-[#4DA3FF] font-bold drop-shadow-[0_0_8px_rgba(77,163,255,0.4)]">
+        <span key={i} className="text-blue-600 dark:text-[#4DA3FF] font-bold drop-shadow-none dark:drop-shadow-[0_0_8px_rgba(77,163,255,0.4)]">
           {part}
         </span>
       );
@@ -49,7 +49,7 @@ export default function CommentItem({
   hasCustomNick = false, 
   userBadge,
   authorUuid,
-  userAvatar // 🔥 AVATAR BURAYA EKLENDİ
+  userAvatar
 }: any) {
   const [localLiked, setLocalLiked] = useState(isInitiallyLiked);
   const [localLikesCount, setLocalLikesCount] = useState(comment.likes || 0);
@@ -107,8 +107,8 @@ export default function CommentItem({
     <>
       <div className={`group flex gap-3 p-4 transition-all duration-300 ease-out mb-3 
         ${isReply 
-          ? 'ml-8 sm:ml-12 mt-1 bg-white/[0.01] rounded-r-[24px] rounded-bl-[24px] border-l-2 border-l-[#4DA3FF]/40' 
-          : 'bg-white/[0.02] backdrop-blur-xl rounded-[24px] border border-white/[0.04] hover:border-white/10 shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
+          ? 'ml-8 sm:ml-12 mt-1 bg-gray-50 dark:bg-white/[0.01] rounded-r-[24px] rounded-bl-[24px] border-l-2 border-l-blue-400/50 dark:border-l-[#4DA3FF]/40' 
+          : 'bg-white dark:bg-white/[0.02] backdrop-blur-xl rounded-[24px] border border-gray-200 dark:border-white/[0.04] hover:border-gray-300 dark:hover:border-white/10 shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)]'
         }`}
       >
         {/* SOL: AVATAR */}
@@ -117,14 +117,14 @@ export default function CommentItem({
           onClick={() => playClickSound()}
           className="shrink-0 mt-0.5"
         >
-          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full p-[1.5px] bg-white/[0.1]`}>
-            <div className="w-full h-full rounded-full bg-[#121212] flex items-center justify-center overflow-hidden">
+          <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full p-[1.5px] bg-gray-200 dark:bg-white/[0.1] transition-colors duration-300`}>
+            <div className="w-full h-full rounded-full bg-gray-100 dark:bg-[#121212] flex items-center justify-center overflow-hidden transition-colors duration-300">
               {userAvatar?.startsWith("data:image") ? (
                 <img src={userAvatar} alt="Profil" className="w-full h-full object-cover" />
               ) : userAvatar ? (
                 <span className="text-[18px]">{userAvatar}</span>
               ) : (
-                <span className="text-[15px] font-black opacity-80 text-white">{commentAuthor.name.charAt(0)}</span>
+                <span className="text-[15px] font-black opacity-80 text-gray-500 dark:text-white">{commentAuthor.name.charAt(0)}</span>
               )}
             </div>
           </div>
@@ -139,19 +139,19 @@ export default function CommentItem({
               <Link 
                 href={`/profil/${encodeURIComponent(finalProfileId)}`} 
                 onClick={() => playClickSound()} 
-                className="font-bold text-white text-[13px] sm:text-[14px] tracking-tight hover:underline truncate max-w-[150px]"
+                className="font-bold text-gray-900 dark:text-white text-[13px] sm:text-[14px] tracking-tight hover:underline truncate max-w-[150px] transition-colors duration-300"
               >
                 {commentAuthor.name}
               </Link>
 
               {isPostAuthor && (
-                <span className="bg-[#4DA3FF]/10 text-[#4DA3FF] text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-[#4DA3FF]/20">
+                <span className="bg-blue-100 dark:bg-[#4DA3FF]/10 text-blue-600 dark:text-[#4DA3FF] text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-blue-200 dark:border-[#4DA3FF]/20 transition-colors duration-300">
                   Yazar
                 </span>
               )}
 
               {userBadge && (
-                <span className="bg-amber-500/10 text-amber-500 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-amber-500/20">
+                <span className="bg-amber-100 dark:bg-amber-500/10 text-amber-600 dark:text-amber-500 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-amber-200 dark:border-amber-500/20 transition-colors duration-300">
                   {userBadge}
                 </span>
               )}
@@ -168,7 +168,7 @@ export default function CommentItem({
           </div>
 
           {/* İÇERİK METNİ */}
-          <p className="text-gray-100 text-[14px] leading-relaxed break-words mt-1 mb-2.5">
+          <p className="text-gray-800 dark:text-gray-100 text-[14px] leading-relaxed break-words mt-1 mb-2.5 transition-colors duration-300">
             {formatCommentText(comment.content)}
           </p>
 
@@ -176,7 +176,7 @@ export default function CommentItem({
           <div className="flex items-center gap-4 text-gray-500 mt-1">
             <button 
               onClick={handleLike} 
-              className={`flex items-center gap-1.5 transition-colors ${localLiked ? 'text-pink-500' : 'hover:text-pink-400'}`}
+              className={`flex items-center gap-1.5 transition-colors ${localLiked ? 'text-pink-500' : 'hover:text-pink-500 dark:hover:text-pink-400'}`}
             >
               <Heart size={15} className={`transition-transform ${isLikingAnimation ? 'scale-125' : ''} ${localLiked ? 'fill-pink-500' : ''}`} />
               <span className="text-[12px] font-bold">{localLikesCount > 0 ? localLikesCount : ''}</span>
@@ -185,7 +185,7 @@ export default function CommentItem({
             {onReply && (
               <button 
                 onClick={() => { playClickSound(); onReply(comment.id, commentAuthor.name); }} 
-                className="flex items-center gap-1.5 hover:text-[#4DA3FF] transition-colors"
+                className="flex items-center gap-1.5 hover:text-blue-500 dark:hover:text-[#4DA3FF] transition-colors"
               >
                 <Reply size={15} />
                 <span className="text-[12px] font-bold">Yanıtla</span>
@@ -194,7 +194,7 @@ export default function CommentItem({
 
             <button 
               onClick={handleReportClick} 
-              className={`ml-auto flex items-center gap-1.5 transition-colors ${reported ? 'text-red-500' : 'hover:text-red-400'}`}
+              className={`ml-auto flex items-center gap-1.5 transition-colors ${reported ? 'text-red-500' : 'hover:text-red-500 dark:hover:text-red-400'}`}
             >
               <Flag size={14} className={reported ? 'fill-red-500' : ''} />
             </button>
@@ -204,22 +204,22 @@ export default function CommentItem({
 
       {/* ŞİKAYET MODALI */}
       {showReportModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={(e) => { e.stopPropagation(); setShowReportModal(false); }}>
-          <div className="bg-[#1A1A1A] border border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-[0_4px_30px_rgba(0,0,0,0.5)] transform transition-all" onClick={(e) => e.stopPropagation()}>
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 dark:bg-black/80 backdrop-blur-sm transition-colors duration-300" onClick={(e) => { e.stopPropagation(); setShowReportModal(false); }}>
+          <div className="bg-white dark:bg-[#1A1A1A] border border-gray-200 dark:border-white/10 rounded-3xl w-full max-w-sm p-6 shadow-xl dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] transform transition-all" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center gap-3 mb-4">
-              <div className="bg-red-500/10 p-3 rounded-2xl border border-red-500/20">
+              <div className="bg-red-50 dark:bg-red-500/10 p-3 rounded-2xl border border-red-100 dark:border-red-500/20">
                 <ShieldAlert className="text-red-500 w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-white font-bold text-lg leading-tight">Yorumu Şikayet Et</h3>
-                <p className="text-gray-400 text-[11px] font-bold uppercase tracking-wider">Gizli & Güvenli</p>
+                <h3 className="text-gray-900 dark:text-white font-bold text-lg leading-tight">Yorumu Şikayet Et</h3>
+                <p className="text-gray-500 dark:text-gray-400 text-[11px] font-bold uppercase tracking-wider">Gizli & Güvenli</p>
               </div>
             </div>
-            <p className="text-gray-300 text-sm mb-4 leading-relaxed">Bu yorumu neden şikayet ediyorsunuz? Lütfen kısaca belirtin.</p>
-            <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Şikayet sebebiniz..." className="w-full bg-[#0A0A0A] border border-white/10 rounded-2xl p-4 text-sm text-white focus:outline-none focus:border-red-500/50 resize-none h-28 mb-5" />
+            <p className="text-gray-600 dark:text-gray-300 text-sm mb-4 leading-relaxed">Bu yorumu neden şikayet ediyorsunuz? Lütfen kısaca belirtin.</p>
+            <textarea value={reportReason} onChange={(e) => setReportReason(e.target.value)} placeholder="Şikayet sebebiniz..." className="w-full bg-gray-50 dark:bg-[#0A0A0A] border border-gray-200 dark:border-white/10 rounded-2xl p-4 text-sm text-gray-900 dark:text-white focus:outline-none focus:border-red-500/50 resize-none h-28 mb-5 transition-colors duration-300" />
             <div className="flex gap-3">
-              <button onClick={() => setShowReportModal(false)} className="flex-1 py-3.5 rounded-2xl font-bold text-sm bg-white/5 text-gray-400 hover:bg-white/10 hover:text-white transition-colors">İptal</button>
-              <button onClick={submitReportAction} disabled={!reportReason.trim() || isSubmittingReport} className="flex-1 py-3.5 rounded-2xl font-bold text-sm bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+              <button onClick={() => setShowReportModal(false)} className="flex-1 py-3.5 rounded-2xl font-bold text-sm bg-gray-100 dark:bg-white/5 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-white/10 hover:text-gray-900 dark:hover:text-white transition-colors">İptal</button>
+              <button onClick={submitReportAction} disabled={!reportReason.trim() || isSubmittingReport} className="flex-1 py-3.5 rounded-2xl font-bold text-sm bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-500 hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 {isSubmittingReport ? 'İletiliyor...' : 'Gönder'}
               </button>
             </div>
