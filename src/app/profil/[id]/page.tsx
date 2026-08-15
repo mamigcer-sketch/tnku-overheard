@@ -107,7 +107,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const totalLikes = userPosts.reduce((acc: any, post: any) => acc + post.likes, 0);
   const userBadge = userBadgeDb?.badgeName;
   
-  // 🔥 TANRI PARÇACIĞI (GOD MODE KONTROLÜ) 🔥
+  // 🔥 TANRI PARÇACIĞI KONTROLÜ 🔥
   const isGodMode = ["KURUCU", "GOD", "SİSTEM"].includes(userBadge?.toUpperCase() || "");
 
   const likedPostsCookie = cookieStore.get('liked_posts')?.value || '';
@@ -138,7 +138,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
     }
   }
 
-  // 🔥 EFEKTLER 🔥
   const profileCardClass = isGodMode
     ? 'bg-gradient-to-br from-yellow-50/80 to-white dark:from-yellow-500/10 dark:to-black/80 border-yellow-400/50 shadow-[0_0_50px_rgba(234,179,8,0.25)] ring-1 ring-yellow-400/30'
     : 'bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/[0.05] shadow-sm dark:shadow-[0_10px_40px_rgba(0,0,0,0.5)]';
@@ -150,7 +149,20 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   return (
     <main className="min-h-screen text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
       
-      {/* 🔥 ARKA PLAN GÜNDÜZ/GECE & GOD MODE UYUMLU 🔥 */}
+      {/* 🔥 GÖRÜNMEZ KİMLİK DOĞRULAYICI (EKSİK ÇEREZLERİ TAMAMLAR, YETKİYİ VERİR) 🔥 */}
+      {!currentUserUuid && targetUuid !== 'ben' && (
+        <script dangerouslySetInnerHTML={{ __html: `
+          (function() {
+            var localId = localStorage.getItem('tnku_anon_id') || localStorage.getItem('user_uuid') || localStorage.getItem('tnku_chat_anon_id');
+            if (localId && localId === '${targetUuid}') {
+              document.cookie = 'user_uuid=' + localId + '; path=/; max-age=31536000; SameSite=Lax';
+              document.cookie = 'tnku_author_id=' + localId + '; path=/; max-age=31536000; SameSite=Lax';
+              window.location.reload();
+            }
+          })();
+        `}} />
+      )}
+
       <div className="fixed inset-0 -z-10 bg-slate-50 dark:bg-[#050505] transition-colors duration-300">
         {isGodMode ? (
           <div className="absolute top-0 left-0 right-0 h-[800px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-yellow-100/60 via-slate-50 to-slate-50 dark:from-yellow-900/30 dark:via-[#050505] dark:to-[#050505] pointer-events-none transition-colors duration-700 animate-pulse"></div>
@@ -164,7 +176,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           <ArrowLeft size={20} />
         </Link>
         <h1 className={`text-[15px] font-black tracking-widest uppercase flex items-center gap-1.5 transition-colors ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>
-          {/* 🔥 ADMİN YAZISI BURADA EKLENDİ 🔥 */}
           <Sparkles size={14} className={isGodMode ? 'text-yellow-500 animate-pulse' : 'text-[#4DA3FF]'} /> {isOwnProfile ? (isGodMode ? 'ADMİN' : 'Profilim') : 'Profil'}
         </h1>
         <button className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-white transition-colors p-1 dark:bg-white/5 rounded-full">
@@ -173,25 +184,32 @@ export default async function ProfilePage({ params, searchParams }: { params: an
       </header>
 
       <div className="max-w-2xl mx-auto pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        
-        {/* PREMIUM PROFİL KARTI */}
         <div className="px-4 pb-2">
           <div className={`flex flex-col sm:flex-row items-center gap-5 sm:gap-6 border rounded-[32px] p-5 backdrop-blur-xl transition-all duration-500 ${profileCardClass}`}>
             
-            {/* AVATAR (GOD MODE İÇİN SARILI) */}
-            <div className={`relative ${isGodMode ? 'p-[3px] rounded-full' : ''}`}>
-              {isGodMode && (
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-400 via-amber-500 to-yellow-300 animate-[spin_3s_linear_infinite] opacity-90 shadow-[0_0_20px_rgba(234,179,8,0.6)] -z-10" />
-              )}
-              <EditableAvatar 
-                userUuid={targetUuid}
-                currentAvatar={currentAvatar}
-                displayNickname={displayNickname}
-                isOwnProfile={isOwnProfile}
-              />
-            </div>
+            {isGodMode ? (
+              <div className="relative shrink-0 p-[3px] rounded-full">
+                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-400 via-amber-500 to-yellow-300 animate-[spin_3s_linear_infinite] shadow-[0_0_20px_rgba(234,179,8,0.6)] pointer-events-none" />
+                <div className="relative z-10 rounded-full bg-gray-100 dark:bg-[#121212]">
+                  <EditableAvatar 
+                    userUuid={targetUuid}
+                    currentAvatar={currentAvatar}
+                    displayNickname={displayNickname}
+                    isOwnProfile={isOwnProfile}
+                  />
+                </div>
+              </div>
+            ) : (
+              <div className="shrink-0">
+                <EditableAvatar 
+                  userUuid={targetUuid}
+                  currentAvatar={currentAvatar}
+                  displayNickname={displayNickname}
+                  isOwnProfile={isOwnProfile}
+                />
+              </div>
+            )}
 
-            {/* İSTATİSTİK KUTUSU */}
             <div className={`w-full flex-1 flex justify-around items-center border rounded-2xl py-3 px-2 transition-colors duration-300 ${statsBoxClass}`}>
               <div className="flex flex-col items-center">
                 <span className={`text-[20px] font-black ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>{postCount}</span>
@@ -210,7 +228,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
             </div>
           </div>
 
-          {/* BIO VE DETAYLAR */}
           <div className="mt-5 px-2">
             <h2 className="text-[16px] font-black flex items-center gap-2">
               <span className={`${isGodMode ? 'bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-amber-500 dark:from-yellow-300 dark:via-amber-400 dark:to-yellow-300 animate-pulse drop-shadow-md text-[18px]' : 'text-gray-900 dark:text-white'}`}>
@@ -226,7 +243,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               {isGodMode ? 'SİSTEMİN HAKİMİ' : 'TNKUOVERHEARD TAKİPÇİSİ'}
             </p>
             
-            {/* OYUN TARZI SEVİYE BARI */}
             <div className={`mt-4 flex items-center gap-3 w-full border p-2.5 rounded-xl transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 border-yellow-200/50 dark:bg-yellow-500/10 dark:border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]' : 'bg-white dark:bg-white/[0.03] border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none'}`}>
               <span className={`text-[12px] font-black shrink-0 flex items-center gap-1.5 w-[70px] ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-amber-600 dark:text-amber-500'}`}>
                 <Flame size={14} className="animate-pulse" /> Lvl {level}
@@ -242,6 +258,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               <span className={`text-[10px] font-bold ${isGodMode ? 'text-yellow-600 dark:text-yellow-500' : 'text-gray-500'}`}>{points} XP</span>
             </div>
             
+            {/* 🔥 BU KISIM ARTIK KESİN OLARAK GÖRÜNECEK 🔥 */}
             {isOwnProfile && (
               <div className="mt-4 w-full">
                 <ProfileNickEdit 
@@ -254,7 +271,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           </div>
         </div>
 
-        {/* iOS TARZI KAPSÜL SEKMELER */}
         <div className={`sticky top-[53px] z-40 backdrop-blur-3xl pt-2 pb-3 px-4 mt-2 transition-colors duration-300 ${isGodMode ? 'bg-slate-50/90 dark:bg-[#050505]/80' : 'bg-slate-50/90 dark:bg-[#050505]/80'}`}>
           <div className={`flex p-1 rounded-xl border shadow-inner transition-colors duration-300 ${isGodMode ? 'bg-yellow-100/50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20' : 'bg-gray-200 dark:bg-white/[0.04] border-gray-300 dark:border-white/5'}`}>
             <Link 
@@ -296,7 +312,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               ) : (
                 <div className="space-y-0 mt-2">
                   {userPosts.map((post: any) => (
-                    // POSTCARD ZATEN İÇİNDE GOD MODE ENTEGRELİ ÇALIŞIR
                     <PostCard 
                       key={post.id} 
                       post={post} 
@@ -325,7 +340,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               ) : (
                 <div className="space-y-3 mt-2">
                   {userComments.map((comment: any) => (
-                    // 🔥 PROFİL İÇİ YORUM KARTLARI DA GOD MODE'A UYARLANDI 🔥
                     <div key={comment.id} className={`p-4 rounded-[24px] hover:shadow-md transition-all duration-300 ${isGodMode ? 'bg-gradient-to-br from-yellow-50/80 to-white dark:from-yellow-500/[0.05] dark:to-white/[0.02] border border-yellow-400/50 shadow-[0_0_20px_rgba(234,179,8,0.1)] ring-1 ring-yellow-400/30' : 'bg-white dark:bg-white/[0.02] backdrop-blur-xl border border-gray-200 dark:border-white/[0.04] dark:hover:bg-white/[0.03] shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)]'}`}>
                       
                       <div className="flex justify-between items-start mb-2">
