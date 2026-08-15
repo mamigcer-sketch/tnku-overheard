@@ -164,7 +164,8 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           <ArrowLeft size={20} />
         </Link>
         <h1 className={`text-[15px] font-black tracking-widest uppercase flex items-center gap-1.5 transition-colors ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>
-          <Sparkles size={14} className={isGodMode ? 'text-yellow-500 animate-pulse' : 'text-[#4DA3FF]'} /> {isOwnProfile ? (isGodMode ? 'Kutsal Alan' : 'Profilim') : 'Profil'}
+          {/* 🔥 ADMİN YAZISI BURADA EKLENDİ 🔥 */}
+          <Sparkles size={14} className={isGodMode ? 'text-yellow-500 animate-pulse' : 'text-[#4DA3FF]'} /> {isOwnProfile ? (isGodMode ? 'ADMİN' : 'Profilim') : 'Profil'}
         </h1>
         <button className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-white transition-colors p-1 dark:bg-white/5 rounded-full">
           <MoreHorizontal size={20} />
