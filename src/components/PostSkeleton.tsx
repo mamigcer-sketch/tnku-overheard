@@ -1,39 +1,46 @@
 export default function PostSkeleton() {
   return (
-    // 🔥 Ana PostCard ile birebir uyumlu, Gündüz/Gece temalı iskelet
-    <div className="relative group bg-white dark:bg-[#151515]/80 backdrop-blur-lg border border-gray-200 dark:border-white/5 p-4 sm:p-5 rounded-[22px] overflow-hidden shadow-sm dark:shadow-lg animate-pulse transition-colors duration-300">
+    // 🔥 Ana PostCard ile birebir aynı kavis (rounded-[24px]), padding ve Gündüz/Gece uyumu
+    <div className="relative group w-full bg-white dark:bg-white/[0.02] backdrop-blur-xl rounded-[24px] mb-5 p-4 sm:p-5 border border-gray-200 dark:border-white/[0.04] shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] animate-pulse transition-colors duration-300">
       
-      {/* Üst Kısım: Kategori ve Yazar Alanı */}
-      <div className="flex justify-between items-start gap-2 mb-3">
-        <div className="flex flex-wrap gap-1.5 items-center">
-          {/* Kategori Etiketi */}
-          <div className="w-16 h-5 bg-gray-200 dark:bg-white/10 rounded-md transition-colors" />
-          {/* Yazar Bilgisi */}
-          <div className="w-28 h-5 bg-gray-100 dark:bg-white/5 rounded-md transition-colors" />
+      {/* Üst Kısım: Avatar, Yazar ve Etiket Alanı */}
+      <div className="flex justify-between items-start mb-4 relative z-10">
+        <div className="flex items-center gap-3">
+          {/* Avatar */}
+          <div className="w-11 h-11 shrink-0 rounded-full bg-gray-200 dark:bg-white/10 transition-colors duration-300" />
+          
+          <div className="flex flex-col gap-1.5">
+            {/* İsim */}
+            <div className="w-28 h-4 bg-gray-200 dark:bg-white/10 rounded-md transition-colors duration-300" />
+            {/* Tarih */}
+            <div className="w-20 h-3 bg-gray-100 dark:bg-white/5 rounded-md transition-colors duration-300" />
+          </div>
         </div>
-        {/* Tarih */}
-        <div className="w-14 h-4 bg-gray-100 dark:bg-white/5 rounded-md pt-1 transition-colors" />
+        
+        {/* Kategori Etiketi */}
+        <div className="w-14 h-6 bg-gray-100 dark:bg-white/5 rounded-lg transition-colors duration-300" />
       </div>
 
       {/* İçerik Metin Satırları */}
-      <div className="space-y-2 mb-4">
-        <div className="w-full h-4 bg-gray-200 dark:bg-white/10 rounded-md transition-colors" />
-        <div className="w-5/6 h-4 bg-gray-100 dark:bg-white/5 rounded-md transition-colors" />
-        <div className="w-2/3 h-4 bg-gray-50 dark:bg-white/[0.03] rounded-md transition-colors" />
+      <div className="space-y-2.5 mb-5 relative z-10 pl-1">
+        <div className="w-full h-3.5 bg-gray-200 dark:bg-white/10 rounded-md transition-colors duration-300" />
+        <div className="w-5/6 h-3.5 bg-gray-100 dark:bg-white/5 rounded-md transition-colors duration-300" />
+        <div className="w-2/3 h-3.5 bg-gray-50 dark:bg-white/[0.03] rounded-md transition-colors duration-300" />
       </div>
 
-      {/* Alt Butonlar ve İkonlar Alanı */}
-      <div className="flex items-center justify-between border-t border-gray-100 dark:border-white/5 pt-3 transition-colors">
-        <div className="flex items-center gap-4">
-          <div className="w-10 h-6 bg-gray-100 dark:bg-white/5 rounded-xl transition-colors" />
-          <div className="w-10 h-6 bg-gray-100 dark:bg-white/5 rounded-xl transition-colors" />
-          <div className="w-8 h-6 bg-gray-50 dark:bg-white/[0.03] rounded-xl transition-colors" />
+      {/* Alt Butonlar Alanı */}
+      <div className="mt-5 flex items-center justify-between bg-gray-50 dark:bg-white/[0.06] border border-gray-100 dark:border-white/[0.1] rounded-full px-4 py-3 shadow-inner dark:shadow-none transition-colors duration-300">
+        <div className="flex items-center gap-5">
+          <div className="w-8 h-4 bg-gray-200 dark:bg-white/10 rounded-md transition-colors duration-300" />
+          <div className="w-8 h-4 bg-gray-200 dark:bg-white/10 rounded-md transition-colors duration-300" />
+          <div className="w-8 h-4 bg-gray-200 dark:bg-white/10 rounded-md transition-colors duration-300" />
         </div>
-        <div className="flex gap-2">
-          <div className="w-8 h-8 bg-gray-50 dark:bg-white/[0.03] rounded-full transition-colors" />
-          <div className="w-8 h-8 bg-gray-50 dark:bg-white/[0.03] rounded-full transition-colors" />
+        <div className="flex gap-4">
+          <div className="w-6 h-4 bg-gray-200 dark:bg-white/10 rounded-md transition-colors duration-300" />
+          <div className="w-6 h-4 bg-gray-200 dark:bg-white/10 rounded-md transition-colors duration-300" />
         </div>
       </div>
+      
     </div>
   );
 }
