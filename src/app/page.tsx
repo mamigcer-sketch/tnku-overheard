@@ -137,8 +137,8 @@ export default async function Home({ searchParams }: any) {
   const filters = ['Tümü', 'İtiraf', 'Boş Yap', 'Overheard', '🔥 Trend'];
 
   return (
-    // 🔥 ANA METİN RENGİ DİNAMİK YAPILDI
-    <main className="min-h-screen text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
+    // 🔥 EKSİK OLAN ARKA PLAN RENGİ MAIN ETİKETİNE EKLENDİ!
+    <main className="min-h-screen bg-slate-50 dark:bg-[#050505] text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
       
       {/* 🔥 ARKA PLAN GÜNDÜZ/GECE MODUNA UYARLANDI */}
       <div className="fixed inset-0 -z-10 bg-slate-50 dark:bg-[#050505] transition-colors duration-300">
