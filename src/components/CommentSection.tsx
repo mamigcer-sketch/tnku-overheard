@@ -30,7 +30,7 @@ export default function CommentSection({
   userLikedCommentIds,
   customNicknamesMap = {},
   userBadgesMap = {},
-  userAvatarsMap = {} // 🔥 AVATAR MAP'İ BURAYA GELDİ
+  userAvatarsMap = {} 
 }: { 
   postId: string; 
   comments: any[]; 
@@ -38,7 +38,7 @@ export default function CommentSection({
   userLikedCommentIds: string[];
   customNicknamesMap?: Record<string, string>;
   userBadgesMap?: Record<string, string>; 
-  userAvatarsMap?: Record<string, string>; // 🔥 TİP TANIMI EKLENDİ
+  userAvatarsMap?: Record<string, string>; 
 }) {
   const [replyingTo, setReplyingTo] = useState<{ id: string; name: string } | null>(null);
 
@@ -63,9 +63,9 @@ export default function CommentSection({
 
   return (
     <div className="space-y-6">
-      {/* Yorumlar Başlığı */}
-      <div className="flex items-center gap-2 px-1 text-gray-200">
-        <MessageCircle size={18} className="text-[#4DA3FF]" />
+      {/* Yorumlar Başlığı (Gündüz/Gece Uyumlu) */}
+      <div className="flex items-center gap-2 px-1 text-gray-800 dark:text-gray-200 transition-colors duration-300">
+        <MessageCircle size={18} className="text-blue-500 dark:text-[#4DA3FF]" />
         <h2 className="text-[16px] font-bold tracking-wide">
           Yorumlar <span className="text-gray-500 font-medium text-sm">({comments.length})</span>
         </h2>
@@ -73,8 +73,9 @@ export default function CommentSection({
 
       <div className="space-y-4">
         {parentComments.length === 0 ? (
-          <div className="text-center py-12 bg-[#121212]/70 backdrop-blur-xl rounded-[22px] border border-white/5 shadow-inner">
-            <p className="text-gray-500 font-medium text-[13px]">Bu fısıltıya ilk cevabı sen ver.</p>
+          // 🔥 BOŞ DURUM KUTUSU (Tamamen Gündüz/Gece Uyumlu)
+          <div className="text-center py-12 bg-gray-50 dark:bg-[#121212]/70 backdrop-blur-xl rounded-[22px] border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-inner transition-colors duration-300">
+            <p className="text-gray-500 dark:text-gray-400 font-medium text-[13px]">Bu fısıltıya ilk cevabı sen ver.</p>
           </div>
         ) : (
           parentComments.map((comment: any) => {
@@ -84,7 +85,7 @@ export default function CommentSection({
             const isLiked = userLikedCommentIds.includes(comment.id);
             const hasCustomNick = !!customNicknamesMap[authorUuid];
             const badge = userBadgesMap[authorUuid]; 
-            const avatar = userAvatarsMap[authorUuid]; // 🔥 AVATAR ÇEKİLDİ
+            const avatar = userAvatarsMap[authorUuid]; 
             
             const replies = comments
               .filter((c: any) => c.parentId === comment.id)
@@ -101,11 +102,12 @@ export default function CommentSection({
                   hasCustomNick={hasCustomNick} 
                   userBadge={badge}
                   authorUuid={authorUuid} 
-                  userAvatar={avatar} // 🔥 AVATAR COMMENT_ITEM'A GİDİYOR
+                  userAvatar={avatar} 
                 />
 
                 {replies.length > 0 && (
-                  <div className="space-y-3 pl-6 sm:pl-10 border-l-2 border-[#4DA3FF]/20 ml-3 sm:ml-5">
+                  // YANIT ÇİZGİSİ (Gündüz/Gece Uyumlu)
+                  <div className="space-y-3 pl-6 sm:pl-10 border-l-2 border-blue-200 dark:border-[#4DA3FF]/20 ml-3 sm:ml-5 transition-colors duration-300">
                     {replies.map((reply: any) => {
                       const replyAuthorUuid = reply.authorId || reply.id;
                       const replyAuthor = getAnonymousData(replyAuthorUuid, customNicknamesMap[replyAuthorUuid]);
@@ -113,7 +115,7 @@ export default function CommentSection({
                       const isReplyLiked = userLikedCommentIds.includes(reply.id);
                       const isReplyHasCustomNick = !!customNicknamesMap[replyAuthorUuid];
                       const replyBadge = userBadgesMap[replyAuthorUuid]; 
-                      const replyAvatar = userAvatarsMap[replyAuthorUuid]; // 🔥 AVATAR ÇEKİLDİ
+                      const replyAvatar = userAvatarsMap[replyAuthorUuid]; 
 
                       return (
                         <CommentItem 
@@ -127,7 +129,7 @@ export default function CommentSection({
                           hasCustomNick={isReplyHasCustomNick} 
                           userBadge={replyBadge}
                           authorUuid={replyAuthorUuid} 
-                          userAvatar={replyAvatar} // 🔥 AVATAR YANITLARA GİDİYOR
+                          userAvatar={replyAvatar} 
                         />
                       );
                     })}
@@ -139,23 +141,22 @@ export default function CommentSection({
         )}
       </div>
       
-      {/* PREMIUM GLASSMORPHISM YORUM YAZMA ALANI */}
-      <div id="comment-form-section" className="pt-6 border-t border-white/5 mt-8 bg-[#121212]/80 backdrop-blur-xl rounded-[24px] p-4 sm:p-5 border border-white/5 shadow-lg">
+      {/* 🔥 PREMIUM YORUM YAZMA ALANI DIŞ KUTUSU (Tamamen Gündüz/Gece Uyumlu) */}
+      <div id="comment-form-section" className="pt-6 mt-8 bg-gray-50 dark:bg-[#121212]/80 backdrop-blur-xl rounded-[24px] p-4 sm:p-5 border border-gray-200 dark:border-white/5 shadow-sm dark:shadow-lg transition-colors duration-300">
         <div className="flex items-center justify-between mb-3 px-1">
-          <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider">
+          <h3 className="text-xs font-bold text-gray-500 dark:text-gray-400 uppercase tracking-wider transition-colors duration-300">
             {replyingTo ? `@${replyingTo.name} kişisine yanıt veriliyor` : "Sen Ne Düşünüyorsun?"}
           </h3>
           {replyingTo && (
             <button 
               onClick={() => setReplyingTo(null)} 
-              className="text-xs text-pink-400 hover:text-pink-300 font-semibold transition-colors cursor-pointer"
+              className="text-xs text-red-500 hover:text-red-600 dark:text-pink-400 dark:hover:text-pink-300 font-semibold transition-colors cursor-pointer"
             >
               Yanıtı İptal Et ✕
             </button>
           )}
         </div>
 
-        {/* SENİN YAZDIĞIN COMMENT FORM BİLEŞENİ ÇAĞRILIYOR */}
         <CommentForm 
           postId={postId} 
           parentId={replyingTo?.id} 

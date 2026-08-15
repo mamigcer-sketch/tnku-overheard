@@ -51,7 +51,8 @@ export default function RootLayout({
   return (
     // 🔥 suppressHydrationWarning EKLENDİ (Tema değişirken React'in hata vermesini engeller)
     <html lang="tr" suppressHydrationWarning>
-      <body className={inter.className}>
+      {/* 🔥 İŞTE ÇÖZÜM: Bütün siteyi kaplayan arkaplan artık gündüz/gece duyarlı! */}
+      <body className={`bg-slate-50 dark:bg-[#050505] text-gray-900 dark:text-white transition-colors duration-300 antialiased ${inter.className}`}>
         
         {/* 🔥 TÜM SİTEYİ SARMALAYAN TEMA BEYNİ */}
         <Providers>
