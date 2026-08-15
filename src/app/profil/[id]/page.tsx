@@ -52,8 +52,31 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const generalUuid = cookieStore.get('user_uuid')?.value;
   const currentUserUuid = authorId || generalUuid || '';
 
-  const targetUuid = id === 'ben' ? (currentUserUuid || 'ben') : decodeURIComponent(id);
-  const isOwnProfile = Boolean(id === 'ben' || (currentUserUuid && targetUuid === currentUserUuid));
+  // 🔥 1. KESİN ÇÖZÜM: EĞER ÇEREZ YOKSA VE "BEN" SAYFASINDAYSA ASLA İŞLEME DEVAM ETME! 🔥
+  // Kullanıcıyı hayali "ben" profiline sokmak yerine gerçek kimliğini bulup oraya fırlatıyoruz.
+  if (id === 'ben' && !currentUserUuid) {
+    return (
+      <main className="min-h-screen bg-slate-50 dark:bg-[#050505] flex flex-col items-center justify-center">
+        <script dangerouslySetInnerHTML={{ __html: `
+          let realId = localStorage.getItem('tnku_anon_id') || localStorage.getItem('tnku_chat_anon_id');
+          if (!realId) {
+            realId = 'user_' + Math.random().toString(36).substr(2, 9);
+            localStorage.setItem('tnku_anon_id', realId);
+          }
+          document.cookie = 'user_uuid=' + realId + '; path=/; max-age=31536000; SameSite=Lax';
+          document.cookie = 'tnku_author_id=' + realId + '; path=/; max-age=31536000; SameSite=Lax';
+          window.location.replace('/profil/' + realId);
+        `}} />
+        <div className="w-10 h-10 border-4 border-[#4DA3FF] border-t-transparent rounded-full animate-spin"></div>
+        <p className="mt-4 text-xs font-bold text-gray-500 uppercase tracking-widest animate-pulse">Kimlik Eşitleniyor...</p>
+      </main>
+    );
+  }
+
+  // 🔥 2. HEDEF KİMLİK BELİRLEME 🔥
+  // Artık id === 'ben' ise currentUserUuid KESİNLİKLE doludur (çünkü boşsa yukarıda yakaladık).
+  const targetUuid = id === 'ben' ? currentUserUuid : decodeURIComponent(id);
+  const isOwnProfile = Boolean(currentUserUuid && targetUuid === currentUserUuid);
   
   const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
 
@@ -149,17 +172,15 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   return (
     <main className="min-h-screen text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
       
-      {/* 🔥 GÖRÜNMEZ KİMLİK DOĞRULAYICI (EKSİK ÇEREZLERİ TAMAMLAR, YETKİYİ VERİR) 🔥 */}
-      {!currentUserUuid && targetUuid !== 'ben' && (
+      {/* 🔥 KENDİ PROFİLİNDE ÇEREZİ SİLİNENLERE TUŞLARI GERİ VEREN SİHİRBAZ 🔥 */}
+      {!currentUserUuid && (
         <script dangerouslySetInnerHTML={{ __html: `
-          (function() {
-            var localId = localStorage.getItem('tnku_anon_id') || localStorage.getItem('user_uuid') || localStorage.getItem('tnku_chat_anon_id');
-            if (localId && localId === '${targetUuid}') {
-              document.cookie = 'user_uuid=' + localId + '; path=/; max-age=31536000; SameSite=Lax';
-              document.cookie = 'tnku_author_id=' + localId + '; path=/; max-age=31536000; SameSite=Lax';
-              window.location.reload();
-            }
-          })();
+          var localId = localStorage.getItem('tnku_anon_id') || localStorage.getItem('tnku_chat_anon_id');
+          if (localId && localId === '${targetUuid}') {
+            document.cookie = 'user_uuid=' + localId + '; path=/; max-age=31536000; SameSite=Lax';
+            document.cookie = 'tnku_author_id=' + localId + '; path=/; max-age=31536000; SameSite=Lax';
+            window.location.reload();
+          }
         `}} />
       )}
 
@@ -258,7 +279,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               <span className={`text-[10px] font-bold ${isGodMode ? 'text-yellow-600 dark:text-yellow-500' : 'text-gray-500'}`}>{points} XP</span>
             </div>
             
-            {/* 🔥 BU KISIM ARTIK KESİN OLARAK GÖRÜNECEK 🔥 */}
+            {/* 🔥 EĞER KİŞİ KENDİ PROFİLİNDEYSE DÜZENLEME TUŞLARI BURADA KESİN ÇIKAR 🔥 */}
             {isOwnProfile && (
               <div className="mt-4 w-full">
                 <ProfileNickEdit 
