@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Rocket, TrendingUp, AlertTriangle, Coins, Flame, Skull } from 'lucide-react';
+import { ArrowLeft, Rocket, TrendingUp, Coins, Flame, Skull } from 'lucide-react';
 import { getUserPoints, startCrashGame, claimCrashWin } from './actions';
 
 export default function BorsaPage() {
@@ -23,11 +23,21 @@ export default function BorsaPage() {
     getUserPoints().then(p => setPoints(p));
   }, []);
 
-  // 🔥 GÖRSEL YÜKSELİŞ ANİMASYONU (RequestAnimationFrame ile yağ gibi akar)
+  // 🔥 EKRANIN RENGİNİ VE OYUNU SIFIRLAYAN SİSTEM (Yeni Tur Hazırlığı) 🔥
+  useEffect(() => {
+    if (status === 'crashed' || status === 'cashed_out') {
+      const timer = setTimeout(() => {
+        setStatus('idle');
+        setMultiplier(1.00);
+      }, 2500); // 2.5 saniye ekranda kalıp siyah ekrana döner
+      return () => clearTimeout(timer);
+    }
+  }, [status]);
+
+  // 🔥 GÖRSEL YÜKSELİŞ ANİMASYONU (RequestAnimationFrame)
   useEffect(() => {
     const tick = () => {
       const elapsed = Date.now() - startTimeRef.current;
-      // Exponential büyüme formülü: Ne kadar uzun sürerse o kadar hızlı artar
       const currentM = Math.max(1.00, Math.exp(elapsed * 0.0003)); 
 
       if (currentM >= crashPoint) {
@@ -51,6 +61,13 @@ export default function BorsaPage() {
 
   const handleBetChange = (amount: number) => {
     if (status === 'playing') return;
+    
+    // Miktar değiştirildiği an kırmızılığı/yeşilliği anında temizle!
+    if (status !== 'idle') {
+      setStatus('idle');
+      setMultiplier(1.00);
+    }
+
     if (amount > points) setBet(points);
     else if (amount < 0) setBet(0);
     else setBet(amount);
@@ -65,7 +82,7 @@ export default function BorsaPage() {
 
     const res = await startCrashGame(bet);
     if (res.success && res.crashPoint) {
-      setPoints(prev => prev - bet); // Görsel olarak bakiyeden düş
+      setPoints(prev => prev - bet); 
       setCrashPoint(res.crashPoint);
       setStatus('playing');
     } else {
@@ -76,13 +93,11 @@ export default function BorsaPage() {
   const handleCashOut = async () => {
     if (status !== 'playing') return;
     
-    // Animasyonu durdur
     if (reqRef.current) cancelAnimationFrame(reqRef.current);
     
     const cashedMultiplier = multiplier;
     setStatus('cashed_out');
     
-    // Sunucuya kazancı kaydet
     const res = await claimCrashWin(bet, cashedMultiplier);
     if (res?.success) {
       setPoints(res.newPoints!);
@@ -97,7 +112,6 @@ export default function BorsaPage() {
       'bg-[#050505]'
     }`}>
       
-      {/* CSS ANİMASYONU */}
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes shake {
           0%, 100% { transform: translateX(0); }
@@ -159,7 +173,6 @@ export default function BorsaPage() {
         {/* KONTROL PANELİ */}
         <div className={`w-full bg-[#0A0A0A] p-6 rounded-[32px] border border-white/5 shadow-xl transition-all duration-300`}>
           
-          {/* Sadece oyun oynanmıyorken bahis girilebilir */}
           {status !== 'playing' && (
             <>
               <div className="mb-5">
@@ -197,7 +210,6 @@ export default function BorsaPage() {
             </>
           )}
 
-          {/* OYUN OYNANIRKEN SADECE ÇEKİL BUTONU GÖZÜKÜR */}
           {status === 'playing' && (
             <div className="animate-in slide-in-from-bottom-4 duration-300">
               <div className="text-center mb-4">
