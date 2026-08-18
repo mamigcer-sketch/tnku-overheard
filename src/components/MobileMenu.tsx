@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-import { Menu, X, Bookmark, ShieldAlert, BookOpen, ExternalLink, Download, User, MessageCircle, Trophy, Sun, Moon, Flame } from 'lucide-react';
+// 🔥 Skull İKONU BURAYA EKLENDİ 🔥
+import { Menu, X, Bookmark, ShieldAlert, BookOpen, ExternalLink, Download, User, MessageCircle, Trophy, Sun, Moon, Flame, Skull } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 
@@ -17,8 +18,9 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
 
   const menuItems = [
     { name: 'NKÜ Chat', icon: <MessageCircle size={18} />, href: '/sohbet', isExternal: false },
-    // 🔥 ETKİNLİKLER BUTONU EKLENDİ 🔥
     { name: 'Etkinlikler', icon: <Flame size={18} />, href: '/etkinlikler', isExternal: false },
+    // 🔥 KARANLIK ODA (XP KUMARI) BURAYA EKLENDİ 🔥
+    { name: 'Karanlık Oda', icon: <Skull size={18} />, href: '/karanlik-oda', isExternal: false },
     { name: 'Leaderboard', icon: <Trophy size={18} />, href: '/liderlik', isExternal: false, hideOnDesktop: true },
     { name: 'Kaydedilenler', icon: <Bookmark size={18} />, href: '/kaydedilenler', isExternal: false, hideOnDesktop: true },
     { name: 'Topluluk Kuralları', icon: <BookOpen size={18} />, href: '/rules', isExternal: false },
