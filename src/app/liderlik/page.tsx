@@ -1,7 +1,7 @@
 import prisma from '@/lib/prisma';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
-import { ArrowLeft, Trophy, Flame, Crown, ChevronRight, Sparkles, CalendarDays } from 'lucide-react';
+import { ArrowLeft, Trophy, Flame, Crown, ChevronRight, CalendarDays } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -19,10 +19,9 @@ const getAnonymousData = (id: string, customNickname?: string) => {
   };
 };
 
-// SearchParams'ı alıyoruz ki hangi sekmede olduğumuzu bilelim
 export default async function LeaderboardPage({ searchParams }: { searchParams: any }) {
   const params = await searchParams;
-  const currentTab = params?.tab || 'all'; // 'all' veya 'weekly'
+  const currentTab = params?.tab || 'all'; 
   const isWeekly = currentTab === 'weekly';
 
   const cookieStore = await cookies();
@@ -50,9 +49,9 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
     userAvatarsMap = (avatarsDb || []).reduce((acc: any, curr: any) => { acc[curr.userUuid] = curr.avatarUrl; return acc; }, {});
   } catch (err) { console.error(err); }
 
-  // 🔥 HAFTALIK (SON 7 GÜN) XP HESAPLAMA ALGORİTMASI 🔥
   let finalDisplayStats = allStats;
 
+  // 🔥 HAFTALIK XP HESAPLAMA & KUMAR FİLTRESİ 🔥
   if (isWeekly) {
     try {
       const sevenDaysAgo = new Date();
@@ -71,7 +70,6 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 
       const weeklyScores: Record<string, number> = {};
 
-      // Puanlama Mantığı: Post=10 XP, Yorum=5 XP, Her Beğeni=2 XP
       recentPosts.forEach((p: any) => {
         if (!p.authorUuid) return;
         if (!weeklyScores[p.authorUuid]) weeklyScores[p.authorUuid] = 0;
@@ -85,20 +83,25 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
         weeklyScores[c.authorId] += 5; 
       });
 
-      // Global statlarla birleştirip haftalık listeyi oluştur
       finalDisplayStats = Object.keys(weeklyScores).map(uuid => {
         const globalStat = allStats.find(s => s.userUuid === uuid);
+        const globalPoints = globalStat ? globalStat.points : 0;
+        
+        // 🔥 İŞTE O MUCİZEVİ SATIR 🔥
+        // Eğer adamın haftalık puanı, ana kasasından (Tüm Zamanlar) yüksekse, 
+        // demek ki aradaki farkı kumarda ezmiştir. Puanını ana kasasına eşitliyoruz!
+        const actualWeeklyPoints = Math.min(weeklyScores[uuid], globalPoints);
+
         return {
           userUuid: uuid,
-          points: weeklyScores[uuid],
-          level: globalStat ? globalStat.level : 1, // Seviyeyi globalden çekiyoruz
+          points: actualWeeklyPoints,
+          level: globalStat ? globalStat.level : 1, 
         };
-      }).sort((a, b) => b.points - a.points);
+      }).filter(s => s.points > 0).sort((a, b) => b.points - a.points);
 
     } catch (e) { console.error(e); }
   }
 
-  // 🔥 Top 10 ve Kullanıcı Sıralaması Algoritması 🔥
   const top10 = finalDisplayStats.slice(0, 10);
   let currentUserRank = -1;
   let currentUserStat = null;
@@ -112,7 +115,6 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 
   const isCurrentUserInTop10 = currentUserRank > 0 && currentUserRank <= 10;
 
-  // Sıralama kartlarını çizen ortak yardımcı fonksiyon
   const renderListItem = (user: any, rank: number, isHighlighted: boolean = false) => {
     const authorData = getAnonymousData(user.userUuid, customNicknamesMap[user.userUuid]);
     const currentAvatar = userAvatarsMap[user.userUuid];
@@ -140,7 +142,6 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
           <span className={rankClasses}>{rank}</span>
         </div>
         
-        {/* AVATAR */}
         <div className="flex-1 flex items-center gap-3 overflow-hidden">
           <div className="w-10 h-10 rounded-full border border-gray-200 dark:border-white/10 bg-gray-100 dark:bg-[#1A1A1A] flex items-center justify-center overflow-hidden shrink-0 shadow-inner">
             {currentAvatar?.startsWith("data:image") ? (
@@ -172,12 +173,10 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
   return (
     <main className="min-h-screen text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-amber-500/30 transition-colors duration-300">
       
-      {/* 🔥 ARKA PLAN (Gündüz/Gece Uyumlu) */}
       <div className="fixed inset-0 -z-10 bg-slate-50 dark:bg-[#050505] transition-colors duration-300">
         <div className="absolute top-0 left-0 right-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-amber-100/50 via-slate-50 to-slate-50 dark:from-amber-900/20 dark:via-[#050505] dark:to-[#050505] pointer-events-none transition-colors duration-300"></div>
       </div>
 
-      {/* HEADER */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-3xl border-b border-gray-200 dark:border-white/[0.05] px-4 py-3 flex items-center gap-4 shadow-sm transition-colors duration-300">
         <Link href="/" className="p-1.5 hover:bg-gray-200 dark:hover:bg-white/10 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white rounded-full transition-colors bg-gray-100 dark:bg-white/5">
           <ArrowLeft size={20} />
@@ -187,7 +186,6 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
         </h1>
       </header>
 
-      {/* 🔥 TAB DEĞİŞTİRİCİ (Tüm Zamanlar / Son 7 Gün) 🔥 */}
       <div className="max-w-xl mx-auto px-4 mt-5 animate-in fade-in duration-500 z-10 relative">
         <div className="flex p-1 bg-gray-100 dark:bg-[#1A1A1A] border border-gray-200 dark:border-white/5 rounded-xl shadow-inner transition-colors">
           <Link 
@@ -209,12 +207,11 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
 
       <div className="max-w-xl mx-auto px-4 pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
         
-        {/* PODYUM (Top 3) */}
         {top10.length > 0 && (
           <div className="grid grid-cols-3 gap-3 mb-10 items-end px-1 mt-4">
             {top10.slice(0, 3).map((user, index) => {
               const rank = index + 1;
-              const pos = rank === 1 ? 2 : rank === 2 ? 1 : 3; // Podyum dizilimi: 2, 1, 3
+              const pos = rank === 1 ? 2 : rank === 2 ? 1 : 3; 
               const rankedUser = top10[pos - 1];
               if (!rankedUser) return null;
               
@@ -223,7 +220,6 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
               const badge = userBadgesMap[rankedUser.userUuid];
               const isFirst = pos === 1;
 
-              // 🔥 DERECEYE GÖRE GÜNDÜZ/GECE UYUMLU STİLLER
               const rankStyles = pos === 1 
                 ? { 
                     border: 'border-amber-400 dark:border-amber-400', 
@@ -290,7 +286,6 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
           </div>
         )}
 
-        {/* LİSTE (Ranks 4-10) */}
         <div className="space-y-2.5 relative z-10">
           {top10.slice(3).map((user, index) => {
             const rank = index + 4;
@@ -299,7 +294,6 @@ export default async function LeaderboardPage({ searchParams }: { searchParams: 
           })}
         </div>
 
-        {/* 🔥 KULLANICI TOP 10'DA DEĞİLSE EN ALTTA GÖSTER 🔥 */}
         {!isCurrentUserInTop10 && currentUserStat && (
           <div className="pt-2 pb-6">
             <div className="flex justify-center mb-4 mt-2">
