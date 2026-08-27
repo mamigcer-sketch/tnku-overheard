@@ -5,6 +5,25 @@ import { useRouter } from 'next/navigation';
 import { Headphones, VenetianMask, Coffee, Send, CheckCircle2, Loader2, Clock } from 'lucide-react';
 import { createPost } from "@/app/post/actions";
 
+// 🔥 KATEGORİ RENK DİNAMİKLERİ SÖZLÜĞÜ 🔥
+const themeStyles = {
+  CONFESSION: {
+    ring: "focus-within:ring-purple-500/20 dark:focus-within:ring-purple-500/30 focus-within:border-purple-300 dark:focus-within:border-purple-500/50",
+    btn: "bg-purple-600 hover:bg-purple-500 text-white shadow-purple-500/30 dark:shadow-purple-900/40",
+    tabActive: "bg-white dark:bg-[#2A1B38] text-purple-600 dark:text-purple-400 shadow-sm border border-purple-200 dark:border-purple-500/30",
+  },
+  BOSYAP: {
+    ring: "focus-within:ring-emerald-500/20 dark:focus-within:ring-emerald-500/30 focus-within:border-emerald-300 dark:focus-within:border-emerald-500/50",
+    btn: "bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30 dark:shadow-emerald-900/40",
+    tabActive: "bg-white dark:bg-[#1B332A] text-emerald-600 dark:text-emerald-400 shadow-sm border border-emerald-200 dark:border-emerald-500/30",
+  },
+  OVERHEARD: {
+    ring: "focus-within:ring-blue-500/20 dark:focus-within:ring-blue-500/30 focus-within:border-blue-300 dark:focus-within:border-[#4DA3FF]/50",
+    btn: "bg-[#4DA3FF] hover:bg-blue-400 text-white shadow-blue-500/30 dark:shadow-blue-900/40",
+    tabActive: "bg-white dark:bg-[#1B2A40] text-blue-600 dark:text-[#4DA3FF] shadow-sm border border-blue-200 dark:border-[#4DA3FF]/30",
+  }
+};
+
 export default function ModernForm() {
   const [type, setType] = useState<'CONFESSION' | 'BOSYAP' | 'OVERHEARD'>('CONFESSION'); 
   const [content, setContent] = useState('');
@@ -19,6 +38,8 @@ export default function ModernForm() {
   
   const router = useRouter();
   const maxChars = 500;
+
+  const currentTheme = themeStyles[type];
 
   const handleTabChange = (newType: 'CONFESSION' | 'BOSYAP' | 'OVERHEARD') => {
     setType(newType);
@@ -70,8 +91,10 @@ export default function ModernForm() {
     }
   };
 
+  const tabBaseStyle = "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] sm:text-[14px] font-bold transition-all duration-300";
+  const tabInactiveStyle = "text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300";
+
   return (
-    // 🔥 DIŞ KUTU SIFIRLANDI: Artık parent modalın içine kusursuz entegre olacak.
     <div className="w-full transition-colors duration-300 relative">
 
       {/* YENİ NESİL iOS SEKMELERİ */}
@@ -79,11 +102,7 @@ export default function ModernForm() {
         <button 
           type="button"
           onClick={() => handleTabChange('CONFESSION')} 
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] sm:text-[14px] font-bold transition-all duration-300 ${
-            type === 'CONFESSION' 
-              ? 'bg-white dark:bg-[#2A1B38] text-purple-600 dark:text-purple-400 shadow-sm border border-gray-200/50 dark:border-purple-500/30' 
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300'
-          }`}
+          className={`${tabBaseStyle} ${type === 'CONFESSION' ? themeStyles.CONFESSION.tabActive : tabInactiveStyle}`}
         >
           <VenetianMask size={16} className={type === 'CONFESSION' ? 'animate-bounce' : ''} /> İtiraf
         </button>
@@ -91,11 +110,7 @@ export default function ModernForm() {
         <button 
           type="button"
           onClick={() => handleTabChange('BOSYAP')} 
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] sm:text-[14px] font-bold transition-all duration-300 ${
-            type === 'BOSYAP' 
-              ? 'bg-white dark:bg-[#1B332A] text-emerald-600 dark:text-emerald-400 shadow-sm border border-gray-200/50 dark:border-emerald-500/30' 
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300'
-          }`}
+          className={`${tabBaseStyle} ${type === 'BOSYAP' ? themeStyles.BOSYAP.tabActive : tabInactiveStyle}`}
         >
           <Coffee size={16} /> Boş Yap
         </button>
@@ -103,11 +118,7 @@ export default function ModernForm() {
         <button 
           type="button"
           onClick={() => handleTabChange('OVERHEARD')} 
-          className={`flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-[13px] sm:text-[14px] font-bold transition-all duration-300 ${
-            type === 'OVERHEARD' 
-              ? 'bg-white dark:bg-[#1B2A40] text-blue-600 dark:text-[#4DA3FF] shadow-sm border border-gray-200/50 dark:border-[#4DA3FF]/30' 
-              : 'text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300'
-          }`}
+          className={`${tabBaseStyle} ${type === 'OVERHEARD' ? themeStyles.OVERHEARD.tabActive : tabInactiveStyle}`}
         >
           <Headphones size={16} /> Duyum
         </button>
@@ -179,8 +190,8 @@ export default function ModernForm() {
           </div>
         )}
 
-        {/* ANA YAZI ALANI */}
-        <div className="relative bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-2xl transition-colors duration-300 focus-within:ring-2 focus-within:ring-purple-500/20 dark:focus-within:ring-purple-500/30 focus-within:border-purple-300 dark:focus-within:border-purple-500/50 shadow-sm dark:shadow-none">
+        {/* ANA YAZI ALANI (DİNAMİK RENKLİ) */}
+        <div className={`relative bg-gray-50 dark:bg-white/[0.02] border border-gray-200 dark:border-white/5 rounded-2xl transition-all duration-300 focus-within:ring-2 shadow-sm dark:shadow-none ${currentTheme.ring}`}>
             <textarea 
               maxLength={maxChars}
               rows={4} 
@@ -193,8 +204,11 @@ export default function ModernForm() {
               onChange={(e) => setContent(e.target.value)} 
               className="w-full bg-transparent p-5 pb-9 text-[15px] sm:text-[16px] text-gray-900 dark:text-white outline-none resize-none placeholder-gray-400 dark:placeholder-gray-600 leading-relaxed font-medium" 
             />
+            {/* Karakter Sayacı (Sona yaklaşınca kızarır) */}
             <div className={`absolute bottom-3 right-4 text-[11px] font-bold transition-colors ${
-              content.length >= maxChars ? 'text-red-500 dark:text-red-400' : 'text-gray-400 dark:text-gray-500'
+              content.length >= maxChars ? 'text-red-500 dark:text-red-400' 
+              : content.length >= maxChars - 50 ? 'text-yellow-500 dark:text-yellow-400'
+              : 'text-gray-400 dark:text-gray-500'
             }`}>
                 {content.length} / {maxChars}
             </div>
@@ -231,14 +245,12 @@ export default function ModernForm() {
         {/* GÖNDER BUTONU */}
         <button 
           type="submit" 
-          disabled={loading || successMsg} 
+          disabled={loading || successMsg || content.trim().length === 0} 
           className={`relative w-full py-4 rounded-2xl text-[15px] font-black flex items-center justify-center gap-2 transition-all duration-300 shadow-md ${
             successMsg ? 'bg-emerald-500 text-white shadow-emerald-500/30' 
-            : loading ? 'bg-gray-200 text-gray-400 dark:bg-white/5 dark:text-gray-600 cursor-not-allowed shadow-none'
+            : loading || content.trim().length === 0 ? 'bg-gray-200 text-gray-400 dark:bg-white/5 dark:text-gray-600 cursor-not-allowed shadow-none'
             : (type === 'CONFESSION' && isEphemeral) ? 'bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white shadow-purple-500/30 dark:shadow-purple-900/40'
-            : type === 'CONFESSION' ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-500/30 dark:shadow-purple-900/40' 
-            : type === 'BOSYAP' ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/30 dark:shadow-emerald-900/40'
-            : 'bg-[#4DA3FF] hover:bg-blue-400 text-white shadow-blue-500/30 dark:shadow-blue-900/40'
+            : currentTheme.btn
           }`}
         >
           {successMsg ? (

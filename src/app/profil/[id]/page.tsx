@@ -2,8 +2,8 @@ import prisma from '@/lib/prisma';
 import PostCard from '@/components/PostCard';
 import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-import { redirect } from 'next/navigation'; // 🔥 EKLENDİ
-import { Heart, MessageCircle, ArrowRight, ArrowLeft, Flame, MoreHorizontal, User, Sparkles } from 'lucide-react';
+import { redirect } from 'next/navigation';
+import { Heart, MessageCircle, ArrowRight, ArrowLeft, Flame, MoreHorizontal, User, Sparkles, Trophy, Target } from 'lucide-react';
 import Link from 'next/link';
 import ProfileNickEdit from '@/components/ProfileNickEdit'; 
 import EditableAvatar from '@/components/EditableAvatar';
@@ -35,13 +35,21 @@ const getAnonymousData = (id: string, customNickname?: string) => {
   for (let i = 0; i < id.length; i++) hash = id.charCodeAt(i) + ((hash << 5) - hash);
   const positiveHash = Math.abs(hash);
   
-  if (customNickname) {
-    return { name: customNickname };
-  }
+  if (customNickname) return { name: customNickname };
 
   return {
     name: `${adjectives[positiveHash % adjectives.length]} ${animals[Math.floor(positiveHash / adjectives.length) % animals.length]}`
   };
+};
+
+// 🔥 DİNAMİK PROFİL UNVANI SİSTEMİ 🔥
+const getTitleByLevel = (level: number) => {
+  if (level === 1) return "KAMPÜSE YENİ DÜŞTÜ (ÇÖMEZ)";
+  if (level === 2) return "KAMPÜS KURDU";
+  if (level === 3) return "DEĞİRMENALTI SEFİRİ";
+  if (level === 4) return "ESKİ TOPRAK";
+  if (level >= 5) return "MEKANIN SAHİBİ";
+  return "TNKUOVERHEARD TAKİPÇİSİ";
 };
 
 export default async function ProfilePage({ params, searchParams }: { params: any, searchParams: any }) {
@@ -53,13 +61,10 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const generalUuid = cookieStore.get('user_uuid')?.value;
   const currentUserUuid = authorId || generalUuid || '';
 
-  // 🔥 YÜZDE YÜZ ÇÖZÜM: DOĞRU PROFİLE SUNUCU YÖNLENDİRMESİ 🔥
   if (id === 'ben') {
     if (currentUserUuid) {
-      // 1. Post attığın asıl kimliğin (çerezin) varsa, seni direkt KENDİ GÖNDERİLERİNİN olduğu profiline fırlat!
       redirect(`/profil/${currentUserUuid}`);
     } else {
-      // 2. Eğer çerezin hiç yoksa (ilk defa giriyorsan veya çerezi sildiysen) sana gizlice doğru ID'yi verir.
       return (
         <main className="min-h-screen bg-slate-50 dark:bg-[#050505] flex flex-col items-center justify-center">
           <script dangerouslySetInnerHTML={{ __html: `
@@ -82,7 +87,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
 
   const targetUuid = decodeURIComponent(id);
   const isOwnProfile = Boolean(currentUserUuid && targetUuid === currentUserUuid);
-  
   const activeTab = sParams?.tab === 'yorumlar' ? 'yorumlar' : 'gonderiler';
 
   const [postCount, commentCount, userPosts, userComments, userBadgeDb, allNicknamesDb, allBadgesDb, userStats, allAvatarsDb] = await Promise.all([
@@ -115,18 +119,9 @@ export default async function ProfilePage({ params, searchParams }: { params: an
     (prisma as any).userAvatar.findMany().catch(() => [])
   ]);
 
-  const customNicknamesMap = (allNicknamesDb || []).reduce((acc: any, curr: any) => {
-    acc[curr.userUuid] = curr.nickname;
-    return acc;
-  }, {});
-  const userBadgesMap = (allBadgesDb || []).reduce((acc: any, curr: any) => {
-    acc[curr.userUuid] = curr.badgeName;
-    return acc;
-  }, {});
-  const userAvatarsMap = (allAvatarsDb || []).reduce((acc: any, curr: any) => {
-    acc[curr.userUuid] = curr.avatarUrl;
-    return acc;
-  }, {});
+  const customNicknamesMap = (allNicknamesDb || []).reduce((acc: any, curr: any) => { acc[curr.userUuid] = curr.nickname; return acc; }, {});
+  const userBadgesMap = (allBadgesDb || []).reduce((acc: any, curr: any) => { acc[curr.userUuid] = curr.badgeName; return acc; }, {});
+  const userAvatarsMap = (allAvatarsDb || []).reduce((acc: any, curr: any) => { acc[curr.userUuid] = curr.avatarUrl; return acc; }, {});
 
   const authorData = getAnonymousData(targetUuid, customNicknamesMap[targetUuid]);
   const displayNickname = authorData.name;
@@ -135,16 +130,18 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const totalLikes = userPosts.reduce((acc: any, post: any) => acc + post.likes, 0);
   const userBadge = userBadgeDb?.badgeName;
   
-  // 🔥 TANRI PARÇACIĞI KONTROLÜ 🔥
+  // TANRI PARÇACIĞI KONTROLÜ
   const isGodMode = ["KURUCU", "GOD", "SİSTEM"].includes(userBadge?.toUpperCase() || "");
 
   const likedPostsCookie = cookieStore.get('liked_posts')?.value || '';
   const likedPosts = likedPostsCookie.split(',');
 
-  const points = userStats?.points || 0;
-  const level = userStats?.level || 1;
-  const nextTarget = (Math.floor(points / 500) + 1) * 500;
-  const fillPercentage = Math.max(5, (points / nextTarget) * 100);
+  // 🔥 XP VE SEVİYE MATEMATİĞİ 🔥
+  const currentXP = userStats?.points || 0;
+  const currentLevel = userStats?.level || 1;
+  const nextLevelTarget = currentLevel * 500; 
+  // Barın %0 ile %100 arasında kalmasını garantileyen formül
+  const fillPercentage = currentXP === 0 ? 0 : Math.min(100, Math.floor((currentXP / nextLevelTarget) * 100));
 
   async function incrementLike(formData: FormData) {
     'use server';
@@ -168,11 +165,11 @@ export default async function ProfilePage({ params, searchParams }: { params: an
 
   const profileCardClass = isGodMode
     ? 'bg-gradient-to-br from-yellow-50/80 to-white dark:from-yellow-500/10 dark:to-black/80 border-yellow-400/50 shadow-[0_0_50px_rgba(234,179,8,0.25)] ring-1 ring-yellow-400/30'
-    : 'bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/[0.05] shadow-sm dark:shadow-[0_10px_40px_rgba(0,0,0,0.5)]';
+    : 'bg-white dark:bg-[#0A0A0A] border-gray-200 dark:border-white/[0.05] shadow-xl';
 
   const statsBoxClass = isGodMode
     ? 'bg-yellow-500/10 dark:bg-yellow-500/5 border-yellow-400/30 dark:border-yellow-500/20 shadow-inner'
-    : 'bg-gray-50 dark:bg-black/40 border-gray-200 dark:border-white/5 shadow-inner';
+    : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5 shadow-inner';
 
   return (
     <main className="min-h-screen text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
@@ -186,82 +183,83 @@ export default async function ProfilePage({ params, searchParams }: { params: an
       </div>
 
       <header className={`sticky top-0 z-50 backdrop-blur-3xl border-b shadow-sm px-4 py-3 flex items-center justify-between transition-colors duration-300 ${isGodMode ? 'bg-white/80 dark:bg-black/60 border-yellow-200 dark:border-yellow-500/20' : 'bg-white/80 dark:bg-[#050505]/80 border-gray-200 dark:border-white/[0.05]'}`}>
-        <Link href="/" className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-white transition-colors p-1 -ml-1 dark:bg-white/5 rounded-full">
+        <Link href="/" className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-white transition-colors p-1.5 dark:bg-white/5 rounded-full">
           <ArrowLeft size={20} />
         </Link>
         <h1 className={`text-[15px] font-black tracking-widest uppercase flex items-center gap-1.5 transition-colors ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>
           <Sparkles size={14} className={isGodMode ? 'text-yellow-500 animate-pulse' : 'text-[#4DA3FF]'} /> {isOwnProfile ? (isGodMode ? 'ADMİN' : 'Profilim') : 'Profil'}
         </h1>
-        <button className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-white transition-colors p-1 dark:bg-white/5 rounded-full">
+        <button className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-white transition-colors p-1.5 dark:bg-white/5 rounded-full">
           <MoreHorizontal size={20} />
         </button>
       </header>
 
-      <div className="max-w-2xl mx-auto pt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+      <div className="max-w-2xl mx-auto pt-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
         <div className="px-4 pb-2">
-          <div className={`flex flex-col sm:flex-row items-center gap-5 sm:gap-6 border rounded-[32px] p-5 backdrop-blur-xl transition-all duration-500 ${profileCardClass}`}>
+          
+          {/* PROFİL KARTI */}
+          <div className={`flex flex-col border rounded-[32px] p-5 backdrop-blur-xl transition-all duration-500 ${profileCardClass}`}>
             
-            {isGodMode ? (
-              <div className="relative shrink-0 p-[3px] rounded-full">
-                <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-400 via-amber-500 to-yellow-300 animate-[spin_3s_linear_infinite] shadow-[0_0_20px_rgba(234,179,8,0.6)] pointer-events-none" />
-                <div className="relative z-10 rounded-full bg-gray-100 dark:bg-[#121212]">
-                  <EditableAvatar 
-                    userUuid={targetUuid}
-                    currentAvatar={currentAvatar}
-                    displayNickname={displayNickname}
-                    isOwnProfile={isOwnProfile}
-                  />
+            {/* ÜST: Avatar ve Unvan */}
+            <div className="flex items-center gap-5">
+              {isGodMode ? (
+                <div className="relative shrink-0 p-[3px] rounded-full">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-400 via-amber-500 to-yellow-300 animate-[spin_3s_linear_infinite] shadow-[0_0_20px_rgba(234,179,8,0.6)] pointer-events-none" />
+                  <div className="relative z-10 rounded-full bg-gray-100 dark:bg-[#121212]">
+                    <EditableAvatar userUuid={targetUuid} currentAvatar={currentAvatar} displayNickname={displayNickname} isOwnProfile={isOwnProfile} />
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="shrink-0">
-                <EditableAvatar 
-                  userUuid={targetUuid}
-                  currentAvatar={currentAvatar}
-                  displayNickname={displayNickname}
-                  isOwnProfile={isOwnProfile}
-                />
-              </div>
-            )}
+              ) : (
+                <div className="shrink-0">
+                  <EditableAvatar userUuid={targetUuid} currentAvatar={currentAvatar} displayNickname={displayNickname} isOwnProfile={isOwnProfile} />
+                </div>
+              )}
 
-            <div className={`w-full flex-1 flex justify-around items-center border rounded-2xl py-3 px-2 transition-colors duration-300 ${statsBoxClass}`}>
-              <div className="flex flex-col items-center">
-                <span className={`text-[20px] font-black ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>{postCount}</span>
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Gönderi</span>
-              </div>
-              <div className={`w-px h-8 ${isGodMode ? 'bg-yellow-300 dark:bg-yellow-500/20' : 'bg-gray-200 dark:bg-white/10'}`}></div>
-              <div className="flex flex-col items-center">
-                <span className={`text-[20px] font-black ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>{totalLikes}</span>
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Beğeni</span>
-              </div>
-              <div className={`w-px h-8 ${isGodMode ? 'bg-yellow-300 dark:bg-yellow-500/20' : 'bg-gray-200 dark:bg-white/10'}`}></div>
-              <div className="flex flex-col items-center">
-                <span className={`text-[20px] font-black ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>{commentCount}</span>
-                <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Yorum</span>
+              <div className="flex flex-col">
+                <h2 className="text-[18px] sm:text-[20px] font-black flex items-center gap-2 flex-wrap">
+                  <span className={`${isGodMode ? 'bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-amber-500 dark:from-yellow-300 dark:via-amber-400 dark:to-yellow-300 animate-pulse drop-shadow-md' : 'text-gray-900 dark:text-white'}`}>
+                    {displayNickname}
+                  </span>
+                  {userBadge && (
+                    <span className={`${isGodMode ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.5)] animate-pulse' : 'bg-amber-100 text-amber-600 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-500 dark:border-amber-500/20'} text-[10px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest shadow-sm flex items-center gap-1`}>
+                      {isGodMode && <Sparkles size={10} />} {userBadge}
+                    </span>
+                  )}
+                </h2>
+                {/* 🔥 DİNAMİK UNVAN 🔥 */}
+                <p className={`text-[11px] font-bold mt-1 uppercase tracking-widest flex items-center gap-1 ${isGodMode ? 'text-yellow-600 dark:text-yellow-500/80' : 'text-gray-500 dark:text-gray-400'}`}>
+                  <Trophy size={12} /> {isGodMode ? 'SİSTEMİN HAKİMİ' : getTitleByLevel(currentLevel)}
+                </p>
               </div>
             </div>
-          </div>
 
-          <div className="mt-5 px-2">
-            <h2 className="text-[16px] font-black flex items-center gap-2">
-              <span className={`${isGodMode ? 'bg-clip-text text-transparent bg-gradient-to-r from-yellow-600 to-amber-500 dark:from-yellow-300 dark:via-amber-400 dark:to-yellow-300 animate-pulse drop-shadow-md text-[18px]' : 'text-gray-900 dark:text-white'}`}>
-                {displayNickname}
-              </span>
-              {userBadge && (
-                <span className={`${isGodMode ? 'bg-yellow-500/20 text-yellow-600 dark:text-yellow-400 border border-yellow-500/50 shadow-[0_0_10px_rgba(234,179,8,0.5)] animate-pulse' : 'bg-amber-100 text-amber-600 border border-amber-200 dark:bg-amber-500/10 dark:text-amber-500 dark:border-amber-500/20'} text-[10px] px-2 py-0.5 rounded-md uppercase font-black tracking-widest shadow-sm flex items-center gap-1`}>
-                  {isGodMode && <Sparkles size={10} />} {userBadge}
-                </span>
-              )}
-            </h2>
-            <p className={`text-[12px] font-medium mt-1 uppercase tracking-widest ${isGodMode ? 'text-yellow-600 dark:text-yellow-500/80 font-bold' : 'text-gray-500 dark:text-gray-400'}`}>
-              {isGodMode ? 'SİSTEMİN HAKİMİ' : 'TNKUOVERHEARD TAKİPÇİSİ'}
-            </p>
+            {/* ORTA: İstatistik Kutuları */}
+            <div className="grid grid-cols-3 gap-2 mt-5">
+              <div className={`flex flex-col items-center justify-center rounded-2xl py-3 border transition-colors ${statsBoxClass}`}>
+                <span className={`text-[20px] font-black ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>{postCount}</span>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5">Gönderi</span>
+              </div>
+              <div className={`flex flex-col items-center justify-center rounded-2xl py-3 border transition-colors ${statsBoxClass}`}>
+                <span className={`text-[20px] font-black ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>{totalLikes}</span>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5">Beğeni</span>
+              </div>
+              <div className={`flex flex-col items-center justify-center rounded-2xl py-3 border transition-colors ${statsBoxClass}`}>
+                <span className={`text-[20px] font-black ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>{commentCount}</span>
+                <span className="text-[10px] font-bold text-gray-500 uppercase tracking-wider mt-0.5">Yorum</span>
+              </div>
+            </div>
             
-            <div className={`mt-4 flex items-center gap-3 w-full border p-2.5 rounded-xl transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 border-yellow-200/50 dark:bg-yellow-500/10 dark:border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]' : 'bg-white dark:bg-white/[0.03] border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none'}`}>
-              <span className={`text-[12px] font-black shrink-0 flex items-center gap-1.5 w-[70px] ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-amber-600 dark:text-amber-500'}`}>
-                <Flame size={14} className="animate-pulse" /> Lvl {level}
-              </span>
-              <div className={`flex-1 h-2 rounded-full overflow-hidden shadow-inner border ${isGodMode ? 'bg-yellow-100 dark:bg-black/50 border-yellow-200 dark:border-yellow-500/20' : 'bg-gray-200 dark:bg-black/50 border-gray-300 dark:border-white/5'}`}>
+            {/* ALT: XP Barı */}
+            <div className={`mt-3 flex flex-col gap-2 w-full border p-3.5 rounded-2xl transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 border-yellow-200/50 dark:bg-yellow-500/10 dark:border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]' : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none'}`}>
+              <div className="flex items-center justify-between px-1">
+                 <span className={`text-[12px] font-black flex items-center gap-1.5 ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-amber-600 dark:text-amber-500'}`}>
+                   <Flame size={14} className={isGodMode ? "animate-pulse" : ""} /> Lvl {currentLevel}
+                 </span>
+                 <span className={`text-[10px] font-bold ${isGodMode ? 'text-yellow-600 dark:text-yellow-500' : 'text-gray-500 dark:text-gray-400'}`}>
+                   <Target size={12} className="inline mr-1 -mt-0.5" /> {currentXP} / {nextLevelTarget} XP
+                 </span>
+              </div>
+              <div className={`w-full h-2.5 rounded-full overflow-hidden shadow-inner border ${isGodMode ? 'bg-yellow-100 dark:bg-black/50 border-yellow-200 dark:border-yellow-500/20' : 'bg-gray-200 dark:bg-black/50 border-gray-300 dark:border-white/5'}`}>
                 <div 
                   className={`h-full transition-all duration-1000 ease-out relative ${isGodMode ? 'bg-gradient-to-r from-yellow-300 via-yellow-400 to-amber-500' : 'bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-400 dark:from-amber-600 dark:via-yellow-500 dark:to-amber-400'}`}
                   style={{ width: `${fillPercentage}%` }}
@@ -269,30 +267,27 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                   <div className="absolute top-0 right-0 bottom-0 left-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[progress-stripe_1s_linear_infinite]"></div>
                 </div>
               </div>
-              <span className={`text-[10px] font-bold ${isGodMode ? 'text-yellow-600 dark:text-yellow-500' : 'text-gray-500'}`}>{points} XP</span>
             </div>
-            
+
+            {/* İSİM DÜZENLEME (Kendi Profiliyse) */}
             {isOwnProfile && (
               <div className="mt-4 w-full">
-                <ProfileNickEdit 
-                  targetUuid={targetUuid} 
-                  currentNick={displayNickname} 
-                  isServerOwner={isOwnProfile} 
-                />
+                <ProfileNickEdit targetUuid={targetUuid} currentNick={displayNickname} isServerOwner={isOwnProfile} />
               </div>
             )}
           </div>
         </div>
 
-        <div className={`sticky top-[53px] z-40 backdrop-blur-3xl pt-2 pb-3 px-4 mt-2 transition-colors duration-300 ${isGodMode ? 'bg-slate-50/90 dark:bg-[#050505]/80' : 'bg-slate-50/90 dark:bg-[#050505]/80'}`}>
-          <div className={`flex p-1 rounded-xl border shadow-inner transition-colors duration-300 ${isGodMode ? 'bg-yellow-100/50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20' : 'bg-gray-200 dark:bg-white/[0.04] border-gray-300 dark:border-white/5'}`}>
+        {/* YENİ NESİL iOS SEKMELERİ (Gönderi/Yorum Geçişi) */}
+        <div className={`sticky top-[58px] z-40 backdrop-blur-3xl pt-2 pb-3 px-4 mt-2 transition-colors duration-300`}>
+          <div className={`flex p-1.5 rounded-2xl border transition-colors duration-300 ${isGodMode ? 'bg-yellow-100/50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20' : 'bg-gray-100 dark:bg-white/[0.04] border-gray-200/50 dark:border-white/5'}`}>
             <Link 
               href={`/profil/${id}?tab=gonderiler`} 
               scroll={false} 
-              className={`flex-1 text-center py-2 text-[13px] font-bold rounded-lg transition-all duration-300 ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-[13px] font-bold rounded-xl transition-all duration-300 ${
                 activeTab === 'gonderiler' 
-                  ? (isGodMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black shadow-md' : 'bg-[#4DA3FF] text-black shadow-md') 
-                  : (isGodMode ? 'text-yellow-700/70 hover:text-yellow-800 dark:text-yellow-500/70 dark:hover:text-yellow-400' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white')
+                  ? (isGodMode ? 'bg-white dark:bg-yellow-500/20 text-yellow-600 shadow-sm border border-yellow-200 dark:border-yellow-500/30' : 'bg-white dark:bg-[#1B2A40] text-blue-600 dark:text-[#4DA3FF] shadow-sm border border-gray-200/50 dark:border-[#4DA3FF]/30') 
+                  : (isGodMode ? 'text-yellow-700/70 hover:text-yellow-800 dark:text-yellow-500/70 dark:hover:text-yellow-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300')
               }`}
             >
               Gönderiler
@@ -300,10 +295,10 @@ export default async function ProfilePage({ params, searchParams }: { params: an
             <Link 
               href={`/profil/${id}?tab=yorumlar`} 
               scroll={false} 
-              className={`flex-1 text-center py-2 text-[13px] font-bold rounded-lg transition-all duration-300 ${
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-[13px] font-bold rounded-xl transition-all duration-300 ${
                 activeTab === 'yorumlar' 
-                  ? (isGodMode ? 'bg-gradient-to-r from-yellow-400 to-amber-500 text-black shadow-md' : 'bg-[#4DA3FF] text-black shadow-md') 
-                  : (isGodMode ? 'text-yellow-700/70 hover:text-yellow-800 dark:text-yellow-500/70 dark:hover:text-yellow-400' : 'text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white')
+                  ? (isGodMode ? 'bg-white dark:bg-yellow-500/20 text-yellow-600 shadow-sm border border-yellow-200 dark:border-yellow-500/30' : 'bg-white dark:bg-[#1B2A40] text-blue-600 dark:text-[#4DA3FF] shadow-sm border border-gray-200/50 dark:border-[#4DA3FF]/30') 
+                  : (isGodMode ? 'text-yellow-700/70 hover:text-yellow-800 dark:text-yellow-500/70 dark:hover:text-yellow-400' : 'text-gray-500 hover:text-gray-700 dark:text-gray-500 dark:hover:text-gray-300')
               }`}
             >
               Yorumlar
@@ -311,12 +306,11 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           </div>
         </div>
 
-        <div className="pt-2 px-4">
-          
+        <div className="pt-1 px-4">
           {activeTab === 'gonderiler' && (
             <div className="animate-in fade-in duration-300">
               {userPosts.length === 0 ? (
-                <div className={`text-center py-16 flex flex-col items-center justify-center border rounded-3xl mt-2 transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 dark:bg-yellow-500/5 border-yellow-200/50 dark:border-yellow-500/10' : 'bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none'}`}>
+                <div className={`text-center py-16 flex flex-col items-center justify-center border rounded-[24px] mt-2 transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 dark:bg-yellow-500/5 border-yellow-200/50 dark:border-yellow-500/10' : 'bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none'}`}>
                   <div className={`w-16 h-16 rounded-full border flex items-center justify-center mb-3 ${isGodMode ? 'bg-yellow-100 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10'}`}>
                     <User size={28} className={isGodMode ? 'text-yellow-500' : 'text-gray-400 dark:text-gray-500'} />
                   </div>
@@ -344,7 +338,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           {activeTab === 'yorumlar' && (
             <div className="animate-in fade-in duration-300">
               {userComments.length === 0 ? (
-                <div className={`text-center py-16 flex flex-col items-center justify-center border rounded-3xl mt-2 transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 dark:bg-yellow-500/5 border-yellow-200/50 dark:border-yellow-500/10' : 'bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none'}`}>
+                <div className={`text-center py-16 flex flex-col items-center justify-center border rounded-[24px] mt-2 transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 dark:bg-yellow-500/5 border-yellow-200/50 dark:border-yellow-500/10' : 'bg-white dark:bg-white/[0.02] border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none'}`}>
                   <div className={`w-16 h-16 rounded-full border flex items-center justify-center mb-3 ${isGodMode ? 'bg-yellow-100 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20' : 'bg-gray-50 dark:bg-white/5 border-gray-100 dark:border-white/10'}`}>
                     <MessageCircle size={28} className={isGodMode ? 'text-yellow-500' : 'text-gray-400 dark:text-gray-500'} />
                   </div>
@@ -353,29 +347,31 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               ) : (
                 <div className="space-y-3 mt-2">
                   {userComments.map((comment: any) => (
-                    <div key={comment.id} className={`p-4 rounded-[24px] hover:shadow-md transition-all duration-300 ${isGodMode ? 'bg-gradient-to-br from-yellow-50/80 to-white dark:from-yellow-500/[0.05] dark:to-white/[0.02] border border-yellow-400/50 shadow-[0_0_20px_rgba(234,179,8,0.1)] ring-1 ring-yellow-400/30' : 'bg-white dark:bg-white/[0.02] backdrop-blur-xl border border-gray-200 dark:border-white/[0.04] dark:hover:bg-white/[0.03] shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)]'}`}>
+                    <div key={comment.id} className={`p-5 rounded-[24px] hover:shadow-md transition-all duration-300 ${isGodMode ? 'bg-gradient-to-br from-yellow-50/80 to-white dark:from-yellow-500/[0.05] dark:to-white/[0.02] border border-yellow-400/50 shadow-[0_0_20px_rgba(234,179,8,0.1)] ring-1 ring-yellow-400/30' : 'bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-white/[0.05] dark:hover:bg-white/[0.03] shadow-sm'}`}>
                       
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between items-start mb-3">
                         <div className="flex items-center gap-2">
-                          <MessageCircle size={14} className={isGodMode ? 'text-yellow-500' : 'text-[#4DA3FF]'} />
+                          <div className={`p-1.5 rounded-full ${isGodMode ? 'bg-yellow-100 dark:bg-yellow-500/20' : 'bg-blue-50 dark:bg-[#4DA3FF]/10'}`}>
+                            <MessageCircle size={14} className={isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-blue-500 dark:text-[#4DA3FF]'} />
+                          </div>
                           <span className={`text-[11px] font-bold tracking-wide ${isGodMode ? 'text-yellow-600/70 dark:text-yellow-500/70' : 'text-gray-500 dark:text-gray-400'}`}>
                             {getRelativeTime(comment.createdAt)}
                           </span>
                         </div>
-                        <div className={`flex items-center gap-1.5 text-[12px] font-bold px-2 py-1 rounded-full border ${isGodMode ? 'bg-yellow-100/50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20 text-yellow-600 dark:text-yellow-400' : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400'}`}>
+                        <div className={`flex items-center gap-1.5 text-[12px] font-bold px-2.5 py-1 rounded-full border ${isGodMode ? 'bg-yellow-100/50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20 text-yellow-600 dark:text-yellow-400' : 'bg-gray-50 dark:bg-white/5 border-gray-200 dark:border-white/5 text-gray-600 dark:text-gray-400'}`}>
                           <Heart size={12} className={comment.likes > 0 ? (isGodMode ? "fill-yellow-500 text-yellow-500" : "fill-pink-500 text-pink-500") : ""} /> {comment.likes || 0}
                         </div>
                       </div>
                       
-                      <p className={`text-[14px] leading-relaxed mb-3 font-medium ${isGodMode ? 'text-gray-900 dark:text-white' : 'text-gray-800 dark:text-gray-100'}`}>
+                      <p className={`text-[14.5px] leading-relaxed mb-4 font-medium break-words ${isGodMode ? 'text-gray-900 dark:text-white' : 'text-gray-800 dark:text-gray-100'}`}>
                         "{comment.content}"
                       </p>
                       
                       {comment.post && (
-                        <div className={`p-3 rounded-xl mb-3 border relative overflow-hidden transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 dark:bg-black/30 border-yellow-200/50 dark:border-yellow-500/20' : 'bg-gray-50 dark:bg-black/30 border-gray-200 dark:border-white/5'}`}>
+                        <div className={`p-3 rounded-xl mb-4 border relative overflow-hidden transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 dark:bg-black/30 border-yellow-200/50 dark:border-yellow-500/20' : 'bg-gray-50 dark:bg-black/30 border-gray-200 dark:border-white/5'}`}>
                           <div className={`absolute left-0 top-0 bottom-0 w-1 ${isGodMode ? 'bg-yellow-400/80' : 'bg-[#4DA3FF]/50'}`}></div>
-                          <p className={`text-[10px] uppercase font-black tracking-widest mb-1 pl-1 ${isGodMode ? 'text-yellow-600/70 dark:text-yellow-500/70' : 'text-gray-500'}`}>Yanıtlanan Gönderi:</p>
-                          <p className={`text-[12px] line-clamp-1 italic pl-1 ${isGodMode ? 'text-gray-800 dark:text-gray-300' : 'text-gray-600 dark:text-gray-300'}`}>
+                          <p className={`text-[10px] uppercase font-black tracking-widest mb-1 pl-1.5 ${isGodMode ? 'text-yellow-600/70 dark:text-yellow-500/70' : 'text-gray-500'}`}>Yanıtlanan Gönderi:</p>
+                          <p className={`text-[12px] line-clamp-1 italic pl-1.5 ${isGodMode ? 'text-gray-800 dark:text-gray-300' : 'text-gray-600 dark:text-gray-300'}`}>
                             {comment.post.content ? comment.post.content : '📷 (Medya İçeriği)'}
                           </p>
                         </div>
@@ -383,9 +379,9 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                       
                       <Link 
                         href={`/post/${comment.postId}`} 
-                        className={`inline-flex items-center gap-1.5 text-[12px] font-bold transition-colors ${isGodMode ? 'text-yellow-600 hover:text-yellow-500 dark:text-yellow-400 dark:hover:text-yellow-300' : 'text-[#4DA3FF] hover:text-blue-500 dark:hover:text-blue-400'}`}
+                        className={`inline-flex items-center justify-center w-full py-2.5 rounded-xl text-[12px] font-bold transition-all border ${isGodMode ? 'bg-yellow-50 dark:bg-yellow-500/10 text-yellow-600 border-yellow-200 hover:bg-yellow-100 dark:text-yellow-400 dark:border-yellow-500/20 dark:hover:bg-yellow-500/20' : 'bg-blue-50 dark:bg-[#4DA3FF]/10 text-blue-600 border-blue-200 hover:bg-blue-100 dark:text-[#4DA3FF] dark:border-[#4DA3FF]/20 dark:hover:bg-[#4DA3FF]/20'}`}
                       >
-                        Gönderiye Git <ArrowRight size={14} />
+                        Gönderiye Git <ArrowRight size={14} className="ml-1" />
                       </Link>
 
                     </div>

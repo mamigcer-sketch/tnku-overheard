@@ -1,12 +1,10 @@
 "use client";
 
 import { useState, useEffect } from 'react';
-// 🔥 Skull ve TrendingUp İKONLARI BURAYA EKLENDİ 🔥
 import { Menu, X, Bookmark, ShieldAlert, BookOpen, ExternalLink, Download, User, MessageCircle, Trophy, Sun, Moon, Flame, Skull, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import { useTheme } from 'next-themes';
 
-// 🔥 TİP HATASI (TYPE ERROR) ÇÖZÜLDÜ: userUuid'yi tekrar kabul ediyoruz 🔥
 export default function MobileMenu({ userUuid }: { userUuid?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -16,18 +14,10 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     setMounted(true);
   }, []);
 
-  const menuItems = [
-    { name: 'NKÜ Chat', icon: <MessageCircle size={18} />, href: '/sohbet', isExternal: false },
-    { name: 'Etkinlikler', icon: <Flame size={18} />, href: '/etkinlikler', isExternal: false },
-    { name: 'Karanlık Oda', icon: <Skull size={18} />, href: '/karanlik-oda', isExternal: false },
-    // 🔥 KAMPÜS BORSASI (ÇARPAN) BURAYA EKLENDİ 🔥
-    { name: 'Kampüs Borsası', icon: <TrendingUp size={18} />, href: '/borsa', isExternal: false },
-    { name: 'Leaderboard', icon: <Trophy size={18} />, href: '/liderlik', isExternal: false, hideOnDesktop: true },
-    { name: 'Kaydedilenler', icon: <Bookmark size={18} />, href: '/kaydedilenler', isExternal: false, hideOnDesktop: true },
-    { name: 'Topluluk Kuralları', icon: <BookOpen size={18} />, href: '/rules', isExternal: false },
-    { name: 'Instagram', icon: <ExternalLink size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
-    { name: 'Bildir / Şikayet', icon: <ShieldAlert size={18} />, href: 'https://instagram.com/tnkuoverheard', isExternal: true },
-  ];
+  // Ortak link stili (Gündüz / Gece uyumlu)
+  const linkBaseStyle = "flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium text-[14px] text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5";
+  const groupTitleStyle = "text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest px-3 mb-1 mt-3";
+  const dividerStyle = "h-px w-full my-2 bg-gray-200 dark:bg-white/10 transition-colors";
 
   return (
     <div className="relative z-50">
@@ -45,7 +35,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           <div className="absolute top-14 right-0 w-[260px] bg-white/95 dark:bg-[#0A0A0A]/95 backdrop-blur-3xl border border-gray-200 dark:border-white/10 rounded-[24px] p-2.5 shadow-xl dark:shadow-[0_10px_50px_rgba(0,0,0,0.7)] z-50 animate-in fade-in zoom-in-95 duration-200 transition-colors">
             <div className="space-y-1">
               
-              {/* 🔥 TERTEMİZ PROFİL BAĞLANTISI (SUNUCU HALLEDECEK) 🔥 */}
+              {/* TERTEMİZ PROFİL BAĞLANTISI */}
               <a 
                 href="/profil/ben"
                 onClick={() => setIsOpen(false)}
@@ -54,32 +44,60 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
                 <User size={18} className="stroke-[2.5]" /> Profilim
               </a>
 
-              {menuItems.map((item) => (
-                item.isExternal ? (
-                  <a 
-                    key={item.name}
-                    href={item.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium text-[14px] text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5 ${item.hideOnDesktop ? 'sm:hidden' : ''}`}
-                  >
-                    {item.icon} {item.name}
-                  </a>
-                ) : (
-                  <Link 
-                    key={item.name} 
-                    href={item.href} 
-                    onClick={() => setIsOpen(false)}
-                    className={`flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium text-[14px] text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5 ${item.hideOnDesktop ? 'sm:hidden' : ''}`}
-                  >
-                    {item.icon} {item.name}
+              {/* 🔥 KATEGORİZE EDİLMİŞ MENÜ 🔥 */}
+              <div className="space-y-1 pb-2">
+                
+                {/* 1. SOSYAL GRUBU */}
+                <div>
+                  <p className={groupTitleStyle}>Sosyal</p>
+                  <Link href="/sohbet" onClick={() => setIsOpen(false)} className={linkBaseStyle}>
+                    <MessageCircle size={18} className="text-[#4DA3FF]" /> NKÜ Chat
                   </Link>
-                )
-              ))}
+                  <Link href="/etkinlikler" onClick={() => setIsOpen(false)} className={linkBaseStyle}>
+                    <Flame size={18} className="text-amber-500" /> Etkinlikler
+                  </Link>
+                  <Link href="/liderlik" onClick={() => setIsOpen(false)} className={`${linkBaseStyle} sm:hidden`}>
+                    <Trophy size={18} className="text-yellow-500" /> Sefirler
+                  </Link>
+                </div>
 
-              <div className="h-px w-full my-2 bg-gray-200 dark:bg-white/10 transition-colors"></div>
+                <div className={dividerStyle}></div>
 
+                {/* 2. EĞLENCE & RİSK GRUBU */}
+                <div>
+                  <p className={groupTitleStyle}>Eğlence & Risk</p>
+                  <Link href="/karanlik-oda" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium text-[14px] text-gray-600 hover:text-red-600 hover:bg-red-50 dark:text-gray-300 dark:hover:text-red-400 dark:hover:bg-red-500/10">
+                    <Skull size={18} className="text-red-500" /> Karanlık Oda
+                  </Link>
+                  <Link href="/borsa" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium text-[14px] text-gray-600 hover:text-blue-600 hover:bg-blue-50 dark:text-gray-300 dark:hover:text-[#4DA3FF] dark:hover:bg-[#4DA3FF]/10">
+                    <TrendingUp size={18} className="text-[#4DA3FF]" /> Kampüs Borsası
+                  </Link>
+                </div>
+
+                <div className={dividerStyle}></div>
+
+                {/* 3. DİĞER GRUBU */}
+                <div>
+                  <p className={groupTitleStyle}>Diğer</p>
+                  <Link href="/kaydedilenler" onClick={() => setIsOpen(false)} className={`${linkBaseStyle} sm:hidden`}>
+                    <Bookmark size={18} className="text-gray-400 dark:text-gray-500" /> Kaydedilenler
+                  </Link>
+                  <Link href="/rules" onClick={() => setIsOpen(false)} className={linkBaseStyle}>
+                    <BookOpen size={18} className="text-gray-400 dark:text-gray-500" /> Topluluk Kuralları
+                  </Link>
+                  <a href="https://instagram.com/tnkuoverheard" target="_blank" rel="noopener noreferrer" onClick={() => setIsOpen(false)} className={linkBaseStyle}>
+                    <ExternalLink size={18} className="text-gray-400 dark:text-gray-500" /> Instagram
+                  </a>
+                  <a href="https://instagram.com/tnkuoverheard" target="_blank" rel="noopener noreferrer" onClick={() => setIsOpen(false)} className={linkBaseStyle}>
+                    <ShieldAlert size={18} className="text-gray-400 dark:text-gray-500" /> Bildir / Şikayet
+                  </a>
+                </div>
+
+              </div>
+
+              <div className={dividerStyle}></div>
+
+              {/* ALT KONTROLLER */}
               {mounted && (
                 <button
                   onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}

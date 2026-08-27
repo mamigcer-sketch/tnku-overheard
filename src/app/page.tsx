@@ -139,12 +139,10 @@ export default async function Home({ searchParams }: any) {
   return (
     <main className="min-h-screen bg-slate-50 dark:bg-[#050505] text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
       
-      {/* 🔥 ARKA PLAN GÜNDÜZ/GECE MODUNA UYARLANDI */}
       <div className="fixed inset-0 -z-10 bg-slate-50 dark:bg-[#050505] transition-colors duration-300">
         <div className="absolute top-0 left-0 right-0 h-[700px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/50 via-slate-50 to-slate-50 dark:from-purple-900/30 dark:via-[#050505] dark:to-[#050505] pointer-events-none transition-colors duration-300"></div>
       </div>
 
-      {/* 🔥 HEADER GÜNDÜZ/GECE MODUNA UYARLANDI */}
       <div className="sticky top-0 z-50 bg-white/70 dark:bg-black/20 backdrop-blur-3xl border-b border-gray-200 dark:border-white/[0.05] shadow-sm dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] transition-colors duration-300">
         
         <header className="px-4 py-3 flex items-center justify-between gap-2">
@@ -193,37 +191,39 @@ export default async function Home({ searchParams }: any) {
 
       <div className="max-w-2xl mx-auto px-4 pt-5">
         
-        {/* 🔥 NKÜ CHAT VE DUYURU KUTULARI */}
+        {/* 🔥 YENİ NESİL GLOW WIDGET'LAR 🔥 */}
         <div className={`grid gap-3 mb-5 ${activeAnnouncement ? 'grid-cols-2' : 'grid-cols-1'}`}>
-          <Link href="/sohbet" className="bg-white dark:bg-white/[0.02] hover:bg-gray-50 dark:hover:bg-white/[0.05] border border-gray-200 dark:border-white/[0.05] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] transition-all duration-300 group relative overflow-hidden backdrop-blur-md shadow-sm dark:shadow-none">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-[#4DA3FF]/15 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none"></div>
+          
+          {/* NKÜ CHAT WIDGET */}
+          <Link href="/sohbet" className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/10 dark:to-[#0A0A0A] border border-blue-200 dark:border-[#4DA3FF]/20 hover:border-blue-400 dark:hover:border-[#4DA3FF]/50 hover:shadow-[0_0_20px_rgba(77,163,255,0.2)] dark:hover:shadow-[0_0_20px_rgba(77,163,255,0.15)] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] transition-all duration-300 group relative overflow-hidden backdrop-blur-md">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-blue-400/20 dark:bg-[#4DA3FF]/15 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none group-hover:scale-[2] transition-transform duration-700"></div>
             <div className="flex items-start justify-between relative z-10">
-              <div className="bg-[#4DA3FF]/15 p-2 rounded-xl text-[#4DA3FF] group-hover:scale-110 transition-transform shadow-inner">
+              <div className="bg-blue-100 dark:bg-[#4DA3FF]/15 p-2 rounded-xl text-blue-600 dark:text-[#4DA3FF] border border-blue-200 dark:border-transparent group-hover:scale-110 transition-transform shadow-inner">
                 <MessageCircle size={18} />
               </div>
               <div className="flex h-2.5 w-2.5 relative">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
               </div>
             </div>
             <div className="mt-3 relative z-10">
-              <h3 className="text-gray-900 dark:text-white font-black text-[14px] tracking-tight">NKÜ CHAT</h3>
-              <p className="text-gray-500 dark:text-gray-400 text-[11px] mt-0.5 font-medium">Kampüs ne konuşuyor?</p>
+              <h3 className="text-blue-900 dark:text-white font-black text-[14px] tracking-tight group-hover:text-blue-600 dark:group-hover:text-[#4DA3FF] transition-colors">NKÜ CHAT</h3>
+              <p className="text-blue-600/70 dark:text-gray-400 text-[11px] mt-0.5 font-bold">Kampüs ne konuşuyor?</p>
             </div>
           </Link>
 
+          {/* DUYURU WIDGET */}
           {activeAnnouncement && (
-            <div className="bg-blue-50 dark:bg-[#4DA3FF]/[0.02] border border-blue-200 dark:border-[#4DA3FF]/20 rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] relative overflow-hidden backdrop-blur-md">
-              <div className="absolute inset-0 bg-gradient-to-br from-[#4DA3FF]/5 to-transparent pointer-events-none"></div>
+            <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/10 dark:to-[#0A0A0A] border border-amber-200 dark:border-amber-500/20 hover:border-amber-400 dark:hover:border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] dark:hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] relative overflow-hidden backdrop-blur-md group transition-all duration-300">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/20 dark:bg-amber-500/15 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none group-hover:scale-[2] transition-transform duration-700"></div>
               <div className="flex items-start justify-between relative z-10">
-                <div className="bg-[#4DA3FF]/20 p-2 rounded-xl text-[#4DA3FF] shadow-inner">
+                <div className="bg-amber-100 dark:bg-amber-500/20 p-2 rounded-xl text-amber-600 dark:text-amber-500 border border-amber-200 dark:border-transparent group-hover:scale-110 transition-transform shadow-inner">
                   <Bell size={18} className="animate-pulse" />
                 </div>
               </div>
               <div className="mt-3 relative z-10">
-                <h3 className="text-[#4DA3FF] font-black text-[14px] tracking-tight">Duyuru</h3>
-                {/* 🔥 BURADAKİ TRUNCATE SİLİNDİ, YERİNE whitespace-pre-wrap EKLENDİ */}
-                <p className="text-gray-600 dark:text-gray-300 text-[11px] mt-0.5 font-medium whitespace-pre-wrap break-words leading-relaxed">{activeAnnouncement.content}</p>
+                <h3 className="text-amber-900 dark:text-white font-black text-[14px] tracking-tight group-hover:text-amber-600 dark:group-hover:text-amber-500 transition-colors">Duyuru</h3>
+                <p className="text-amber-700/80 dark:text-gray-300 text-[11px] mt-0.5 font-bold whitespace-pre-wrap break-words leading-relaxed">{activeAnnouncement.content}</p>
               </div>
             </div>
           )}

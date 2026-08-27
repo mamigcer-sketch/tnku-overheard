@@ -36,6 +36,28 @@ const getRelativeTime = (dateString: string) => {
   return date.toLocaleDateString('tr-TR', { day: 'numeric', month: 'short' });
 };
 
+// 🔥 KATEGORİ RENK DİNAMİKLERİ SÖZLÜĞÜ (Gündüz/Gece Uyumlu) 🔥
+const categoryColors: Record<string, any> = {
+  CONFESSION: { 
+    label: "İTİRAF", 
+    text: "text-purple-600 dark:text-purple-400", 
+    border: "hover:border-purple-300 dark:hover:border-purple-500/30", 
+    badge: "text-purple-600 bg-purple-100 border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20"
+  },
+  BOSYAP: { 
+    label: "BOŞ YAP", 
+    text: "text-emerald-600 dark:text-emerald-400", 
+    border: "hover:border-emerald-300 dark:hover:border-emerald-500/30", 
+    badge: "text-emerald-600 bg-emerald-100 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20"
+  },
+  OVERHEARD: { 
+    label: "OVERHEARD", 
+    text: "text-blue-600 dark:text-[#4DA3FF]", 
+    border: "hover:border-blue-300 dark:hover:border-[#4DA3FF]/30", 
+    badge: "text-blue-600 bg-blue-100 border-blue-200 dark:text-[#4DA3FF] dark:bg-[#4DA3FF]/10 dark:border-[#4DA3FF]/20"
+  }
+};
+
 export default function PostCard({ post, isLiked, incrementLike, customNickname, userBadge, userAvatar }: any) {
   const router = useRouter();
   const cardRef = useRef(null);
@@ -58,39 +80,19 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
   const clickTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const isEphemeral = !!post.expiresAt;
-  const isConfession = post.type === 'CONFESSION';
-  const isBosYap = post.type === 'BOSYAP';
-
-  const tagText = isConfession ? 'İtiraf' : isBosYap ? 'Boş Yap' : 'Overheard';
   
   // 🔥 TANRI PARÇACIĞI KONTROLÜ (GOD MODE) 🔥
   const isGodMode = ["KURUCU", "GOD", "SİSTEM"].includes(userBadge?.toUpperCase());
 
-  // TEMALAR (Gündüz/Gece uyumlu)
-  const themeClasses = isConfession 
-    ? { 
-        border: 'hover:border-purple-300 dark:hover:border-purple-500/30', 
-        badge: 'text-purple-600 bg-purple-100 border-purple-200 dark:text-purple-400 dark:bg-purple-500/10 dark:border-purple-500/20', 
-        text: 'text-purple-600 dark:text-purple-400' 
-      }
-    : isBosYap 
-    ? { 
-        border: 'hover:border-emerald-300 dark:hover:border-emerald-500/30', 
-        badge: 'text-emerald-600 bg-emerald-100 border-emerald-200 dark:text-emerald-400 dark:bg-emerald-500/10 dark:border-emerald-500/20', 
-        text: 'text-emerald-600 dark:text-emerald-400' 
-      }
-    : { 
-        border: 'hover:border-blue-300 dark:hover:border-[#4DA3FF]/30', 
-        badge: 'text-blue-600 bg-blue-100 border-blue-200 dark:text-[#4DA3FF] dark:bg-[#4DA3FF]/10 dark:border-[#4DA3FF]/20', 
-        text: 'text-blue-600 dark:text-[#4DA3FF]' 
-      };
+  // 🔥 AKTİF TEMAYI ÇEK 🔥
+  const theme = categoryColors[post.type] || categoryColors.OVERHEARD;
 
   // 🔥 GOD MODE ARKA PLAN EFEKTİ 🔥
   const cardBorderClass = isGodMode 
     ? 'border-transparent shadow-[0_0_30px_rgba(234,179,8,0.25)] dark:shadow-[0_0_40px_rgba(234,179,8,0.15)] ring-1 ring-yellow-400/50 bg-gradient-to-br from-yellow-50/50 to-white dark:from-yellow-500/5 dark:to-white/[0.02]'
     : isEphemeral 
     ? 'border-amber-300 shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:border-amber-400 dark:border-amber-500/30 dark:shadow-[0_0_20px_rgba(245,158,11,0.08)] dark:hover:border-amber-500/50 bg-white dark:bg-white/[0.02]' 
-    : `border-gray-200 shadow-sm hover:shadow-md dark:border-white/[0.04] bg-white dark:bg-white/[0.02] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${themeClasses.border}`;
+    : `border-gray-200 shadow-sm hover:shadow-md dark:border-white/[0.04] bg-white dark:bg-white/[0.02] dark:shadow-[0_4px_30px_rgba(0,0,0,0.5)] ${theme.border}`;
 
   useEffect(() => {
     const getCookie = (name: string) => {
@@ -252,8 +254,8 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           </Link>
           
           <div className="flex items-center gap-2">
-            <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-widest ${themeClasses.badge}`}>
-              {tagText}
+            <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border uppercase tracking-widest ${theme.badge}`}>
+              {theme.label}
             </span>
             <button onClick={() => setShowReportModal(true)} className="p-1.5 text-gray-400 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-500 dark:hover:text-white transition-colors dark:bg-white/5 rounded-full dark:hover:bg-white/10">
               <MoreHorizontal size={16} />
@@ -274,7 +276,7 @@ export default function PostCard({ post, isLiked, incrementLike, customNickname,
           )}
 
           {!isExpanded && isLongText && (
-            <button onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }} className={`text-[13px] mt-1 font-medium hover:underline transition-colors ${themeClasses.text}`}>
+            <button onClick={(e) => { e.stopPropagation(); setIsExpanded(true); }} className={`text-[13px] mt-1 font-medium hover:underline transition-colors ${theme.text}`}>
               Devamını oku...
             </button>
           )}
