@@ -136,11 +136,16 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const likedPostsCookie = cookieStore.get('liked_posts')?.value || '';
   const likedPosts = likedPostsCookie.split(',');
 
-  // 🔥 XP VE SEVİYE MATEMATİĞİ 🔥
+  // 🔥 DİNAMİK XP VE SEVİYE MATEMATİĞİ 🔥
   const currentXP = userStats?.points || 0;
-  const currentLevel = userStats?.level || 1;
+  
+  // Seviyeyi veritabanından beklemek yerine direkt puandan hesaplıyoruz (Her 500 XP = 1 Seviye)
+  const currentLevel = Math.floor(currentXP / 500) + 1; 
+  
+  // Yeni hedefini belirliyoruz (Örn: Lvl 2 olduysan hedef 1000 olur)
   const nextLevelTarget = currentLevel * 500; 
-  // Barın %0 ile %100 arasında kalmasını garantileyen formül
+  
+  // Barın % doluluğu (0 ile 100 arasında sabitliyoruz ki taşmasın)
   const fillPercentage = currentXP === 0 ? 0 : Math.min(100, Math.floor((currentXP / nextLevelTarget) * 100));
 
   async function incrementLike(formData: FormData) {
