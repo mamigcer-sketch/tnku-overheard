@@ -21,22 +21,21 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
     return () => { document.body.style.overflow = 'unset'; }
   }, [isOpen]);
 
-  // Ortak link stili
   const linkBaseStyle = "flex items-center gap-3 p-3.5 rounded-xl transition-all font-medium text-[15px] text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-300 dark:hover:text-white dark:hover:bg-white/5 active:scale-95";
   const groupTitleStyle = "text-[10px] font-black text-gray-400 dark:text-gray-500 uppercase tracking-widest px-3 mb-1 mt-4";
   const dividerStyle = "h-px w-full my-3 bg-gray-200 dark:bg-white/10 transition-colors";
 
   return (
     <div className="relative z-50">
-      {/* ANA MENÜ AÇMA TUŞU */}
+      {/* Hamburger Menü Butonu */}
       <button 
         onClick={() => setIsOpen(true)} 
-        className="p-2 rounded-full transition-colors cursor-pointer active:scale-90 text-gray-600 hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+        className="p-2 rounded-full transition-colors cursor-pointer active:scale-90 text-gray-600 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/10"
       >
-        <Menu size={26} />
+        <Menu size={24} />
       </button>
 
-      {/* ARKA PLAN KARARTMASI (OVERLAY) */}
+      {/* ARKA PLAN KARARTMASI */}
       {isOpen && (
         <div 
           className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm transition-opacity duration-300 animate-in fade-in" 
@@ -47,7 +46,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
       {/* 🔥 SAĞDAN KAYARAK AÇILAN DEV MENÜ (DRAWER) 🔥 */}
       <div className={`fixed top-0 right-0 h-[100dvh] w-[85%] max-w-[340px] bg-white dark:bg-[#0A0A0A] border-l border-gray-200 dark:border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] z-[101] transform transition-transform duration-300 ease-out flex flex-col ${isOpen ? 'translate-x-0' : 'translate-x-full'}`}>
         
-        {/* ÜST KISIM (Başlık ve Kapat Tuşu) */}
+        {/* ÜST KISIM */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100 dark:border-white/5">
           <span className="font-black tracking-widest text-[14px] text-gray-900 dark:text-white">MENÜ</span>
           <button onClick={() => setIsOpen(false)} className="p-2 bg-gray-100 dark:bg-white/10 rounded-full text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors active:scale-90">
@@ -55,7 +54,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           </button>
         </div>
 
-        {/* ORTA KISIM (Kaydırılabilir Menü İçeriği) */}
+        {/* ORTA KISIM (Kaydırılabilir İçerik) */}
         <div className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-1">
           
           <a 
@@ -109,8 +108,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
             </a>
           </div>
           
-          {/* Altta kaydırma boşluğu */}
-          <div className="h-6"></div> 
+          <div className="h-8"></div> 
         </div>
 
         {/* ALT KISIM (Sabit Kontroller) */}

@@ -1,109 +1,98 @@
 "use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { Plus, X } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Plus, X, Home, Trophy, MessageCircle, User } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export default function ClientShareWidgetV2({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [dragY, setDragY] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const startYRef = useRef(0);
+  const pathname = usePathname();
 
+  // Rota değiştiğinde modalı otomatik kapat
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-      setDragY(0);
-    }
+    setIsOpen(false);
+  }, [pathname]);
+
+  // Modal açıkken arkaplan kaymasını engelle
+  useEffect(() => {
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = 'unset';
+    return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    startYRef.current = e.touches[0].clientY;
-    setIsDragging(true);
-  };
-
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (!isDragging) return;
-    const currentY = e.touches[0].clientY;
-    const diff = currentY - startYRef.current;
-    if (diff > 0) {
-      setDragY(diff);
-    }
-  };
-
-  const handleTouchEnd = () => {
-    setIsDragging(false);
-    if (dragY > 120) {
-      setIsOpen(false);
-    }
-    setDragY(0);
-  };
 
   return (
     <>
-      {/* 🔥 PAYLAŞ BUTONU (Gündüz/Gece Uyumlu) */}
-      <div className="fixed bottom-6 right-4 z-40">
-        <button
-          type="button"
+      {/* 💻 MASAÜSTÜ FLOATING BUTON (Eski Tasarım Masaüstünde Kalır) */}
+      <div className="hidden sm:flex fixed bottom-8 right-8 z-40">
+        <button 
           onClick={() => setIsOpen(true)}
-          className="group relative flex items-center gap-2.5 py-3.5 px-6 rounded-2xl text-gray-900 dark:text-white font-bold text-sm active:scale-95 transition-all duration-300 bg-white/90 dark:bg-[#181818]/90 backdrop-blur-2xl border border-gray-200 dark:border-white/10 shadow-lg dark:shadow-[0_8px_30px_rgba(0,0,0,0.5)] hover:border-gray-300 dark:hover:border-white/20 hover:bg-gray-50 dark:hover:bg-[#202020] cursor-pointer"
+          className="flex items-center gap-2 px-6 py-4 bg-gradient-to-r from-[#4DA3FF] to-blue-600 text-white rounded-full font-black tracking-widest uppercase shadow-[0_10px_30px_rgba(77,163,255,0.4)] hover:shadow-[0_10px_40px_rgba(77,163,255,0.6)] hover:-translate-y-1 transition-all active:scale-95 border border-blue-400/50"
         >
-          {/* Butonun Asıl İçeriği */}
-          <div className="relative z-10 flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-gray-100 dark:bg-white/10 backdrop-blur-md border border-gray-300 dark:border-white/25 flex items-center justify-center text-gray-900 dark:text-white group-hover:scale-110 transition-transform duration-300 shadow-sm dark:shadow-inner">
-              <Plus size={18} strokeWidth={2.5} />
-            </div>
-            <span className="tracking-wide text-gray-800 dark:text-white/90 group-hover:text-black dark:group-hover:text-white transition-colors">Paylaş</span>
-          </div>
+          <Plus size={20} className="stroke-[3]" /> Paylaş
         </button>
       </div>
 
-      {/* Arka Plan Karartma */}
-      {isOpen && (
-        <div 
-          onClick={() => setIsOpen(false)}
-          className="fixed inset-0 z-[90] bg-gray-900/30 dark:bg-black/70 backdrop-blur-md animate-in fade-in duration-300 transition-colors"
-        />
-      )}
-
-      {/* Bottom Sheet Paneli */}
-      <div 
-        onTouchStart={handleTouchStart}
-        onTouchMove={handleTouchMove}
-        onTouchEnd={handleTouchEnd}
-        style={{
-          transform: isOpen 
-            ? `translateY(${dragY}px)` 
-            : 'translateY(100%)',
-          transition: isDragging ? 'none' : 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1)'
-        }}
-        className={`fixed inset-x-0 bottom-0 z-[100] max-h-[90vh] overflow-y-auto rounded-t-[32px] bg-white/95 dark:bg-[#0A0A0A]/95 backdrop-blur-3xl border-t border-gray-200 dark:border-white/10 p-5 sm:p-8 pb-12 sm:pb-8 shadow-[0_-10px_50px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_50px_rgba(0,0,0,0.9)] scrollbar-hide transition-colors duration-300 ${
-          isOpen ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-        }`}
-      >
+      {/* 📱 MOBİL BOTTOM NAVIGATION BAR (YENİ EFSANE APP DENEYİMİ) */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/90 dark:bg-[#0A0A0A]/90 backdrop-blur-2xl border-t border-gray-200 dark:border-white/10 pb-5 pt-3 px-6 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         
-        {/* Üst Tutamaç */}
-        <div className="w-12 h-1.5 bg-gray-300 dark:bg-white/20 rounded-full mx-auto mb-6 cursor-grab active:cursor-grabbing transition-colors" />
+        <Link href="/" className={`flex flex-col items-center gap-1 transition-colors ${pathname === '/' ? 'text-[#4DA3FF]' : 'text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white'}`}>
+          <Home size={24} className={pathname === '/' ? 'stroke-[2.5]' : 'stroke-2'} />
+        </Link>
 
-        <div className="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-white/5 transition-colors">
-          <div>
-            <h3 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white tracking-tight transition-colors">Yeni Paylaşım Yap ✨</h3>
-            <p className="text-[11px] text-gray-500 dark:text-gray-400 transition-colors">Değirmenaltı'nda gizli kalmasın.</p>
-          </div>
+        <Link href="/sohbet" className={`flex flex-col items-center gap-1 transition-colors ${pathname === '/sohbet' ? 'text-[#4DA3FF]' : 'text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white'}`}>
+          <MessageCircle size={24} className={pathname === '/sohbet' ? 'stroke-[2.5]' : 'stroke-2'} />
+        </Link>
+
+        {/* ORTA DEV NEON PAYLAŞ BUTONU */}
+        <div className="relative -mt-10">
           <button 
-            type="button"
-            onClick={() => setIsOpen(false)}
-            className="w-9 h-9 rounded-full bg-gray-100 dark:bg-white/5 border border-gray-200 dark:border-white/10 flex items-center justify-center text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white cursor-pointer transition-colors"
+            onClick={() => setIsOpen(true)}
+            className="w-14 h-14 bg-gradient-to-r from-[#4DA3FF] to-blue-600 rounded-full flex items-center justify-center text-white shadow-[0_10px_25px_rgba(77,163,255,0.6)] border-[4px] border-slate-50 dark:border-[#050505] active:scale-95 transition-transform"
           >
-            <X size={18} />
+            <Plus size={28} className="stroke-[3]" />
           </button>
         </div>
 
-        <div className="pb-6">
-          {children}
-        </div>
+        <Link href="/liderlik" className={`flex flex-col items-center gap-1 transition-colors ${pathname === '/liderlik' ? 'text-amber-500' : 'text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white'}`}>
+          <Trophy size={24} className={pathname === '/liderlik' ? 'stroke-[2.5]' : 'stroke-2'} />
+        </Link>
+
+        <Link href="/profil/ben" className={`flex flex-col items-center gap-1 transition-colors ${pathname.includes('/profil') ? 'text-[#4DA3FF]' : 'text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white'}`}>
+          <User size={24} className={pathname.includes('/profil') ? 'stroke-[2.5]' : 'stroke-2'} />
+        </Link>
       </div>
+
+      {/* 🔥 PAYLAŞIM MODALI (Aşağıdan Pürüzsüz Kayarak Çıkar) */}
+      {isOpen && (
+        <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 animate-in fade-in duration-300">
+          <div 
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm" 
+            onClick={() => setIsOpen(false)}
+          ></div>
+          
+          <div className="bg-white dark:bg-[#0A0A0A] w-full sm:max-w-lg rounded-t-[32px] sm:rounded-[32px] p-6 relative z-10 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 duration-300 shadow-2xl border border-gray-200 dark:border-white/10">
+            {/* Mobil Çekme Çubuğu */}
+            <div className="w-12 h-1.5 bg-gray-200 dark:bg-white/20 rounded-full mx-auto mb-6 sm:hidden"></div>
+
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-xl font-black text-gray-900 dark:text-white flex items-center gap-2">Yeni Paylaşım Yap ✨</h2>
+                <p className="text-[12px] font-medium text-gray-500 mt-1">Değirmenaltı'nda gizli kalmasın.</p>
+              </div>
+              <button 
+                onClick={() => setIsOpen(false)}
+                className="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-white/5 dark:hover:bg-white/10 text-gray-600 dark:text-gray-400 rounded-full transition-colors active:scale-90"
+              >
+                <X size={20} />
+              </button>
+            </div>
+            
+            {/* ModernForm Buraya Gelecek */}
+            {children}
+          </div>
+        </div>
+      )}
     </>
   );
 }

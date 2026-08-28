@@ -54,20 +54,17 @@ export default function RootLayout({
       {/* 🔥 İŞTE ÇÖZÜM: Bütün siteyi kaplayan arkaplan artık gündüz/gece duyarlı! */}
       <body className={`bg-slate-50 dark:bg-[#050505] text-gray-900 dark:text-white transition-colors duration-300 antialiased ${inter.className}`}>
         
-        {/* 🔥 TÜM SİTEYİ SARMALAYAN TEMA BEYNİ */}
+       {/* 🔥 TÜM SİTEYİ SARMALAYAN TEMA BEYNİ */}
         <Providers>
-          {/* 🔥 ŞELALE GİBİ AKACAK İNTRO EKRANI */}
           <SplashScreen />
 
-          {children}
+          {/* 🔥 İŞTE ÇÖZÜM: Mobil alt navigasyon barı içeriklerin üstünü kapatmasın diye mobilde pb-24 (alttan boşluk) verildi! */}
+          <div className="pb-24 sm:pb-0">
+            {children}
+          </div>
           
-          {/* 🔥 YUKARI ÇIK BUTONU */}
           <ScrollToTopV2 />
-
-          {/* 🔥 UYGULAMAYI YÜKLE MODALI */}
           <InstallModal />
-
-          {/* 🔥 İNSTAGRAM TARAYICI KİMLİK SABİTLEME KÖPRÜSÜ */}
           <SyncAuth />
         </Providers>
 
