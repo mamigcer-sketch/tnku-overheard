@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from 'react';
-import { Pencil, Upload, X, Loader2, CheckCircle2 } from 'lucide-react';
-import { updateUserAvatar } from '@/app/post/actions'; // Action yolunun doğru olduğundan emin ol
+import { Pencil, Upload, X, Loader2 } from 'lucide-react';
+import { updateProfileAvatar } from '@/app/post/actions'; 
 import { useRouter } from 'next/navigation';
 
 const PRESET_AVATARS = ["🎭", "🦊", "🐺", "🦁", "🐱", "🦉", "🥷", "👻", "👾", "👑", "🔥", "⚡"];
@@ -12,7 +12,6 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  // 🔥 FOTOĞRAF SIKIŞTIRMA ALGORİTMASI (5 MB'lık iPhone fotosunu 50 KB'a düşürür) 🔥
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -22,7 +21,7 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
         img.src = event.target?.result as string;
         img.onload = () => {
           const canvas = document.createElement('canvas');
-          const MAX_WIDTH = 400; // PP için 400px fazlasıyla yeterli
+          const MAX_WIDTH = 400; 
           const MAX_HEIGHT = 400;
           let width = img.width;
           let height = img.height;
@@ -37,7 +36,6 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
           const ctx = canvas.getContext('2d');
           ctx?.drawImage(img, 0, 0, width, height);
           
-          // %70 kalite ile JPEG'e çevir (Boyutu inanılmaz küçültür)
           const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
           resolve(dataUrl);
         };
@@ -50,7 +48,13 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
   const handleSelect = async (avatarValue: string) => {
     setIsLoading(true);
     try {
-      await updateUserAvatar(userUuid, avatarValue);
+      // 🔥 SENİN ORİJİNAL FONKSİYONUNA FORM DATA İLE GÖNDERİYORUZ 🔥
+      const formData = new FormData();
+      formData.append('userUuid', userUuid);
+      formData.append('avatarUrl', avatarValue);
+
+      await updateProfileAvatar(formData);
+      
       setIsOpen(false);
       router.refresh();
     } catch (error) {
@@ -66,18 +70,21 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
 
     setIsLoading(true);
     try {
-      // Önce fotoğrafı sıkıştırıyoruz
       const compressedBase64 = await compressImage(file);
       
-      // Sonra sunucuya yolluyoruz
-      await updateUserAvatar(userUuid, compressedBase64);
+      // 🔥 YÜKLENEN FOTOĞRAFI FORM DATA İLE GÖNDERİYORUZ 🔥
+      const formData = new FormData();
+      formData.append('userUuid', userUuid);
+      formData.append('avatarUrl', compressedBase64);
+
+      await updateProfileAvatar(formData);
+      
       setIsOpen(false);
       router.refresh();
     } catch (error) {
       console.error("Yükleme hatası:", error);
       alert("Fotoğraf yüklenirken bir hata oluştu.");
     } finally {
-      // Ne olursa olsun yükleme animasyonunu durdur
       setIsLoading(false);
     }
   };
@@ -102,7 +109,6 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
         )}
       </div>
 
-      {/* 🔥 Z-INDEX [9999] VE SIKIŞTIRMA SİSTEMLİ MODAL 🔥 */}
       {isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !isLoading && setIsOpen(false)}></div>
@@ -119,7 +125,6 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
               <p className="text-[12px] font-medium text-gray-500 mt-1">Karakterini belirle veya galerinden yükle.</p>
             </div>
 
-            {/* MEVCUT AVATARI GÖSTER (SADECE GÖRSEL) */}
             <div className="flex justify-center mb-8">
               <div className="w-24 h-24 rounded-full border-4 border-[#4DA3FF]/30 p-1 flex items-center justify-center bg-gray-50 dark:bg-[#121212] shadow-[0_0_20px_rgba(77,163,255,0.2)]">
                  {currentAvatar?.startsWith('data:image') ? (

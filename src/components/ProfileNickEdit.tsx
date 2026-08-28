@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Pencil, X, VenetianMask, Loader2, CheckCircle2 } from 'lucide-react';
-import { updateNickname } from '@/app/post/actions'; // Action yolunun doğru olduğundan emin ol
+import { updateCustomNickname } from '@/app/post/actions'; 
 import { useRouter } from 'next/navigation';
 
 export default function ProfileNickEdit({ targetUuid, currentNick, isServerOwner }: { targetUuid: string, currentNick: string, isServerOwner: boolean }) {
@@ -20,7 +20,13 @@ export default function ProfileNickEdit({ targetUuid, currentNick, isServerOwner
     setIsLoading(true);
 
     try {
-      await updateNickname(targetUuid, nickname.trim());
+      // 🔥 SENİN ORİJİNAL FONKSİYONUNA FORM DATA İLE GÖNDERİYORUZ 🔥
+      const formData = new FormData();
+      formData.append('userUuid', targetUuid);
+      formData.append('nickname', nickname.trim());
+
+      await updateCustomNickname(formData);
+      
       setIsSuccess(true);
       setTimeout(() => {
         setIsOpen(false);
@@ -43,7 +49,6 @@ export default function ProfileNickEdit({ targetUuid, currentNick, isServerOwner
         <Pencil size={16} /> Nick Belirle / Değiştir
       </button>
 
-      {/* 🔥 Z-INDEX [9999] EKLENDİ - ARTIK SEKMELERİN ALTINDA KALMAYACAK 🔥 */}
       {isOpen && (
         <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsOpen(false)}></div>

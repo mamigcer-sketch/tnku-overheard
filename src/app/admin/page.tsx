@@ -34,7 +34,7 @@ export default async function AdminDashboard({ searchParams }: any) {
   if (!isAuthenticated) {
     async function login(formData: FormData) {
       'use server';
-      if (formData.get('password') === 'betul123') {
+      if (formData.get('password') === 'ordu') {
         const cookiesList = await cookies();
         cookiesList.set('admin_auth', 'true', { secure: true, httpOnly: true });
         revalidatePath('/admin');
