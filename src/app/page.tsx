@@ -152,13 +152,17 @@ export default async function Home({ searchParams }: any) {
           </Link>
           
           <div className="flex items-center gap-2.5 shrink-0">
-            <RefreshButton />
+            {/* 🔥 MOBİLDE YENİLE BUTONU GİZLENDİ */}
+            <div className="hidden sm:block">
+              <RefreshButton />
+            </div>
             
             <Link href="/kaydedilenler" className="hidden sm:flex items-center gap-1.5 bg-gray-100 hover:bg-gray-200 dark:bg-white/[0.03] dark:hover:bg-white/[0.08] px-3 py-1.5 rounded-full transition-colors text-[12px] font-bold border border-gray-200 dark:border-white/[0.05] text-gray-700 dark:text-gray-300">
               <Bookmark size={14} className="text-gray-500 dark:text-gray-400" /> <span>Kaydedilenler</span>
             </Link>
 
-            <Link href="/liderlik" className="flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 px-2.5 py-1.5 rounded-full transition-all text-[12px] font-bold border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-500 shadow-sm dark:shadow-[0_0_15px_rgba(245,158,11,0.1)]">
+            {/* 🔥 MOBİLDE SEFİRLER BUTONU GİZLENDİ (ZATEN ALTTA VAR) */}
+            <Link href="/liderlik" className="hidden sm:flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 dark:bg-amber-500/10 dark:hover:bg-amber-500/20 px-2.5 py-1.5 rounded-full transition-all text-[12px] font-bold border border-amber-200 dark:border-amber-500/20 text-amber-600 dark:text-amber-500 shadow-sm dark:shadow-[0_0_15px_rgba(245,158,11,0.1)]">
               <Trophy size={14} /> <span className="hidden sm:inline">Sefirler</span>
             </Link>
 
@@ -191,10 +195,7 @@ export default async function Home({ searchParams }: any) {
 
       <div className="max-w-2xl mx-auto px-4 pt-5">
         
-        {/* 🔥 YENİ NESİL GLOW WIDGET'LAR 🔥 */}
         <div className={`grid gap-3 mb-5 ${activeAnnouncement ? 'grid-cols-2' : 'grid-cols-1'}`}>
-          
-          {/* NKÜ CHAT WIDGET */}
           <Link href="/sohbet" className="bg-gradient-to-br from-blue-50 to-white dark:from-blue-900/10 dark:to-[#0A0A0A] border border-blue-200 dark:border-[#4DA3FF]/20 hover:border-blue-400 dark:hover:border-[#4DA3FF]/50 hover:shadow-[0_0_20px_rgba(77,163,255,0.2)] dark:hover:shadow-[0_0_20px_rgba(77,163,255,0.15)] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] transition-all duration-300 group relative overflow-hidden backdrop-blur-md">
             <div className="absolute top-0 right-0 w-24 h-24 bg-blue-400/20 dark:bg-[#4DA3FF]/15 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none group-hover:scale-[2] transition-transform duration-700"></div>
             <div className="flex items-start justify-between relative z-10">
@@ -212,7 +213,6 @@ export default async function Home({ searchParams }: any) {
             </div>
           </Link>
 
-          {/* DUYURU WIDGET */}
           {activeAnnouncement && (
             <div className="bg-gradient-to-br from-amber-50 to-white dark:from-amber-900/10 dark:to-[#0A0A0A] border border-amber-200 dark:border-amber-500/20 hover:border-amber-400 dark:hover:border-amber-500/50 hover:shadow-[0_0_20px_rgba(245,158,11,0.2)] dark:hover:shadow-[0_0_20px_rgba(245,158,11,0.15)] rounded-[24px] p-4 flex flex-col justify-between min-h-[100px] relative overflow-hidden backdrop-blur-md group transition-all duration-300">
               <div className="absolute top-0 right-0 w-24 h-24 bg-amber-400/20 dark:bg-amber-500/15 blur-2xl rounded-full -mr-8 -mt-8 pointer-events-none group-hover:scale-[2] transition-transform duration-700"></div>
