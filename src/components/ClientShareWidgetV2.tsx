@@ -33,11 +33,8 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
         </button>
       </div>
 
-      {/* 📱 MOBİL BOTTOM NAVIGATION BAR (SİYAH ŞERİT DÜZELTİLDİ) */}
-      <div 
-        className="sm:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/95 dark:bg-[#0A0A0A]/95 backdrop-blur-3xl border-t border-gray-200 dark:border-white/10 pt-3 px-6 flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)]"
-        style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}
-      >
+      {/* 📱 MOBİL BOTTOM NAVIGATION BAR (SİYAH ŞERİT KESİN ÇÖZÜM) */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-[100] bg-white/95 dark:bg-[#0A0A0A]/95 backdrop-blur-3xl border-t border-gray-200 dark:border-white/10 pt-3 px-6 pb-[calc(env(safe-area-inset-bottom)+16px)] flex items-center justify-between shadow-[0_-10px_40px_rgba(0,0,0,0.1)] dark:shadow-[0_-10px_40px_rgba(0,0,0,0.5)]">
         
         <Link href="/" className={`flex flex-col items-center gap-1 transition-colors ${pathname === '/' ? 'text-[#4DA3FF]' : 'text-gray-400 hover:text-gray-900 dark:text-gray-500 dark:hover:text-white'}`}>
           <Home size={24} className={pathname === '/' ? 'stroke-[2.5]' : 'stroke-2'} />
@@ -74,10 +71,7 @@ export default function ClientShareWidgetV2({ children }: { children: React.Reac
             onClick={() => setIsOpen(false)}
           ></div>
           
-          <div 
-            className="bg-white dark:bg-[#0A0A0A] w-full sm:max-w-lg rounded-t-[32px] sm:rounded-[32px] p-6 relative z-10 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 duration-300 shadow-2xl border border-gray-200 dark:border-white/10"
-            style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 24px)' }}
-          >
+          <div className="bg-white dark:bg-[#0A0A0A] w-full sm:max-w-lg rounded-t-[32px] sm:rounded-[32px] p-6 pb-[calc(env(safe-area-inset-bottom)+24px)] relative z-10 animate-in slide-in-from-bottom-full sm:slide-in-from-bottom-8 duration-300 shadow-2xl border border-gray-200 dark:border-white/10">
             {/* Mobil Çekme Çubuğu */}
             <div className="w-12 h-1.5 bg-gray-200 dark:bg-white/20 rounded-full mx-auto mb-6 sm:hidden"></div>
 

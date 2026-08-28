@@ -1,13 +1,25 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import ScrollToTopV2 from '@/components/ScrollToTopV2';
 import InstallModal from '@/components/InstallModal';
-import SyncAuth from '@/components/SyncAuth'; // 🔥 Instagram kimlik sabitleme bileşeni eklendi
-import SplashScreen from '@/components/SplashScreen'; // 🔥 EFSANE AÇILIŞ EKRANI EKLENDİ
-import { Providers } from './providers'; // 🔥 TEMA HAFIZASI BEYNİ EKLENDİ
+import SyncAuth from '@/components/SyncAuth'; 
+import SplashScreen from '@/components/SplashScreen'; 
+import { Providers } from './providers'; 
 
 const inter = Inter({ subsets: ['latin'] });
+
+// 🔥 İŞTE SİYAH ŞERİDİ YOK EDEN KOD (Apple Safari için tam ekran ve tema rengi uyumu) 🔥
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#f8fafc' }, 
+    { media: '(prefers-color-scheme: dark)', color: '#050505' }
+  ],
+};
 
 export const metadata: Metadata = {
   title: 'TNKU Overheard | NKÜ - NKÜ İtiraf',
@@ -49,16 +61,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    // 🔥 suppressHydrationWarning EKLENDİ (Tema değişirken React'in hata vermesini engeller)
     <html lang="tr" suppressHydrationWarning>
-      {/* 🔥 İŞTE ÇÖZÜM: Bütün siteyi kaplayan arkaplan artık gündüz/gece duyarlı! */}
       <body className={`bg-slate-50 dark:bg-[#050505] text-gray-900 dark:text-white transition-colors duration-300 antialiased ${inter.className}`}>
         
-       {/* 🔥 TÜM SİTEYİ SARMALAYAN TEMA BEYNİ */}
         <Providers>
           <SplashScreen />
 
-          {/* 🔥 İŞTE ÇÖZÜM: Mobil alt navigasyon barı içeriklerin üstünü kapatmasın diye mobilde pb-24 (alttan boşluk) verildi! */}
           <div className="pb-24 sm:pb-0">
             {children}
           </div>
