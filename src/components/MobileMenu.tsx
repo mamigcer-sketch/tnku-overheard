@@ -108,7 +108,7 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
             </a>
           </div>
           
-          <div className="h-8"></div> 
+          <div className="h-4"></div> 
         </div>
 
         {/* ALT KISIM (Sabit Kontroller) */}
@@ -135,6 +135,10 @@ export default function MobileMenu({ userUuid }: { userUuid?: string }) {
           >
             <Download size={18} /> Uygulamayı Yükle
           </button>
+
+          {/* 🔥 MOBİL ALT BAR İÇİN GÜVENLİ BOŞLUK (SPACER) 🔥 */}
+          {/* Alt bar butonları kapatmasın diye mobilde araya 85px boşluk ekliyoruz */}
+          <div className="w-full sm:hidden" style={{ height: 'calc(env(safe-area-inset-bottom) + 80px)' }}></div>
         </div>
         
       </div>
