@@ -14,18 +14,13 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
   const [mounted, setMounted] = useState(false); 
   const router = useRouter();
 
-  // 🔥 Portalın sadece istemcide (client) çalışması için mount kontrolü
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Modal açıkken arkaplan kaymasını engelle
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
+    if (isOpen) document.body.style.overflow = 'hidden';
+    else document.body.style.overflow = 'unset';
     return () => { document.body.style.overflow = 'unset'; };
   }, [isOpen]);
 
@@ -130,12 +125,8 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
         )}
       </div>
 
-      {/* 🔥 REACT PORTAL VE NÜKLEER Z-INDEX İLE KESİN ÇÖZÜM 🔥 */}
       {isOpen && mounted && createPortal(
-        <div 
-          className="!fixed !inset-0 flex items-center justify-center p-4" 
-          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999999 }}
-        >
+        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 9999999 }}>
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !isLoading && setIsOpen(false)}></div>
           
           <div className="bg-white dark:bg-[#0A0A0A] w-full max-w-sm rounded-[32px] p-6 relative z-10 animate-in fade-in zoom-in-95 duration-200 border border-gray-200 dark:border-white/10 shadow-2xl">
