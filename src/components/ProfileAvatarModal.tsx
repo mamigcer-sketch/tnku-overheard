@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom'; 
+import { useState, useRef } from 'react';
 import { Pencil, Upload, X, Loader2 } from 'lucide-react';
 import { updateProfileAvatar } from '@/app/post/actions'; 
 import { useRouter } from 'next/navigation';
@@ -11,18 +10,20 @@ const PRESET_AVATARS = ["🎭", "🦊", "🐺", "🦁", "🐱", "🦉", "🥷", 
 export default function EditableAvatar({ userUuid, currentAvatar, displayNickname, isOwnProfile }: any) {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [mounted, setMounted] = useState(false); 
+  const dialogRef = useRef<HTMLDialogElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  // 🔥 YENİLMEZ DIALOG KONTROLLERİ 🔥
+  const openModal = () => {
+    setIsOpen(true);
+    dialogRef.current?.showModal();
+  };
 
-  useEffect(() => {
-    if (isOpen) document.body.style.overflow = 'hidden';
-    else document.body.style.overflow = 'unset';
-    return () => { document.body.style.overflow = 'unset'; };
-  }, [isOpen]);
+  const closeModal = () => {
+    if (isLoading) return;
+    setIsOpen(false);
+    dialogRef.current?.close();
+  };
 
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -66,7 +67,7 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
 
       await updateProfileAvatar(formData);
       
-      setIsOpen(false);
+      closeModal();
       router.refresh();
     } catch (error) {
       console.error(error);
@@ -95,7 +96,7 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
 
       await updateProfileAvatar(formData);
       
-      setIsOpen(false);
+      closeModal();
       router.refresh();
     } catch (error) {
       console.error("Yükleme hatası:", error);
@@ -107,7 +108,7 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
 
   return (
     <>
-      <div className="relative group cursor-pointer" onClick={() => isOwnProfile && setIsOpen(true)}>
+      <div className="relative group cursor-pointer" onClick={() => isOwnProfile && openModal()}>
         <div className="w-[84px] h-[84px] rounded-full flex items-center justify-center overflow-hidden bg-gray-100 dark:bg-[#1A1A1A] border-2 border-gray-200 dark:border-white/10 shadow-inner">
           {currentAvatar?.startsWith('data:image') ? (
             <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
@@ -125,18 +126,23 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
         )}
       </div>
 
-      {isOpen && mounted && createPortal(
-        <div className="fixed inset-0 flex items-center justify-center p-4" style={{ zIndex: 9999999 }}>
-          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !isLoading && setIsOpen(false)}></div>
-          
-          <div className="bg-white dark:bg-[#0A0A0A] w-full max-w-sm rounded-[32px] p-6 relative z-10 animate-in fade-in zoom-in-95 duration-200 border border-gray-200 dark:border-white/10 shadow-2xl">
+      {/* 🔥 CSS HİYERARŞİSİNİ EZİP GEÇEN NATIVE DIALOG 🔥 */}
+      <dialog 
+        ref={dialogRef}
+        className="backdrop:bg-black/80 backdrop:backdrop-blur-sm bg-transparent p-4 m-auto w-full max-w-sm outline-none overflow-visible shadow-none rounded-[32px]"
+        onClick={(e) => {
+          if (e.target === dialogRef.current) closeModal();
+        }}
+      >
+        {isOpen && (
+          <div className="bg-white dark:bg-[#0A0A0A] w-full rounded-[32px] p-6 relative animate-in fade-in zoom-in-95 duration-200 border border-gray-200 dark:border-white/10 shadow-2xl">
             {!isLoading && (
-              <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-white/5 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+              <button onClick={closeModal} className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-white/5 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
                 <X size={20} />
               </button>
             )}
 
-            <div className="text-center mb-6">
+            <div className="text-center mb-6 mt-2">
               <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Profil Resmi Seç</h2>
               <p className="text-[12px] font-medium text-gray-500 mt-1">Karakterini belirle veya galerinden yükle (Maks 5 MB).</p>
             </div>
@@ -186,9 +192,8 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
               </button>
             </div>
           </div>
-        </div>,
-        document.body 
-      )}
+        )}
+      </dialog>
     </>
   );
 }
