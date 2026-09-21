@@ -42,7 +42,6 @@ const getAnonymousData = (id: string, customNickname?: string) => {
   };
 };
 
-// 🔥 DİNAMİK PROFİL UNVANI SİSTEMİ 🔥
 const getTitleByLevel = (level: number) => {
   if (level === 1) return "KAMPÜSE YENİ DÜŞTÜ (ÇÖMEZ)";
   if (level === 2) return "KAMPÜS KURDU";
@@ -130,22 +129,14 @@ export default async function ProfilePage({ params, searchParams }: { params: an
   const totalLikes = userPosts.reduce((acc: any, post: any) => acc + post.likes, 0);
   const userBadge = userBadgeDb?.badgeName;
   
-  // TANRI PARÇACIĞI KONTROLÜ
   const isGodMode = ["KURUCU", "GOD", "SİSTEM"].includes(userBadge?.toUpperCase() || "");
 
   const likedPostsCookie = cookieStore.get('liked_posts')?.value || '';
   const likedPosts = likedPostsCookie.split(',');
 
-  // 🔥 DİNAMİK XP VE SEVİYE MATEMATİĞİ 🔥
   const currentXP = userStats?.points || 0;
-  
-  // Seviyeyi veritabanından beklemek yerine direkt puandan hesaplıyoruz (Her 500 XP = 1 Seviye)
   const currentLevel = Math.floor(currentXP / 500) + 1; 
-  
-  // Yeni hedefini belirliyoruz (Örn: Lvl 2 olduysan hedef 1000 olur)
   const nextLevelTarget = currentLevel * 500; 
-  
-  // Barın % doluluğu (0 ile 100 arasında sabitliyoruz ki taşmasın)
   const fillPercentage = currentXP === 0 ? 0 : Math.min(100, Math.floor((currentXP / nextLevelTarget) * 100));
 
   async function incrementLike(formData: FormData) {
@@ -170,14 +161,14 @@ export default async function ProfilePage({ params, searchParams }: { params: an
 
   const profileCardClass = isGodMode
     ? 'bg-gradient-to-br from-yellow-50/80 to-white dark:from-yellow-500/10 dark:to-black/80 border-yellow-400/50 shadow-[0_0_50px_rgba(234,179,8,0.25)] ring-1 ring-yellow-400/30'
-    : 'bg-white dark:bg-[#0A0A0A] border-gray-200 dark:border-white/[0.05] shadow-xl';
+    : 'bg-white/50 dark:bg-[#0A0A0A]/50 border-gray-200 dark:border-white/[0.05] shadow-xl';
 
   const statsBoxClass = isGodMode
     ? 'bg-yellow-500/10 dark:bg-yellow-500/5 border-yellow-400/30 dark:border-yellow-500/20 shadow-inner'
     : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5 shadow-inner';
 
   return (
-    <main className="min-h-screen text-gray-900 dark:text-white relative z-0 pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
+    <main className="min-h-screen text-gray-900 dark:text-white relative pb-20 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
       
       <div className="fixed inset-0 -z-10 bg-slate-50 dark:bg-[#050505] transition-colors duration-300">
         {isGodMode ? (
@@ -187,7 +178,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
         )}
       </div>
 
-      <header className={`sticky top-0 z-50 backdrop-blur-3xl border-b shadow-sm px-4 py-3 flex items-center justify-between transition-colors duration-300 ${isGodMode ? 'bg-white/80 dark:bg-black/60 border-yellow-200 dark:border-yellow-500/20' : 'bg-white/80 dark:bg-[#050505]/80 border-gray-200 dark:border-white/[0.05]'}`}>
+      <header className={`sticky top-0 z-40 backdrop-blur-3xl border-b shadow-sm px-4 py-3 flex items-center justify-between transition-colors duration-300 ${isGodMode ? 'bg-white/80 dark:bg-black/60 border-yellow-200 dark:border-yellow-500/20' : 'bg-white/80 dark:bg-[#050505]/80 border-gray-200 dark:border-white/[0.05]'}`}>
         <Link href="/" className="text-gray-500 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-400 dark:hover:text-white transition-colors p-1.5 dark:bg-white/5 rounded-full">
           <ArrowLeft size={20} />
         </Link>
@@ -199,23 +190,22 @@ export default async function ProfilePage({ params, searchParams }: { params: an
         </button>
       </header>
 
-      <div className="max-w-2xl mx-auto pt-5 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <div className="px-4 pb-2">
+      {/* 🔥 İŞTE BURASI: MODALLARIN ÖZGÜRLÜĞE KAVUŞTUĞU KISIM (z-index ve position fixlendi) 🔥 */}
+      <div className="max-w-2xl mx-auto pt-5 relative z-50">
+        <div className="px-4 pb-2 relative z-50">
           
-          {/* PROFİL KARTI */}
-          <div className={`flex flex-col border rounded-[32px] p-5 backdrop-blur-xl transition-all duration-500 ${profileCardClass}`}>
+          <div className={`flex flex-col border rounded-[32px] p-5 transition-all duration-500 relative z-50 ${profileCardClass}`}>
             
-            {/* ÜST: Avatar ve Unvan */}
-            <div className="flex items-center gap-5">
+            <div className="flex items-center gap-5 relative z-50">
               {isGodMode ? (
-                <div className="relative shrink-0 p-[3px] rounded-full">
+                <div className="relative shrink-0 p-[3px] rounded-full z-50">
                   <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-yellow-400 via-amber-500 to-yellow-300 animate-[spin_3s_linear_infinite] shadow-[0_0_20px_rgba(234,179,8,0.6)] pointer-events-none" />
-                  <div className="relative z-10 rounded-full bg-gray-100 dark:bg-[#121212]">
+                  <div className="relative z-50 rounded-full bg-gray-100 dark:bg-[#121212]">
                     <EditableAvatar userUuid={targetUuid} currentAvatar={currentAvatar} displayNickname={displayNickname} isOwnProfile={isOwnProfile} />
                   </div>
                 </div>
               ) : (
-                <div className="shrink-0">
+                <div className="shrink-0 relative z-50">
                   <EditableAvatar userUuid={targetUuid} currentAvatar={currentAvatar} displayNickname={displayNickname} isOwnProfile={isOwnProfile} />
                 </div>
               )}
@@ -231,14 +221,12 @@ export default async function ProfilePage({ params, searchParams }: { params: an
                     </span>
                   )}
                 </h2>
-                {/* 🔥 DİNAMİK UNVAN 🔥 */}
                 <p className={`text-[11px] font-bold mt-1 uppercase tracking-widest flex items-center gap-1 ${isGodMode ? 'text-yellow-600 dark:text-yellow-500/80' : 'text-gray-500 dark:text-gray-400'}`}>
                   <Trophy size={12} /> {isGodMode ? 'SİSTEMİN HAKİMİ' : getTitleByLevel(currentLevel)}
                 </p>
               </div>
             </div>
 
-            {/* ORTA: İstatistik Kutuları */}
             <div className="grid grid-cols-3 gap-2 mt-5">
               <div className={`flex flex-col items-center justify-center rounded-2xl py-3 border transition-colors ${statsBoxClass}`}>
                 <span className={`text-[20px] font-black ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-gray-900 dark:text-white'}`}>{postCount}</span>
@@ -254,7 +242,6 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               </div>
             </div>
             
-            {/* ALT: XP Barı */}
             <div className={`mt-3 flex flex-col gap-2 w-full border p-3.5 rounded-2xl transition-colors duration-300 ${isGodMode ? 'bg-yellow-50/50 border-yellow-200/50 dark:bg-yellow-500/10 dark:border-yellow-500/20 shadow-[0_0_15px_rgba(234,179,8,0.1)]' : 'bg-gray-50 dark:bg-white/[0.02] border-gray-200 dark:border-white/5 shadow-sm dark:shadow-none'}`}>
               <div className="flex items-center justify-between px-1">
                  <span className={`text-[12px] font-black flex items-center gap-1.5 ${isGodMode ? 'text-yellow-600 dark:text-yellow-400' : 'text-amber-600 dark:text-amber-500'}`}>
@@ -274,17 +261,15 @@ export default async function ProfilePage({ params, searchParams }: { params: an
               </div>
             </div>
 
-            {/* İSİM DÜZENLEME (Kendi Profiliyse) */}
             {isOwnProfile && (
-              <div className="mt-4 w-full">
+              <div className="mt-4 w-full relative z-50">
                 <ProfileNickEdit targetUuid={targetUuid} currentNick={displayNickname} isServerOwner={isOwnProfile} />
               </div>
             )}
           </div>
         </div>
 
-        {/* YENİ NESİL iOS SEKMELERİ (Gönderi/Yorum Geçişi) */}
-        <div className={`sticky top-[58px] z-40 backdrop-blur-3xl pt-2 pb-3 px-4 mt-2 transition-colors duration-300`}>
+        <div className={`sticky top-[58px] z-10 backdrop-blur-3xl pt-2 pb-3 px-4 mt-2 transition-colors duration-300`}>
           <div className={`flex p-1.5 rounded-2xl border transition-colors duration-300 ${isGodMode ? 'bg-yellow-100/50 dark:bg-yellow-500/10 border-yellow-200 dark:border-yellow-500/20' : 'bg-gray-100 dark:bg-white/[0.04] border-gray-200/50 dark:border-white/5'}`}>
             <Link 
               href={`/profil/${id}?tab=gonderiler`} 
@@ -311,7 +296,7 @@ export default async function ProfilePage({ params, searchParams }: { params: an
           </div>
         </div>
 
-        <div className="pt-1 px-4">
+        <div className="pt-1 px-4 relative z-0">
           {activeTab === 'gonderiler' && (
             <div className="animate-in fade-in duration-300">
               {userPosts.length === 0 ? (
