@@ -14,9 +14,20 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
   const [mounted, setMounted] = useState(false); 
   const router = useRouter();
 
+  // 🔥 Portalın sadece istemcide (client) çalışması için mount kontrolü
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  // Modal açıkken arkaplan kaymasını engelle
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => { document.body.style.overflow = 'unset'; };
+  }, [isOpen]);
 
   const compressImage = (file: File): Promise<string> => {
     return new Promise((resolve, reject) => {
@@ -73,16 +84,14 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // 🔥 İŞTE BURASI: 5 MB DOSYA BOYUTU SINIRI (5 * 1024 * 1024) 🔥
     if (file.size > 5 * 1024 * 1024) {
       alert("Kral fotoğraf 5 MB'den büyük! Lütfen daha düşük boyutlu bir şey seç.");
-      e.target.value = ''; // Input'u temizle ki bug'a girmesin
+      e.target.value = ''; 
       return;
     }
 
     setIsLoading(true);
     try {
-      // 5 MB'lık fotoğraf burada saniyesinde 50 KB'a ezilecek
       const compressedBase64 = await compressImage(file);
       
       const formData = new FormData();
@@ -121,8 +130,12 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
         )}
       </div>
 
+      {/* 🔥 REACT PORTAL VE NÜKLEER Z-INDEX İLE KESİN ÇÖZÜM 🔥 */}
       {isOpen && mounted && createPortal(
-        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+        <div 
+          className="!fixed !inset-0 flex items-center justify-center p-4" 
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 999999 }}
+        >
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !isLoading && setIsOpen(false)}></div>
           
           <div className="bg-white dark:bg-[#0A0A0A] w-full max-w-sm rounded-[32px] p-6 relative z-10 animate-in fade-in zoom-in-95 duration-200 border border-gray-200 dark:border-white/10 shadow-2xl">
@@ -183,7 +196,7 @@ export default function EditableAvatar({ userUuid, currentAvatar, displayNicknam
             </div>
           </div>
         </div>,
-        document.body
+        document.body 
       )}
     </>
   );

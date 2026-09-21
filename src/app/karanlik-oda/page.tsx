@@ -121,7 +121,7 @@ export default function KaranlikOdaPage() {
         <div className="mb-8 text-center">
           <h1 className="text-4xl font-black bg-gradient-to-b from-red-400 via-red-600 to-red-900 text-transparent bg-clip-text tracking-tighter uppercase drop-shadow-[0_0_15px_rgba(220,38,38,0.6)] flex items-center justify-center gap-3">
             <Skull size={32} className={`text-red-500 ${isRolling ? "animate-spin" : ""}`} /> 
-            KARANLIK ODA 
+            JACKPOT  
             <Skull size={32} className={`text-red-500 ${isRolling ? "animate-spin" : ""}`} />
           </h1>
           <p className="text-red-500/60 text-[10px] uppercase tracking-[0.3em] mt-2 font-black">Kasa Her Zaman Kazanır</p>
