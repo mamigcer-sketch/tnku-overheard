@@ -1,154 +1,190 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { X, Camera, Check, Upload, Loader2 } from "lucide-react";
-import { updateProfileAvatar } from "@/app/profile/actions";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom'; 
+import { Pencil, Upload, X, Loader2 } from 'lucide-react';
+import { updateProfileAvatar } from '@/app/post/actions'; 
+import { useRouter } from 'next/navigation';
 
-const PRESET_AVATARS = [
-  "🎭", "🦊", "🐺", "🦁", "🐱", "🦉", 
-  "🥷", "👻", "👾", "👑", "🔥", "⚡"
-];
+const PRESET_AVATARS = ["🎭", "🦊", "🐺", "🦁", "🐱", "🦉", "🥷", "👻", "👾", "👑", "🔥", "⚡"];
 
-export default function ProfileAvatarModal({
-  userUuid,
-  currentAvatar,
-  isOpen,
-  onClose,
-}: {
-  userUuid: string;
-  currentAvatar?: string;
-  isOpen: boolean;
-  onClose: () => void;
-}) {
-  const [mounted, setMounted] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState(currentAvatar || "");
-  const [loading, setLoading] = useState(false);
+export default function EditableAvatar({ userUuid, currentAvatar, displayNickname, isOwnProfile }: any) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [mounted, setMounted] = useState(false); 
   const router = useRouter();
 
-  // 🔥 PORTAL İÇİN MOUNT KONTROLÜ VE ARKA PLAN KAYDIRMA KİLİDİ
   useEffect(() => {
     setMounted(true);
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "unset";
+  }, []);
+
+  const compressImage = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target?.result as string;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 400; 
+          const MAX_HEIGHT = 400;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+          } else {
+            if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0, width, height);
+          
+          const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+          resolve(dataUrl);
+        };
+        img.onerror = (error) => reject(error);
+      };
+      reader.onerror = (error) => reject(error);
+    });
+  };
+
+  const handleSelect = async (avatarValue: string) => {
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('userUuid', userUuid);
+      formData.append('avatarUrl', avatarValue);
+
+      await updateProfileAvatar(formData);
+      
+      setIsOpen(false);
+      router.refresh();
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setIsLoading(false);
     }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen]);
+  };
 
-  if (!isOpen || !mounted) return null;
-
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert("Fotoğraf boyutu maksimum 2MB olabilir!");
+    // 🔥 İŞTE BURASI: 5 MB DOSYA BOYUTU SINIRI (5 * 1024 * 1024) 🔥
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Kral fotoğraf 5 MB'den büyük! Lütfen daha düşük boyutlu bir şey seç.");
+      e.target.value = ''; // Input'u temizle ki bug'a girmesin
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setSelectedAvatar(reader.result as string);
-    };
-    reader.readAsDataURL(file);
-  };
+    setIsLoading(true);
+    try {
+      // 5 MB'lık fotoğraf burada saniyesinde 50 KB'a ezilecek
+      const compressedBase64 = await compressImage(file);
+      
+      const formData = new FormData();
+      formData.append('userUuid', userUuid);
+      formData.append('avatarUrl', compressedBase64);
 
-  const handleSubmit = async () => {
-    if (!selectedAvatar) return;
-    setLoading(true);
-
-    const formData = new FormData();
-    formData.append("userUuid", userUuid);
-    formData.append("avatarUrl", selectedAvatar);
-
-    const res = await updateProfileAvatar(formData);
-
-    if (res?.success) {
+      await updateProfileAvatar(formData);
+      
+      setIsOpen(false);
       router.refresh();
-      onClose();
-    } else if (res?.error) {
-      alert(res.error);
+    } catch (error) {
+      console.error("Yükleme hatası:", error);
+      alert("Fotoğraf yüklenirken bir hata oluştu.");
+    } finally {
+      setIsLoading(false);
     }
-    setLoading(false);
   };
 
-  // 🔥 MODALI CREATEPORTAL İLE DİREKT BODY'YE IŞINLIYORUZ (Asla kesilmez)
-  return createPortal(
-    <div 
-      // 🔥 ARKA PLAN FLULAŞTIRMASI DİNAMİK YAPILDI
-      className="fixed inset-0 z-[99999] bg-gray-900/60 dark:bg-black/85 backdrop-blur-sm overflow-y-auto flex p-4 animate-in fade-in duration-200 transition-colors"
-      onClick={onClose}
-    >
-      <div 
-        // 🔥 MODAL KUTUSU GÜNDÜZ/GECE UYUMLU YAPILDI
-        className="m-auto relative w-full max-w-sm bg-white dark:bg-[#0A0A0A] border border-gray-200 dark:border-white/10 p-6 rounded-[28px] shadow-xl dark:shadow-[0_0_50px_rgba(0,0,0,0.8)] animate-in zoom-in-95 duration-200 transition-colors"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button 
-          onClick={onClose}
-          className="absolute top-5 right-5 p-2 text-gray-400 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 dark:text-gray-500 dark:hover:text-white dark:bg-transparent dark:hover:bg-white/10 rounded-full transition-colors z-10 cursor-pointer"
-        >
-          <X size={20} />
-        </button>
-
-        <h2 className="text-xl font-black text-gray-900 dark:text-white mt-2 mb-1 tracking-tight transition-colors">Profil Resmi Seç</h2>
-        <p className="text-gray-500 dark:text-gray-400 text-xs mb-6 pr-8 leading-relaxed transition-colors">
-          Karakterini belirle veya galerinden yükle.
-        </p>
-
-        {/* ÖN İZLEME */}
-        <div className="flex justify-center mb-6">
-          <div className="relative w-24 h-24 rounded-full border-2 border-blue-400 dark:border-[#4DA3FF] p-1 bg-gray-50 dark:bg-black/40 flex items-center justify-center overflow-hidden shadow-sm dark:shadow-[0_0_25px_rgba(77,163,255,0.2)] transition-colors">
-            {selectedAvatar?.startsWith("data:image") ? (
-              <img src={selectedAvatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
-            ) : selectedAvatar ? (
-              <span className="text-4xl">{selectedAvatar}</span>
-            ) : (
-              <Camera size={32} className="text-gray-400 dark:text-gray-500" />
-            )}
+  return (
+    <>
+      <div className="relative group cursor-pointer" onClick={() => isOwnProfile && setIsOpen(true)}>
+        <div className="w-[84px] h-[84px] rounded-full flex items-center justify-center overflow-hidden bg-gray-100 dark:bg-[#1A1A1A] border-2 border-gray-200 dark:border-white/10 shadow-inner">
+          {currentAvatar?.startsWith('data:image') ? (
+            <img src={currentAvatar} alt="Avatar" className="w-full h-full object-cover" />
+          ) : currentAvatar ? (
+            <span className="text-[40px] leading-none">{currentAvatar}</span>
+          ) : (
+            <span className="text-[32px] font-black text-gray-400 dark:text-gray-500 uppercase">{displayNickname?.charAt(0)}</span>
+          )}
+        </div>
+        
+        {isOwnProfile && (
+          <div className="absolute -bottom-1 -right-1 w-8 h-8 bg-[#4DA3FF] rounded-full border-[3px] border-white dark:border-[#0A0A0A] flex items-center justify-center text-white shadow-md transition-transform group-hover:scale-110">
+            <Pencil size={14} className="fill-white" />
           </div>
-        </div>
-
-        {/* HAZIR AVATARLAR */}
-        <div className="grid grid-cols-6 gap-2 mb-6">
-          {PRESET_AVATARS.map((emoji) => (
-            <button
-              key={emoji}
-              onClick={() => setSelectedAvatar(emoji)}
-              className={`h-11 rounded-xl text-xl flex items-center justify-center transition-all duration-300 ${
-                selectedAvatar === emoji 
-                  ? "bg-blue-100 border-2 border-blue-500 dark:bg-[#4DA3FF]/20 dark:border-[#4DA3FF] scale-105 shadow-sm dark:shadow-[0_0_15px_rgba(77,163,255,0.3)]" 
-                  : "bg-gray-50 hover:bg-gray-100 border border-gray-200 dark:bg-white/[0.04] dark:hover:bg-white/10 dark:border-white/5"
-              }`}
-            >
-              {emoji}
-            </button>
-          ))}
-        </div>
-
-        {/* GALERİDEN YÜKLE & KAYDET */}
-        <div className="space-y-3">
-          <label className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 border border-gray-200 text-gray-700 dark:bg-white/5 dark:hover:bg-white/10 dark:border-white/10 dark:text-white text-xs font-bold rounded-xl flex items-center justify-center gap-2 cursor-pointer transition-colors active:scale-95">
-            <Upload size={16} />
-            <span>Galeriden Fotoğraf Seç</span>
-            <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
-          </label>
-
-          <button
-            onClick={handleSubmit}
-            disabled={loading || !selectedAvatar}
-            className="w-full py-3.5 bg-[#4DA3FF] hover:bg-blue-500 text-white dark:text-black dark:hover:bg-blue-400 font-black rounded-xl text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50 active:scale-95 cursor-pointer shadow-md dark:shadow-[0_4px_15px_rgba(77,163,255,0.3)]"
-          >
-            {loading ? <Loader2 size={18} className="animate-spin" /> : <><Check size={18} /> Resmini Güncelle</>}
-          </button>
-        </div>
+        )}
       </div>
-    </div>,
-    document.body
+
+      {isOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => !isLoading && setIsOpen(false)}></div>
+          
+          <div className="bg-white dark:bg-[#0A0A0A] w-full max-w-sm rounded-[32px] p-6 relative z-10 animate-in fade-in zoom-in-95 duration-200 border border-gray-200 dark:border-white/10 shadow-2xl">
+            {!isLoading && (
+              <button onClick={() => setIsOpen(false)} className="absolute top-4 right-4 p-2 bg-gray-100 dark:bg-white/5 rounded-full text-gray-500 hover:text-gray-900 dark:hover:text-white transition-colors">
+                <X size={20} />
+              </button>
+            )}
+
+            <div className="text-center mb-6">
+              <h2 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">Profil Resmi Seç</h2>
+              <p className="text-[12px] font-medium text-gray-500 mt-1">Karakterini belirle veya galerinden yükle (Maks 5 MB).</p>
+            </div>
+
+            <div className="flex justify-center mb-8">
+              <div className="w-24 h-24 rounded-full border-4 border-[#4DA3FF]/30 p-1 flex items-center justify-center bg-gray-50 dark:bg-[#121212] shadow-[0_0_20px_rgba(77,163,255,0.2)]">
+                 {currentAvatar?.startsWith('data:image') ? (
+                  <img src={currentAvatar} alt="Avatar" className="w-full h-full rounded-full object-cover" />
+                ) : currentAvatar ? (
+                  <span className="text-[48px] leading-none drop-shadow-md">{currentAvatar}</span>
+                ) : (
+                  <span className="text-[40px] font-black text-gray-400 dark:text-gray-600 uppercase">{displayNickname?.charAt(0)}</span>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-6 gap-2 mb-6 bg-gray-50 dark:bg-[#050505] p-3 rounded-2xl border border-gray-200 dark:border-white/5">
+              {PRESET_AVATARS.map((emoji) => (
+                <button 
+                  key={emoji} 
+                  disabled={isLoading}
+                  onClick={() => handleSelect(emoji)}
+                  className="aspect-square flex items-center justify-center text-[24px] bg-white dark:bg-white/5 rounded-xl hover:bg-gray-100 dark:hover:bg-white/10 hover:scale-110 active:scale-95 transition-all shadow-sm dark:shadow-none disabled:opacity-50"
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+
+            <div className="relative">
+              <input 
+                type="file" 
+                accept="image/jpeg, image/png, image/webp" 
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                onChange={handleFileUpload}
+                disabled={isLoading}
+              />
+              <button 
+                disabled={isLoading}
+                className={`w-full py-4 rounded-2xl font-black text-[14px] flex items-center justify-center gap-2 transition-all shadow-lg ${
+                  isLoading 
+                    ? 'bg-[#4DA3FF] text-white cursor-wait' 
+                    : 'bg-gray-100 dark:bg-white/[0.05] hover:bg-gray-200 dark:hover:bg-white/10 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 active:scale-95'
+                }`}
+              >
+                {isLoading ? <><Loader2 size={18} className="animate-spin" /> Yükleniyor...</> : <><Upload size={18} /> Galeriden Fotoğraf Seç</>}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+    </>
   );
 }

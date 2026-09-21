@@ -219,35 +219,102 @@ export async function markNotificationsAsRead() {
 }
 
 export async function toggleCommentReaction(commentId: string, emoji: string, postId: string) {
-  'use server';
-  const { cookies } = await import('next/headers');
-  const cookieStore = await cookies();
-  
-  let userUuid = cookieStore.get('tnku_author_id')?.value;
-  if (!userUuid) {
-    userUuid = cookieStore.get('user_uuid')?.value;
-  }
-  if (!userUuid) return;
-
-  const { PrismaClient } = await import('@prisma/client');
-  const prisma = new PrismaClient();
+  const authorId = await getOrCreateAuthorId();
+  if (!authorId) return;
 
   try {
     const existing = await prisma.commentReaction.findFirst({
-      where: { commentId, userUuid, emoji }
+      where: { commentId, userUuid: authorId, emoji }
     });
 
     if (existing) {
       await prisma.commentReaction.delete({ where: { id: existing.id } });
     } else {
       await prisma.commentReaction.create({ 
-        data: { commentId, userUuid, emoji } 
+        data: { commentId, userUuid: authorId, emoji } 
       });
     }
   } catch (err) {
     console.error("Reaksiyon kayıt hatası:", err);
   }
 
-  const { revalidatePath } = await import('next/cache');
   revalidatePath(`/post/${postId}`);
+}
+
+// =====================================================================================
+// 🔥 YENİ EKLENEN PROFİL BİLEŞENİ FONKSİYONLARI (Z-Index / Modal Hatalarını Çözen Sistem)
+// =====================================================================================
+
+// 8. Özel Nickname (Kullanıcı Adı) Güncelleme
+export async function updateCustomNickname(formData: FormData) {
+  try {
+    const nickname = (formData.get('nickname') as string)?.trim();
+    const targetUuid = (formData.get('userUuid') as string)?.trim();
+
+    // Güvenlik Önlemi: Eğer targetUuid yoksa işlemi iptal et (kendi kendine oluşturmasın diye)
+    if (!targetUuid) {
+       return { error: 'Profil ID bulunamadı.' };
+    }
+
+    if (!nickname) {
+      return { error: 'Lütfen geçerli bir nick gir.' };
+    }
+
+    // Harf, rakam, alt çizgi ve Türkçe karakterler serbest (boşlukları temizle)
+    const cleanNick = nickname.replace(/[^a-zA-Z0-9_ğüşıöçĞÜŞİÖÇ ]/g, '').trim();
+    
+    if (cleanNick.length < 2 || cleanNick.length > 20) {
+      return { error: 'Nick 2 ile 20 karakter arasında olmalıdır.' };
+    }
+
+    // 🔥 UPSERT: Varsa Güncelle, Yoksa Yeni Oluştur (Kritik Çözüm)
+    await (prisma as any).customNickname.upsert({
+      where: { userUuid: targetUuid },
+      update: { nickname: cleanNick },
+      create: { userUuid: targetUuid, nickname: cleanNick }
+    });
+
+    // Sayfaların yeniden oluşturulmasını sağla (Önbellek Temizliği)
+    revalidatePath('/');
+    revalidatePath(`/profil/${targetUuid}`);
+    revalidatePath(`/profil/ben`);
+    revalidatePath('/sohbet');
+    revalidatePath('/liderlik');
+
+    return { success: true, nickname: cleanNick };
+  } catch (error: any) {
+    console.error("Nick Güncelleme Hatası:", error);
+    return { error: 'Nick güncellenirken sunucu hatası oluştu.' };
+  }
+}
+
+// 9. Profil Avatarı / Emojisi Güncelleme
+export async function updateProfileAvatar(formData: FormData) {
+  try {
+    const avatarUrl = formData.get("avatarUrl") as string;
+    const targetUuid = (formData.get('userUuid') as string)?.trim();
+
+    if (!targetUuid || !avatarUrl) {
+      return { error: "Eksik bilgi gönderildi." };
+    }
+
+    // 🔥 UPSERT: Varsa Avatarı Güncelle, Yoksa Yeni Oluştur
+    await (prisma as any).userAvatar.upsert({
+      where: { userUuid: targetUuid },
+      update: { avatarUrl },
+      create: { userUuid: targetUuid, avatarUrl },
+    });
+
+    // Sayfaların yeniden oluşturulmasını sağla (Önbellek Temizliği)
+    revalidatePath('/');
+    revalidatePath(`/profil/${targetUuid}`);
+    revalidatePath(`/profil/ben`);
+    revalidatePath('/liderlik');
+    revalidatePath('/sohbet');
+
+    return { success: true };
+  } catch (error) {
+    console.error("Avatar Güncelleme Hatası:", error);
+    return { error: "Profil resmi güncellenirken bir hata oluştu." };
+  }
 }

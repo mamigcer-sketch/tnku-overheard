@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom'; // 🔥 PORTAL IŞINLAYICISI
 import { Pencil, X, VenetianMask, Loader2, CheckCircle2 } from 'lucide-react';
-import { updateCustomNickname } from '@/app/post/actions'; 
+import { updateCustomNickname } from '@/app/post/actions'; // Action yolun doğru kalsın
 import { useRouter } from 'next/navigation';
 
 export default function ProfileNickEdit({ targetUuid, currentNick, isServerOwner }: { targetUuid: string, currentNick: string, isServerOwner: boolean }) {
@@ -10,7 +11,12 @@ export default function ProfileNickEdit({ targetUuid, currentNick, isServerOwner
   const [nickname, setNickname] = useState(currentNick);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [mounted, setMounted] = useState(false); // 🔥 EKLENDİ
   const router = useRouter();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   if (!isServerOwner) return null;
 
@@ -20,7 +26,6 @@ export default function ProfileNickEdit({ targetUuid, currentNick, isServerOwner
     setIsLoading(true);
 
     try {
-      // 🔥 SENİN ORİJİNAL FONKSİYONUNA FORM DATA İLE GÖNDERİYORUZ 🔥
       const formData = new FormData();
       formData.append('userUuid', targetUuid);
       formData.append('nickname', nickname.trim());
@@ -49,8 +54,9 @@ export default function ProfileNickEdit({ targetUuid, currentNick, isServerOwner
         <Pencil size={16} /> Nick Belirle / Değiştir
       </button>
 
-      {isOpen && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+      {/* 🔥 REACT PORTAL İLE MODAL EN ÜSTE IŞINLANDI 🔥 */}
+      {isOpen && mounted && createPortal(
+        <div className="fixed inset-0 z-[99999] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-black/80 backdrop-blur-md" onClick={() => setIsOpen(false)}></div>
           
           <div className="bg-white dark:bg-[#0A0A0A] w-full max-w-sm rounded-[32px] p-6 relative z-10 animate-in fade-in zoom-in-95 duration-200 border border-gray-200 dark:border-white/10 shadow-2xl">
@@ -98,7 +104,8 @@ export default function ProfileNickEdit({ targetUuid, currentNick, isServerOwner
               </button>
             </form>
           </div>
-        </div>
+        </div>,
+        document.body // <- IŞINLANMA NOKTASI
       )}
     </>
   );
