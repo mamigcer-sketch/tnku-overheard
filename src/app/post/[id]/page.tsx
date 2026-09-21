@@ -13,7 +13,6 @@ export default async function PostPage({ params }: any) {
   const resolvedParams = await params;
   const postId = resolvedParams?.id;
 
-  // 🔥 YÜKLENİYOR EKRANI GÜNDÜZ/GECE UYUMLU
   if (!postId) return <div className="min-h-screen bg-slate-50 dark:bg-[#050505] flex items-center justify-center text-gray-900 dark:text-white font-medium transition-colors duration-300">Yükleniyor...</div>;
 
   const post = await prisma.post.findUnique({
@@ -24,7 +23,6 @@ export default async function PostPage({ params }: any) {
     }
   });
 
-  // 🔥 BULUNAMADI EKRANI GÜNDÜZ/GECE UYUMLU
   if (!post) return <div className="min-h-screen bg-slate-50 dark:bg-[#050505] flex items-center justify-center text-gray-500 font-medium transition-colors duration-300">Post bulunamadı...</div>;
 
   let customNicknamesDb: any[] = [];
@@ -99,15 +97,12 @@ export default async function PostPage({ params }: any) {
   }
 
   return (
-    // 🔥 ANA METİN RENGİ VE GEÇİŞ
-    <main className="min-h-screen text-gray-900 dark:text-white relative z-0 overflow-hidden pb-24 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
+    <main className="min-h-screen text-gray-900 dark:text-white relative z-0 pb-24 selection:bg-[#4DA3FF]/30 transition-colors duration-300">
       
-      {/* 🔥 ARKA PLAN GÜNDÜZ/GECE UYUMLU */}
       <div className="fixed inset-0 -z-10 bg-slate-50 dark:bg-[#050505] transition-colors duration-300">
         <div className="absolute top-0 left-0 right-0 h-[600px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-blue-100/50 via-slate-50 to-slate-50 dark:from-blue-900/20 dark:via-[#050505] dark:to-[#050505] pointer-events-none transition-colors duration-300"></div>
       </div>
 
-      {/* 🔥 HEADER GÜNDÜZ/GECE UYUMLU */}
       <header className="sticky top-0 z-50 bg-white/80 dark:bg-[#050505]/80 backdrop-blur-3xl border-b border-gray-200 dark:border-white/[0.05] px-4 py-3 flex items-center shadow-sm mb-4 sm:mb-6 transition-colors duration-300">
         <div className="flex-1 flex justify-start">
           <BackButton />
