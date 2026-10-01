@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { getLatestPartyMessage } from '../actions';
-import { Flame, EyeOff, Ear, Radio } from 'lucide-react';
 
 export default function DjScreen() {
   const [message, setMessage] = useState<any>(null);
@@ -10,10 +9,10 @@ export default function DjScreen() {
 
   useEffect(() => {
     const fetchMsg = async () => {
-      const msg = await getLatestPartyMessage();
+      // Date.now() göndererek tarayıcı cache'ini de zorla kırıyoruz
+      const msg = await getLatestPartyMessage(Date.now());
       if (msg) {
         setMessage((prev: any) => {
-          // Yeni mesaj gelmişse animasyonu tetikle
           if (prev?.id !== msg.id) {
             setAnimate(false);
             setTimeout(() => setAnimate(true), 50); 
@@ -28,106 +27,83 @@ export default function DjScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  // Varsayılan Bekleme (Boşta) Teması
-  let themeColor = "text-purple-500 drop-shadow-[0_0_40px_rgba(168,85,247,0.8)]";
-  let gradientColor = "from-purple-900/30";
-  let Icon = Radio;
-  let title = "SİSTEM HAZIR";
+  // Sadeleştirilmiş Renk Temaları
+  let titleColor = "text-white/40";
+  let title = "";
 
-  // Eğer Mesaj Varsa Tema Değişir
   if (message) {
     if (message.location === 'itiraf') {
-      themeColor = "text-red-500 drop-shadow-[0_0_40px_rgba(239,68,68,0.8)]";
-      gradientColor = "from-red-900/30";
-      Icon = Flame;
+      titleColor = "text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.5)]";
       title = "İTİRAF EDİYORUM";
     } else if (message.location === 'rezil') {
-      themeColor = "text-purple-500 drop-shadow-[0_0_40px_rgba(168,85,247,0.8)]";
-      gradientColor = "from-purple-900/30";
-      Icon = EyeOff;
+      titleColor = "text-purple-500 drop-shadow-[0_0_20px_rgba(168,85,247,0.5)]";
       title = "REZİL OLDUM";
     } else if (message.location === 'overheard') {
-      themeColor = "text-blue-500 drop-shadow-[0_0_40px_rgba(59,130,246,0.8)]";
-      gradientColor = "from-blue-900/30";
-      Icon = Ear;
+      titleColor = "text-blue-500 drop-shadow-[0_0_20px_rgba(59,130,246,0.5)]";
       title = "KULAK MİSAFİRİ OLDUM";
     }
   }
 
   return (
-    <main className="min-h-screen bg-[#020202] flex items-center justify-center p-8 md:p-24 overflow-hidden cursor-none relative">
+    <main className="min-h-screen bg-[#020202] flex flex-col items-center justify-center p-8 overflow-hidden cursor-none relative">
       
-      {/* Dev Arka Plan Parlaması ve Kumlanma (Noise) Efekti */}
-      <div className={`absolute inset-0 bg-gradient-to-b ${gradientColor} via-[#020202] to-[#020202] pointer-events-none transition-colors duration-1000`}></div>
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-overlay"></div>
+      {/* Hafif Kumlanma (Club Ambiyansı) */}
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay"></div>
 
-      {/* 🔥 SOL ÜST KÖŞE: ANA LOGO (5555.png) 🔥 */}
-      <div className="fixed top-12 left-12 z-[99] pointer-events-none">
+      {/* 🔥 SOL ÜST: KÜÇÜLTÜLMÜŞ, SADE ANA LOGO 🔥 */}
+      <div className="fixed top-10 left-10 z-50">
         <img 
           src="/5555.png" 
           alt="TNKU Logo" 
-          className="w-48 md:w-64 h-auto object-contain animate-pulse drop-shadow-[0_0_40px_rgba(255,255,255,0.4)]" 
+          className="w-24 md:w-32 h-auto opacity-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" 
         />
       </div>
 
-      {/* Sağ Üst - CANLI YAYIN BUTONU */}
-      <div className="fixed top-12 right-12 z-[99] flex items-center gap-3 bg-red-500/10 border border-red-500/30 px-6 py-3 rounded-full backdrop-blur-md shadow-[0_0_30px_rgba(239,68,68,0.2)]">
-        <div className="w-4 h-4 bg-red-500 rounded-full animate-ping absolute"></div>
-        <div className="w-4 h-4 bg-red-500 rounded-full relative z-10"></div>
-        <span className="text-red-500 font-black text-xl tracking-[0.2em] uppercase drop-shadow-md">Canlı Yayın</span>
+      {/* 🔥 SAĞ ÜST: ZARİF CANLI YAYIN BİLDİRİMİ 🔥 */}
+      <div className="fixed top-12 right-12 z-50 flex items-center gap-3 bg-red-900/20 px-5 py-2 rounded-full border border-red-500/20">
+        <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-pulse shadow-[0_0_10px_rgba(239,68,68,1)]"></div>
+        <span className="text-red-500/80 font-bold tracking-[0.2em] text-xs uppercase">Canlı</span>
       </div>
 
-      {/* Ana İçerik Kutusu (Mesaj ve Tırnaklar) */}
-      <div className={`relative z-10 w-full max-w-[90vw] flex flex-col items-center justify-center text-center ${animate ? 'animate-in zoom-in-[0.9] fade-in duration-700 ease-out' : ''}`}>
+      {/* 🔥 MERKEZ: SADECE YAZILAR (Kutusuz, Tırnaksız) 🔥 */}
+      <div className={`relative z-10 w-full max-w-6xl flex flex-col items-center justify-center text-center ${animate ? 'animate-in zoom-in-[0.95] fade-in duration-700 ease-out' : ''}`}>
         
-        {/* Başlık Kısmı */}
-        <div className={`inline-flex items-center gap-6 border-b-2 pb-6 mb-16 px-12 ${!message ? 'border-purple-500/20' : message.location === 'itiraf' ? 'border-red-500/20' : message.location === 'rezil' ? 'border-purple-500/20' : 'border-blue-500/20'}`}>
-          <Icon size={70} className={`${themeColor} animate-pulse`} />
-          <h2 className={`text-5xl md:text-6xl font-black uppercase tracking-[0.4em] ${themeColor}`}>
-            {title}
-          </h2>
-          <Icon size={70} className={`${themeColor} animate-pulse`} />
-        </div>
-
-        {/* Mesaj Kısmı */}
-        <div className="relative w-full max-w-7xl">
-          <span className={`absolute -top-20 -left-10 text-[15rem] font-serif leading-none opacity-20 ${themeColor}`}>"</span>
-          
-          {message ? (
-            <p className="text-white font-black text-[4rem] md:text-[5.5rem] leading-[1.2] break-words drop-shadow-[0_10px_30px_rgba(0,0,0,1)] relative z-10 px-12">
+        {message ? (
+          <>
+            {/* Üstteki İtiraf/Rezil Kategorisi */}
+            <h2 className={`text-xl md:text-2xl font-black uppercase tracking-[0.6em] mb-12 opacity-90 ${titleColor}`}>
+              {title}
+            </h2>
+            
+            {/* Ortadaki Devasa Mesaj */}
+            <p className="text-white font-bold text-[3rem] md:text-[5rem] leading-[1.1] break-words drop-shadow-2xl px-4">
               {message.content}
             </p>
-          ) : (
-            // HİÇ MESAJ YOKSA GÖSTERİLECEK ŞIK BEKLEME ANİMASYONU
-            <div className="flex flex-col items-center justify-center py-12 relative z-10">
-               <div className="w-24 h-24 border-8 border-purple-500 border-t-transparent rounded-full animate-spin mb-8"></div>
-               <p className="text-white/40 font-black text-[3rem] md:text-[4rem] tracking-[0.2em] uppercase drop-shadow-lg">
-                 Mesaj Bekleniyor...
-               </p>
-            </div>
-          )}
-          
-          <span className={`absolute -bottom-32 -right-10 text-[15rem] font-serif leading-none opacity-20 ${themeColor}`}>"</span>
-        </div>
+          </>
+        ) : (
+          // MESAJ YOKKEN GÖSTERİLECEK ZARİF BEKLEME YAZISI
+          <div className="text-white/20 tracking-[0.4em] text-xl md:text-2xl uppercase animate-pulse font-medium">
+            Yeni Mesaj Bekleniyor...
+          </div>
+        )}
 
       </div>
 
-      {/* ALT ORTA: Katılım Linki */}
-      <div className="fixed bottom-12 left-0 right-0 z-[99] flex justify-center pointer-events-none">
-        <div className="bg-white/5 border border-white/10 backdrop-blur-md px-8 py-4 rounded-3xl flex items-center gap-4 shadow-2xl">
-          <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
-          <p className="text-white/60 font-bold text-2xl tracking-widest uppercase">
-            Sen de katıl: <span className="text-white font-black ml-2">tnkuoverheard.com.tr/parti</span>
-          </p>
+      {/* 🔥 ALT ORTA: ŞIK KATILIM LİNKİ 🔥 */}
+      <div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center">
+        <div className="text-white/40 tracking-[0.2em] text-lg md:text-xl font-medium uppercase">
+          Sen de yaz: <span className="text-white/90 font-black ml-3">tnkuoverheard.com.tr/parti</span>
         </div>
       </div>
 
-      {/* 🔥 SAĞ ALT KÖŞE: YENİ EKLENEN İKİNCİ LOGO (d6.png) 🔥 */}
-      <div className="fixed bottom-12 right-12 z-[99] pointer-events-none">
+      {/* 🔥 SAĞ ALT KÖŞE: PARTNER LOGOSU (Kırık resmi gizleyen kodla) 🔥 */}
+      <div className="fixed bottom-10 right-10 z-50">
         <img 
           src="/d6.png" 
           alt="Partner Logo" 
-          className="w-32 md:w-48 h-auto object-contain opacity-80 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" 
+          className="w-20 md:w-28 h-auto opacity-50" 
+          // Eğer public klasöründe d6.png adında bir dosya yoksa, çirkin durmasın diye resmi görünmez yapar
+          onError={(e) => { e.currentTarget.style.display = 'none'; }} 
         />
       </div>
 

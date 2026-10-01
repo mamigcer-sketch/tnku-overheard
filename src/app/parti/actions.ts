@@ -2,8 +2,9 @@
 
 import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
+import { unstable_noStore as noStore } from 'next/cache';
 
-// Parti mesajını veritabanına kaydet
 export async function sendPartyMessage(formData: FormData) {
   try {
     const type = formData.get('type') as string;
@@ -16,13 +17,16 @@ export async function sendPartyMessage(formData: FormData) {
 
     await (prisma as any).post.create({
       data: {
-        type: 'PARTY', // Sisteme özel bir etiket
-        location: type, // 'itiraf', 'rezil', 'overheard'
+        type: 'PARTY', 
+        location: type, 
         content: content.trim(),
         authorUuid: authorId,
-        status: 'APPROVED', // Anında ekrana düşmesi için
+        status: 'APPROVED', 
       }
     });
+
+    // Mesaj atıldığı an DJ ekranını güncellemeye zorla
+    revalidatePath('/parti/dj');
 
     return { success: true };
   } catch (error) {
@@ -31,8 +35,8 @@ export async function sendPartyMessage(formData: FormData) {
   }
 }
 
-// DJ Ekranı için son 1 mesajı çek
-export async function getLatestPartyMessage() {
+export async function getLatestPartyMessage(timestamp?: number) {
+  noStore(); // 🔥 NEXT.JS'E EMİR: ASLA CACHE YAPMA, HEP TAZE VERİ GETİR! 🔥
   try {
     const msg = await (prisma as any).post.findFirst({
       where: { type: 'PARTY' },
