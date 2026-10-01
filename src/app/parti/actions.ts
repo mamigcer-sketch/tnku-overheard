@@ -25,7 +25,7 @@ export async function sendPartyMessage(formData: FormData) {
 
     await (prisma as any).post.create({
       data: {
-        type: type ? type.toUpperCase() : 'TEXT', 
+        type: type ? type.toUpperCase() : 'TEXT', // 🔥 Artık "TEXT" değil, ITIRAF, REZIL veya OVERHEARD yazılacak!
         content: content.trim(),
         location: `PARTY_${type ? type.toUpperCase() : 'GENERAL'}`, 
         people: 'PARTI_MODU', 
