@@ -1,10 +1,6 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getLatestPartyMessage } from '../actions';
-import { Flame, EyeOff, Ear, Radio } from 'lucide-react';
-
-export const dynamic = 'force-dynamic'; // 🔥 NEXT.JS CACHE SİSTEMİNİ PARÇALAYAN KOD 🔥
 
 export default function DjScreen() {
   const [message, setMessage] = useState<any>(null);
@@ -12,15 +8,23 @@ export default function DjScreen() {
 
   useEffect(() => {
     const fetchMsg = async () => {
-      const msg = await getLatestPartyMessage();
-      if (msg) {
-        setMessage((prev: any) => {
-          if (prev?.id !== msg.id) {
-            setAnimate(false);
-            setTimeout(() => setAnimate(true), 50); 
-          }
-          return msg;
-        });
+      try {
+        // 🔥 SERVER ACTION YERİNE %100 CACHE-FREE API KULLANIYORUZ 🔥
+        // Sonuna Date.now() ekleyerek tarayıcıyı "bu yeni bir adres" diye kandırıyoruz
+        const res = await fetch('/api/party?t=' + Date.now(), { cache: 'no-store' });
+        const data = await res.json();
+        
+        if (data?.message) {
+          setMessage((prev: any) => {
+            if (prev?.id !== data.message.id) {
+              setAnimate(false);
+              setTimeout(() => setAnimate(true), 50); 
+            }
+            return data.message;
+          });
+        }
+      } catch (e) {
+        console.error("Mesaj çekilemedi", e);
       }
     };
 
@@ -29,8 +33,8 @@ export default function DjScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  let titleColor = "text-purple-500 drop-shadow-[0_0_40px_rgba(168,85,247,0.8)]";
-  let title = "SİSTEM HAZIR";
+  let titleColor = "text-white/40";
+  let title = "";
 
   if (message) {
     if (message.location === 'PARTY_ITIRAF') {
@@ -50,7 +54,7 @@ export default function DjScreen() {
       
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 pointer-events-none mix-blend-overlay"></div>
 
-      <div className="fixed top-10 left-10 z-50">
+      <div className="fixed top-10 left-10 z-50 pointer-events-none">
         <img src="/5555.png" alt="TNKU Logo" className="w-24 md:w-32 h-auto opacity-90 drop-shadow-[0_0_15px_rgba(255,255,255,0.1)]" />
       </div>
 
@@ -78,14 +82,19 @@ export default function DjScreen() {
 
       </div>
 
-      <div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center">
+      <div className="fixed bottom-10 left-0 right-0 z-50 flex justify-center pointer-events-none">
         <div className="text-white/40 tracking-[0.2em] text-lg md:text-xl font-medium uppercase">
           Sen de yaz: <span className="text-white/90 font-black ml-3">tnkuoverheard.com.tr/parti</span>
         </div>
       </div>
 
-      <div className="fixed bottom-10 right-10 z-50">
-        <img src="/d6.png" alt="Partner Logo" className="w-20 md:w-28 h-auto opacity-50" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
+      <div className="fixed bottom-10 right-10 z-50 pointer-events-none">
+        <img 
+          src="/d6.png" 
+          alt="Partner Logo" 
+          className="w-20 md:w-28 h-auto opacity-50" 
+          onError={(e) => { e.currentTarget.style.display = 'none'; }} 
+        />
       </div>
 
     </main>
