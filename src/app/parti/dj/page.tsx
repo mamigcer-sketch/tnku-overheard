@@ -51,7 +51,7 @@ export default function DjScreen() {
     themeColor = "text-purple-500 drop-shadow-[0_0_40px_rgba(168,85,247,0.8)]";
     gradientColor = "from-purple-900/30";
     Icon = EyeOff;
-    title = "REZİL OLDUM";
+    title = "REZİL EDİYORUM";
   } else if (message.location === 'overheard') {
     themeColor = "text-blue-500 drop-shadow-[0_0_40px_rgba(59,130,246,0.8)]";
     gradientColor = "from-blue-900/30";
