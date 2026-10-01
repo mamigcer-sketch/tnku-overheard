@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from 'react';
 import { getLatestPartyMessage } from '../actions';
+import { Flame, EyeOff, Ear, Radio } from 'lucide-react';
+
+export const dynamic = 'force-dynamic'; // 🔥 NEXT.JS CACHE SİSTEMİNİ PARÇALAYAN KOD 🔥
 
 export default function DjScreen() {
   const [message, setMessage] = useState<any>(null);
@@ -9,8 +12,7 @@ export default function DjScreen() {
 
   useEffect(() => {
     const fetchMsg = async () => {
-      // Date.now() ile her seferinde tamamen yeni veri çekmeye zorluyoruz
-      const msg = await getLatestPartyMessage(Date.now());
+      const msg = await getLatestPartyMessage();
       if (msg) {
         setMessage((prev: any) => {
           if (prev?.id !== msg.id) {
@@ -27,10 +29,9 @@ export default function DjScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  let titleColor = "text-white/40";
-  let title = "";
+  let titleColor = "text-purple-500 drop-shadow-[0_0_40px_rgba(168,85,247,0.8)]";
+  let title = "SİSTEM HAZIR";
 
-  // 🔥 Yeni etiketleri tanıma sistemi ('PARTY_ITIRAF' vb.)
   if (message) {
     if (message.location === 'PARTY_ITIRAF') {
       titleColor = "text-red-500 drop-shadow-[0_0_20px_rgba(239,68,68,0.5)]";
@@ -84,12 +85,7 @@ export default function DjScreen() {
       </div>
 
       <div className="fixed bottom-10 right-10 z-50">
-        <img 
-          src="/d6.png" 
-          alt="Partner Logo" 
-          className="w-20 md:w-28 h-auto opacity-50" 
-          onError={(e) => { e.currentTarget.style.display = 'none'; }} 
-        />
+        <img src="/d6.png" alt="Partner Logo" className="w-20 md:w-28 h-auto opacity-50" onError={(e) => { e.currentTarget.style.display = 'none'; }} />
       </div>
 
     </main>

@@ -19,19 +19,25 @@ export default function PartyInputPage() {
     formData.append('type', type);
     formData.append('content', content);
     
-    await sendPartyMessage(formData);
+    // 🔥 SUNUCUDAN GELEN CEVABI KONTROL ET 🔥
+    const response = await sendPartyMessage(formData);
+    
+    if (response?.error) {
+      alert("HATA ÇIKTI KRAL: " + response.error); // Eğer DB çökerse sebebini ekranda göreceksin!
+      setIsSubmitting(false);
+      return;
+    }
     
     setSuccess(true);
     setContent("");
     setIsSubmitting(false);
-    setTimeout(() => setSuccess(false), 3000); // 3 saniye sonra yeni mesaja hazır
+    setTimeout(() => setSuccess(false), 3000); 
   };
 
   return (
     <main className="min-h-screen bg-[#050505] flex flex-col items-center justify-center p-4 selection:bg-purple-500/30">
       <div className="w-full max-w-md bg-[#0A0A0A] border border-white/10 rounded-[32px] p-6 shadow-2xl relative overflow-hidden">
         
-        {/* Arka plan parlaması */}
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-600/20 to-transparent pointer-events-none"></div>
 
         <div className="text-center mb-8 relative z-10">
