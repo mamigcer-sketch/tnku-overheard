@@ -25,9 +25,9 @@ export async function sendPartyMessage(formData: FormData) {
 
     await (prisma as any).post.create({
       data: {
-        type: 'TEXT', 
+        type: type ? type.toUpperCase() : 'TEXT', // 🔥 Formdan gelen kategori (ITIRAF, REZIL vb.) doğrudan işleniyor
         content: content.trim(),
-        location: `PARTY_${type.toUpperCase()}`, // Örn: PARTY_ITIRAF
+        location: `PARTY_${type ? type.toUpperCase() : 'GENERAL'}`, 
         people: 'PARTI_MODU', 
         gender: 'UNKNOWN',
         authorUuid: authorId,
