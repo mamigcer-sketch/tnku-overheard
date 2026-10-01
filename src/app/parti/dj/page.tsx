@@ -51,7 +51,7 @@ export default function DjScreen() {
     themeColor = "text-purple-500 drop-shadow-[0_0_40px_rgba(168,85,247,0.8)]";
     gradientColor = "from-purple-900/30";
     Icon = EyeOff;
-    title = "REZİL EDİYORUM";
+    title = "REZİL OLDUM";
   } else if (message.location === 'overheard') {
     themeColor = "text-blue-500 drop-shadow-[0_0_40px_rgba(59,130,246,0.8)]";
     gradientColor = "from-blue-900/30";
@@ -66,7 +66,23 @@ export default function DjScreen() {
       <div className={`absolute inset-0 bg-gradient-to-b ${gradientColor} via-[#020202] to-[#020202] pointer-events-none transition-colors duration-1000`}></div>
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-overlay"></div>
 
-      {/* 🔥 KESİN ÇÖZÜM: SAĞ ÜST KÖŞEYE ÇİVİLENMİŞ CANLI YAYIN BUTONU 🔥 */}
+      {/* 🔥 KENDİ LOGON (5555.png) ANİMASYONLU ŞEKİLDE BURADA 🔥 */}
+      <div className="fixed top-8 left-8 z-[99] flex items-center gap-4 bg-white/5 border border-white/10 px-6 py-3 rounded-full backdrop-blur-md shadow-[0_0_30px_rgba(255,255,255,0.05)]">
+        
+        {/* Senin 5555.png Logon - Pulse animasyonu ve havalı bir parlama eklendi */}
+        <img 
+          src="/5555.png" 
+          alt="TNKU Logo" 
+          className="w-14 h-14 object-contain animate-pulse drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" 
+        />
+
+        <div className="flex flex-col">
+          <span className="text-white font-black text-xl tracking-[0.2em] leading-none drop-shadow-md">TNKU</span>
+          <span className="text-white/50 font-bold text-[10px] tracking-[0.4em] leading-none mt-1.5">OVERHEARD</span>
+        </div>
+      </div>
+
+      {/* Sağ Üst - CANLI YAYIN BUTONU */}
       <div className="fixed top-8 right-8 z-[99] flex items-center gap-3 bg-red-500/10 border border-red-500/30 px-6 py-3 rounded-full backdrop-blur-md shadow-[0_0_30px_rgba(239,68,68,0.2)]">
         <div className="w-4 h-4 bg-red-500 rounded-full animate-ping absolute"></div>
         <div className="w-4 h-4 bg-red-500 rounded-full relative z-10"></div>
