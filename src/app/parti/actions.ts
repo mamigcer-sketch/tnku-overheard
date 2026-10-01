@@ -2,8 +2,8 @@
 
 import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache'; // 🔥 Önbelleği anında patlatmak için şart!
 
-// 🔥 Senin orijinal sistemindeki UUID oluşturucuyu buraya kurduk
 async function getOrCreateAuthorId() {
   const cookieStore = await cookies();
   let authorId = cookieStore.get('tnku_author_id')?.value;
@@ -19,13 +19,13 @@ export async function sendPartyMessage(formData: FormData) {
     const type = formData.get('type') as string; 
     const content = formData.get('content') as string;
     
-    const authorId = await getOrCreateAuthorId(); // Artık sahte ID yok!
+    const authorId = await getOrCreateAuthorId();
 
     if (!content || content.length < 2) return { error: "Çok kısa!" };
 
     await (prisma as any).post.create({
       data: {
-        type: type ? type.toUpperCase() : 'TEXT', // 🔥 Formdan gelen kategori (ITIRAF, REZIL vb.) doğrudan işleniyor
+        type: type ? type.toUpperCase() : 'TEXT', 
         content: content.trim(),
         location: `PARTY_${type ? type.toUpperCase() : 'GENERAL'}`, 
         people: 'PARTI_MODU', 
@@ -34,6 +34,11 @@ export async function sendPartyMessage(formData: FormData) {
         status: 'APPROVED',
       }
     });
+
+    // 🔥 Next.js cache'ini yeniliyoruz ki dev ekran yeni mesajı hemen alsın!
+    revalidatePath('/'); 
+    // Eğer parti ekranı örneğin /party veya başka bir yolddaysa buraya da yazabilirsin:
+    // revalidatePath('/party');
 
     return { success: true };
   } catch (error: any) {
