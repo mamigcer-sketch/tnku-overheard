@@ -9,9 +9,8 @@ export default function DjScreen() {
   useEffect(() => {
     const fetchMsg = async () => {
       try {
-        // 🔥 SERVER ACTION YERİNE %100 CACHE-FREE API KULLANIYORUZ 🔥
-        // Sonuna Date.now() ekleyerek tarayıcıyı "bu yeni bir adres" diye kandırıyoruz
-        const res = await fetch('/api/party?t=' + Date.now(), { cache: 'no-store' });
+        // 🔥 Doğru Türkçe rota adı (`/api/parti`) ile veriyi çekiyoruz
+        const res = await fetch('/api/parti?t=' + Date.now(), { cache: 'no-store' });
         const data = await res.json();
         
         if (data?.message) {
