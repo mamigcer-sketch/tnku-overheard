@@ -1,7 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
-import ScrollToTopV2 from '@/components/ScrollToTopV2';
 import InstallModal from '@/components/InstallModal';
 import SyncAuth from '@/components/SyncAuth'; 
 import SplashScreen from '@/components/SplashScreen'; 
@@ -71,7 +70,6 @@ export default function RootLayout({
             {children}
           </div>
           
-          <ScrollToTopV2 />
           <InstallModal />
           <SyncAuth />
         </Providers>
