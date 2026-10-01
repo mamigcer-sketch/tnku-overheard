@@ -2,7 +2,7 @@
 
 import prisma from '@/lib/prisma';
 import { cookies } from 'next/headers';
-import { revalidatePath } from 'next/cache'; // 🔥 Önbelleği anında patlatmak için şart!
+import { revalidatePath } from 'next/cache';
 
 async function getOrCreateAuthorId() {
   const cookieStore = await cookies();
@@ -18,31 +18,30 @@ export async function sendPartyMessage(formData: FormData) {
   try {
     const type = formData.get('type') as string; 
     const content = formData.get('content') as string;
-    
     const authorId = await getOrCreateAuthorId();
 
-    if (!content || content.length < 2) return { error: "Çok kısa!" };
+    if (!content || content.trim().length < 2) {
+      return { error: "Mesaj çok kısa!" };
+    }
+
+    const cleanType = type ? type.toUpperCase() : 'ITIRAF';
 
     await (prisma as any).post.create({
       data: {
-        type: type ? type.toUpperCase() : 'TEXT', // 🔥 Artık "TEXT" değil, ITIRAF, REZIL veya OVERHEARD yazılacak!
+        type: cleanType,
         content: content.trim(),
-        location: `PARTY_${type ? type.toUpperCase() : 'GENERAL'}`, 
+        location: `PARTY_${cleanType}`, 
         people: 'PARTI_MODU', 
         gender: 'UNKNOWN',
         authorUuid: authorId,
-        status: 'APPROVED',
+        status: 'APPROVED', // Doğrudan onaylı düşüyor
       }
     });
 
-    // 🔥 Next.js cache'ini yeniliyoruz ki dev ekran yeni mesajı hemen alsın!
-    revalidatePath('/'); 
-    // Eğer parti ekranı örneğin /party veya başka bir yolddaysa buraya da yazabilirsin:
-    // revalidatePath('/party');
-
+    revalidatePath('/party'); // Parti sayfasının önbelleğini patlatıyoruz
     return { success: true };
   } catch (error: any) {
-    console.error("🔥 VERİTABANI ÇÖKTÜ 🔥:", error);
-    return { error: error.message || "Bilinmeyen bir veritabanı hatası!" };
+    console.error("🔥 PARTİ MESAJ HATASI:", error);
+    return { error: error.message || "Veritabanı hatası oluştu!" };
   }
 }
