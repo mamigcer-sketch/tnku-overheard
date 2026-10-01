@@ -62,11 +62,11 @@ export default function DjScreen() {
   return (
     <main className="min-h-screen bg-[#020202] flex items-center justify-center p-8 md:p-24 overflow-hidden cursor-none relative">
       
-      {/* Dev Arka Plan Parlaması */}
+      {/* Dev Arka Plan Parlaması ve Kumlanma (Noise) Efekti */}
       <div className={`absolute inset-0 bg-gradient-to-b ${gradientColor} via-[#020202] to-[#020202] pointer-events-none transition-colors duration-1000`}></div>
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 pointer-events-none mix-blend-overlay"></div>
 
-      {/* 🔥 DEVASA LOGO (Kutusuz, Yazısız, Sadece Görsel) 🔥 */}
+      {/* 🔥 SOL ÜST KÖŞE: ANA LOGO (5555.png) 🔥 */}
       <div className="fixed top-12 left-12 z-[99] pointer-events-none">
         <img 
           src="/5555.png" 
@@ -82,7 +82,7 @@ export default function DjScreen() {
         <span className="text-red-500 font-black text-xl tracking-[0.2em] uppercase drop-shadow-md">Canlı Yayın</span>
       </div>
 
-      {/* Ana İçerik Kutusu */}
+      {/* Ana İçerik Kutusu (Mesaj ve Tırnaklar) */}
       <div className={`relative z-10 w-full max-w-[90vw] flex flex-col items-center justify-center text-center ${animate ? 'animate-in zoom-in-[0.9] fade-in duration-700 ease-out' : ''}`}>
         
         {/* Başlık Kısmı */}
@@ -94,7 +94,7 @@ export default function DjScreen() {
           <Icon size={70} className={`${themeColor} animate-pulse`} />
         </div>
 
-        {/* Mesaj Kısmı (Dev Tırnak İşaretleri ile) */}
+        {/* Mesaj Kısmı */}
         <div className="relative w-full max-w-7xl">
           <span className={`absolute -top-20 -left-10 text-[15rem] font-serif leading-none opacity-20 ${themeColor}`}>"</span>
           
@@ -107,7 +107,7 @@ export default function DjScreen() {
 
       </div>
 
-      {/* Alt Bilgi - İnsanlar nereye gireceğini bilsin */}
+      {/* ALT ORTA: Katılım Linki */}
       <div className="fixed bottom-12 left-0 right-0 z-[99] flex justify-center pointer-events-none">
         <div className="bg-white/5 border border-white/10 backdrop-blur-md px-8 py-4 rounded-3xl flex items-center gap-4 shadow-2xl">
           <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse"></span>
@@ -115,6 +115,15 @@ export default function DjScreen() {
             Sen de katıl: <span className="text-white font-black ml-2">tnkuoverheard.com.tr/parti</span>
           </p>
         </div>
+      </div>
+
+      {/* 🔥 SAĞ ALT KÖŞE: YENİ EKLENEN İKİNCİ LOGO (d6.png) 🔥 */}
+      <div className="fixed bottom-12 right-12 z-[99] pointer-events-none">
+        <img 
+          src="/d6.png" 
+          alt="Partner Logo" 
+          className="w-32 md:w-48 h-auto object-contain opacity-80 drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]" 
+        />
       </div>
 
     </main>
