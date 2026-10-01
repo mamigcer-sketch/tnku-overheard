@@ -7,43 +7,55 @@ import { unstable_noStore as noStore } from 'next/cache';
 
 export async function sendPartyMessage(formData: FormData) {
   try {
-    const type = formData.get('type') as string;
+    const type = formData.get('type') as string; // 'itiraf', 'rezil', 'overheard'
     const content = formData.get('content') as string;
     
     const cookieStore = await cookies();
-    let authorId = cookieStore.get('tnku_author_id')?.value || 'party_anon_' + Math.random().toString(36).substring(7);
+    let authorId = cookieStore.get('tnku_author_id')?.value;
+    
+    // Eğer kişi siteye ilk kez giriyorsa çökmesin diye rastgele ID veriyoruz
+    if (!authorId) {
+        authorId = 'party_' + Date.now();
+    }
 
     if (!content || content.length < 2) return { error: "Çok kısa!" };
 
+    // 🔥 İŞTE ÇÖZÜM: Prisma çökmesin diye type'ı 'TEXT' yapıp zorunlu alanları boş gönderiyoruz
     await (prisma as any).post.create({
       data: {
-        type: 'PARTY', 
-        location: type, 
+        type: 'TEXT', // Hata vermemesi için geçerli bir tip
+        location: `PARTY_${type.toUpperCase()}`, // Örn: 'PARTY_ITIRAF' (DJ ekranı buradan tanıyacak)
         content: content.trim(),
         authorUuid: authorId,
         status: 'APPROVED', 
+        people: '', // Zorunluysa boş geç
+        gender: ''  // Zorunluysa boş geç
       }
     });
 
-    // Mesaj atıldığı an DJ ekranını güncellemeye zorla
+    // DJ Ekranının önbelleğini kır
     revalidatePath('/parti/dj');
 
     return { success: true };
-  } catch (error) {
-    console.error("Parti mesajı hatası:", error);
-    return { error: "Mesaj gönderilemedi!" };
+  } catch (error: any) {
+    console.error("🔥 PARTİ MESAJI KAYIT HATASI 🔥:", error);
+    return { error: "Sunucu hatası!" };
   }
 }
 
 export async function getLatestPartyMessage(timestamp?: number) {
-  noStore(); // 🔥 NEXT.JS'E EMİR: ASLA CACHE YAPMA, HEP TAZE VERİ GETİR! 🔥
+  noStore(); // Önbelleği (Cache) tamamen yok eder
   try {
+    // 🔥 Sadece lokasyonunda 'PARTY_' yazan postları çeker
     const msg = await (prisma as any).post.findFirst({
-      where: { type: 'PARTY' },
+      where: { 
+        location: { startsWith: 'PARTY_' } 
+      },
       orderBy: { createdAt: 'desc' },
     });
     return msg;
   } catch (error) {
+    console.error("🔥 DJ EKRANI VERİ ÇEKME HATASI 🔥:", error);
     return null;
   }
 }
