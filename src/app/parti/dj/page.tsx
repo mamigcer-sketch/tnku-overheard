@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getLatestPartyMessage } from '../actions';
-import { Flame, EyeOff, Ear } from 'lucide-react';
+import { Flame, EyeOff, Ear, Radio } from 'lucide-react';
 
 export default function DjScreen() {
   const [message, setMessage] = useState<any>(null);
@@ -13,6 +13,7 @@ export default function DjScreen() {
       const msg = await getLatestPartyMessage();
       if (msg) {
         setMessage((prev: any) => {
+          // Yeni mesaj gelmişse animasyonu tetikle
           if (prev?.id !== msg.id) {
             setAnimate(false);
             setTimeout(() => setAnimate(true), 50); 
@@ -27,36 +28,30 @@ export default function DjScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  if (!message) {
-    return (
-      <div className="min-h-screen bg-[#050505] flex flex-col items-center justify-center">
-        <div className="w-16 h-16 border-4 border-purple-500 border-t-transparent rounded-full animate-spin mb-8"></div>
-        <h1 className="text-3xl font-black text-white/40 animate-pulse uppercase tracking-[0.5em]">DJ Ekranı Hazır, Mesaj Bekleniyor...</h1>
-      </div>
-    );
-  }
+  // Varsayılan Bekleme (Boşta) Teması
+  let themeColor = "text-purple-500 drop-shadow-[0_0_40px_rgba(168,85,247,0.8)]";
+  let gradientColor = "from-purple-900/30";
+  let Icon = Radio;
+  let title = "SİSTEM HAZIR";
 
-  // Renk ve Tema ayarları
-  let themeColor = "";
-  let gradientColor = "";
-  let Icon = Flame;
-  let title = "";
-
-  if (message.location === 'itiraf') {
-    themeColor = "text-red-500 drop-shadow-[0_0_40px_rgba(239,68,68,0.8)]";
-    gradientColor = "from-red-900/30";
-    Icon = Flame;
-    title = "İTİRAF EDİYORUM";
-  } else if (message.location === 'rezil') {
-    themeColor = "text-purple-500 drop-shadow-[0_0_40px_rgba(168,85,247,0.8)]";
-    gradientColor = "from-purple-900/30";
-    Icon = EyeOff;
-    title = "REZİL OLDUM";
-  } else if (message.location === 'overheard') {
-    themeColor = "text-blue-500 drop-shadow-[0_0_40px_rgba(59,130,246,0.8)]";
-    gradientColor = "from-blue-900/30";
-    Icon = Ear;
-    title = "KULAK MİSAFİRİ OLDUM";
+  // Eğer Mesaj Varsa Tema Değişir
+  if (message) {
+    if (message.location === 'itiraf') {
+      themeColor = "text-red-500 drop-shadow-[0_0_40px_rgba(239,68,68,0.8)]";
+      gradientColor = "from-red-900/30";
+      Icon = Flame;
+      title = "İTİRAF EDİYORUM";
+    } else if (message.location === 'rezil') {
+      themeColor = "text-purple-500 drop-shadow-[0_0_40px_rgba(168,85,247,0.8)]";
+      gradientColor = "from-purple-900/30";
+      Icon = EyeOff;
+      title = "REZİL OLDUM";
+    } else if (message.location === 'overheard') {
+      themeColor = "text-blue-500 drop-shadow-[0_0_40px_rgba(59,130,246,0.8)]";
+      gradientColor = "from-blue-900/30";
+      Icon = Ear;
+      title = "KULAK MİSAFİRİ OLDUM";
+    }
   }
 
   return (
@@ -86,7 +81,7 @@ export default function DjScreen() {
       <div className={`relative z-10 w-full max-w-[90vw] flex flex-col items-center justify-center text-center ${animate ? 'animate-in zoom-in-[0.9] fade-in duration-700 ease-out' : ''}`}>
         
         {/* Başlık Kısmı */}
-        <div className={`inline-flex items-center gap-6 border-b-2 pb-6 mb-16 px-12 ${message.location === 'itiraf' ? 'border-red-500/20' : message.location === 'rezil' ? 'border-purple-500/20' : 'border-blue-500/20'}`}>
+        <div className={`inline-flex items-center gap-6 border-b-2 pb-6 mb-16 px-12 ${!message ? 'border-purple-500/20' : message.location === 'itiraf' ? 'border-red-500/20' : message.location === 'rezil' ? 'border-purple-500/20' : 'border-blue-500/20'}`}>
           <Icon size={70} className={`${themeColor} animate-pulse`} />
           <h2 className={`text-5xl md:text-6xl font-black uppercase tracking-[0.4em] ${themeColor}`}>
             {title}
@@ -98,9 +93,19 @@ export default function DjScreen() {
         <div className="relative w-full max-w-7xl">
           <span className={`absolute -top-20 -left-10 text-[15rem] font-serif leading-none opacity-20 ${themeColor}`}>"</span>
           
-          <p className="text-white font-black text-[4rem] md:text-[5.5rem] leading-[1.2] break-words drop-shadow-[0_10px_30px_rgba(0,0,0,1)] relative z-10 px-12">
-            {message.content}
-          </p>
+          {message ? (
+            <p className="text-white font-black text-[4rem] md:text-[5.5rem] leading-[1.2] break-words drop-shadow-[0_10px_30px_rgba(0,0,0,1)] relative z-10 px-12">
+              {message.content}
+            </p>
+          ) : (
+            // HİÇ MESAJ YOKSA GÖSTERİLECEK ŞIK BEKLEME ANİMASYONU
+            <div className="flex flex-col items-center justify-center py-12 relative z-10">
+               <div className="w-24 h-24 border-8 border-purple-500 border-t-transparent rounded-full animate-spin mb-8"></div>
+               <p className="text-white/40 font-black text-[3rem] md:text-[4rem] tracking-[0.2em] uppercase drop-shadow-lg">
+                 Mesaj Bekleniyor...
+               </p>
+            </div>
+          )}
           
           <span className={`absolute -bottom-32 -right-10 text-[15rem] font-serif leading-none opacity-20 ${themeColor}`}>"</span>
         </div>
