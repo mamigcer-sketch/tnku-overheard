@@ -126,7 +126,7 @@ export default function DjScreen() {
         {/* Hata gizleme kodunu kaldırdık, görsel yolu doğruysa efsane parlayacak */}
         <div className="flex items-center justify-center bg-white/5 backdrop-blur-2xl border-[3px] border-white/10 p-6 md:p-8 rounded-[2rem] shadow-[0_0_50px_rgba(255,255,255,0.1)] hover:scale-105 transition-transform">
           <img 
-            src="/d6.png" 
+            src="/D6.png" 
             alt="Sponsor Logo" 
             className="h-20 md:h-28 w-auto object-contain drop-shadow-[0_0_30px_rgba(255,255,255,0.4)]"
           />
