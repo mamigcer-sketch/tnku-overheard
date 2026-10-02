@@ -3,11 +3,16 @@ import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
-    // Veritabanındaki en son eklenen mesajı doğrudan çekiyoruz
-    const latestMessage = await (prisma as any).post.findFirst({
+    const latestMessage = await prisma.post.findFirst({
+      where: {
+        location: {
+          in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_OVERHEARD']
+        },
+        status: 'APPROVED'
+      },
       orderBy: {
-        createdAt: 'desc'
-      }
+        createdAt: 'desc',
+      },
     });
 
     return NextResponse.json({ message: latestMessage || null }, { 

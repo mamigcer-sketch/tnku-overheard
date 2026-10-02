@@ -8,23 +8,19 @@ datasource db {
 }
 
 model Post {
-  id         String    @id @default(cuid())
+  id         String   @id @default(cuid())
   type       String
-  content    String?   // 🔥 Sadece ses atılabilmesi için opsiyonel (?) yapıldı
-  status     String    @default("PENDING")
-  likes      Int       @default(0)
-  views      Int       @default(0)
+  content    String?  
+  status     String   @default("PENDING")
+  likes      Int      @default(0)
+  views      Int      @default(0)
   location   String?
   people     String?
   gender     String?
   time       String?
   authorUuid String?
-  
-  audioUrl   String?   // 🔥 Ses dosyasının linkini tutacak
-
-  // 🔥 24 saat sonra kaybolacak süreli postlar için bitiş zamanı
+  audioUrl   String?  
   expiresAt  DateTime? 
-
   createdAt  DateTime  @default(now())
   
   comments      Comment[]
@@ -44,7 +40,7 @@ model Comment {
   parent       Comment?        @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies      Comment[]       @relation("CommentReplies")
 
-  post         Post          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  post         Post            @relation(fields: [postId], references: [id], onDelete: Cascade)
   reactions    CommentReaction[]
   commentLikes CommentLike[]  
   reports      Report[]     
@@ -84,12 +80,11 @@ model Report {
   comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
 }
 
-// 🔥 İKİ TABLO BİRLEŞTİRİLDİ: Hem sistem mesajı hem post bildirimi atılabilir 🔥
 model Notification {
   id        String   @id @default(cuid())
   userUuid  String   
   message   String   
-  postId    String?  // Zihin Kontrolü için opsiyonel (?) yapıldı!
+  postId    String?  
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 
@@ -152,7 +147,6 @@ model UnlockedBadge {
   @@unique([userUuid, badgeName]) 
 }
 
-// 🔥 YENİ EKLENEN PROFİL RESMİ MODELİ (EN DIŞTA VE NİZAMİ)
 model UserAvatar {
   id        String   @id @default(cuid())
   userUuid  String   @unique
@@ -163,7 +157,7 @@ model UserAvatar {
 
 model SystemSetting {
   id        String   @id @default("global")
-  isActive  Boolean  @default(true) // true = site açık, false = bakım modu (middleware devrede)
+  isActive  Boolean  @default(true) 
   updatedAt DateTime @updatedAt
 }
 
@@ -172,16 +166,17 @@ model BannedIP {
   ipAddress String   @unique
   createdAt DateTime @default(now())
 }
+
 model Event {
   id          String   @id @default(cuid())
   title       String
   description String
   date        DateTime
   location    String?
-  imageUrl    String?  // Etkinlik afişi (opsiyonel)
-  actionLink  String?  // Bilet al / İncele butonu linki (reklamlar için)
-  actionText  String?  // Örn: "Bilet Al", "Kaydol"
-  isSponsored Boolean  @default(false) // Parayı basanlar için true yapacağız
+  imageUrl    String?  
+  actionLink  String?  
+  actionText  String?  
+  isSponsored Boolean  @default(false) 
   createdAt   DateTime @default(now())
 
   attendees   EventAttendee[]

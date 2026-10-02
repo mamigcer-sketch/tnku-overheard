@@ -14,18 +14,13 @@ export default function PartyInputPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // Daha önce şifreyi girdiyse tekrar sormayalım
   useEffect(() => {
     const auth = sessionStorage.getItem('tnku_party_auth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
+    if (auth === 'true') setIsAuthenticated(true);
   }, []);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // 🔥 Masalara yazacağın şifre burası! İstediğin gibi değiştirebilirsin (Örn: "parti2026")
     const CORRECT_PASSWORD = "parti2026"; 
 
     if (passcode.trim() === CORRECT_PASSWORD) {
@@ -60,20 +55,16 @@ export default function PartyInputPage() {
     setTimeout(() => setSuccess(false), 2500); 
   };
 
-  // 1. EĞER ŞİFRE GİRİLMEDİYSE KİLİT EKRANI GÖSTER
   if (!isAuthenticated) {
     return (
       <main className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 selection:bg-purple-500/30">
         <div className="w-full max-w-md bg-[#0A0A0A] border border-white/10 rounded-[32px] p-8 shadow-2xl relative overflow-hidden text-center">
           <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-600/20 to-transparent pointer-events-none"></div>
-
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-500/10 border border-purple-500/30 mb-6 animate-pulse relative z-10">
             <Lock size={28} className="text-purple-400" />
           </div>
-
           <h1 className="text-2xl font-black uppercase tracking-wider mb-2 relative z-10">Parti Alanı Kilitli</h1>
           <p className="text-gray-400 text-sm mb-8 relative z-10">Dev ekrana mesaj göndermek için masada yazan şifreyi girin!</p>
-
           <form onSubmit={handleLogin} className="space-y-4 relative z-10">
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
@@ -88,15 +79,8 @@ export default function PartyInputPage() {
                 autoFocus
               />
             </div>
-
-            {passError && (
-              <p className="text-red-400 text-xs font-bold animate-pulse">Şifre hatalı, masadaki kodu kontrol et!</p>
-            )}
-
-            <button 
-              type="submit"
-              className="w-full py-4 rounded-2xl bg-white text-black font-black text-lg hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95"
-            >
+            {passError && <p className="text-red-400 text-xs font-bold animate-pulse">Şifre hatalı, masadaki kodu kontrol et!</p>}
+            <button type="submit" className="w-full py-4 rounded-2xl bg-white text-black font-black text-lg hover:bg-gray-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.2)] active:scale-95">
               Partiye Giriş Yap 🚀
             </button>
           </form>
@@ -105,13 +89,10 @@ export default function PartyInputPage() {
     );
   }
 
-  // 2. ŞİFRE DOĞRUYSA NORMAL MESAJ GÖNDERME EKRANI
   return (
     <main className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 selection:bg-purple-500/30">
       <div className="w-full max-w-md bg-[#0A0A0A] border border-white/10 rounded-[32px] p-6 shadow-2xl relative overflow-hidden">
-        
         <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-b from-purple-600/20 to-transparent pointer-events-none"></div>
-
         <div className="text-center mb-8 relative z-10">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-purple-500/10 border border-purple-500/30 mb-4 animate-pulse">
             <PartyPopper size={32} className="text-purple-400" />
@@ -119,7 +100,6 @@ export default function PartyInputPage() {
           <h1 className="text-2xl font-black uppercase tracking-widest">Canlı Parti Modu</h1>
           <p className="text-gray-400 text-sm mt-2 font-medium">Yaz, gönder, dev ekranda gör!</p>
         </div>
-
         <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
           <div className="grid grid-cols-3 gap-2">
             <button type="button" onClick={() => setType('ITIRAF')} className={`flex flex-col items-center p-3 rounded-2xl border transition-all ${type === 'ITIRAF' ? 'bg-red-500/10 border-red-500/50 text-red-400 shadow-[0_0_15px_rgba(239,68,68,0.2)]' : 'bg-white/5 border-white/5 text-gray-500'}`}>
@@ -135,7 +115,6 @@ export default function PartyInputPage() {
               <span className="text-[10px] font-black tracking-wider">DUYDUM</span>
             </button>
           </div>
-
           <div className="relative">
             <textarea 
               value={content}
@@ -146,7 +125,6 @@ export default function PartyInputPage() {
             />
             <div className="absolute bottom-3 right-4 text-xs font-bold text-gray-600">{content.length}/150</div>
           </div>
-
           <button 
             type="submit" 
             disabled={isSubmitting || !content.trim() || success}

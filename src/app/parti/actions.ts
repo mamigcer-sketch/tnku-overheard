@@ -1,47 +1,38 @@
-"use server";
+'use server';
 
 import prisma from '@/lib/prisma';
-import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
-
-async function getOrCreateAuthorId() {
-  const cookieStore = await cookies();
-  let authorId = cookieStore.get('tnku_author_id')?.value;
-  if (!authorId) {
-    authorId = crypto.randomUUID();
-    cookieStore.set({ name: 'tnku_author_id', value: authorId, maxAge: 60 * 60 * 24 * 365, path: '/' });
-  }
-  return authorId;
-}
 
 export async function sendPartyMessage(formData: FormData) {
   try {
-    const type = formData.get('type') as string; 
+    const type = formData.get('type') as string;
     const content = formData.get('content') as string;
-    const authorId = await getOrCreateAuthorId();
 
-    if (!content || content.trim().length < 2) {
-      return { error: "Mesaj çok kısa!" };
+    if (!content || !content.trim()) {
+      return { error: "Mesaj içeriği boş olamaz!" };
     }
 
-    const cleanType = type ? type.toUpperCase() : 'ITIRAF';
+    const locationMapping: Record<string, string> = {
+      'ITIRAF': 'PARTY_ITIRAF',
+      'REZIL': 'PARTY_REZIL',
+      'OVERHEARD': 'PARTY_OVERHEARD'
+    };
 
-    await (prisma as any).post.create({
+    const targetLocation = locationMapping[type] || 'PARTY_ITIRAF';
+
+    await prisma.post.create({
       data: {
-        type: cleanType,
+        type: 'PARTY_MODE', // Şemandaki zorunlu alanı dolduruyoruz
         content: content.trim(),
-        location: `PARTY_${cleanType}`, 
-        people: 'PARTI_MODU', 
-        gender: 'UNKNOWN',
-        authorUuid: authorId,
-        status: 'APPROVED', // Doğrudan onaylı düşüyor
-      }
+        location: targetLocation,
+        status: 'APPROVED'
+      },
     });
 
-    revalidatePath('/party'); // Parti sayfasının önbelleğini patlatıyoruz
+    revalidatePath('/dj');
     return { success: true };
   } catch (error: any) {
-    console.error("🔥 PARTİ MESAJ HATASI:", error);
-    return { error: error.message || "Veritabanı hatası oluştu!" };
+    console.error("Mesaj gönderilemedi:", error);
+    return { error: error.message || "Veritabanı kayıt hatası oluştu." };
   }
 }

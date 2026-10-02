@@ -63,29 +63,24 @@ export default function DjScreen() {
   return (
     <main className="min-h-screen bg-[#020205] flex flex-col items-center justify-between p-8 md:p-12 overflow-hidden cursor-none relative selection:bg-purple-500/30">
       
-      {/* Premium Arka Plan Atmosferik Işıklar */}
       <div className={`absolute inset-0 bg-gradient-to-b ${themeGlow} pointer-events-none transition-all duration-700`}></div>
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0,transparent_100%)] pointer-events-none"></div>
       <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-15 pointer-events-none mix-blend-overlay"></div>
 
-      {/* Üst Header */}
       <div className="w-full max-w-7xl flex items-center justify-between z-50">
         <div className="flex items-center gap-4">
           <img src="/5555.png" alt="TNKU Logo" className="w-24 md:w-28 h-auto opacity-95 drop-shadow-[0_0_20px_rgba(255,255,255,0.25)]" />
         </div>
-
         <div className="flex items-center gap-3 bg-black/60 backdrop-blur-xl px-6 py-2.5 rounded-full border border-red-500/30 shadow-[0_0_20px_rgba(239,68,68,0.2)]">
           <div className="w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></div>
           <span className="text-red-400 font-black tracking-[0.25em] text-xs uppercase">CANLI PARTİ AKIŞI</span>
         </div>
       </div>
 
-      {/* Ana Mesaj Alanı (Kutusuz, Sinematik Dev Yazı) */}
       <div className="w-full max-w-6xl flex flex-col items-center justify-center text-center z-10 my-auto px-4">
         {message ? (
           <div className={`flex flex-col items-center transition-all duration-700 ${animate ? 'animate-in zoom-in-95 fade-in duration-600' : ''}`}>
             
-            {/* Kategori Rozeti */}
             <div className={`inline-flex items-center gap-2.5 px-6 py-2.5 rounded-full border mb-10 backdrop-blur-md transition-all duration-500 ${badgeStyle}`}>
               <IconComponent size={20} className="animate-pulse" />
               <span className="text-sm md:text-base font-black tracking-[0.35em] uppercase">
@@ -93,11 +88,9 @@ export default function DjScreen() {
               </span>
             </div>
 
-            {/* Mesaj İçeriği (Tırnaksız, Sinematik Boyut) */}
             <h1 className={`text-white font-black text-[3rem] md:text-[6rem] lg:text-[7rem] leading-[1.08] tracking-tight max-w-5xl break-words ${textGlow}`}>
               {message.content}
             </h1>
-
           </div>
         ) : (
           <div className="flex flex-col items-center gap-4">
@@ -111,14 +104,12 @@ export default function DjScreen() {
         )}
       </div>
 
-      {/* Alt Bilgi Barı */}
       <div className="w-full max-w-7xl flex items-center justify-between z-50">
         <div className="bg-white/[0.04] backdrop-blur-xl border border-white/10 px-6 py-3.5 rounded-2xl shadow-xl">
           <span className="text-white/50 tracking-widest text-xs md:text-sm font-bold uppercase">
             Masadan Gönder: <span className="text-white font-black ml-2 tracking-normal underline decoration-purple-500/50 underline-offset-4">tnkuoverheard.com.tr/parti</span>
           </span>
         </div>
-
         <div>
           <img 
             src="/d6.png" 
