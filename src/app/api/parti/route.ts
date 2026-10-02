@@ -5,8 +5,12 @@ export async function GET() {
   try {
     const latestMessage = await (prisma as any).post.findFirst({
       where: {
-        people: 'PARTI_MODU',
-        status: 'APPROVED'
+        OR: [
+          { people: 'PARTI_MODU' },
+          { location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_OVERHEARD'] } },
+          { people: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_OVERHEARD'] } }
+        ]
+        // status: 'APPROVED' -> Eğer mesajların hemen görünmesini istiyorsan buradaki status filtresini şimdilik kaldırabiliriz veya onay sistemine bağlıysa bırakabiliriz.
       },
       orderBy: {
         createdAt: 'desc'
