@@ -246,55 +246,56 @@ export default function PartyInputPage() {
 
   return (
 
-    <main className="min-h-screen bg-[#050208] text-white flex flex-col items-center justify-center p-4 md:p-6 selection:bg-fuchsia-500/30 transition-colors duration-700 relative overflow-hidden">
+    <main className="min-h-screen bg-[#050208] text-white flex items-center justify-center p-4 md:p-8 selection:bg-fuchsia-500/30 transition-colors duration-700 relative overflow-hidden">
 
 
 
       {/* Arkada değişen dinamik atmosfer ışığı */}
 
       <div className={`fixed inset-0 bg-gradient-to-b ${themeObj.glow} to-[#030303] opacity-40 pointer-events-none transition-all duration-1000`}></div>
+      <div className="fixed -top-32 left-1/2 -translate-x-1/2 w-[620px] h-[360px] rounded-full bg-fuchsia-500/10 blur-[120px] pointer-events-none"></div>
 
       <div className="fixed inset-0 bg-[url('https\://grainy-gradients.vercel.app/noise.svg')] opacity-[0.06] mix-blend-overlay pointer-events-none"></div>
 
 
 
-      <div className="w-full max-w-md bg-[#09070c]/90 backdrop-blur-2xl border border-white/10 rounded-[2.1rem] p-5 md:p-7 shadow-[0_35px_100px_rgba(0,0,0,.55)] relative overflow-hidden z-10 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-fuchsia-400/70 before:to-transparent">
+      <div className="w-full max-w-[520px] bg-[#09070c]/92 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-7 md:p-8 shadow-[0_35px_100px_rgba(0,0,0,.6)] relative overflow-hidden z-10 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent before:via-fuchsia-400/70 before:to-transparent">
 
 
 
         {/* Başlık Alanı */}
 
-        <div className="text-center mb-8 relative z-10">
+        <div className="text-center mb-6 relative z-10">
 
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-400/20 mb-4 shadow-[0_0_30px_rgba(217,70,239,.14)] backdrop-blur-md">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-fuchsia-500/10 border border-fuchsia-400/20 mb-3 shadow-[0_0_30px_rgba(217,70,239,.14)] backdrop-blur-md">
 
             <Sparkles size={28} className={themeObj.icon} />
 
           </div>
 
-          <h1 className="text-3xl font-black tracking-[0.12em] text-white mb-2">
+          <h1 className="text-2xl md:text-[28px] font-black tracking-[0.12em] text-white mb-2 whitespace-nowrap">
 
             OVERHEARD PARTY
 
           </h1>
 
-          <p className="text-gray-400 text-sm font-medium tracking-wide">Mesajını yaz, onaya gönder, dev ekranda gör!</p>
+          <p className="text-gray-500 text-[13px] font-medium tracking-wide">Mesajını yaz, onaya gönder, dev ekranda gör!</p>
 
         </div>
 
 
 
-        <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
+        <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
 
 
 
           {/* Kategori Seçimi - Premium Görünüm */}
 
-          <div className="grid grid-cols-3 gap-1.5 bg-black/35 p-1.5 rounded-2xl border border-white/10">
+          <div className="flex gap-1.5 bg-black/35 p-1.5 rounded-2xl border border-white/10">
 
-            <button type="button" onClick={() => setType('ITIRAF')} className={`flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-300 ${type === 'ITIRAF' ? 'bg-red-500/15 border border-red-500/30 text-red-400 shadow-[0_0_20px_rgba(220,38,38,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
+            <button type="button" onClick={() => setType('ITIRAF')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'ITIRAF' ? 'bg-red-500/15 border border-red-500/30 text-red-400 shadow-[0_0_20px_rgba(220,38,38,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
 
-              <Flame size={20} className="mb-1.5" />
+              <Flame size={20} className="" />
 
               <span className="text-[10px] font-black tracking-widest">İTİRAF</span>
 
@@ -302,9 +303,9 @@ export default function PartyInputPage() {
 
 
 
-            <button type="button" onClick={() => setType('REZIL')} className={`flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-300 ${type === 'REZIL' ? 'bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_20px_rgba(192,38,211,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
+            <button type="button" onClick={() => setType('REZIL')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'REZIL' ? 'bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_20px_rgba(192,38,211,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
 
-              <EyeOff size={20} className="mb-1.5" />
+              <EyeOff size={20} className="" />
 
               <span className="text-[10px] font-black tracking-widest">REZİL@</span>
 
@@ -312,9 +313,9 @@ export default function PartyInputPage() {
 
 
 
-            <button type="button" onClick={() => setType('OVERHEARD')} className={`flex flex-col items-center justify-center py-3 rounded-xl transition-all duration-300 ${type === 'OVERHEARD' ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 shadow-[0_0_20px_rgba(8,145,178,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
+            <button type="button" onClick={() => setType('OVERHEARD')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'OVERHEARD' ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 shadow-[0_0_20px_rgba(8,145,178,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
 
-              <Ear size={20} className="mb-1.5" />
+              <Ear size={20} className="" />
 
               <span className="text-[10px] font-black tracking-widest">DUYDUM</span>
 
@@ -336,7 +337,7 @@ export default function PartyInputPage() {
 
               placeholder="Ekrana ne yansıtmak istiyorsun?"
 
-              className={`w-full bg-black/30 border border-white/10 rounded-[1.35rem] p-5 text-white text-base font-medium placeholder:text-gray-600 outline-none transition-all duration-300 resize-none h-36 ${themeObj.border} group-hover:bg-[#151515]`}
+              className={`w-full bg-black/30 border border-white/10 rounded-[1.35rem] p-5 text-white text-base font-medium placeholder:text-gray-600 outline-none transition-all duration-300 resize-none h-[150px] ${themeObj.border} group-hover:bg-[#151515]`}
 
               maxLength={150}
 
@@ -360,7 +361,7 @@ export default function PartyInputPage() {
 
             disabled={isSubmitting || !content.trim() || success}
 
-            className={`w-full py-4 rounded-xl font-black text-[13px] tracking-[0.18em] flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98] ${
+            className={`w-full h-14 rounded-xl font-black text-[13px] tracking-[0.18em] flex items-center justify-center gap-3 transition-all duration-300 active:scale-[0.98] ${
 
               success 
 
