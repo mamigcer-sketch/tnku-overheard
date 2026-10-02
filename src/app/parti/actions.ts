@@ -22,14 +22,13 @@ export async function sendPartyMessage(formData: FormData) {
 
     await prisma.post.create({
       data: {
-        type: 'PARTY_MODE', // Şemandaki zorunlu alanı dolduruyoruz
+        type: 'PARTY_MODE', 
         content: content.trim(),
         location: targetLocation,
-        status: 'APPROVED'
+        status: 'PENDING' // 🔥 ARTIK DİREKT EKRANA GİTMEYECEK, ONAY BEKLEYECEK
       },
     });
 
-    revalidatePath('/dj');
     return { success: true };
   } catch (error: any) {
     console.error("Mesaj gönderilemedi:", error);
