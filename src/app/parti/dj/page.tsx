@@ -969,7 +969,7 @@ export default function DjScreen() {
             "
           >
             <img
-              src="/d6.png"
+              src="/D6.png"
               alt="D6 Sosyal"
               className="
                 h-11
