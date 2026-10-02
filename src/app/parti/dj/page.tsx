@@ -124,7 +124,7 @@ export default function DjScreen() {
         {/* Sağ Alt - VIP Sponsor Logosu (d6.png) - Daha toparlanmış boyut */}
         <div className="flex items-center justify-center bg-black/20 backdrop-blur-md border border-white/5 p-4 md:p-5 rounded-2xl shadow-xl hover:scale-105 transition-transform">
           <img 
-            src="/d6.png" 
+            src="/D6.png" 
             alt="Sponsor Logo" 
             className="h-12 md:h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
           />
