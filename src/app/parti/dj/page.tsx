@@ -1,25 +1,48 @@
+
 "use client";
 
-import { useEffect, useState } from 'react';
-import { Flame, EyeOff, Ear, Sparkles, Radio } from 'lucide-react';
+import { useEffect, useState } from "react";
+import {
+  Flame,
+  EyeOff,
+  Ear,
+  Sparkles,
+  Radio,
+  Zap,
+} from "lucide-react";
 
 export default function DjScreen() {
   const [message, setMessage] = useState<any>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isLive, setIsLive] = useState(true);
 
   useEffect(() => {
+    let timeout: ReturnType<typeof setTimeout>;
+
     const fetchMsg = async () => {
       try {
-        const res = await fetch('/api/parti?t=' + Date.now(), { cache: 'no-store' });
+        const res = await fetch(
+          "/api/parti?t=" + Date.now(),
+          { cache: "no-store" }
+        );
+
         const data = await res.json();
-        
+
         if (data?.message) {
           setMessage((prev: any) => {
             if (prev?.id !== data.message.id) {
               setIsAnimating(false);
-              setTimeout(() => setIsAnimating(true), 50); 
+
+              clearTimeout(timeout);
+
+              timeout = setTimeout(() => {
+                setIsAnimating(true);
+              }, 100);
+
+              return data.message;
             }
-            return data.message;
+
+            return prev;
           });
         }
       } catch (e) {
@@ -27,110 +50,280 @@ export default function DjScreen() {
       }
     };
 
-    fetchMsg(); 
-    const interval = setInterval(fetchMsg, 3000); 
-    return () => clearInterval(interval);
+    fetchMsg();
+
+    const interval = setInterval(fetchMsg, 3000);
+
+    const liveInterval = setInterval(() => {
+      setIsLive((prev) => !prev);
+    }, 1000);
+
+    return () => {
+      clearInterval(interval);
+      clearInterval(liveInterval);
+      clearTimeout(timeout);
+    };
   }, []);
 
-  // Animasyonlu Arka Plan Temalandırması
-  let themeGlow = "from-zinc-900/60 via-black to-[#020205]";
-  let badgeStyle = "bg-white/10 border-white/20 text-white shadow-lg";
-  let textGlow = "drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]";
-  let title = "BEKLENİYOR";
-  let IconComponent = Sparkles;
+  let accent = "#ef4444";
+  let theme = "red";
+  let title = "İTİRAF";
+  let IconComponent = Flame;
 
-  if (message) {
-    if (message.location === 'PARTY_ITIRAF') {
-      themeGlow = "from-red-900/60 via-red-950/10 to-[#020205]";
-      badgeStyle = "bg-red-950/60 border-red-500/40 text-red-400 shadow-[0_0_30px_rgba(239,68,68,0.4)]";
-      textGlow = "drop-shadow-[0_0_40px_rgba(239,68,68,0.7)] text-white";
-      title = "İTİRAF";
-      IconComponent = Flame;
-    } else if (message.location === 'PARTY_REZIL') {
-      themeGlow = "from-fuchsia-900/60 via-fuchsia-950/10 to-[#020205]";
-      badgeStyle = "bg-fuchsia-950/60 border-fuchsia-500/40 text-fuchsia-400 shadow-[0_0_30px_rgba(217,70,239,0.4)]";
-      textGlow = "drop-shadow-[0_0_40px_rgba(217,70,239,0.7)] text-white";
-      title = "REZİL@";
-      IconComponent = EyeOff;
-    } else if (message.location === 'PARTY_OVERHEARD') {
-      themeGlow = "from-cyan-900/60 via-cyan-950/10 to-[#020205]";
-      badgeStyle = "bg-cyan-950/60 border-cyan-500/40 text-cyan-400 shadow-[0_0_30px_rgba(6,182,212,0.4)]";
-      textGlow = "drop-shadow-[0_0_40px_rgba(6,182,212,0.7)] text-white";
-      title = "DUYDUM";
-      IconComponent = Ear;
-    }
+  if (message?.location === "PARTY_REZIL") {
+    accent = "#e879f9";
+    theme = "pink";
+    title = "REZİL@";
+    IconComponent = EyeOff;
+  }
+
+  if (message?.location === "PARTY_OVERHEARD") {
+    accent = "#22d3ee";
+    theme = "cyan";
+    title = "DUYDUM";
+    IconComponent = Ear;
   }
 
   return (
-    <main className="min-h-screen bg-[#050505] flex flex-col justify-between p-6 md:p-10 overflow-hidden cursor-none relative font-sans selection:bg-transparent">
-      
-      {/* 1. DİNAMİK & ANİMASYONLU ARKA PLAN (Sürekli nefes alır) */}
-      <div className={`absolute inset-0 bg-gradient-to-br ${themeGlow} transition-colors duration-[2000ms] ease-in-out animate-[pulse_8s_ease-in-out_infinite]`}></div>
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.03)_0,transparent_100%)] pointer-events-none animate-[pulse_5s_ease-in-out_infinite]"></div>
-      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.10] mix-blend-overlay pointer-events-none"></div>
+    <main
+      className="relative min-h-screen overflow-hidden bg-[#030303] text-white flex flex-col justify-between p-6 md:p-10 font-sans"
+      style={{ "--accent": accent } as React.CSSProperties}
+    >
 
-      {/* ÜST BAR (Header) - DAHA MİNİMAL VE ŞIK */}
-      <header className="relative z-10 w-full flex justify-between items-start">
-        
-        {/* Sol Üst - Büyütülmüş, zarif dönen logo */}
-        <div className="flex items-center">
-          <div className="w-28 h-28 md:w-36 md:h-36 rounded-full bg-black/30 border border-white/10 flex items-center justify-center p-3 backdrop-blur-md shadow-[0_0_30px_rgba(255,255,255,0.05)] transition-transform">
-             <img src="/5555.png" alt="TNKU Logo" className="w-full h-full object-contain drop-shadow-lg animate-[spin_20s_linear_infinite]" />
+      {/* ANİMASYONLU ARKA PLAN */}
+
+      <div
+        className="absolute inset-0 transition-all duration-1000"
+        style={{
+          background: `
+            radial-gradient(
+              ellipse at 50% 45%,
+              ${accent}30 0%,
+              transparent 55%
+            ),
+            radial-gradient(
+              ellipse at 10% 10%,
+              ${accent}15 0%,
+              transparent 50%
+            ),
+            #030303
+          `,
+        }}
+      />
+
+      <div className="absolute inset-0 opacity-20 animate-[pulse_5s_ease-in-out_infinite]"
+        style={{
+          background: `radial-gradient(circle at center, ${accent}30, transparent 70%)`,
+        }}
+      />
+
+      {/* IŞIK HÜZMESİ */}
+
+      <div
+        className="absolute w-[70vw] h-[120vh] top-[-10%] left-[15%] opacity-[0.07] blur-[100px] rotate-12 animate-[pulse_7s_ease-in-out_infinite]"
+        style={{ background: accent }}
+      />
+
+      {/* GRAIN */}
+
+      <div
+        className="absolute inset-0 opacity-[0.07] pointer-events-none mix-blend-screen"
+        style={{
+          backgroundImage:
+            "url('https://grainy-gradients.vercel.app/noise.svg')",
+        }}
+      />
+
+      {/* ÜST BAR */}
+
+      <header className="relative z-10 flex justify-between items-start">
+
+        <div className="relative group">
+          <div
+            className="absolute inset-[-8px] rounded-full blur-xl opacity-30 animate-pulse"
+            style={{ background: accent }}
+          />
+
+          <div className="relative w-20 h-20 md:w-32 md:h-32 rounded-full bg-black/60 border border-white/10 p-3 backdrop-blur-xl shadow-2xl">
+            <img
+              src="/5555.png"
+              alt="TNKU Logo"
+              className="w-full h-full object-contain animate-[spin_30s_linear_infinite]"
+            />
           </div>
         </div>
 
-        {/* Sağ Üst Canlı Yayın Bildirgeci - Daha ince ve kibar */}
-        <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md border border-red-500/20 px-5 py-2.5 rounded-full shadow-lg">
-          <Radio size={16} className="text-red-500 animate-[pulse_1s_ease-in-out_infinite]" />
-          <span className="text-red-100 font-bold tracking-[0.2em] text-xs md:text-sm uppercase opacity-90">Canlı Parti Akışı</span>
+        <div
+          className="flex items-center gap-3 rounded-full px-5 py-3 backdrop-blur-xl border transition-colors duration-700"
+          style={{
+            borderColor: `${accent}55`,
+            background: "#080808cc",
+          }}
+        >
+          <span
+            className={`w-2.5 h-2.5 rounded-full transition-opacity ${
+              isLive ? "opacity-100" : "opacity-30"
+            }`}
+            style={{
+              background: accent,
+              boxShadow: `0 0 15px ${accent}`,
+            }}
+          />
+
+          <Radio size={16} style={{ color: accent }} />
+
+          <span className="text-xs md:text-sm font-black tracking-[0.2em] uppercase">
+            CANLI PARTİ AKIŞI
+          </span>
         </div>
       </header>
 
-      {/* MERKEZ (Ana Mesaj Alanı) */}
-      <section className="relative z-10 flex-grow flex flex-col items-center justify-center text-center px-6">
+      {/* MERKEZ */}
+
+      <section className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-3">
+
         {message ? (
-          <div className={`max-w-7xl mx-auto flex flex-col items-center transform transition-all duration-[1200ms] ease-[cubic-bezier(0.23,1,0.32,1)] ${isAnimating ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'}`}>
-            
-            <div className={`inline-flex items-center gap-3 px-8 py-3 rounded-full border mb-10 backdrop-blur-md ${badgeStyle}`}>
-              <IconComponent size={24} className={isAnimating ? "animate-bounce" : ""} style={{ animationDuration: '2s' }} />
-              <span className="text-xl md:text-2xl font-black tracking-[0.35em] uppercase">
+          <div
+            key={message.id}
+            className={`w-full flex flex-col items-center transition-all duration-700 ${
+              isAnimating
+                ? "opacity-100 translate-y-0 scale-100"
+                : "opacity-0 translate-y-8 scale-90"
+            }`}
+          >
+
+            {/* KATEGORİ */}
+
+            <div
+              className="inline-flex items-center gap-3 px-7 py-3 rounded-full border backdrop-blur-xl mb-8 md:mb-12 animate-[fadeIn_1s_ease-out]"
+              style={{
+                color: accent,
+                borderColor: `${accent}80`,
+                background: `${accent}15`,
+                boxShadow: `0 0 35px ${accent}25`,
+              }}
+            >
+              <IconComponent size={22} />
+
+              <span className="font-black text-lg md:text-2xl tracking-[0.35em]">
                 {title}
               </span>
             </div>
 
-            <h1 className={`font-black text-[4.5rem] md:text-[7rem] lg:text-[9rem] leading-[1.05] tracking-tighter break-words max-w-[95vw] ${textGlow}`}>
+            {/* ANA MESAJ */}
+
+            <h1
+              className="font-black uppercase leading-[1.02] tracking-[-0.065em] break-words max-w-[95vw] text-[clamp(3rem,9vw,9rem)]"
+              style={{
+                textShadow: `
+                  0 0 20px ${accent}35,
+                  0 0 70px ${accent}25
+                `,
+                animation: "messageEnter 1s cubic-bezier(.16,1,.3,1) both",
+              }}
+            >
               {message.content}
             </h1>
+
+            {/* ALT IŞIK ÇİZGİSİ */}
+
+            <div
+              className="mt-10 h-[3px] w-32 md:w-56 rounded-full animate-[pulse_2s_ease-in-out_infinite]"
+              style={{
+                background: accent,
+                boxShadow: `0 0 25px ${accent}`,
+              }}
+            />
+
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-6 opacity-30">
-            <Sparkles size={60} className="text-white animate-[pulse_2s_ease-in-out_infinite]" />
-            <h2 className="text-white text-3xl md:text-4xl font-black tracking-[0.4em] uppercase">Bomba Bekleniyor</h2>
+          <div className="flex flex-col items-center gap-8 opacity-60">
+            <div className="relative">
+              <div
+                className="absolute inset-[-30px] rounded-full blur-2xl animate-pulse"
+                style={{ background: accent }}
+              />
+              <Sparkles size={65} className="relative animate-[spin_12s_linear_infinite]" />
+            </div>
+
+            <h2 className="text-3xl md:text-5xl font-black tracking-[0.3em]">
+              BOMBA BEKLENİYOR
+            </h2>
           </div>
         )}
+
       </section>
 
-      {/* ALT BAR (Footer & Sponsor) - DAHA KİBAR KUTULAR */}
-      <footer className="relative z-10 w-full flex justify-between items-end">
-        
-        {/* Sol Alt - Gönderim Linki - İnceltilmiş ve zarif */}
-        <div className="bg-black/40 backdrop-blur-md border border-white/5 px-6 py-3 md:px-8 md:py-4 rounded-2xl shadow-xl flex items-center gap-3">
-          <span className="text-gray-400 font-bold tracking-widest text-xs md:text-sm uppercase">Masadan Gönder:</span>
-          <span className="text-white font-black text-lg md:text-2xl tracking-widest uppercase bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-            overheardparti/parti
-          </span>
+      {/* ALT BAR */}
+
+      <footer className="relative z-10 flex justify-between items-end gap-4">
+
+        <div className="rounded-2xl border border-white/10 bg-black/50 backdrop-blur-xl px-5 py-4 md:px-8 md:py-5 shadow-2xl">
+
+          <div className="flex flex-wrap items-center gap-2 md:gap-4">
+
+            <span className="text-gray-400 font-bold text-[10px] md:text-sm tracking-widest uppercase">
+              MASADAN GÖNDER
+            </span>
+
+            <Zap size={16} style={{ color: accent }} />
+
+            <span className="text-white font-black text-sm md:text-2xl tracking-wider">
+              OVERHEARDPARTI/PARTI
+            </span>
+
+          </div>
         </div>
 
-        {/* Sağ Alt - VIP Sponsor Logosu (d6.png) - Daha toparlanmış boyut */}
-        <div className="flex items-center justify-center bg-black/20 backdrop-blur-md border border-white/5 p-4 md:p-5 rounded-2xl shadow-xl hover:scale-105 transition-transform">
-          <img 
-            src="/D6.png" 
-            alt="Sponsor Logo" 
-            className="h-12 md:h-16 w-auto object-contain drop-shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+        <div className="rounded-2xl border border-white/10 bg-black/50 backdrop-blur-xl p-3 md:p-5 shadow-2xl transition-transform duration-500 hover:scale-110">
+          <img
+            src="/D6.png"
+            alt="Sponsor Logo"
+            className="h-10 md:h-16 w-auto object-contain"
           />
         </div>
-        
+
       </footer>
+
+      {/* ÖZEL ANİMASYONLAR */}
+
+      <style jsx global>{`
+        @keyframes messageEnter {
+          0% {
+            opacity: 0;
+            transform: translateY(60px) scale(0.88);
+            filter: blur(15px);
+          }
+          60% {
+            opacity: 1;
+            filter: blur(0);
+          }
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: translateY(-15px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          *,
+          *::before,
+          *::after {
+            animation-duration: 0.01ms !important;
+            transition-duration: 0.01ms !important;
+          }
+        }
+      `}</style>
 
     </main>
   );
