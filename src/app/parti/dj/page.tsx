@@ -52,14 +52,14 @@ export default function DjScreen() {
       }
 
       /*
-       * PREMIUM AÇILIŞ
+       * PREMIUM AÇILIŞ YAZISI
        */
       setTransitionStep(`YENİ ${transitionTitle}`);
       await delay(1300);
       if (!mounted) return;
 
       /*
-       * COUNTDOWN
+       * ŞOK DALGALI COUNTDOWN (3 - 2 - 1)
        */
       setTransitionStep("3");
       await delay(850);
@@ -74,7 +74,7 @@ export default function DjScreen() {
       if (!mounted) return;
 
       /*
-       * FLASH
+       * FLASH PATLAMASI
        */
       setTransitionStep(null);
       setFlash(true);
@@ -419,7 +419,7 @@ export default function DjScreen() {
       />
 
       {/* ========================================================= */}
-      {/* GRAIN (🔥 HATA BURADAYDI, TEK SATIRA DÜŞÜRÜLDÜ) */}
+      {/* GRAIN */}
       {/* ========================================================= */}
 
       <div
@@ -457,7 +457,7 @@ export default function DjScreen() {
       />
 
       {/* ========================================================= */}
-      {/* CINEMATIC TRANSITION */}
+      {/* CINEMATIC TRANSITION & COUNTDOWN (YENİLENDİ!) */}
       {/* ========================================================= */}
 
       {transitionStep && (
@@ -485,77 +485,99 @@ export default function DjScreen() {
               opacity-20
               animate-[transitionGlow_2s_ease-in-out_infinite]
             "
-            style={{
-              background: accent,
-            }}
+            style={{ background: accent }}
           />
 
-          {/* Horizontal cinematic line */}
-          <div
-            className="
-              absolute
-              left-0
-              right-0
-              h-[1px]
-              animate-[transitionLine_1.2s_ease-out_forwards]
-            "
-            style={{
-              background: `linear-gradient(90deg, transparent, ${accent}, white, ${accent}, transparent)`,
-              boxShadow: `0 0 30px ${accent}`,
-            }}
-          />
+          {transitionStep.length <= 2 ? (
+            /* 1. DURUM: GERİ SAYIM NUMARALARI (3, 2, 1) */
+            <div className="relative flex items-center justify-center">
+              {/* Şok dalgası halkası */}
+              <div
+                key={`ring-${transitionStep}`}
+                className="absolute w-[10vw] h-[10vw] rounded-full border-[6px] animate-[shockwave_1s_ease-out_forwards]"
+                style={{ borderColor: accent }}
+              />
 
-          <div className="relative flex flex-col items-center">
-            <div
-              className="
-                mb-6
-                h-px
-                w-24
-                opacity-70
-                animate-[lineExpand_1.2s_ease-out_forwards]
-              "
-              style={{
-                background: accent,
-                boxShadow: `0 0 20px ${accent}`,
-              }}
-            />
+              <h1
+                key={`num-${transitionStep}`}
+                className="relative font-black text-center text-white leading-none animate-[countdownThump_1s_cubic-bezier(.16,1,.3,1)_forwards]"
+                style={{
+                  fontSize: "clamp(12rem, 35vw, 35rem)", // Devasa sayılar
+                  textShadow: `0 0 40px ${accent}, 0 0 100px ${accent}90`,
+                }}
+              >
+                {transitionStep}
+              </h1>
+            </div>
+          ) : (
+            /* 2. DURUM: "YENİ İTİRAF" GİBİ YAZILAR */
+            <div className="relative flex flex-col items-center">
+              {/* Yatay sinematik çizgi */}
+              <div
+                className="
+                  absolute
+                  left-[-50vw]
+                  right-[-50vw]
+                  top-1/2
+                  h-[1px]
+                  animate-[transitionLine_1.2s_ease-out_forwards]
+                  -z-10
+                "
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${accent}, white, ${accent}, transparent)`,
+                  boxShadow: `0 0 30px ${accent}`,
+                }}
+              />
 
-            <h1
-              key={transitionStep}
-              className="
-                relative
-                font-black
-                text-center
-                uppercase
-                tracking-[0.28em]
-                text-white
-                animate-[premiumCountdown_1s_cubic-bezier(.16,1,.3,1)_forwards]
-              "
-              style={{
-                fontSize:
-                  transitionStep.length > 2
-                    ? "clamp(3rem, 7vw, 9rem)"
-                    : "clamp(9rem, 24vw, 24rem)",
-                textShadow: `0 0 25px ${accent}, 0 0 70px ${accent}90, 0 0 150px ${accent}45`,
-              }}
-            >
-              {transitionStep}
-            </h1>
+              <div
+                className="
+                  mb-6
+                  h-px
+                  w-24
+                  opacity-70
+                  animate-[lineExpand_1.2s_ease-out_forwards]
+                "
+                style={{
+                  background: accent,
+                  boxShadow: `0 0 20px ${accent}`,
+                }}
+              />
 
-            <div
-              className="
-                mt-6
-                h-px
-                w-24
-                opacity-70
-                animate-[lineExpand_1.2s_ease-out_forwards]
-              "
-              style={{
-                background: accent,
-                boxShadow: `0 0 20px ${accent}`,
-              }}
-            />
-          </div>
+              <h1
+                key={`text-${transitionStep}`}
+                className="
+                  relative
+                  font-black
+                  text-center
+                  uppercase
+                  text-white
+                  animate-[premiumTextReveal_1.2s_cubic-bezier(.16,1,.3,1)_forwards]
+                "
+                style={{
+                  fontSize: "clamp(3rem, 7vw, 9rem)",
+                  letterSpacing: "0.28em",
+                  paddingLeft: "0.28em", /* HARİKA HİLE: Kaymayı engeller ve tam merkeze oturtur! */
+                  textShadow: `0 0 25px ${accent}, 0 0 70px ${accent}90, 0 0 150px ${accent}45`,
+                }}
+              >
+                {transitionStep}
+              </h1>
+
+              <div
+                className="
+                  mt-6
+                  h-px
+                  w-24
+                  opacity-70
+                  animate-[lineExpand_1.2s_ease-out_forwards]
+                "
+                style={{
+                  background: accent,
+                  boxShadow: `0 0 20px ${accent}`,
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -783,6 +805,7 @@ export default function DjScreen() {
                   md:text-2xl
                   font-black
                   tracking-[0.32em]
+                  pl-[0.32em]
                 "
               >
                 {title}
@@ -877,6 +900,7 @@ export default function DjScreen() {
                 md:text-6xl
                 font-black
                 tracking-[0.25em]
+                pl-[0.25em]
               "
             >
               BOMBA BEKLENİYOR
@@ -969,7 +993,7 @@ export default function DjScreen() {
             "
           >
             <img
-              src="/D6.png"
+              src="/d6.png"
               alt="D6 Sosyal"
               className="
                 h-11
@@ -983,7 +1007,7 @@ export default function DjScreen() {
       </footer>
 
       {/* ========================================================= */}
-      {/* ANIMATION ENGINE (🔥 HATA BURADAYDI, <style> OLARAK DÜZELTİLDİ) */}
+      {/* ANIMATION ENGINE */}
       {/* ========================================================= */}
 
       <style>{`
@@ -1053,10 +1077,10 @@ export default function DjScreen() {
         }
 
         @keyframes transitionLine {
-          0% { transform: scaleX(0); opacity: 0; }
-          35% { transform: scaleX(1); opacity: 1; }
-          75% { transform: scaleX(1); opacity: 0.8; }
-          100% { transform: scaleX(1.4); opacity: 0; }
+          0% { transform: translateY(-50%) scaleX(0); opacity: 0; }
+          35% { transform: translateY(-50%) scaleX(1); opacity: 1; }
+          75% { transform: translateY(-50%) scaleX(1); opacity: 0.8; }
+          100% { transform: translateY(-50%) scaleX(1.4); opacity: 0; }
         }
 
         @keyframes lineExpand {
@@ -1065,11 +1089,26 @@ export default function DjScreen() {
           100% { width: 8rem; opacity: 0.35; }
         }
 
-        @keyframes premiumCountdown {
-          0% { opacity: 0; transform: scale(0.45); filter: blur(35px); }
-          20% { opacity: 1; transform: scale(1.08); filter: blur(0); }
+        /* 1) Yazılar için Premium Animasyon (YENİ İTİRAF vb.) */
+        @keyframes premiumTextReveal {
+          0% { opacity: 0; transform: scale(0.8); filter: blur(20px); }
+          20% { opacity: 1; transform: scale(1.05); filter: blur(0); }
           70% { opacity: 1; transform: scale(1); }
-          100% { opacity: 0; transform: scale(1.18); filter: blur(15px); }
+          100% { opacity: 0; transform: scale(1.1); filter: blur(15px); }
+        }
+
+        /* 2) Geri sayım sayıları için vuruş (Thump) animasyonu */
+        @keyframes countdownThump {
+          0% { opacity: 0; transform: scale(2.5); filter: blur(20px); }
+          20% { opacity: 1; transform: scale(1); filter: blur(0); }
+          80% { opacity: 1; transform: scale(0.95); filter: blur(0); }
+          100% { opacity: 0; transform: scale(0.5); filter: blur(10px); }
+        }
+
+        /* 3) Şok dalgası halkası (Geri sayımla patlar) */
+        @keyframes shockwave {
+          0% { opacity: 1; transform: scale(0.5); border-width: 15px; }
+          100% { opacity: 0; transform: scale(2.5); border-width: 0px; }
         }
 
         @keyframes messageReveal {
