@@ -344,7 +344,7 @@ export default function DjScreen() {
           />
           <div className="relative bg-[#080808] rounded-2xl p-4 md:p-5">
             <img
-              src="/d6.png"
+              src="/D6.png"
               alt="D6 Sosyal"
               className="h-12 md:h-16 w-auto object-contain"
             />
