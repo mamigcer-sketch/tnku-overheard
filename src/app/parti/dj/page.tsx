@@ -34,40 +34,22 @@ export default function DjScreen() {
      */
     const runTransition = async (newMsg: any) => {
       if (!mounted) return;
-
       isTransitioning.current = true;
 
-      // Eski mesajı kaldır
       setVisible(false);
-
       await delay(350);
-
       if (!mounted) return;
 
-      // Yeni mesajı hazırla
       setMessage(newMsg);
 
       let transitionTitle = "YENİ İTİRAF";
+      if (newMsg.location === "PARTY_LİNÇ") transitionTitle = "YENİ LİNÇ@";
+      if (newMsg.location === "PARTY_OVERHEARD") transitionTitle = "YENİ DUYDUM";
 
-      if (newMsg.location === "PARTY_LİNÇ") {
-        transitionTitle = "YENİ LİNÇ@";
-      }
-
-      if (newMsg.location === "PARTY_OVERHEARD") {
-        transitionTitle = "YENİ DUYDUM";
-      }
-
-      /*
-       * 1. AŞAMA: ÖNCE YAZI GELSİN
-       */
       setTransitionStep(transitionTitle);
       await delay(1800); 
-
       if (!mounted) return;
 
-      /*
-       * 2. AŞAMA: GERİ SAYIM (3 - 2 - 1)
-       */
       setTransitionStep("3");
       await delay(700);
       if (!mounted) return;
@@ -80,9 +62,6 @@ export default function DjScreen() {
       await delay(720);
       if (!mounted) return;
 
-      /*
-       * 3. AŞAMA: PATLAMA (FLASH VE MESAJ)
-       */
       setTransitionStep(null);
       setFlash(true);
 
@@ -95,38 +74,26 @@ export default function DjScreen() {
       if (!mounted) return;
 
       setFlash(false);
-
       await delay(300);
 
       isTransitioning.current = false;
     };
 
-    /*
-     * =========================================================
-     * API
-     * =========================================================
-     */
-
     const fetchMsg = async () => {
       try {
         if (isTransitioning.current) return;
 
-        const res = await fetch("/api/parti?t=" + Date.now(), {
-          cache: "no-store",
-        });
-
+        const res = await fetch("/api/parti?t=" + Date.now(), { cache: "no-store" });
         const data = await res.json();
 
         if (!mounted || !data?.message) return;
 
         if (lastMsgId.current !== data.message.id) {
-          /* İlk açılış */
           if (lastMsgId.current === null) {
             lastMsgId.current = data.message.id;
             setMessage(data.message);
             setVisible(true);
           } else {
-            /* Yeni mesaj */
             lastMsgId.current = data.message.id;
             runTransition(data.message);
           }
@@ -137,9 +104,7 @@ export default function DjScreen() {
     };
 
     fetchMsg();
-
     const interval = setInterval(fetchMsg, 3000);
-
     const liveInterval = setInterval(() => {
       setLive((value) => !value);
     }, 900);
@@ -173,12 +138,6 @@ export default function DjScreen() {
     Icon = Ear;
   }
 
-  /*
-   * =========================================================
-   * PARTICLES
-   * =========================================================
-   */
-
   const particles = [
     { left: "7%", top: "18%", delay: "0s", duration: "7s" },
     { left: "15%", top: "67%", delay: "1.5s", duration: "9s" },
@@ -198,76 +157,53 @@ export default function DjScreen() {
       className="dj-screen relative min-h-screen overflow-hidden bg-[#030208] text-white flex flex-col justify-between p-6 md:p-10 select-none"
       style={{ "--accent": accent } as React.CSSProperties}
     >
-      {/* ========================================================= */}
       {/* BACKGROUND */}
-      {/* ========================================================= */}
-
       <div className="absolute inset-0 bg-[#030208]" />
 
       <div
         className="absolute inset-[-20%] animate-[premiumAmbient_12s_ease-in-out_infinite]"
-        style={{
-          background: `radial-gradient(ellipse at 50% 45%, ${accent}42 0%, ${accent}18 22%, transparent 58%)`,
-        }}
+        style={{ background: `radial-gradient(ellipse at 50% 45%, ${accent}42 0%, ${accent}18 22%, transparent 58%)` }}
       />
-
       <div
         className="absolute top-[-45%] left-[-18%] w-[65vw] h-[190vh] blur-[115px] opacity-[0.12] animate-[stageLightLeft_14s_ease-in-out_infinite]"
         style={{ background: accent, transform: "rotate(-25deg)" }}
       />
-
       <div
         className="absolute top-[-45%] right-[-18%] w-[60vw] h-[190vh] blur-[125px] opacity-[0.10] animate-[stageLightRight_17s_ease-in-out_infinite]"
         style={{ background: accent, transform: "rotate(25deg)" }}
       />
-
       <div
         className="absolute left-1/2 top-1/2 w-[34vw] h-[130vh] -translate-x-1/2 -translate-y-1/2 blur-[90px] opacity-[0.06] animate-[centerBeam_9s_ease-in-out_infinite]"
         style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }}
       />
-
-      {/* LIGHT SWEEP */}
       <div
         className="absolute left-[-30%] top-[-60%] w-[45vw] h-[220vh] rotate-[25deg] blur-[80px] opacity-[0.035] animate-[lightSweep_11s_ease-in-out_infinite]"
         style={{ background: "linear-gradient(90deg, transparent, white, transparent)" }}
       />
 
-      {/* PARTICLES */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {particles.map((particle, index) => (
           <span
             key={index}
             className="absolute w-[3px] h-[3px] rounded-full opacity-20 animate-[particleFloat_var(--duration)_ease-in-out_infinite]"
             style={{
-              left: particle.left,
-              top: particle.top,
-              background: accent,
-              boxShadow: `0 0 12px ${accent}`,
-              "--delay": particle.delay,
-              "--duration": particle.duration,
-              animationDelay: particle.delay,
+              left: particle.left, top: particle.top, background: accent, boxShadow: `0 0 12px ${accent}`,
+              "--delay": particle.delay, "--duration": particle.duration, animationDelay: particle.delay,
             } as React.CSSProperties}
           />
         ))}
       </div>
 
-      {/* RADIAL RINGS */}
       <div className="absolute left-1/2 top-1/2 w-[72vw] aspect-square rounded-full border opacity-[0.035] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_10s_ease-in-out_infinite]" style={{ borderColor: accent }} />
       <div className="absolute left-1/2 top-1/2 w-[52vw] aspect-square rounded-full border opacity-[0.05] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_7s_ease-in-out_infinite_reverse]" style={{ borderColor: accent }} />
       <div className="absolute left-1/2 top-1/2 w-[30vw] aspect-square rounded-full border opacity-[0.035] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_5s_ease-in-out_infinite]" style={{ borderColor: accent }} />
 
-      {/* VIGNETTE */}
       <div className="absolute inset-0 pointer-events-none z-[5]" style={{ background: "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.25) 68%, rgba(0,0,0,.78) 100%)" }} />
-
-      {/* SCANLINES */}
       <div className="absolute inset-0 pointer-events-none z-[6] opacity-[0.035]" style={{ background: "repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(255,255,255,.8) 4px, transparent 5px)" }} />
-
-      {/* GRAIN (🔥 HATA BURADAYDI, TERTEMİZ YAPILDI) */}
+      
       <div
         className="absolute inset-0 pointer-events-none z-[7] opacity-[0.025] mix-blend-screen animate-[grain_.25s_steps(2)_infinite]"
-        style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.8' /%3E%3C/svg%3E")`,
-        }}
+        style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.8' /%3E%3C/svg%3E")` }}
       />
 
       {/* FLASH */}
@@ -277,7 +213,7 @@ export default function DjScreen() {
       />
 
       {/* ========================================================= */}
-      {/* PREMIUM SİNEMATİK GEÇİŞ VE COUNTDOWN */}
+      {/* SİNEMATİK GEÇİŞ VE COUNTDOWN */}
       {/* ========================================================= */}
 
       {transitionStep && (
@@ -288,61 +224,53 @@ export default function DjScreen() {
           />
 
           {transitionStep === "PARTY" ? (
-            /* PARTY ÖZEL İNTRO EKRANI */
             <div className="relative flex flex-col items-center justify-center">
-              <div className="absolute w-[42vw] max-w-[760px] aspect-[2.7/1] rounded-full bg-[#0066ff]/20 blur-[90px] animate-[partyIntroGlow_1.5s_ease-out_forwards]" />
-              <div className="relative w-[62vw] max-w-[1050px] animate-[partyIntroLogo_1.5s_cubic-bezier(.16,1,.3,1)_forwards]">
-                <div className="absolute inset-0 blur-[25px] opacity-60">
-                  <img src="/overheard-party.png" alt="OVERHEARD PARTY" className="w-full h-auto object-contain mix-blend-screen" />
-                </div>
-                <img src="/overheard-party.png" alt="OVERHEARD PARTY" className="relative w-full h-auto object-contain mix-blend-screen" />
+              <div 
+                className="absolute w-[42vw] max-w-[760px] aspect-[2.7/1] rounded-full blur-[90px] animate-[partyIntroGlow_1.5s_ease-out_forwards]" 
+                style={{ background: accent, opacity: 0.2 }}
+              />
+              <div className="relative w-[50vw] max-w-[700px] animate-[partyIntroLogo_1.5s_cubic-bezier(.16,1,.3,1)_forwards]">
+                <img src="/overheard-party.png" alt="OVERHEARD PARTY" className="relative w-full h-auto object-contain" style={{ filter: `drop-shadow(0 0 25px ${accent}80)` }} />
                 <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(110deg,transparent_20%,rgba(255,255,255,.8)_45%,transparent_58%)] bg-[length:240%_100%] animate-[partyLogoShine_1.5s_ease-in-out_infinite]" />
               </div>
-              <div className="mt-3 text-[9px] md:text-xs font-black tracking-[0.65em] pl-[0.65em] text-white/45 animate-pulse">
+              <div className="mt-5 text-[10px] md:text-sm font-black tracking-[0.65em] pl-[0.65em] text-white/50 animate-pulse">
                 PARTİ AKIYOR
               </div>
             </div>
           ) : transitionStep === "3" || transitionStep === "2" || transitionStep === "1" ? (
-            /* 3 - 2 - 1 GERİ SAYIM ŞOVU */
             <div className="relative flex items-center justify-center">
               <div className="absolute w-[24vw] max-w-[340px] aspect-square rounded-full border border-white/10" />
               <div className="absolute w-[20vw] max-w-[290px] aspect-square rounded-full border border-white/5 animate-[countdownOrbit_2.1s_linear_infinite]" />
-
               <div
                 key={`ring-${transitionStep}`}
                 className="absolute w-[16vw] max-w-[240px] aspect-square rounded-full border-2 animate-[cinematicRing_700ms_ease-out_forwards]"
-                style={{ borderColor: "#1677ff" }}
+                style={{ borderColor: accent }}
               />
-
               <div
                 key={`tick-${transitionStep}`}
                 className="absolute w-[26vw] max-w-[380px] aspect-square rounded-full animate-[countdownPulse_700ms_ease-out_forwards]"
-                style={{ border: "1px solid rgba(22,119,255,.35)" }}
+                style={{ border: `1px solid ${accent}`, opacity: 0.3 }}
               />
-
               <h1
                 key={`num-${transitionStep}`}
                 className="relative z-10 font-black text-white leading-none animate-[countdownThump_700ms_cubic-bezier(.16,1,.3,1)_forwards]"
                 style={{
                   fontSize: "clamp(11rem, 28vw, 28rem)",
                   WebkitTextStroke: "1px rgba(255,255,255,.18)",
-                  textShadow: "0 0 18px rgba(0,102,255,.95), 0 0 55px rgba(0,102,255,.75), 0 0 130px rgba(0,102,255,.35)",
+                  textShadow: `0 0 18px ${accent}, 0 0 55px ${accent}90, 0 0 130px ${accent}40`,
                 }}
               >
                 {transitionStep}
               </h1>
-
               <div className="absolute -bottom-24 md:-bottom-28 flex items-center gap-3 text-[9px] md:text-xs font-black tracking-[0.5em] pl-[0.5em] text-white/40">
-                <span className="w-10 md:w-16 h-px bg-gradient-to-r from-transparent to-[#1677ff]" />
+                <span className="w-10 md:w-16 h-px" style={{ background: `linear-gradient(to right, transparent, ${accent})` }} />
                 HAZIR OL
-                <span className="w-10 md:w-16 h-px bg-gradient-to-l from-transparent to-[#1677ff]" />
+                <span className="w-10 md:w-16 h-px" style={{ background: `linear-gradient(to left, transparent, ${accent})` }} />
               </div>
             </div>
           ) : (
-            /* YENİ İTİRAF VEYA DİĞER YAZI AŞAMASI */
             <div className="relative flex flex-col items-center">
               <div className="mb-6 h-px animate-[cinematicLine_1.8s_ease-out_forwards]" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
-              
               <h2
                 key={`text-${transitionStep}`}
                 className="relative font-black uppercase text-center text-white animate-[cinematicText_1.8s_cubic-bezier(0.16,1,0.3,1)_forwards]"
@@ -350,7 +278,6 @@ export default function DjScreen() {
               >
                 {transitionStep}
               </h2>
-
               <div className="mt-6 h-px animate-[cinematicLine_1.8s_ease-out_forwards]" style={{ background: `linear-gradient(90deg, transparent, ${accent}, transparent)` }} />
               <span className="absolute -bottom-14 text-xs font-bold tracking-[0.6em] pl-[0.6em] text-white/50 animate-pulse">HAZIRLAN</span>
             </div>
@@ -363,18 +290,22 @@ export default function DjScreen() {
       {/* ========================================================= */}
 
       <header className="relative z-20 flex justify-between items-start">
-        {/* PARTY LOGO */}
+        
+        {/* TEMİZLENMİŞ VE TEMA RENGİNE UYARLANMIŞ LOGO */}
         <div className="relative flex items-center justify-center min-w-0">
-          <div className="absolute -inset-10 md:-inset-16 rounded-full blur-[55px] opacity-35 animate-[partyLogoHalo_4s_ease-in-out_infinite] bg-[#0066ff]" />
-          <div className="absolute -inset-4 md:-inset-8 rounded-full border border-[#1677ff]/25 animate-[partyLogoRing_7s_linear_infinite]" />
-          <div className="absolute -inset-2 md:-inset-5 rounded-full border border-white/10 animate-[partyLogoRing_11s_linear_infinite_reverse]" />
-
-          <div className="relative w-[230px] md:w-[390px] lg:w-[470px]">
-            <div className="absolute inset-0 blur-[22px] opacity-45 animate-[partyLogoGlow_3.5s_ease-in-out_infinite]">
-              <img src="/overheard-party.png" alt="OVERHEARD PARTY" className="w-full h-auto object-contain mix-blend-screen" />
-            </div>
-            <img src="/overheard-party.png" alt="OVERHEARD PARTY" className="relative w-full h-auto object-contain mix-blend-screen drop-shadow-[0_0_22px_rgba(0,102,255,.55)] animate-[partyLogoFloat_5s_ease-in-out_infinite]" />
-            <div className="absolute inset-0 pointer-events-none bg-[linear-gradient(110deg,transparent_20%,rgba(255,255,255,.8)_45%,transparent_58%)] bg-[length:240%_100%] animate-[partyLogoShine_1.5s_ease-in-out_infinite]" />
+          <div className="relative w-48 md:w-64 lg:w-72 transition-all duration-700">
+            {/* Logonun arkasındaki dinamik renk parlaması */}
+            <div
+              className="absolute inset-0 blur-[30px] opacity-35 animate-pulse"
+              style={{ background: accent }}
+            />
+            {/* Logo resmi - mix-blend kaldirildi, saydam PNG olmali! */}
+            <img
+              src="/overheard-party.png"
+              alt="OVERHEARD PARTY"
+              className="relative w-full h-auto object-contain transition-all duration-700"
+              style={{ filter: `drop-shadow(0 0 15px ${accent}60)` }}
+            />
           </div>
         </div>
 
@@ -394,11 +325,11 @@ export default function DjScreen() {
         {message ? (
           <div key={message.id} className={`w-full flex flex-col items-center transition-all duration-700 ${visible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-8 scale-[.94] blur-md"}`}>
             
-            {/* CATEGORY BADGE */}
-            <div className="relative flex items-center gap-3 rounded-full border px-7 py-3 mb-9 md:mb-12 backdrop-blur-2xl overflow-hidden animate-[badgePremium_1s_cubic-bezier(.16,1,.3,1)]" style={{ borderColor: `${accent}90`, color: accent, background: `${accent}10`, boxShadow: `0 0 35px ${accent}20, inset 0 0 25px ${accent}08` }}>
+            {/* CATEGORY BADGE (Biraz Büyütüldü) */}
+            <div className="relative flex items-center gap-3 rounded-full border px-8 py-3.5 mb-9 md:mb-12 backdrop-blur-2xl overflow-hidden animate-[badgePremium_1s_cubic-bezier(.16,1,.3,1)]" style={{ borderColor: `${accent}90`, color: accent, background: `${accent}10`, boxShadow: `0 0 35px ${accent}20, inset 0 0 25px ${accent}08` }}>
               <div className="absolute inset-y-0 left-[-80%] w-[45%] skew-x-[-20deg] animate-[badgeSweep_4s_ease-in-out_infinite]" style={{ background: "linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent)" }} />
-              <Icon size={21} className="relative" />
-              <span className="relative text-lg md:text-2xl font-black tracking-[0.32em] pl-[0.32em]">{title}</span>
+              <Icon size={24} className="relative" />
+              <span className="relative text-xl md:text-3xl font-black tracking-[0.32em] pl-[0.32em]">{title}</span>
             </div>
 
             {/* MESSAGE TEXT */}
@@ -435,7 +366,6 @@ export default function DjScreen() {
 
       <footer className="relative z-20 flex justify-between items-end gap-4">
         
-        {/* MASADAN GÖNDER */}
         <div className="rounded-2xl border border-white/10 bg-black/55 backdrop-blur-2xl px-5 py-4 md:px-8 md:py-5 shadow-[0_10px_50px_rgba(0,0,0,.45)]">
           <div className="flex flex-wrap items-center gap-3">
             <span className="text-gray-400 font-bold tracking-[0.2em] text-[9px] md:text-xs">MASADAN GÖNDER</span>
@@ -444,14 +374,13 @@ export default function DjScreen() {
           </div>
         </div>
 
-        {/* SPONSOR */}
         <div className="relative p-[1px] rounded-2xl overflow-hidden">
           <div
             className="absolute inset-[-100%] animate-[sponsorSweep_6s_linear_infinite]"
             style={{ background: `conic-gradient(from 0deg, transparent 0deg, transparent 100deg, ${accent} 150deg, white 175deg, ${accent} 200deg, transparent 250deg, transparent 360deg)` }}
           />
           <div className="relative bg-[#080808] rounded-2xl p-3 md:p-4">
-            <img src="/D6.png" alt="D6 Sosyal" className="h-11 md:h-16 w-auto object-contain" />
+            <img src="/d6.png" alt="D6 Sosyal" className="h-11 md:h-16 w-auto object-contain" />
           </div>
         </div>
 
@@ -469,51 +398,21 @@ export default function DjScreen() {
         @keyframes centerBeam { 0%, 100% { transform: translate(-50%, -50%) scaleX(.65); opacity: .03; } 50% { transform: translate(-50%, -50%) scaleX(1.25); opacity: .09; } }
         @keyframes lightSweep { 0% { transform: translateX(-20%) rotate(25deg); opacity: 0; } 20% { opacity: .04; } 50% { opacity: .06; } 80% { opacity: .02; } 100% { transform: translateX(280%) rotate(25deg); opacity: 0; } }
 
-        /* YENİ EFEKTLER (1.8 Saniyelik Yazı ve 3-2-1) */
-        @keyframes cinematicText {
-          0% { opacity: 0; transform: scale(0.85); filter: blur(15px); letter-spacing: 0.1em; padding-left: 0.1em; }
-          15% { opacity: 1; transform: scale(1); filter: blur(0); letter-spacing: 0.28em; padding-left: 0.28em; }
-          85% { opacity: 1; transform: scale(1); filter: blur(0); letter-spacing: 0.28em; padding-left: 0.28em; }
-          100% { opacity: 0; transform: scale(1.1); filter: blur(10px); letter-spacing: 0.35em; padding-left: 0.35em; }
-        }
-
-        @keyframes cinematicLine {
-          0% { width: 0; opacity: 0; }
-          15% { width: 250px; opacity: 1; }
-          85% { width: 250px; opacity: 1; }
-          100% { width: 350px; opacity: 0; }
-        }
-
-        @keyframes countdownThump {
-          0% { opacity: 0; transform: scale(1.8); filter: blur(20px); }
-          25% { opacity: 1; transform: scale(1); filter: blur(0); }
-          75% { opacity: 1; transform: scale(0.95); filter: blur(0); }
-          100% { opacity: 0; transform: scale(0.8); filter: blur(10px); }
-        }
-
-        @keyframes cinematicRing {
-          0% { opacity: 1; transform: scale(0.2); border-width: 10px; }
-          100% { opacity: 0; transform: scale(2.2); border-width: 0px; }
-        }
-
+        /* SİNEMATİK COUNTDOWN AŞAMASI */
+        @keyframes countdownThump { 0% { opacity: 0; transform: scale(1.8); filter: blur(20px); } 25% { opacity: 1; transform: scale(1); filter: blur(0); } 75% { opacity: 1; transform: scale(0.95); filter: blur(0); } 100% { opacity: 0; transform: scale(0.8); filter: blur(10px); } }
+        @keyframes cinematicRing { 0% { opacity: 1; transform: scale(0.2); border-width: 10px; } 100% { opacity: 0; transform: scale(2.2); border-width: 0px; } }
+        @keyframes cinematicText { 0% { opacity: 0; transform: scale(0.85); filter: blur(15px); letter-spacing: 0.1em; padding-left: 0.1em; } 15% { opacity: 1; transform: scale(1); filter: blur(0); letter-spacing: 0.28em; padding-left: 0.28em; } 85% { opacity: 1; transform: scale(1); filter: blur(0); letter-spacing: 0.28em; padding-left: 0.28em; } 100% { opacity: 0; transform: scale(1.1); filter: blur(10px); letter-spacing: 0.35em; padding-left: 0.35em; } }
+        @keyframes cinematicLine { 0% { width: 0; opacity: 0; } 15% { width: 250px; opacity: 1; } 85% { width: 250px; opacity: 1; } 100% { width: 350px; opacity: 0; } }
         @keyframes transitionGlow { 0%, 100% { transform: scale(0.75); opacity: 0.1; } 50% { transform: scale(1.15); opacity: 0.28; } }
         @keyframes countdownOrbit { to { transform: rotate(360deg); } }
         @keyframes countdownPulse { 0% { opacity: .85; transform: scale(.35); box-shadow: 0 0 0 rgba(0,102,255,0); } 55% { opacity: .35; transform: scale(1); box-shadow: 0 0 70px rgba(0,102,255,.25); } 100% { opacity: 0; transform: scale(1.65); } }
 
         /* PARTY LOGO ANİMASYONLARI */
-        @keyframes partyLogoFloat { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-6px) scale(1.015); } }
-        @keyframes partyLogoHalo { 0%, 100% { transform: scale(.86); opacity: .18; } 50% { transform: scale(1.12); opacity: .38; } }
-        @keyframes partyLogoRing { to { transform: rotate(360deg) scale(1.04); } }
-        @keyframes partyLogoGlow { 0%, 100% { opacity: .28; transform: scale(.97); } 50% { opacity: .62; transform: scale(1.035); } }
         @keyframes partyLogoShine { 0% { background-position: 180% 0; opacity: 0; } 20% { opacity: 1; } 60%, 100% { background-position: -80% 0; opacity: 0; } }
         @keyframes partyIntroLogo { 0% { opacity: 0; transform: scale(.72); filter: blur(18px); } 35% { opacity: 1; transform: scale(1.025); filter: blur(0); } 70% { transform: scale(.99); } 100% { opacity: 0; transform: scale(1.08); filter: blur(8px); } }
         @keyframes partyIntroGlow { 0% { opacity: 0; transform: scale(.55); } 35% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.35); } }
 
         /* DİĞER DETAYLAR */
-        @keyframes logoHalo { 0%, 100% { transform: scale(.95); opacity: .18; } 50% { transform: scale(1.12); opacity: .34; } }
-        @keyframes logoBreath { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.025); } }
-        @keyframes logoRing { 0%, 100% { transform: scale(.96); opacity: .28; } 50% { transform: scale(1.05); opacity: .72; } }
-        @keyframes logoRingInner { 0%, 100% { transform: scale(1); opacity: .18; } 50% { transform: scale(.94); opacity: .45; } }
         @keyframes particleFloat { 0%, 100% { transform: translate3d(0,0,0); opacity: 0; } 20% { opacity: .25; } 50% { transform: translate3d(12px,-35px,0); opacity: .5; } 80% { opacity: .15; } }
         @keyframes slowPulse { 0%, 100% { transform: translate(-50%, -50%) scale(.96); opacity: .025; } 50% { transform: translate(-50%, -50%) scale(1.04); opacity: .07; } }
         @keyframes sponsorSweep { to { transform: rotate(360deg); } }
