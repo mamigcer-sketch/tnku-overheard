@@ -442,6 +442,25 @@ export default function DjScreen() {
         }}
       />
 
+      <div
+        className="
+          absolute
+          left-1/2
+          top-1/2
+          w-[30vw]
+          aspect-square
+          rounded-full
+          border
+          opacity-[0.035]
+          -translate-x-1/2
+          -translate-y-1/2
+          animate-[slowPulse_5s_ease-in-out_infinite]
+        "
+        style={{
+          borderColor: accent,
+        }}
+      />
+
       {/* VIGNETTE */}
 
       <div
@@ -519,263 +538,78 @@ export default function DjScreen() {
       />
 
       {/* ========================================================= */}
-      {/* 3 - 2 - 1 TRANSITION */}
+      {/* PREMIUM SİNEMATİK GEÇİŞ VE COUNTDOWN */}
       {/* ========================================================= */}
 
       {transitionStep && (
-        <div
-          className="
-            absolute
-            inset-0
-            z-[90]
-            flex
-            items-center
-            justify-center
-            overflow-hidden
-            bg-black/70
-            backdrop-blur-md
-          "
-        >
-
-          {/* GLOW */}
-
+        <div className="absolute inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-2xl overflow-hidden">
+          
+          {/* Arkadaki devasa loş ortam ışığı */}
           <div
-            className="
-              absolute
-              left-1/2
-              top-1/2
-              w-[25vw]
-              aspect-square
-              -translate-x-1/2
-              -translate-y-1/2
-              rounded-full
-              blur-[100px]
-              animate-[countdownGlow_1s_ease-out_forwards]
-            "
-            style={{
-              background: accent,
-            }}
+            className="absolute w-[40vw] aspect-square rounded-full blur-[120px] opacity-30 animate-pulse"
+            style={{ background: accent }}
           />
 
-          {/* EXPANDING RING */}
-
-          <div
-            key={`ring-${transitionStep}`}
-            className="
-              absolute
-              left-1/2
-              top-1/2
-              w-[10vw]
-              aspect-square
-              -translate-x-1/2
-              -translate-y-1/2
-              rounded-full
-              border-[2px]
-              animate-[countdownRing_900ms_cubic-bezier(.16,1,.3,1)_forwards]
-            "
-            style={{
-              borderColor: accent,
-              boxShadow: `0 0 30px ${accent}, 0 0 80px ${accent}80`,
-            }}
-          />
-
-          {/* SECOND RING */}
-
-          <div
-            key={`ring2-${transitionStep}`}
-            className="
-              absolute
-              left-1/2
-              top-1/2
-              w-[4vw]
-              aspect-square
-              -translate-x-1/2
-              -translate-y-1/2
-              rounded-full
-              border
-              opacity-60
-              animate-[countdownRingSmall_800ms_ease-out_forwards]
-            "
-            style={{
-              borderColor: accent,
-            }}
-          />
-
-          {/* NUMBER */}
-
-          <div
-            key={`number-${transitionStep}`}
-            className="
-              relative
-              flex
-              items-center
-              justify-center
-              animate-[countdownNumber_700ms_cubic-bezier(.16,1,.3,1)_forwards]
-            "
-          >
-
-            <span
-              className="
-                absolute
-                font-black
-                text-[clamp(12rem,32vw,32rem)]
-                leading-none
-                text-white/5
-                blur-sm
-              "
-            >
-              {transitionStep}
-            </span>
-
-            <span
-              className="
-                relative
-                font-black
-                text-[clamp(9rem,24vw,24rem)]
-                leading-none
-                text-white
-              "
-              style={{
-                textShadow: `
-                  0 0 20px ${accent},
-                  0 0 50px ${accent},
-                  0 0 110px ${accent}90,
-                  0 0 180px ${accent}50
-                `,
-              }}
-            >
-              {transitionStep}
-            </span>
-
-          </div>
-
-          {/* BOTTOM STATUS */}
-
-          <div
-            className="
-              absolute
-              bottom-[17%]
-              left-1/2
-              -translate-x-1/2
-              flex
-              items-center
-              gap-3
-              animate-[countdownStatus_700ms_ease-out_forwards]
-            "
-          >
-
-            <span
-              className="w-10 h-px"
-              style={{
-                background: `linear-gradient(90deg, transparent, ${accent})`,
-              }}
-            />
-
-            <span
-              className="
-                text-[9px]
-                md:text-xs
-                font-black
-                tracking-[0.45em]
-                pl-[0.45em]
-                text-white/40
-              "
-            >
-              YENİ GÖNDERİ
-            </span>
-
-            <span
-              className="w-10 h-px"
-              style={{
-                background: `linear-gradient(90deg, ${accent}, transparent)`,
-              }}
-            />
-
-          </div>
-
-        </div>
-      )}
-
-      {/* ========================================================= */}
-      {/* MERAK YAZISI */}
-      {/* ========================================================= */}
-
-      {transitionStep &&
-        transitionStep !== "3" &&
-        transitionStep !== "2" &&
-        transitionStep !== "1" && (
-          <div
-            className="
-              absolute
-              inset-0
-              z-[95]
-              flex
-              items-center
-              justify-center
-              bg-black
-              animate-[revealScreen_850ms_cubic-bezier(.16,1,.3,1)_forwards]
-            "
-          >
-
-            <div
-              className="
-                flex
-                flex-col
-                items-center
-                justify-center
-                text-center
-              "
-            >
-
+          {transitionStep === "3" || transitionStep === "2" || transitionStep === "1" ? (
+            /* 1) RAKAMLARIN ŞOVU (3, 2, 1) */
+            <div className="relative flex items-center justify-center">
+              {/* Sadece tek bir keskin şok dalgası */}
               <div
-                className="
-                  mb-5
-                  h-px
-                  w-16
-                  animate-[mysteryLine_850ms_ease-out_forwards]
-                "
+                key={`ring-${transitionStep}`}
+                className="absolute w-[20vw] h-[20vw] rounded-full border-[3px] animate-[cinematicRing_700ms_ease-out_forwards]"
+                style={{ borderColor: accent }}
+              />
+
+              {/* Rakamın Kendisi */}
+              <h1
+                key={`num-${transitionStep}`}
+                className="relative font-black text-white leading-none animate-[cinematicNumber_700ms_cubic-bezier(0.16,1,0.3,1)_forwards]"
                 style={{
-                  background: accent,
-                  boxShadow: `0 0 20px ${accent}`,
+                  fontSize: "clamp(12rem, 30vw, 30rem)",
+                  textShadow: `0 0 60px ${accent}80, 0 0 120px ${accent}40`,
+                }}
+              >
+                {transitionStep}
+              </h1>
+            </div>
+          ) : (
+            /* 2) YAZILARIN ŞOVU (YENİ İTİRAF, vb.) */
+            <div className="relative flex flex-col items-center">
+              
+              {/* Üstteki ince neon çizgi */}
+              <div
+                className="mb-6 h-px animate-[cinematicLine_850ms_ease-out_forwards]"
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
                 }}
               />
 
               <h2
-                className="
-                  font-black
-                  uppercase
-                  text-white
-                  text-[clamp(3rem,7vw,8rem)]
-                  tracking-[-0.04em]
-                  animate-[mysteryText_850ms_cubic-bezier(.16,1,.3,1)_forwards]
-                "
+                key={`text-${transitionStep}`}
+                className="relative font-black uppercase text-white animate-[cinematicText_850ms_cubic-bezier(0.16,1,0.3,1)_forwards]"
                 style={{
-                  textShadow: `
-                    0 0 20px ${accent},
-                    0 0 60px ${accent}80
-                  `,
+                  fontSize: "clamp(3rem, 7vw, 7rem)",
+                  textShadow: `0 0 40px ${accent}80`,
                 }}
               >
                 {transitionStep}
               </h2>
 
+              {/* Alttaki ince neon çizgi */}
               <div
-                className="
-                  mt-5
-                  text-[9px]
-                  md:text-xs
-                  tracking-[0.55em]
-                  pl-[0.55em]
-                  text-white/30
-                "
-              >
-                MASADAN GELİYOR...
-              </div>
+                className="mt-6 h-px animate-[cinematicLine_850ms_ease-out_forwards]"
+                style={{
+                  background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+                }}
+              />
 
+              <span className="absolute -bottom-14 text-xs font-bold tracking-[0.6em] pl-[0.6em] text-white/50 animate-pulse">
+                HAZIRLAN
+              </span>
             </div>
-
-          </div>
-        )}
+          )}
+        </div>
+      )}
 
       {/* ========================================================= */}
       {/* HEADER */}
@@ -1299,536 +1133,174 @@ export default function DjScreen() {
       <style>{`
 
         /* ===================================================== */
-        /* BACKGROUND */
+        /* BACKGROUND & LIGHTS */
         /* ===================================================== */
 
         @keyframes premiumAmbient {
-
-          0%, 100% {
-            transform: scale(1);
-            opacity: .52;
-          }
-
-          50% {
-            transform: scale(1.16);
-            opacity: .9;
-          }
-
+          0%, 100% { transform: scale(1); opacity: .52; }
+          50% { transform: scale(1.16); opacity: .9; }
         }
 
         @keyframes stageLightLeft {
-
-          0%, 100% {
-            transform: translateX(-12%) rotate(-25deg) scale(1);
-            opacity: .08;
-          }
-
-          50% {
-            transform: translateX(18%) rotate(-17deg) scale(1.08);
-            opacity: .17;
-          }
-
+          0%, 100% { transform: translateX(-12%) rotate(-25deg) scale(1); opacity: .08; }
+          50% { transform: translateX(18%) rotate(-17deg) scale(1.08); opacity: .17; }
         }
 
         @keyframes stageLightRight {
-
-          0%, 100% {
-            transform: translateX(12%) rotate(25deg) scale(1);
-            opacity: .07;
-          }
-
-          50% {
-            transform: translateX(-18%) rotate(17deg) scale(1.08);
-            opacity: .15;
-          }
-
+          0%, 100% { transform: translateX(12%) rotate(25deg) scale(1); opacity: .07; }
+          50% { transform: translateX(-18%) rotate(17deg) scale(1.08); opacity: .15; }
         }
 
         @keyframes centerBeam {
-
-          0%, 100% {
-            transform: translate(-50%, -50%) scaleX(.65);
-            opacity: .03;
-          }
-
-          50% {
-            transform: translate(-50%, -50%) scaleX(1.25);
-            opacity: .09;
-          }
-
+          0%, 100% { transform: translate(-50%, -50%) scaleX(.65); opacity: .03; }
+          50% { transform: translate(-50%, -50%) scaleX(1.25); opacity: .09; }
         }
 
         @keyframes lightSweep {
-
-          0% {
-            transform: translateX(-20%) rotate(25deg);
-            opacity: 0;
-          }
-
-          20% {
-            opacity: .04;
-          }
-
-          50% {
-            opacity: .06;
-          }
-
-          80% {
-            opacity: .02;
-          }
-
-          100% {
-            transform: translateX(280%) rotate(25deg);
-            opacity: 0;
-          }
-
+          0% { transform: translateX(-20%) rotate(25deg); opacity: 0; }
+          20% { opacity: .04; }
+          50% { opacity: .06; }
+          80% { opacity: .02; }
+          100% { transform: translateX(280%) rotate(25deg); opacity: 0; }
         }
 
         /* ===================================================== */
-        /* COUNTDOWN GLOW */
+        /* YEPYENİ SİNEMATİK COUNTDOWN AŞAMASI (TEMİZLENDİ) */
         /* ===================================================== */
 
-        @keyframes countdownGlow {
+        /* 1) Rakam Animasyonu */
+        @keyframes cinematicNumber {
+          0% { opacity: 0; transform: scale(1.8); filter: blur(20px); }
+          25% { opacity: 1; transform: scale(1); filter: blur(0); }
+          75% { opacity: 1; transform: scale(0.95); filter: blur(0); }
+          100% { opacity: 0; transform: scale(0.8); filter: blur(10px); }
+        }
 
-          0% {
-            transform: translate(-50%, -50%) scale(.35);
-            opacity: 0;
+        /* 2) Şok Dalgası */
+        @keyframes cinematicRing {
+          0% { opacity: 1; transform: scale(0.2); border-width: 10px; }
+          100% { opacity: 0; transform: scale(2.2); border-width: 0px; }
+        }
+
+        /* 3) Başlık Animasyonu (YENİ İTİRAF vb.) */
+        @keyframes cinematicText {
+          0% { 
+            opacity: 0; 
+            transform: scale(0.85); 
+            filter: blur(15px); 
+            letter-spacing: 0.1em; 
+            padding-left: 0.1em; 
           }
-
-          35% {
-            opacity: .35;
+          20% { 
+            opacity: 1; 
+            transform: scale(1); 
+            filter: blur(0); 
+            letter-spacing: 0.28em; 
+            padding-left: 0.28em; 
           }
-
-          100% {
-            transform: translate(-50%, -50%) scale(2.4);
-            opacity: 0;
+          80% { 
+            opacity: 1; 
+            transform: scale(1); 
+            filter: blur(0); 
+            letter-spacing: 0.28em; 
+            padding-left: 0.28em; 
           }
+          100% { 
+            opacity: 0; 
+            transform: scale(1.1); 
+            filter: blur(10px); 
+            letter-spacing: 0.35em; 
+            padding-left: 0.35em; 
+          }
+        }
 
+        /* 4) Çizgi Çekilme Animasyonu */
+        @keyframes cinematicLine {
+          0% { width: 0; opacity: 0; }
+          30% { width: 250px; opacity: 1; }
+          70% { width: 250px; opacity: 1; }
+          100% { width: 350px; opacity: 0; }
         }
 
         /* ===================================================== */
-        /* COUNTDOWN RING */
-        /* ===================================================== */
-
-        @keyframes countdownRing {
-
-          0% {
-            transform: translate(-50%, -50%) scale(.35);
-            opacity: 0;
-            border-width: 8px;
-          }
-
-          20% {
-            opacity: 1;
-          }
-
-          100% {
-            transform: translate(-50%, -50%) scale(5);
-            opacity: 0;
-            border-width: 1px;
-          }
-
-        }
-
-        @keyframes countdownRingSmall {
-
-          0% {
-            transform: translate(-50%, -50%) scale(.4);
-            opacity: 0;
-          }
-
-          25% {
-            opacity: .8;
-          }
-
-          100% {
-            transform: translate(-50%, -50%) scale(4);
-            opacity: 0;
-          }
-
-        }
-
-        /* ===================================================== */
-        /* COUNTDOWN NUMBER */
-        /* ===================================================== */
-
-        @keyframes countdownNumber {
-
-          0% {
-            opacity: 0;
-            transform: scale(2.2);
-            filter: blur(18px);
-          }
-
-          18% {
-            opacity: 1;
-            transform: scale(.92);
-            filter: blur(0);
-          }
-
-          35% {
-            transform: scale(1.04);
-          }
-
-          55% {
-            transform: scale(1);
-          }
-
-          78% {
-            opacity: 1;
-            transform: scale(1.02);
-          }
-
-          100% {
-            opacity: 0;
-            transform: scale(.72);
-            filter: blur(10px);
-          }
-
-        }
-
-        /* ===================================================== */
-        /* COUNTDOWN STATUS */
-        /* ===================================================== */
-
-        @keyframes countdownStatus {
-
-          0% {
-            opacity: 0;
-            transform: translateY(12px);
-          }
-
-          25% {
-            opacity: 1;
-          }
-
-          75% {
-            opacity: .45;
-          }
-
-          100% {
-            opacity: 0;
-            transform: translateY(-5px);
-          }
-
-        }
-
-        /* ===================================================== */
-        /* MYSTERY SCREEN */
-        /* ===================================================== */
-
-        @keyframes revealScreen {
-
-          0% {
-            opacity: 0;
-          }
-
-          18% {
-            opacity: 1;
-          }
-
-          75% {
-            opacity: 1;
-          }
-
-          100% {
-            opacity: 0;
-          }
-
-        }
-
-        @keyframes mysteryText {
-
-          0% {
-            opacity: 0;
-            transform: scale(.72);
-            filter: blur(20px);
-            letter-spacing: .12em;
-          }
-
-          30% {
-            opacity: 1;
-            transform: scale(1.05);
-            filter: blur(0);
-            letter-spacing: -.04em;
-          }
-
-          60% {
-            transform: scale(1);
-          }
-
-          100% {
-            opacity: 0;
-            transform: scale(1.08);
-            filter: blur(10px);
-          }
-
-        }
-
-        @keyframes mysteryLine {
-
-          0% {
-            width: 0;
-            opacity: 0;
-          }
-
-          35% {
-            width: 4rem;
-            opacity: 1;
-          }
-
-          100% {
-            width: 9rem;
-            opacity: 0;
-          }
-
-        }
-
-        /* ===================================================== */
-        /* MESSAGE */
-        /* ===================================================== */
-
-        @keyframes messageReveal {
-
-          0% {
-            opacity: 0;
-            transform: scale(.68) translateY(50px);
-            filter: blur(24px);
-          }
-
-          45% {
-            opacity: 1;
-            transform: scale(1.035) translateY(-6px);
-            filter: blur(0);
-          }
-
-          65% {
-            transform: scale(.985);
-          }
-
-          100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            filter: blur(0);
-          }
-
-        }
-
-        @keyframes badgePremium {
-
-          0% {
-            opacity: 0;
-            transform: translateY(-22px) scale(.82);
-            filter: blur(8px);
-          }
-
-          70% {
-            opacity: 1;
-            transform: translateY(2px) scale(1.02);
-            filter: blur(0);
-          }
-
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-
-        }
-
-        @keyframes badgeSweep {
-
-          0% {
-            left: -80%;
-          }
-
-          45%, 100% {
-            left: 140%;
-          }
-
-        }
-
-        @keyframes energyPremium {
-
-          0% {
-            left: -55%;
-            opacity: 0;
-          }
-
-          20% {
-            opacity: 1;
-          }
-
-          75% {
-            opacity: 1;
-          }
-
-          100% {
-            left: 110%;
-            opacity: 0;
-          }
-
-        }
-
-        /* ===================================================== */
-        /* LOGO */
+        /* LOGO VE DETAYLAR */
         /* ===================================================== */
 
         @keyframes logoHalo {
-
-          0%, 100% {
-            transform: scale(.95);
-            opacity: .18;
-          }
-
-          50% {
-            transform: scale(1.12);
-            opacity: .34;
-          }
-
+          0%, 100% { transform: scale(.95); opacity: .18; }
+          50% { transform: scale(1.12); opacity: .34; }
         }
 
         @keyframes logoBreath {
-
-          0%, 100% {
-            transform: scale(1);
-          }
-
-          50% {
-            transform: scale(1.025);
-          }
-
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.025); }
         }
 
         @keyframes logoRing {
-
-          0%, 100% {
-            transform: scale(.96);
-            opacity: .28;
-          }
-
-          50% {
-            transform: scale(1.05);
-            opacity: .72;
-          }
-
+          0%, 100% { transform: scale(.96); opacity: .28; }
+          50% { transform: scale(1.05); opacity: .72; }
         }
 
         @keyframes logoRingInner {
-
-          0%, 100% {
-            transform: scale(1);
-            opacity: .18;
-          }
-
-          50% {
-            transform: scale(.94);
-            opacity: .45;
-          }
-
+          0%, 100% { transform: scale(1); opacity: .18; }
+          50% { transform: scale(.94); opacity: .45; }
         }
-
-        /* ===================================================== */
-        /* PARTICLES */
-        /* ===================================================== */
 
         @keyframes particleFloat {
-
-          0%, 100% {
-            transform: translate3d(0,0,0);
-            opacity: 0;
-          }
-
-          20% {
-            opacity: .25;
-          }
-
-          50% {
-            transform: translate3d(12px,-35px,0);
-            opacity: .5;
-          }
-
-          80% {
-            opacity: .15;
-          }
-
+          0%, 100% { transform: translate3d(0,0,0); opacity: 0; }
+          20% { opacity: .25; }
+          50% { transform: translate3d(12px,-35px,0); opacity: .5; }
+          80% { opacity: .15; }
         }
-
-        /* ===================================================== */
-        /* RINGS */
-        /* ===================================================== */
 
         @keyframes slowPulse {
-
-          0%, 100% {
-            transform: translate(-50%, -50%) scale(.96);
-            opacity: .025;
-          }
-
-          50% {
-            transform: translate(-50%, -50%) scale(1.04);
-            opacity: .07;
-          }
-
+          0%, 100% { transform: translate(-50%, -50%) scale(.96); opacity: .025; }
+          50% { transform: translate(-50%, -50%) scale(1.04); opacity: .07; }
         }
 
-        /* ===================================================== */
-        /* SPONSOR */
-        /* ===================================================== */
-
         @keyframes sponsorSweep {
-
-          to {
-            transform: rotate(360deg);
-          }
-
+          to { transform: rotate(360deg); }
         }
 
         @keyframes sparkleFloat {
-
-          0%, 100% {
-            transform: translateY(0) rotate(0deg);
-          }
-
-          50% {
-            transform: translateY(-10px) rotate(8deg);
-          }
-
+          0%, 100% { transform: translateY(0) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(8deg); }
         }
-
-        /* ===================================================== */
-        /* GRAIN */
-        /* ===================================================== */
 
         @keyframes grain {
-
-          0% {
-            transform: translate(0,0);
-          }
-
-          25% {
-            transform: translate(2%,-1%);
-          }
-
-          50% {
-            transform: translate(-1%,2%);
-          }
-
-          75% {
-            transform: translate(-2%,-1%);
-          }
-
-          100% {
-            transform: translate(0,0);
-          }
-
+          0% { transform: translate(0,0); }
+          25% { transform: translate(2%,-1%); }
+          50% { transform: translate(-1%,2%); }
+          75% { transform: translate(-2%,-1%); }
+          100% { transform: translate(0,0); }
         }
 
-        /* ===================================================== */
-        /* REDUCED MOTION */
-        /* ===================================================== */
+        @keyframes messageReveal {
+          0% { opacity: 0; transform: scale(.68) translateY(50px); filter: blur(24px); }
+          45% { opacity: 1; transform: scale(1.035) translateY(-6px); filter: blur(0); }
+          65% { transform: scale(.985); }
+          100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
+
+        @keyframes badgePremium {
+          0% { opacity: 0; transform: translateY(-22px) scale(.82); filter: blur(8px); }
+          70% { opacity: 1; transform: translateY(2px) scale(1.02); filter: blur(0); }
+          100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        @keyframes badgeSweep {
+          0% { left: -80%; }
+          45%, 100% { left: 140%; }
+        }
+
+        @keyframes energyPremium {
+          0% { left: -55%; opacity: 0; }
+          20% { opacity: 1; }
+          75% { opacity: 1; }
+          100% { left: 110%; opacity: 0; }
+        }
 
         @media (prefers-reduced-motion: reduce) {
-
           *,
           *::before,
           *::after {
@@ -1836,7 +1308,6 @@ export default function DjScreen() {
             animation-iteration-count: 1 !important;
             transition-duration: .01ms !important;
           }
-
         }
 
       `}</style>
