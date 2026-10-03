@@ -67,7 +67,7 @@ export default function PartyInputPage() {
     selection: "selection:bg-red-500/30"
   };
 
-  if (type === 'REZIL') {
+  if (type === 'LİNÇ') {
     themeObj = {
       glow: "from-fuchsia-600/20",
       ambient: "bg-fuchsia-500/10",
@@ -164,9 +164,9 @@ export default function PartyInputPage() {
               <span className="text-[10px] font-black tracking-widest">İTİRAF</span>
             </button>
 
-            <button type="button" onClick={() => setType('REZIL')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'REZIL' ? 'bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_20px_rgba(192,38,211,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
+            <button type="button" onClick={() => setType('LİNÇ')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'LİNÇ' ? 'bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_20px_rgba(192,38,211,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
               <EyeOff size={20} />
-              <span className="text-[10px] font-black tracking-widest">REZİL@</span>
+              <span className="text-[10px] font-black tracking-widest">LİNÇ@</span>
             </button>
 
             <button type="button" onClick={() => setType('OVERHEARD')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'OVERHEARD' ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 shadow-[0_0_20px_rgba(8,145,178,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>

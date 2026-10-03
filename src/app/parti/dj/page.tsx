@@ -49,8 +49,8 @@ export default function DjScreen() {
 
       let transitionTitle = "YENİ İTİRAF";
 
-      if (newMsg.location === "PARTY_REZIL") {
-        transitionTitle = "YENİ REZİL@";
+      if (newMsg.location === "PARTY_LİNÇ") {
+        transitionTitle = "YENİ LİNÇ@";
       }
 
       if (newMsg.location === "PARTY_OVERHEARD") {
@@ -167,9 +167,9 @@ export default function DjScreen() {
   let title = "İTİRAF";
   let Icon = Flame;
 
-  if (message?.location === "PARTY_REZIL") {
+  if (message?.location === "PARTY_LİNÇ") {
     accent = "#ed48ff";
-    title = "REZİL@";
+    title = "LİNÇ@";
     Icon = EyeOff;
   }
 
