@@ -28,64 +28,73 @@ export default function DjScreen() {
       new Promise((resolve) => setTimeout(resolve, ms));
 
     /*
-     * PREMIUM MESAJ GEÇİŞİ
+     * CINEMATIC PREMIUM MESAJ GEÇİŞİ
      */
     const runTransition = async (newMsg: any) => {
       if (!mounted) return;
+
       isTransitioning.current = true;
 
       // Eski mesajı kaldır
       setVisible(false);
-      await delay(450);
+
+      await delay(500);
 
       if (!mounted) return;
 
       // Yeni mesajı hazırla
       setMessage(newMsg);
 
-      let transitionTitle = "İTİRAF";
+      let transitionTitle = "YENİ İTİRAF";
+
       if (newMsg.location === "PARTY_REZIL") {
-        transitionTitle = "REZİL@";
+        transitionTitle = "YENİ REZİL@";
       }
+
       if (newMsg.location === "PARTY_OVERHEARD") {
-        transitionTitle = "DUYDUM";
+        transitionTitle = "YENİ DUYDUM";
       }
 
       /*
-       * PREMIUM AÇILIŞ YAZISI
+       * CINEMATIC INTRO
        */
-      setTransitionStep(`YENİ ${transitionTitle}`);
-      await delay(1300);
+      setTransitionStep(transitionTitle);
+
+      await delay(1500);
+
       if (!mounted) return;
 
       /*
-       * ŞOK DALGALI COUNTDOWN (3 - 2 - 1)
+       * IMPACT
        */
-      setTransitionStep("3");
-      await delay(850);
-      if (!mounted) return;
+      setTransitionStep("IMPACT");
 
-      setTransitionStep("2");
-      await delay(850);
-      if (!mounted) return;
+      await delay(650);
 
-      setTransitionStep("1");
-      await delay(850);
       if (!mounted) return;
 
       /*
-       * FLASH PATLAMASI
+       * FLASH
        */
       setTransitionStep(null);
       setFlash(true);
 
-      await delay(250);
+      await delay(180);
+
       if (!mounted) return;
 
+      /*
+       * YENİ MESAJ
+       */
       setVisible(true);
 
-      await delay(300);
+      await delay(260);
+
+      if (!mounted) return;
+
       setFlash(false);
+
+      await delay(400);
 
       isTransitioning.current = false;
     };
@@ -205,7 +214,6 @@ export default function DjScreen() {
 
       <div className="absolute inset-0 bg-[#030208]" />
 
-      {/* Ana atmosfer */}
       <div
         className="
           absolute
@@ -217,7 +225,6 @@ export default function DjScreen() {
         }}
       />
 
-      {/* Sol sahne ışığı */}
       <div
         className="
           absolute
@@ -235,7 +242,6 @@ export default function DjScreen() {
         }}
       />
 
-      {/* Sağ sahne ışığı */}
       <div
         className="
           absolute
@@ -253,7 +259,6 @@ export default function DjScreen() {
         }}
       />
 
-      {/* Merkez sahne ışığı */}
       <div
         className="
           absolute
@@ -273,7 +278,7 @@ export default function DjScreen() {
       />
 
       {/* ========================================================= */}
-      {/* PREMIUM LIGHT SWEEP */}
+      {/* LIGHT SWEEP */}
       {/* ========================================================= */}
 
       <div
@@ -294,7 +299,7 @@ export default function DjScreen() {
       />
 
       {/* ========================================================= */}
-      {/* PARTİKÜLLER */}
+      {/* PARTICLES */}
       {/* ========================================================= */}
 
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -325,7 +330,7 @@ export default function DjScreen() {
       </div>
 
       {/* ========================================================= */}
-      {/* PREMIUM RADIAL RINGS */}
+      {/* RADIAL RINGS */}
       {/* ========================================================= */}
 
       <div
@@ -397,12 +402,13 @@ export default function DjScreen() {
           z-[5]
         "
         style={{
-          background: `radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.25) 68%, rgba(0,0,0,.78) 100%)`,
+          background:
+            "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.25) 68%, rgba(0,0,0,.78) 100%)",
         }}
       />
 
       {/* ========================================================= */}
-      {/* LED SCANLINES */}
+      {/* SCANLINES */}
       {/* ========================================================= */}
 
       <div
@@ -414,7 +420,8 @@ export default function DjScreen() {
           opacity-[0.035]
         "
         style={{
-          background: `repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(255,255,255,.8) 4px, transparent 5px)`,
+          background:
+            "repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(255,255,255,.8) 4px, transparent 5px)",
         }}
       />
 
@@ -433,7 +440,8 @@ export default function DjScreen() {
           animate-[grain_.25s_steps(2)_infinite]
         "
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.8' /%3E%3C/svg%3E")`,
+          backgroundImage:
+            "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.8' /%3E%3C/svg%3E\")",
         }}
       />
 
@@ -457,127 +465,243 @@ export default function DjScreen() {
       />
 
       {/* ========================================================= */}
-      {/* CINEMATIC TRANSITION & COUNTDOWN (YENİLENDİ!) */}
+      {/* CINEMATIC TRANSITION */}
       {/* ========================================================= */}
 
       {transitionStep && (
-        <div
-          className="
-            absolute
-            inset-0
-            z-[90]
-            flex
-            items-center
-            justify-center
-            overflow-hidden
-            bg-black/65
-            backdrop-blur-xl
-          "
-        >
-          {/* Transition glow */}
+        <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-[#020204]/90 backdrop-blur-2xl">
+
+          {/* CORE GLOW */}
+
           <div
             className="
               absolute
-              w-[45vw]
+              left-1/2
+              top-1/2
+              w-[18vw]
+              min-w-[220px]
               aspect-square
+              -translate-x-1/2
+              -translate-y-1/2
               rounded-full
-              blur-[100px]
-              opacity-20
-              animate-[transitionGlow_2s_ease-in-out_infinite]
+              blur-[80px]
+              animate-[incomingCore_1.5s_cubic-bezier(.16,1,.3,1)_forwards]
             "
-            style={{ background: accent }}
+            style={{
+              background: accent,
+            }}
           />
 
-          {transitionStep.length <= 2 ? (
-            /* 1. DURUM: GERİ SAYIM NUMARALARI (3, 2, 1) */
-            <div className="relative flex items-center justify-center">
-              {/* Şok dalgası halkası */}
-              <div
-                key={`ring-${transitionStep}`}
-                className="absolute w-[10vw] h-[10vw] rounded-full border-[6px] animate-[shockwave_1s_ease-out_forwards]"
-                style={{ borderColor: accent }}
-              />
+          {/* OUTER RING */}
 
-              <h1
-                key={`num-${transitionStep}`}
-                className="relative font-black text-center text-white leading-none animate-[countdownThump_1s_cubic-bezier(.16,1,.3,1)_forwards]"
-                style={{
-                  fontSize: "clamp(12rem, 35vw, 35rem)", // Devasa sayılar
-                  textShadow: `0 0 40px ${accent}, 0 0 100px ${accent}90`,
-                }}
-              >
-                {transitionStep}
-              </h1>
-            </div>
-          ) : (
-            /* 2. DURUM: "YENİ İTİRAF" GİBİ YAZILAR */
-            <div className="relative flex flex-col items-center">
-              {/* Yatay sinematik çizgi */}
-              <div
-                className="
-                  absolute
-                  left-[-50vw]
-                  right-[-50vw]
-                  top-1/2
-                  h-[1px]
-                  animate-[transitionLine_1.2s_ease-out_forwards]
-                  -z-10
-                "
-                style={{
-                  background: `linear-gradient(90deg, transparent, ${accent}, white, ${accent}, transparent)`,
-                  boxShadow: `0 0 30px ${accent}`,
-                }}
-              />
+          <div
+            className="
+              absolute
+              left-1/2
+              top-1/2
+              w-[8vw]
+              min-w-[120px]
+              aspect-square
+              -translate-x-1/2
+              -translate-y-1/2
+              rounded-full
+              border
+              animate-[incomingRing_1.7s_cubic-bezier(.16,1,.3,1)_forwards]
+            "
+            style={{
+              borderColor: accent,
+              boxShadow: `
+                0 0 30px ${accent},
+                0 0 90px ${accent}90,
+                inset 0 0 30px ${accent}50
+              `,
+            }}
+          />
 
-              <div
-                className="
-                  mb-6
-                  h-px
-                  w-24
-                  opacity-70
-                  animate-[lineExpand_1.2s_ease-out_forwards]
-                "
-                style={{
-                  background: accent,
-                  boxShadow: `0 0 20px ${accent}`,
-                }}
-              />
+          {/* INNER RING */}
 
-              <h1
-                key={`text-${transitionStep}`}
-                className="
-                  relative
-                  font-black
-                  text-center
-                  uppercase
-                  text-white
-                  animate-[premiumTextReveal_1.2s_cubic-bezier(.16,1,.3,1)_forwards]
-                "
-                style={{
-                  fontSize: "clamp(3rem, 7vw, 9rem)",
-                  letterSpacing: "0.28em",
-                  paddingLeft: "0.28em", /* HARİKA HİLE: Kaymayı engeller ve tam merkeze oturtur! */
-                  textShadow: `0 0 25px ${accent}, 0 0 70px ${accent}90, 0 0 150px ${accent}45`,
-                }}
-              >
-                {transitionStep}
-              </h1>
+          <div
+            className="
+              absolute
+              left-1/2
+              top-1/2
+              w-[5vw]
+              min-w-[80px]
+              aspect-square
+              -translate-x-1/2
+              -translate-y-1/2
+              rounded-full
+              border
+              opacity-60
+              animate-[incomingRingInner_1.2s_ease-out_forwards]
+            "
+            style={{
+              borderColor: accent,
+            }}
+          />
 
-              <div
-                className="
-                  mt-6
-                  h-px
-                  w-24
-                  opacity-70
-                  animate-[lineExpand_1.2s_ease-out_forwards]
-                "
-                style={{
-                  background: accent,
-                  boxShadow: `0 0 20px ${accent}`,
-                }}
-              />
-            </div>
-          )}
+          {/* ENERGY BEAM */}
+
+          <div
+            className="
+              absolute
+              left-0
+              right-0
+              top-1/2
+              h-px
+              animate-[incomingBeam_1.5s_cubic-bezier(.16,1,.3,1)_forwards]
+            "
+            style={{
+              background: `
+                linear-gradient(
+                  90deg,
+                  transparent,
+                  ${accent}20,
+                  ${accent},
+                  white,
+                  ${accent},
+                  ${accent}20,
+                  transparent
+                )
+              `,
+              boxShadow: `0 0 30px ${accent}`,
+            }}
+          />
+
+          {/* TOP LABEL */}
+
+          <div
+            className="
+              absolute
+              top-[38%]
+              left-1/2
+              -translate-x-1/2
+              flex
+              items-center
+              gap-3
+              whitespace-nowrap
+              animate-[incomingLabel_1.1s_cubic-bezier(.16,1,.3,1)_forwards]
+            "
+          >
+            <span
+              className="w-10 md:w-16 h-px"
+              style={{
+                background: `linear-gradient(90deg, transparent, ${accent})`,
+              }}
+            />
+
+            <span
+              className="
+                text-[9px]
+                md:text-xs
+                font-bold
+                tracking-[0.5em]
+                pl-[0.5em]
+                text-white/45
+              "
+            >
+              LIVE TRANSMISSION
+            </span>
+
+            <span
+              className="w-10 md:w-16 h-px"
+              style={{
+                background: `linear-gradient(90deg, ${accent}, transparent)`,
+              }}
+            />
+          </div>
+
+          {/* MAIN TITLE */}
+
+          <div
+            className="
+              relative
+              flex
+              flex-col
+              items-center
+              justify-center
+              animate-[incomingTitle_1.5s_cubic-bezier(.16,1,.3,1)_forwards]
+            "
+          >
+            <div
+              className="
+                mb-7
+                h-[2px]
+                w-16
+                md:w-24
+                animate-[incomingLine_1.2s_ease-out_forwards]
+              "
+              style={{
+                background: accent,
+                boxShadow: `0 0 20px ${accent}`,
+              }}
+            />
+
+            <h1
+              className="
+                relative
+                text-center
+                font-black
+                uppercase
+                leading-none
+                tracking-[-0.055em]
+                text-[clamp(4rem,9vw,11rem)]
+              "
+              style={{
+                textShadow: `
+                  0 0 20px ${accent},
+                  0 0 60px ${accent}90,
+                  0 0 130px ${accent}50
+                `,
+              }}
+            >
+              {transitionStep}
+            </h1>
+
+            <div
+              className="
+                mt-7
+                h-px
+                w-32
+                md:w-52
+                opacity-60
+              "
+              style={{
+                background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+                boxShadow: `0 0 18px ${accent}`,
+              }}
+            />
+          </div>
+
+          {/* CORNER UI */}
+
+          <div className="absolute top-8 left-8 opacity-40">
+            <div
+              className="w-10 h-10 border-l border-t"
+              style={{ borderColor: accent }}
+            />
+          </div>
+
+          <div className="absolute top-8 right-8 opacity-40">
+            <div
+              className="w-10 h-10 border-r border-t"
+              style={{ borderColor: accent }}
+            />
+          </div>
+
+          <div className="absolute bottom-8 left-8 opacity-40">
+            <div
+              className="w-10 h-10 border-l border-b"
+              style={{ borderColor: accent }}
+            />
+          </div>
+
+          <div className="absolute bottom-8 right-8 opacity-40">
+            <div
+              className="w-10 h-10 border-r border-b"
+              style={{ borderColor: accent }}
+            />
+          </div>
         </div>
       )}
 
@@ -586,8 +710,11 @@ export default function DjScreen() {
       {/* ========================================================= */}
 
       <header className="relative z-20 flex justify-between items-start">
-        {/* PREMIUM STATIC LOGO */}
+
+        {/* LOGO */}
+
         <div className="relative flex items-center justify-center">
+
           <div
             className="
               absolute
@@ -656,15 +783,8 @@ export default function DjScreen() {
               shadow-[0_0_60px_rgba(0,0,0,.8)]
             "
           >
-            <div
-              className="
-                absolute
-                inset-2
-                rounded-full
-                border
-                border-white/10
-              "
-            />
+            <div className="absolute inset-2 rounded-full border border-white/10" />
+
             <img
               src="/5555.png"
               alt="TNKU Logo"
@@ -681,6 +801,7 @@ export default function DjScreen() {
         </div>
 
         {/* CANLI PARTİ AKIŞI */}
+
         <div
           className="
             flex
@@ -759,6 +880,8 @@ export default function DjScreen() {
               }
             `}
           >
+            {/* CATEGORY BADGE */}
+
             <div
               className="
                 relative
@@ -792,7 +915,8 @@ export default function DjScreen() {
                   animate-[badgeSweep_4s_ease-in-out_infinite]
                 "
                 style={{
-                  background: `linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent)`,
+                  background:
+                    "linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent)",
                 }}
               />
 
@@ -812,6 +936,8 @@ export default function DjScreen() {
               </span>
             </div>
 
+            {/* MESSAGE */}
+
             <h1
               className="
                 relative
@@ -825,11 +951,17 @@ export default function DjScreen() {
                 animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]
               "
               style={{
-                textShadow: `0 0 18px ${accent}35, 0 0 55px ${accent}40, 0 0 110px ${accent}20`,
+                textShadow: `
+                  0 0 18px ${accent}35,
+                  0 0 55px ${accent}40,
+                  0 0 110px ${accent}20
+                `,
               }}
             >
               {message.content}
             </h1>
+
+            {/* ENERGY LINE */}
 
             <div
               className="
@@ -863,14 +995,25 @@ export default function DjScreen() {
             </div>
 
             <div className="mt-6 flex items-center gap-2 opacity-40">
-              <span className="w-1 h-1 rounded-full" style={{ background: accent }} />
-              <span className="w-1 h-1 rounded-full" style={{ background: accent }} />
-              <span className="w-1 h-1 rounded-full" style={{ background: accent }} />
+              <span
+                className="w-1 h-1 rounded-full"
+                style={{ background: accent }}
+              />
+              <span
+                className="w-1 h-1 rounded-full"
+                style={{ background: accent }}
+              />
+              <span
+                className="w-1 h-1 rounded-full"
+                style={{ background: accent }}
+              />
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-8">
+
             <div className="relative">
+
               <div
                 className="
                   absolute
@@ -938,6 +1081,7 @@ export default function DjScreen() {
           "
         >
           <div className="flex flex-wrap items-center gap-3">
+
             <span
               className="
                 text-gray-400
@@ -968,10 +1112,12 @@ export default function DjScreen() {
             >
               OVERHEARDPARTI/PARTI
             </span>
+
           </div>
         </div>
 
         <div className="relative p-[1px] rounded-2xl overflow-hidden">
+
           <div
             className="
               absolute
@@ -1003,6 +1149,7 @@ export default function DjScreen() {
               "
             />
           </div>
+
         </div>
       </footer>
 
@@ -1011,154 +1158,466 @@ export default function DjScreen() {
       {/* ========================================================= */}
 
       <style>{`
+
+        /* ========================================================= */
+        /* BACKGROUND */
+        /* ========================================================= */
+
         @keyframes premiumAmbient {
-          0%, 100% { transform: scale(1); opacity: 0.52; }
-          50% { transform: scale(1.16); opacity: 0.9; }
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.52;
+          }
+
+          50% {
+            transform: scale(1.16);
+            opacity: 0.9;
+          }
         }
 
         @keyframes stageLightLeft {
-          0%, 100% { transform: translateX(-12%) rotate(-25deg) scale(1); opacity: 0.08; }
-          50% { transform: translateX(18%) rotate(-17deg) scale(1.08); opacity: 0.17; }
+          0%, 100% {
+            transform: translateX(-12%) rotate(-25deg) scale(1);
+            opacity: 0.08;
+          }
+
+          50% {
+            transform: translateX(18%) rotate(-17deg) scale(1.08);
+            opacity: 0.17;
+          }
         }
 
         @keyframes stageLightRight {
-          0%, 100% { transform: translateX(12%) rotate(25deg) scale(1); opacity: 0.07; }
-          50% { transform: translateX(-18%) rotate(17deg) scale(1.08); opacity: 0.15; }
+          0%, 100% {
+            transform: translateX(12%) rotate(25deg) scale(1);
+            opacity: 0.07;
+          }
+
+          50% {
+            transform: translateX(-18%) rotate(17deg) scale(1.08);
+            opacity: 0.15;
+          }
         }
 
         @keyframes centerBeam {
-          0%, 100% { transform: translate(-50%, -50%) scaleX(0.65); opacity: 0.03; }
-          50% { transform: translate(-50%, -50%) scaleX(1.25); opacity: 0.09; }
+          0%, 100% {
+            transform: translate(-50%, -50%) scaleX(0.65);
+            opacity: 0.03;
+          }
+
+          50% {
+            transform: translate(-50%, -50%) scaleX(1.25);
+            opacity: 0.09;
+          }
         }
 
         @keyframes lightSweep {
-          0% { transform: translateX(-20%) rotate(25deg); opacity: 0; }
-          20% { opacity: 0.04; }
-          50% { opacity: 0.06; }
-          80% { opacity: 0.02; }
-          100% { transform: translateX(280%) rotate(25deg); opacity: 0; }
+          0% {
+            transform: translateX(-20%) rotate(25deg);
+            opacity: 0;
+          }
+
+          20% {
+            opacity: 0.04;
+          }
+
+          50% {
+            opacity: 0.06;
+          }
+
+          80% {
+            opacity: 0.02;
+          }
+
+          100% {
+            transform: translateX(280%) rotate(25deg);
+            opacity: 0;
+          }
         }
 
+        /* ========================================================= */
+        /* LOGO */
+        /* ========================================================= */
+
         @keyframes logoHalo {
-          0%, 100% { transform: scale(0.95); opacity: 0.18; }
-          50% { transform: scale(1.12); opacity: 0.34; }
+          0%, 100% {
+            transform: scale(0.95);
+            opacity: 0.18;
+          }
+
+          50% {
+            transform: scale(1.12);
+            opacity: 0.34;
+          }
         }
 
         @keyframes logoBreath {
-          0%, 100% { transform: scale(1); filter: drop-shadow(0 0 18px rgba(255, 255, 255, 0.22)); }
-          50% { transform: scale(1.025); filter: drop-shadow(0 0 32px rgba(255, 255, 255, 0.45)); }
+          0%, 100% {
+            transform: scale(1);
+            filter: drop-shadow(0 0 18px rgba(255,255,255,.22));
+          }
+
+          50% {
+            transform: scale(1.025);
+            filter: drop-shadow(0 0 32px rgba(255,255,255,.45));
+          }
         }
 
         @keyframes logoRing {
-          0%, 100% { transform: scale(0.96); opacity: 0.28; }
-          50% { transform: scale(1.05); opacity: 0.72; }
+          0%, 100% {
+            transform: scale(0.96);
+            opacity: 0.28;
+          }
+
+          50% {
+            transform: scale(1.05);
+            opacity: 0.72;
+          }
         }
 
         @keyframes logoRingInner {
-          0%, 100% { transform: scale(1); opacity: 0.18; }
-          50% { transform: scale(0.94); opacity: 0.45; }
+          0%, 100% {
+            transform: scale(1);
+            opacity: 0.18;
+          }
+
+          50% {
+            transform: scale(0.94);
+            opacity: 0.45;
+          }
         }
 
+        /* ========================================================= */
+        /* PARTICLES */
+        /* ========================================================= */
+
         @keyframes particleFloat {
-          0%, 100% { transform: translate3d(0, 0, 0); opacity: 0; }
-          20% { opacity: 0.25; }
-          50% { transform: translate3d(12px, -35px, 0); opacity: 0.5; }
-          80% { opacity: 0.15; }
+          0%, 100% {
+            transform: translate3d(0,0,0);
+            opacity: 0;
+          }
+
+          20% {
+            opacity: 0.25;
+          }
+
+          50% {
+            transform: translate3d(12px,-35px,0);
+            opacity: 0.5;
+          }
+
+          80% {
+            opacity: 0.15;
+          }
         }
 
         @keyframes slowPulse {
-          0%, 100% { transform: translate(-50%, -50%) scale(0.96); opacity: 0.025; }
-          50% { transform: translate(-50%, -50%) scale(1.04); opacity: 0.07; }
+          0%, 100% {
+            transform: translate(-50%, -50%) scale(0.96);
+            opacity: 0.025;
+          }
+
+          50% {
+            transform: translate(-50%, -50%) scale(1.04);
+            opacity: 0.07;
+          }
         }
 
-        @keyframes transitionGlow {
-          0%, 100% { transform: scale(0.75); opacity: 0.1; }
-          50% { transform: scale(1.15); opacity: 0.28; }
+        /* ========================================================= */
+        /* CINEMATIC INCOMING */
+        /* ========================================================= */
+
+        @keyframes incomingCore {
+
+          0% {
+            transform: translate(-50%, -50%) scale(0.15);
+            opacity: 0;
+          }
+
+          30% {
+            opacity: 0.35;
+          }
+
+          65% {
+            opacity: 0.18;
+          }
+
+          100% {
+            transform: translate(-50%, -50%) scale(5);
+            opacity: 0;
+          }
         }
 
-        @keyframes transitionLine {
-          0% { transform: translateY(-50%) scaleX(0); opacity: 0; }
-          35% { transform: translateY(-50%) scaleX(1); opacity: 1; }
-          75% { transform: translateY(-50%) scaleX(1); opacity: 0.8; }
-          100% { transform: translateY(-50%) scaleX(1.4); opacity: 0; }
+        @keyframes incomingRing {
+
+          0% {
+            transform: translate(-50%, -50%) scale(0.2);
+            opacity: 0;
+          }
+
+          15% {
+            opacity: 0.95;
+          }
+
+          45% {
+            opacity: 0.55;
+          }
+
+          100% {
+            transform: translate(-50%, -50%) scale(18);
+            opacity: 0;
+          }
         }
 
-        @keyframes lineExpand {
-          0% { width: 0; opacity: 0; }
-          60% { width: 6rem; opacity: 0.8; }
-          100% { width: 8rem; opacity: 0.35; }
+        @keyframes incomingRingInner {
+
+          0% {
+            transform: translate(-50%, -50%) scale(0.2);
+            opacity: 0;
+          }
+
+          25% {
+            opacity: 0.9;
+          }
+
+          100% {
+            transform: translate(-50%, -50%) scale(7);
+            opacity: 0;
+          }
         }
 
-        /* 1) Yazılar için Premium Animasyon (YENİ İTİRAF vb.) */
-        @keyframes premiumTextReveal {
-          0% { opacity: 0; transform: scale(0.8); filter: blur(20px); }
-          20% { opacity: 1; transform: scale(1.05); filter: blur(0); }
-          70% { opacity: 1; transform: scale(1); }
-          100% { opacity: 0; transform: scale(1.1); filter: blur(15px); }
+        @keyframes incomingBeam {
+
+          0% {
+            transform: scaleX(0);
+            opacity: 0;
+          }
+
+          20% {
+            opacity: 1;
+          }
+
+          55% {
+            transform: scaleX(1);
+            opacity: 0.9;
+          }
+
+          100% {
+            transform: scaleX(1.35);
+            opacity: 0;
+          }
         }
 
-        /* 2) Geri sayım sayıları için vuruş (Thump) animasyonu */
-        @keyframes countdownThump {
-          0% { opacity: 0; transform: scale(2.5); filter: blur(20px); }
-          20% { opacity: 1; transform: scale(1); filter: blur(0); }
-          80% { opacity: 1; transform: scale(0.95); filter: blur(0); }
-          100% { opacity: 0; transform: scale(0.5); filter: blur(10px); }
+        @keyframes incomingLabel {
+
+          0% {
+            opacity: 0;
+            transform: translate(-50%, 18px);
+            filter: blur(8px);
+          }
+
+          35% {
+            opacity: 1;
+            filter: blur(0);
+          }
+
+          70% {
+            opacity: 0.8;
+          }
+
+          100% {
+            opacity: 0;
+            transform: translate(-50%, -8px);
+          }
         }
 
-        /* 3) Şok dalgası halkası (Geri sayımla patlar) */
-        @keyframes shockwave {
-          0% { opacity: 1; transform: scale(0.5); border-width: 15px; }
-          100% { opacity: 0; transform: scale(2.5); border-width: 0px; }
+        @keyframes incomingTitle {
+
+          0% {
+            opacity: 0;
+            transform: scale(0.72) translateY(30px);
+            filter: blur(24px);
+            letter-spacing: 0.08em;
+          }
+
+          25% {
+            opacity: 1;
+            transform: scale(1.04) translateY(-4px);
+            filter: blur(0);
+            letter-spacing: -0.055em;
+          }
+
+          45% {
+            transform: scale(1);
+          }
+
+          72% {
+            opacity: 1;
+          }
+
+          100% {
+            opacity: 0;
+            transform: scale(1.08) translateY(-18px);
+            filter: blur(12px);
+          }
         }
+
+        @keyframes incomingLine {
+
+          0% {
+            width: 0;
+            opacity: 0;
+          }
+
+          35% {
+            width: 6rem;
+            opacity: 1;
+          }
+
+          70% {
+            width: 9rem;
+            opacity: 0.8;
+          }
+
+          100% {
+            width: 10rem;
+            opacity: 0;
+          }
+        }
+
+        /* ========================================================= */
+        /* MESSAGE */
+        /* ========================================================= */
 
         @keyframes messageReveal {
-          0% { opacity: 0; transform: scale(0.72) translateY(40px); filter: blur(22px); }
-          55% { opacity: 1; transform: scale(1.025) translateY(-4px); filter: blur(0); }
-          100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+
+          0% {
+            opacity: 0;
+            transform: scale(0.72) translateY(40px);
+            filter: blur(22px);
+          }
+
+          55% {
+            opacity: 1;
+            transform: scale(1.025) translateY(-4px);
+            filter: blur(0);
+          }
+
+          100% {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+            filter: blur(0);
+          }
         }
 
         @keyframes badgePremium {
-          0% { opacity: 0; transform: translateY(-22px) scale(0.82); filter: blur(8px); }
-          70% { opacity: 1; transform: translateY(2px) scale(1.02); filter: blur(0); }
-          100% { opacity: 1; transform: translateY(0) scale(1); }
+
+          0% {
+            opacity: 0;
+            transform: translateY(-22px) scale(0.82);
+            filter: blur(8px);
+          }
+
+          70% {
+            opacity: 1;
+            transform: translateY(2px) scale(1.02);
+            filter: blur(0);
+          }
+
+          100% {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+          }
         }
 
         @keyframes badgeSweep {
-          0% { left: -80%; }
-          45%, 100% { left: 140%; }
+
+          0% {
+            left: -80%;
+          }
+
+          45%, 100% {
+            left: 140%;
+          }
         }
 
         @keyframes energyPremium {
-          0% { left: -55%; opacity: 0; }
-          20% { opacity: 1; }
-          75% { opacity: 1; }
-          100% { left: 110%; opacity: 0; }
+
+          0% {
+            left: -55%;
+            opacity: 0;
+          }
+
+          20% {
+            opacity: 1;
+          }
+
+          75% {
+            opacity: 1;
+          }
+
+          100% {
+            left: 110%;
+            opacity: 0;
+          }
         }
 
         @keyframes sponsorSweep {
-          to { transform: rotate(360deg); }
+          to {
+            transform: rotate(360deg);
+          }
         }
 
         @keyframes sparkleFloat {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-10px) rotate(8deg); }
+
+          0%, 100% {
+            transform: translateY(0) rotate(0deg);
+          }
+
+          50% {
+            transform: translateY(-10px) rotate(8deg);
+          }
         }
 
         @keyframes grain {
-          0% { transform: translate(0, 0); }
-          25% { transform: translate(2%, -1%); }
-          50% { transform: translate(-1%, 2%); }
-          75% { transform: translate(-2%, -1%); }
-          100% { transform: translate(0, 0); }
+
+          0% {
+            transform: translate(0,0);
+          }
+
+          25% {
+            transform: translate(2%,-1%);
+          }
+
+          50% {
+            transform: translate(-1%,2%);
+          }
+
+          75% {
+            transform: translate(-2%,-1%);
+          }
+
+          100% {
+            transform: translate(0,0);
+          }
         }
 
+        /* ========================================================= */
+        /* REDUCED MOTION */
+        /* ========================================================= */
+
         @media (prefers-reduced-motion: reduce) {
-          *, *::before, *::after {
+
+          *,
+          *::before,
+          *::after {
             animation-duration: 0.01ms !important;
             animation-iteration-count: 1 !important;
             transition-duration: 0.01ms !important;
           }
+
         }
+
       `}</style>
     </main>
   );
