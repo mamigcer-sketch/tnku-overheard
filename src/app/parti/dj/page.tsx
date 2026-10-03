@@ -29,10 +29,9 @@ export default function DjScreen() {
 
     /*
      * =========================================================
-     * PARTİ MESAJ GEÇİŞİ
+     * PARTİ MESAJ GEÇİŞİ (ÖNCE YAZI, SONRA 3-2-1)
      * =========================================================
      */
-
     const runTransition = async (newMsg: any) => {
       if (!mounted) return;
 
@@ -45,7 +44,7 @@ export default function DjScreen() {
 
       if (!mounted) return;
 
-      // Yeni mesajı hazırla
+      // Yeni mesajı hazırla (Arka plan renkleri anında değişir)
       setMessage(newMsg);
 
       let transitionTitle = "YENİ İTİRAF";
@@ -60,85 +59,45 @@ export default function DjScreen() {
 
       /*
        * =====================================================
-       * 3
+       * 1. AŞAMA: ÖNCE YAZI GELSİN (YENİ İTİRAF)
        * =====================================================
        */
-
-      setTransitionStep("3");
-
-      await delay(700);
+      setTransitionStep(transitionTitle);
+      await delay(1800); // Yazı 1.8 saniye ekranda kalır
 
       if (!mounted) return;
 
       /*
        * =====================================================
-       * 2
+       * 2. AŞAMA: GERİ SAYIM (3 - 2 - 1)
        * =====================================================
        */
+      setTransitionStep("3");
+      await delay(700);
+      if (!mounted) return;
 
       setTransitionStep("2");
-
       await delay(700);
-
       if (!mounted) return;
-
-      /*
-       * =====================================================
-       * 1
-       * =====================================================
-       */
 
       setTransitionStep("1");
-
       await delay(720);
-
       if (!mounted) return;
 
       /*
        * =====================================================
-       * PATLAMA
+       * 3. AŞAMA: PATLAMA (FLASH VE MESAJ)
        * =====================================================
        */
-
       setTransitionStep(null);
       setFlash(true);
 
       await delay(180);
-
-      if (!mounted) return;
-
-      setFlash(false);
-
-      /*
-       * =====================================================
-       * ÇOK KISA MERAK EKRANI
-       * =====================================================
-       */
-
-      setTransitionStep(transitionTitle);
-
-      await delay(850);
-
-      if (!mounted) return;
-
-      /*
-       * =====================================================
-       * MESAJ PATLAMASI
-       * =====================================================
-       */
-
-      setTransitionStep(null);
-
-      setFlash(true);
-
-      await delay(100);
-
       if (!mounted) return;
 
       setVisible(true);
 
       await delay(220);
-
       if (!mounted) return;
 
       setFlash(false);
@@ -167,22 +126,14 @@ export default function DjScreen() {
         if (!mounted || !data?.message) return;
 
         if (lastMsgId.current !== data.message.id) {
-          /*
-           * İlk açılış
-           */
-
+          /* İlk açılış */
           if (lastMsgId.current === null) {
             lastMsgId.current = data.message.id;
-
             setMessage(data.message);
             setVisible(true);
           } else {
-            /*
-             * Yeni mesaj
-             */
-
+            /* Yeni mesaj */
             lastMsgId.current = data.message.id;
-
             runTransition(data.message);
           }
         }
@@ -201,7 +152,6 @@ export default function DjScreen() {
 
     return () => {
       mounted = false;
-
       clearInterval(interval);
       clearInterval(liveInterval);
     };
@@ -352,7 +302,6 @@ export default function DjScreen() {
       />
 
       {/* LIGHT SWEEP */}
-
       <div
         className="
           absolute
@@ -372,9 +321,7 @@ export default function DjScreen() {
       />
 
       {/* PARTICLES */}
-
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-
         {particles.map((particle, index) => (
           <span
             key={index}
@@ -399,11 +346,9 @@ export default function DjScreen() {
             }
           />
         ))}
-
       </div>
 
       {/* RADIAL RINGS */}
-
       <div
         className="
           absolute
@@ -462,7 +407,6 @@ export default function DjScreen() {
       />
 
       {/* VIGNETTE */}
-
       <div
         className="
           absolute
@@ -477,7 +421,6 @@ export default function DjScreen() {
       />
 
       {/* SCANLINES */}
-
       <div
         className="
           absolute
@@ -493,7 +436,6 @@ export default function DjScreen() {
       />
 
       {/* GRAIN */}
-
       <div
         className="
           absolute
@@ -542,28 +484,25 @@ export default function DjScreen() {
       {/* ========================================================= */}
 
       {transitionStep && (
-        <div className="absolute inset-0 z-[90] flex items-center justify-center bg-black/80 backdrop-blur-2xl overflow-hidden">
+        <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-black/80 backdrop-blur-2xl">
           
-          {/* Arkadaki devasa loş ortam ışığı */}
           <div
-            className="absolute w-[40vw] aspect-square rounded-full blur-[120px] opacity-30 animate-pulse"
+            className="absolute w-[40vw] aspect-square rounded-full blur-[120px] opacity-30 animate-[transitionGlow_2s_ease-in-out_infinite]"
             style={{ background: accent }}
           />
 
           {transitionStep === "3" || transitionStep === "2" || transitionStep === "1" ? (
-            /* 1) RAKAMLARIN ŞOVU (3, 2, 1) */
+            /* RAKAMLARIN ŞOVU (3, 2, 1) */
             <div className="relative flex items-center justify-center">
-              {/* Sadece tek bir keskin şok dalgası */}
               <div
                 key={`ring-${transitionStep}`}
                 className="absolute w-[20vw] h-[20vw] rounded-full border-[3px] animate-[cinematicRing_700ms_ease-out_forwards]"
                 style={{ borderColor: accent }}
               />
 
-              {/* Rakamın Kendisi */}
               <h1
                 key={`num-${transitionStep}`}
-                className="relative font-black text-white leading-none animate-[cinematicNumber_700ms_cubic-bezier(0.16,1,0.3,1)_forwards]"
+                className="relative font-black text-white leading-none animate-[countdownThump_700ms_cubic-bezier(0.16,1,0.3,1)_forwards]"
                 style={{
                   fontSize: "clamp(12rem, 30vw, 30rem)",
                   textShadow: `0 0 60px ${accent}80, 0 0 120px ${accent}40`,
@@ -573,12 +512,11 @@ export default function DjScreen() {
               </h1>
             </div>
           ) : (
-            /* 2) YAZILARIN ŞOVU (YENİ İTİRAF, vb.) */
+            /* YAZILARIN ŞOVU (YENİ İTİRAF, vb.) */
             <div className="relative flex flex-col items-center">
               
-              {/* Üstteki ince neon çizgi */}
               <div
-                className="mb-6 h-px animate-[cinematicLine_850ms_ease-out_forwards]"
+                className="mb-6 h-px animate-[cinematicLine_1.8s_ease-out_forwards]"
                 style={{
                   background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
                 }}
@@ -586,7 +524,7 @@ export default function DjScreen() {
 
               <h2
                 key={`text-${transitionStep}`}
-                className="relative font-black uppercase text-white animate-[cinematicText_850ms_cubic-bezier(0.16,1,0.3,1)_forwards]"
+                className="relative font-black uppercase text-center text-white animate-[cinematicText_1.8s_cubic-bezier(0.16,1,0.3,1)_forwards]"
                 style={{
                   fontSize: "clamp(3rem, 7vw, 7rem)",
                   textShadow: `0 0 40px ${accent}80`,
@@ -595,9 +533,8 @@ export default function DjScreen() {
                 {transitionStep}
               </h2>
 
-              {/* Alttaki ince neon çizgi */}
               <div
-                className="mt-6 h-px animate-[cinematicLine_850ms_ease-out_forwards]"
+                className="mt-6 h-px animate-[cinematicLine_1.8s_ease-out_forwards]"
                 style={{
                   background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
                 }}
@@ -616,11 +553,8 @@ export default function DjScreen() {
       {/* ========================================================= */}
 
       <header className="relative z-20 flex justify-between items-start">
-
         {/* LOGO */}
-
         <div className="relative flex items-center justify-center">
-
           <div
             className="
               absolute
@@ -689,7 +623,6 @@ export default function DjScreen() {
               shadow-[0_0_60px_rgba(0,0,0,.8)]
             "
           >
-
             <div
               className="
                 absolute
@@ -712,12 +645,10 @@ export default function DjScreen() {
                 animate-[logoBreath_5s_ease-in-out_infinite]
               "
             />
-
           </div>
         </div>
 
         {/* LIVE */}
-
         <div
           className="
             flex
@@ -733,7 +664,6 @@ export default function DjScreen() {
             shadow-[0_10px_50px_rgba(0,0,0,.45)]
           "
         >
-
           <span
             className={`
               w-2.5
@@ -764,9 +694,7 @@ export default function DjScreen() {
           >
             CANLI PARTİ AKIŞI
           </span>
-
         </div>
-
       </header>
 
       {/* ========================================================= */}
@@ -785,9 +713,7 @@ export default function DjScreen() {
           px-3
         "
       >
-
         {message ? (
-
           <div
             key={message.id}
             className={`
@@ -805,9 +731,7 @@ export default function DjScreen() {
               }
             `}
           >
-
             {/* CATEGORY */}
-
             <div
               className="
                 relative
@@ -834,7 +758,6 @@ export default function DjScreen() {
                 `,
               }}
             >
-
               <div
                 className="
                   absolute
@@ -867,11 +790,9 @@ export default function DjScreen() {
               >
                 {title}
               </span>
-
             </div>
 
             {/* MESSAGE */}
-
             <h1
               className="
                 relative
@@ -896,7 +817,6 @@ export default function DjScreen() {
             </h1>
 
             {/* ENERGY */}
-
             <div
               className="
                 relative
@@ -913,7 +833,6 @@ export default function DjScreen() {
                 boxShadow: `0 0 25px ${accent}30`,
               }}
             >
-
               <div
                 className="
                   absolute
@@ -936,36 +855,26 @@ export default function DjScreen() {
                   boxShadow: `0 0 20px ${accent}`,
                 }}
               />
-
             </div>
 
             <div className="mt-6 flex items-center gap-2 opacity-40">
-
               <span
                 className="w-1 h-1 rounded-full"
                 style={{ background: accent }}
               />
-
               <span
                 className="w-1 h-1 rounded-full"
                 style={{ background: accent }}
               />
-
               <span
                 className="w-1 h-1 rounded-full"
                 style={{ background: accent }}
               />
-
             </div>
-
           </div>
-
         ) : (
-
           <div className="flex flex-col items-center gap-8">
-
             <div className="relative">
-
               <div
                 className="
                   absolute
@@ -979,7 +888,6 @@ export default function DjScreen() {
                   background: accent,
                 }}
               />
-
               <Sparkles
                 size={75}
                 className="
@@ -987,7 +895,6 @@ export default function DjScreen() {
                   animate-[sparkleFloat_4s_ease-in-out_infinite]
                 "
               />
-
             </div>
 
             <h2
@@ -1001,11 +908,8 @@ export default function DjScreen() {
             >
               BOMBA BEKLENİYOR
             </h2>
-
           </div>
-
         )}
-
       </section>
 
       {/* ========================================================= */}
@@ -1022,7 +926,6 @@ export default function DjScreen() {
           gap-4
         "
       >
-
         <div
           className="
             rounded-2xl
@@ -1037,9 +940,7 @@ export default function DjScreen() {
             shadow-[0_10px_50px_rgba(0,0,0,.45)]
           "
         >
-
           <div className="flex flex-wrap items-center gap-3">
-
             <span
               className="
                 text-gray-400
@@ -1070,13 +971,10 @@ export default function DjScreen() {
             >
               OVERHEARDPARTI/PARTI
             </span>
-
           </div>
-
         </div>
 
         <div className="relative p-[1px] rounded-2xl overflow-hidden">
-
           <div
             className="
               absolute
@@ -1098,7 +996,6 @@ export default function DjScreen() {
               `,
             }}
           />
-
           <div
             className="
               relative
@@ -1108,7 +1005,6 @@ export default function DjScreen() {
               md:p-4
             "
           >
-
             <img
               src="/D6.png"
               alt="D6 Sosyal"
@@ -1119,11 +1015,8 @@ export default function DjScreen() {
                 object-contain
               "
             />
-
           </div>
-
         </div>
-
       </footer>
 
       {/* ========================================================= */}
@@ -1165,11 +1058,11 @@ export default function DjScreen() {
         }
 
         /* ===================================================== */
-        /* YEPYENİ SİNEMATİK COUNTDOWN AŞAMASI (TEMİZLENDİ) */
+        /* YEPYENİ SİNEMATİK COUNTDOWN AŞAMASI */
         /* ===================================================== */
 
-        /* 1) Rakam Animasyonu */
-        @keyframes cinematicNumber {
+        /* 1) Rakam Animasyonu (3, 2, 1) */
+        @keyframes countdownThump {
           0% { opacity: 0; transform: scale(1.8); filter: blur(20px); }
           25% { opacity: 1; transform: scale(1); filter: blur(0); }
           75% { opacity: 1; transform: scale(0.95); filter: blur(0); }
@@ -1191,14 +1084,14 @@ export default function DjScreen() {
             letter-spacing: 0.1em; 
             padding-left: 0.1em; 
           }
-          20% { 
+          15% { 
             opacity: 1; 
             transform: scale(1); 
             filter: blur(0); 
             letter-spacing: 0.28em; 
             padding-left: 0.28em; 
           }
-          80% { 
+          85% { 
             opacity: 1; 
             transform: scale(1); 
             filter: blur(0); 
@@ -1217,9 +1110,14 @@ export default function DjScreen() {
         /* 4) Çizgi Çekilme Animasyonu */
         @keyframes cinematicLine {
           0% { width: 0; opacity: 0; }
-          30% { width: 250px; opacity: 1; }
-          70% { width: 250px; opacity: 1; }
+          15% { width: 250px; opacity: 1; }
+          85% { width: 250px; opacity: 1; }
           100% { width: 350px; opacity: 0; }
+        }
+
+        @keyframes transitionGlow {
+          0%, 100% { transform: scale(0.75); opacity: 0.1; }
+          50% { transform: scale(1.15); opacity: 0.28; }
         }
 
         /* ===================================================== */
