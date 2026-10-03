@@ -28,8 +28,11 @@ export default function DjScreen() {
       new Promise((resolve) => setTimeout(resolve, ms));
 
     /*
-     * CINEMATIC PREMIUM MESAJ GEÇİŞİ
+     * =========================================================
+     * PARTİ MESAJ GEÇİŞİ
+     * =========================================================
      */
+
     const runTransition = async (newMsg: any) => {
       if (!mounted) return;
 
@@ -38,7 +41,7 @@ export default function DjScreen() {
       // Eski mesajı kaldır
       setVisible(false);
 
-      await delay(500);
+      await delay(350);
 
       if (!mounted) return;
 
@@ -56,26 +59,47 @@ export default function DjScreen() {
       }
 
       /*
-       * CINEMATIC INTRO
+       * =====================================================
+       * 3
+       * =====================================================
        */
-      setTransitionStep(transitionTitle);
 
-      await delay(1500);
+      setTransitionStep("3");
+
+      await delay(700);
 
       if (!mounted) return;
 
       /*
-       * IMPACT
+       * =====================================================
+       * 2
+       * =====================================================
        */
-      setTransitionStep("IMPACT");
 
-      await delay(650);
+      setTransitionStep("2");
+
+      await delay(700);
 
       if (!mounted) return;
 
       /*
-       * FLASH
+       * =====================================================
+       * 1
+       * =====================================================
        */
+
+      setTransitionStep("1");
+
+      await delay(720);
+
+      if (!mounted) return;
+
+      /*
+       * =====================================================
+       * PATLAMA
+       * =====================================================
+       */
+
       setTransitionStep(null);
       setFlash(true);
 
@@ -83,25 +107,53 @@ export default function DjScreen() {
 
       if (!mounted) return;
 
+      setFlash(false);
+
       /*
-       * YENİ MESAJ
+       * =====================================================
+       * ÇOK KISA MERAK EKRANI
+       * =====================================================
        */
+
+      setTransitionStep(transitionTitle);
+
+      await delay(850);
+
+      if (!mounted) return;
+
+      /*
+       * =====================================================
+       * MESAJ PATLAMASI
+       * =====================================================
+       */
+
+      setTransitionStep(null);
+
+      setFlash(true);
+
+      await delay(100);
+
+      if (!mounted) return;
+
       setVisible(true);
 
-      await delay(260);
+      await delay(220);
 
       if (!mounted) return;
 
       setFlash(false);
 
-      await delay(400);
+      await delay(300);
 
       isTransitioning.current = false;
     };
 
     /*
-     * API'DEN PARTİ MESAJI
+     * =========================================================
+     * API
+     * =========================================================
      */
+
     const fetchMsg = async () => {
       try {
         if (isTransitioning.current) return;
@@ -118,15 +170,19 @@ export default function DjScreen() {
           /*
            * İlk açılış
            */
+
           if (lastMsgId.current === null) {
             lastMsgId.current = data.message.id;
+
             setMessage(data.message);
             setVisible(true);
           } else {
             /*
              * Yeni mesaj
              */
+
             lastMsgId.current = data.message.id;
+
             runTransition(data.message);
           }
         }
@@ -145,14 +201,18 @@ export default function DjScreen() {
 
     return () => {
       mounted = false;
+
       clearInterval(interval);
       clearInterval(liveInterval);
     };
   }, []);
 
   /*
-   * KATEGORİ RENKLERİ
+   * =========================================================
+   * KATEGORİ
+   * =========================================================
    */
+
   let accent = "#ff3038";
   let title = "İTİRAF";
   let Icon = Flame;
@@ -170,8 +230,11 @@ export default function DjScreen() {
   }
 
   /*
-   * PARTİ PARTİKÜLLERİ
+   * =========================================================
+   * PARTICLES
+   * =========================================================
    */
+
   const particles = [
     { left: "7%", top: "18%", delay: "0s", duration: "7s" },
     { left: "15%", top: "67%", delay: "1.5s", duration: "9s" },
@@ -208,8 +271,9 @@ export default function DjScreen() {
         } as React.CSSProperties
       }
     >
+
       {/* ========================================================= */}
-      {/* PREMIUM BACKGROUND */}
+      {/* BACKGROUND */}
       {/* ========================================================= */}
 
       <div className="absolute inset-0 bg-[#030208]" />
@@ -221,7 +285,12 @@ export default function DjScreen() {
           animate-[premiumAmbient_12s_ease-in-out_infinite]
         "
         style={{
-          background: `radial-gradient(ellipse at 50% 45%, ${accent}42 0%, ${accent}18 22%, transparent 58%)`,
+          background: `radial-gradient(
+            ellipse at 50% 45%,
+            ${accent}42 0%,
+            ${accent}18 22%,
+            transparent 58%
+          )`,
         }}
       />
 
@@ -273,13 +342,16 @@ export default function DjScreen() {
           animate-[centerBeam_9s_ease-in-out_infinite]
         "
         style={{
-          background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
+          background: `linear-gradient(
+            90deg,
+            transparent,
+            ${accent},
+            transparent
+          )`,
         }}
       />
 
-      {/* ========================================================= */}
       {/* LIGHT SWEEP */}
-      {/* ========================================================= */}
 
       <div
         className="
@@ -294,15 +366,15 @@ export default function DjScreen() {
           animate-[lightSweep_11s_ease-in-out_infinite]
         "
         style={{
-          background: `linear-gradient(90deg, transparent, white, transparent)`,
+          background:
+            "linear-gradient(90deg, transparent, white, transparent)",
         }}
       />
 
-      {/* ========================================================= */}
       {/* PARTICLES */}
-      {/* ========================================================= */}
 
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
+
         {particles.map((particle, index) => (
           <span
             key={index}
@@ -327,11 +399,10 @@ export default function DjScreen() {
             }
           />
         ))}
+
       </div>
 
-      {/* ========================================================= */}
       {/* RADIAL RINGS */}
-      {/* ========================================================= */}
 
       <div
         className="
@@ -371,28 +442,7 @@ export default function DjScreen() {
         }}
       />
 
-      <div
-        className="
-          absolute
-          left-1/2
-          top-1/2
-          w-[30vw]
-          aspect-square
-          rounded-full
-          border
-          opacity-[0.035]
-          -translate-x-1/2
-          -translate-y-1/2
-          animate-[slowPulse_5s_ease-in-out_infinite]
-        "
-        style={{
-          borderColor: accent,
-        }}
-      />
-
-      {/* ========================================================= */}
       {/* VIGNETTE */}
-      {/* ========================================================= */}
 
       <div
         className="
@@ -407,9 +457,7 @@ export default function DjScreen() {
         }}
       />
 
-      {/* ========================================================= */}
       {/* SCANLINES */}
-      {/* ========================================================= */}
 
       <div
         className="
@@ -425,9 +473,7 @@ export default function DjScreen() {
         }}
       />
 
-      {/* ========================================================= */}
       {/* GRAIN */}
-      {/* ========================================================= */}
 
       <div
         className="
@@ -456,135 +502,170 @@ export default function DjScreen() {
           z-[100]
           pointer-events-none
           transition-opacity
-          duration-300
+          duration-200
           ${flash ? "opacity-100" : "opacity-0"}
         `}
         style={{
-          background: `radial-gradient(circle at center, white 0%, ${accent}cc 12%, ${accent}35 30%, transparent 68%)`,
+          background: `
+            radial-gradient(
+              circle at center,
+              white 0%,
+              ${accent}ee 10%,
+              ${accent}55 25%,
+              transparent 65%
+            )
+          `,
         }}
       />
 
       {/* ========================================================= */}
-      {/* CINEMATIC TRANSITION */}
+      {/* 3 - 2 - 1 TRANSITION */}
       {/* ========================================================= */}
 
       {transitionStep && (
-        <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-[#020204]/90 backdrop-blur-2xl">
+        <div
+          className="
+            absolute
+            inset-0
+            z-[90]
+            flex
+            items-center
+            justify-center
+            overflow-hidden
+            bg-black/70
+            backdrop-blur-md
+          "
+        >
 
-          {/* CORE GLOW */}
+          {/* GLOW */}
 
           <div
             className="
               absolute
               left-1/2
               top-1/2
-              w-[18vw]
-              min-w-[220px]
+              w-[25vw]
               aspect-square
               -translate-x-1/2
               -translate-y-1/2
               rounded-full
-              blur-[80px]
-              animate-[incomingCore_1.5s_cubic-bezier(.16,1,.3,1)_forwards]
+              blur-[100px]
+              animate-[countdownGlow_1s_ease-out_forwards]
             "
             style={{
               background: accent,
             }}
           />
 
-          {/* OUTER RING */}
+          {/* EXPANDING RING */}
 
           <div
+            key={`ring-${transitionStep}`}
             className="
               absolute
               left-1/2
               top-1/2
-              w-[8vw]
-              min-w-[120px]
+              w-[10vw]
               aspect-square
               -translate-x-1/2
               -translate-y-1/2
               rounded-full
-              border
-              animate-[incomingRing_1.7s_cubic-bezier(.16,1,.3,1)_forwards]
+              border-[2px]
+              animate-[countdownRing_900ms_cubic-bezier(.16,1,.3,1)_forwards]
             "
             style={{
               borderColor: accent,
-              boxShadow: `
-                0 0 30px ${accent},
-                0 0 90px ${accent}90,
-                inset 0 0 30px ${accent}50
-              `,
+              boxShadow: `0 0 30px ${accent}, 0 0 80px ${accent}80`,
             }}
           />
 
-          {/* INNER RING */}
+          {/* SECOND RING */}
 
           <div
+            key={`ring2-${transitionStep}`}
             className="
               absolute
               left-1/2
               top-1/2
-              w-[5vw]
-              min-w-[80px]
+              w-[4vw]
               aspect-square
               -translate-x-1/2
               -translate-y-1/2
               rounded-full
               border
               opacity-60
-              animate-[incomingRingInner_1.2s_ease-out_forwards]
+              animate-[countdownRingSmall_800ms_ease-out_forwards]
             "
             style={{
               borderColor: accent,
             }}
           />
 
-          {/* ENERGY BEAM */}
+          {/* NUMBER */}
 
           <div
+            key={`number-${transitionStep}`}
             className="
-              absolute
-              left-0
-              right-0
-              top-1/2
-              h-px
-              animate-[incomingBeam_1.5s_cubic-bezier(.16,1,.3,1)_forwards]
+              relative
+              flex
+              items-center
+              justify-center
+              animate-[countdownNumber_700ms_cubic-bezier(.16,1,.3,1)_forwards]
             "
-            style={{
-              background: `
-                linear-gradient(
-                  90deg,
-                  transparent,
-                  ${accent}20,
-                  ${accent},
-                  white,
-                  ${accent},
-                  ${accent}20,
-                  transparent
-                )
-              `,
-              boxShadow: `0 0 30px ${accent}`,
-            }}
-          />
+          >
 
-          {/* TOP LABEL */}
+            <span
+              className="
+                absolute
+                font-black
+                text-[clamp(12rem,32vw,32rem)]
+                leading-none
+                text-white/5
+                blur-sm
+              "
+            >
+              {transitionStep}
+            </span>
+
+            <span
+              className="
+                relative
+                font-black
+                text-[clamp(9rem,24vw,24rem)]
+                leading-none
+                text-white
+              "
+              style={{
+                textShadow: `
+                  0 0 20px ${accent},
+                  0 0 50px ${accent},
+                  0 0 110px ${accent}90,
+                  0 0 180px ${accent}50
+                `,
+              }}
+            >
+              {transitionStep}
+            </span>
+
+          </div>
+
+          {/* BOTTOM STATUS */}
 
           <div
             className="
               absolute
-              top-[38%]
+              bottom-[17%]
               left-1/2
               -translate-x-1/2
               flex
               items-center
               gap-3
-              whitespace-nowrap
-              animate-[incomingLabel_1.1s_cubic-bezier(.16,1,.3,1)_forwards]
+              animate-[countdownStatus_700ms_ease-out_forwards]
             "
           >
+
             <span
-              className="w-10 md:w-16 h-px"
+              className="w-10 h-px"
               style={{
                 background: `linear-gradient(90deg, transparent, ${accent})`,
               }}
@@ -594,116 +675,107 @@ export default function DjScreen() {
               className="
                 text-[9px]
                 md:text-xs
-                font-bold
-                tracking-[0.5em]
-                pl-[0.5em]
-                text-white/45
+                font-black
+                tracking-[0.45em]
+                pl-[0.45em]
+                text-white/40
               "
             >
-              LIVE TRANSMISSION
+              YENİ GÖNDERİ
             </span>
 
             <span
-              className="w-10 md:w-16 h-px"
+              className="w-10 h-px"
               style={{
                 background: `linear-gradient(90deg, ${accent}, transparent)`,
               }}
             />
+
           </div>
 
-          {/* MAIN TITLE */}
-
-          <div
-            className="
-              relative
-              flex
-              flex-col
-              items-center
-              justify-center
-              animate-[incomingTitle_1.5s_cubic-bezier(.16,1,.3,1)_forwards]
-            "
-          >
-            <div
-              className="
-                mb-7
-                h-[2px]
-                w-16
-                md:w-24
-                animate-[incomingLine_1.2s_ease-out_forwards]
-              "
-              style={{
-                background: accent,
-                boxShadow: `0 0 20px ${accent}`,
-              }}
-            />
-
-            <h1
-              className="
-                relative
-                text-center
-                font-black
-                uppercase
-                leading-none
-                tracking-[-0.055em]
-                text-[clamp(4rem,9vw,11rem)]
-              "
-              style={{
-                textShadow: `
-                  0 0 20px ${accent},
-                  0 0 60px ${accent}90,
-                  0 0 130px ${accent}50
-                `,
-              }}
-            >
-              {transitionStep}
-            </h1>
-
-            <div
-              className="
-                mt-7
-                h-px
-                w-32
-                md:w-52
-                opacity-60
-              "
-              style={{
-                background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
-                boxShadow: `0 0 18px ${accent}`,
-              }}
-            />
-          </div>
-
-          {/* CORNER UI */}
-
-          <div className="absolute top-8 left-8 opacity-40">
-            <div
-              className="w-10 h-10 border-l border-t"
-              style={{ borderColor: accent }}
-            />
-          </div>
-
-          <div className="absolute top-8 right-8 opacity-40">
-            <div
-              className="w-10 h-10 border-r border-t"
-              style={{ borderColor: accent }}
-            />
-          </div>
-
-          <div className="absolute bottom-8 left-8 opacity-40">
-            <div
-              className="w-10 h-10 border-l border-b"
-              style={{ borderColor: accent }}
-            />
-          </div>
-
-          <div className="absolute bottom-8 right-8 opacity-40">
-            <div
-              className="w-10 h-10 border-r border-b"
-              style={{ borderColor: accent }}
-            />
-          </div>
         </div>
       )}
+
+      {/* ========================================================= */}
+      {/* MERAK YAZISI */}
+      {/* ========================================================= */}
+
+      {transitionStep &&
+        transitionStep !== "3" &&
+        transitionStep !== "2" &&
+        transitionStep !== "1" && (
+          <div
+            className="
+              absolute
+              inset-0
+              z-[95]
+              flex
+              items-center
+              justify-center
+              bg-black
+              animate-[revealScreen_850ms_cubic-bezier(.16,1,.3,1)_forwards]
+            "
+          >
+
+            <div
+              className="
+                flex
+                flex-col
+                items-center
+                justify-center
+                text-center
+              "
+            >
+
+              <div
+                className="
+                  mb-5
+                  h-px
+                  w-16
+                  animate-[mysteryLine_850ms_ease-out_forwards]
+                "
+                style={{
+                  background: accent,
+                  boxShadow: `0 0 20px ${accent}`,
+                }}
+              />
+
+              <h2
+                className="
+                  font-black
+                  uppercase
+                  text-white
+                  text-[clamp(3rem,7vw,8rem)]
+                  tracking-[-0.04em]
+                  animate-[mysteryText_850ms_cubic-bezier(.16,1,.3,1)_forwards]
+                "
+                style={{
+                  textShadow: `
+                    0 0 20px ${accent},
+                    0 0 60px ${accent}80
+                  `,
+                }}
+              >
+                {transitionStep}
+              </h2>
+
+              <div
+                className="
+                  mt-5
+                  text-[9px]
+                  md:text-xs
+                  tracking-[0.55em]
+                  pl-[0.55em]
+                  text-white/30
+                "
+              >
+                MASADAN GELİYOR...
+              </div>
+
+            </div>
+
+          </div>
+        )}
 
       {/* ========================================================= */}
       {/* HEADER */}
@@ -783,7 +855,16 @@ export default function DjScreen() {
               shadow-[0_0_60px_rgba(0,0,0,.8)]
             "
           >
-            <div className="absolute inset-2 rounded-full border border-white/10" />
+
+            <div
+              className="
+                absolute
+                inset-2
+                rounded-full
+                border
+                border-white/10
+              "
+            />
 
             <img
               src="/5555.png"
@@ -797,10 +878,11 @@ export default function DjScreen() {
                 animate-[logoBreath_5s_ease-in-out_infinite]
               "
             />
+
           </div>
         </div>
 
-        {/* CANLI PARTİ AKIŞI */}
+        {/* LIVE */}
 
         <div
           className="
@@ -817,6 +899,7 @@ export default function DjScreen() {
             shadow-[0_10px_50px_rgba(0,0,0,.45)]
           "
         >
+
           <span
             className={`
               w-2.5
@@ -832,7 +915,10 @@ export default function DjScreen() {
             }}
           />
 
-          <Radio size={17} className="text-red-500" />
+          <Radio
+            size={17}
+            className="text-red-500"
+          />
 
           <span
             className="
@@ -844,11 +930,13 @@ export default function DjScreen() {
           >
             CANLI PARTİ AKIŞI
           </span>
+
         </div>
+
       </header>
 
       {/* ========================================================= */}
-      {/* MAIN STAGE */}
+      {/* MAIN */}
       {/* ========================================================= */}
 
       <section
@@ -863,7 +951,9 @@ export default function DjScreen() {
           px-3
         "
       >
+
         {message ? (
+
           <div
             key={message.id}
             className={`
@@ -873,6 +963,7 @@ export default function DjScreen() {
               items-center
               transition-all
               duration-700
+
               ${
                 visible
                   ? "opacity-100 translate-y-0 scale-100"
@@ -880,7 +971,8 @@ export default function DjScreen() {
               }
             `}
           >
-            {/* CATEGORY BADGE */}
+
+            {/* CATEGORY */}
 
             <div
               className="
@@ -902,9 +994,13 @@ export default function DjScreen() {
                 borderColor: `${accent}90`,
                 color: accent,
                 background: `${accent}10`,
-                boxShadow: `0 0 35px ${accent}20, inset 0 0 25px ${accent}08`,
+                boxShadow: `
+                  0 0 35px ${accent}20,
+                  inset 0 0 25px ${accent}08
+                `,
               }}
             >
+
               <div
                 className="
                   absolute
@@ -920,7 +1016,10 @@ export default function DjScreen() {
                 }}
               />
 
-              <Icon size={21} className="relative" />
+              <Icon
+                size={21}
+                className="relative"
+              />
 
               <span
                 className="
@@ -934,6 +1033,7 @@ export default function DjScreen() {
               >
                 {title}
               </span>
+
             </div>
 
             {/* MESSAGE */}
@@ -961,7 +1061,7 @@ export default function DjScreen() {
               {message.content}
             </h1>
 
-            {/* ENERGY LINE */}
+            {/* ENERGY */}
 
             <div
               className="
@@ -979,6 +1079,7 @@ export default function DjScreen() {
                 boxShadow: `0 0 25px ${accent}30`,
               }}
             >
+
               <div
                 className="
                   absolute
@@ -988,28 +1089,45 @@ export default function DjScreen() {
                   animate-[energyPremium_2.8s_ease-in-out_infinite]
                 "
                 style={{
-                  background: `linear-gradient(90deg, transparent, ${accent}, white, ${accent}, transparent)`,
+                  background: `
+                    linear-gradient(
+                      90deg,
+                      transparent,
+                      ${accent},
+                      white,
+                      ${accent},
+                      transparent
+                    )
+                  `,
                   boxShadow: `0 0 20px ${accent}`,
                 }}
               />
+
             </div>
 
             <div className="mt-6 flex items-center gap-2 opacity-40">
+
               <span
                 className="w-1 h-1 rounded-full"
                 style={{ background: accent }}
               />
+
               <span
                 className="w-1 h-1 rounded-full"
                 style={{ background: accent }}
               />
+
               <span
                 className="w-1 h-1 rounded-full"
                 style={{ background: accent }}
               />
+
             </div>
+
           </div>
+
         ) : (
+
           <div className="flex flex-col items-center gap-8">
 
             <div className="relative">
@@ -1035,6 +1153,7 @@ export default function DjScreen() {
                   animate-[sparkleFloat_4s_ease-in-out_infinite]
                 "
               />
+
             </div>
 
             <h2
@@ -1048,8 +1167,11 @@ export default function DjScreen() {
             >
               BOMBA BEKLENİYOR
             </h2>
+
           </div>
+
         )}
+
       </section>
 
       {/* ========================================================= */}
@@ -1066,6 +1188,7 @@ export default function DjScreen() {
           gap-4
         "
       >
+
         <div
           className="
             rounded-2xl
@@ -1080,6 +1203,7 @@ export default function DjScreen() {
             shadow-[0_10px_50px_rgba(0,0,0,.45)]
           "
         >
+
           <div className="flex flex-wrap items-center gap-3">
 
             <span
@@ -1114,6 +1238,7 @@ export default function DjScreen() {
             </span>
 
           </div>
+
         </div>
 
         <div className="relative p-[1px] rounded-2xl overflow-hidden">
@@ -1125,7 +1250,18 @@ export default function DjScreen() {
               animate-[sponsorSweep_6s_linear_infinite]
             "
             style={{
-              background: `conic-gradient(from 0deg, transparent 0deg, transparent 100deg, ${accent} 150deg, white 175deg, ${accent} 200deg, transparent 250deg, transparent 360deg)`,
+              background: `
+                conic-gradient(
+                  from 0deg,
+                  transparent 0deg,
+                  transparent 100deg,
+                  ${accent} 150deg,
+                  white 175deg,
+                  ${accent} 200deg,
+                  transparent 250deg,
+                  transparent 360deg
+                )
+              `,
             }}
           />
 
@@ -1138,6 +1274,7 @@ export default function DjScreen() {
               md:p-4
             "
           >
+
             <img
               src="/D6.png"
               alt="D6 Sosyal"
@@ -1148,9 +1285,11 @@ export default function DjScreen() {
                 object-contain
               "
             />
+
           </div>
 
         </div>
+
       </footer>
 
       {/* ========================================================= */}
@@ -1159,310 +1298,274 @@ export default function DjScreen() {
 
       <style>{`
 
-        /* ========================================================= */
+        /* ===================================================== */
         /* BACKGROUND */
-        /* ========================================================= */
+        /* ===================================================== */
 
         @keyframes premiumAmbient {
+
           0%, 100% {
             transform: scale(1);
-            opacity: 0.52;
+            opacity: .52;
           }
 
           50% {
             transform: scale(1.16);
-            opacity: 0.9;
+            opacity: .9;
           }
+
         }
 
         @keyframes stageLightLeft {
+
           0%, 100% {
             transform: translateX(-12%) rotate(-25deg) scale(1);
-            opacity: 0.08;
+            opacity: .08;
           }
 
           50% {
             transform: translateX(18%) rotate(-17deg) scale(1.08);
-            opacity: 0.17;
+            opacity: .17;
           }
+
         }
 
         @keyframes stageLightRight {
+
           0%, 100% {
             transform: translateX(12%) rotate(25deg) scale(1);
-            opacity: 0.07;
+            opacity: .07;
           }
 
           50% {
             transform: translateX(-18%) rotate(17deg) scale(1.08);
-            opacity: 0.15;
+            opacity: .15;
           }
+
         }
 
         @keyframes centerBeam {
+
           0%, 100% {
-            transform: translate(-50%, -50%) scaleX(0.65);
-            opacity: 0.03;
+            transform: translate(-50%, -50%) scaleX(.65);
+            opacity: .03;
           }
 
           50% {
             transform: translate(-50%, -50%) scaleX(1.25);
-            opacity: 0.09;
+            opacity: .09;
           }
+
         }
 
         @keyframes lightSweep {
+
           0% {
             transform: translateX(-20%) rotate(25deg);
             opacity: 0;
           }
 
           20% {
-            opacity: 0.04;
+            opacity: .04;
           }
 
           50% {
-            opacity: 0.06;
+            opacity: .06;
           }
 
           80% {
-            opacity: 0.02;
+            opacity: .02;
           }
 
           100% {
             transform: translateX(280%) rotate(25deg);
             opacity: 0;
           }
+
         }
 
-        /* ========================================================= */
-        /* LOGO */
-        /* ========================================================= */
+        /* ===================================================== */
+        /* COUNTDOWN GLOW */
+        /* ===================================================== */
 
-        @keyframes logoHalo {
-          0%, 100% {
-            transform: scale(0.95);
-            opacity: 0.18;
-          }
+        @keyframes countdownGlow {
 
-          50% {
-            transform: scale(1.12);
-            opacity: 0.34;
-          }
-        }
-
-        @keyframes logoBreath {
-          0%, 100% {
-            transform: scale(1);
-            filter: drop-shadow(0 0 18px rgba(255,255,255,.22));
-          }
-
-          50% {
-            transform: scale(1.025);
-            filter: drop-shadow(0 0 32px rgba(255,255,255,.45));
-          }
-        }
-
-        @keyframes logoRing {
-          0%, 100% {
-            transform: scale(0.96);
-            opacity: 0.28;
-          }
-
-          50% {
-            transform: scale(1.05);
-            opacity: 0.72;
-          }
-        }
-
-        @keyframes logoRingInner {
-          0%, 100% {
-            transform: scale(1);
-            opacity: 0.18;
-          }
-
-          50% {
-            transform: scale(0.94);
-            opacity: 0.45;
-          }
-        }
-
-        /* ========================================================= */
-        /* PARTICLES */
-        /* ========================================================= */
-
-        @keyframes particleFloat {
-          0%, 100% {
-            transform: translate3d(0,0,0);
+          0% {
+            transform: translate(-50%, -50%) scale(.35);
             opacity: 0;
+          }
+
+          35% {
+            opacity: .35;
+          }
+
+          100% {
+            transform: translate(-50%, -50%) scale(2.4);
+            opacity: 0;
+          }
+
+        }
+
+        /* ===================================================== */
+        /* COUNTDOWN RING */
+        /* ===================================================== */
+
+        @keyframes countdownRing {
+
+          0% {
+            transform: translate(-50%, -50%) scale(.35);
+            opacity: 0;
+            border-width: 8px;
           }
 
           20% {
-            opacity: 0.25;
-          }
-
-          50% {
-            transform: translate3d(12px,-35px,0);
-            opacity: 0.5;
-          }
-
-          80% {
-            opacity: 0.15;
-          }
-        }
-
-        @keyframes slowPulse {
-          0%, 100% {
-            transform: translate(-50%, -50%) scale(0.96);
-            opacity: 0.025;
-          }
-
-          50% {
-            transform: translate(-50%, -50%) scale(1.04);
-            opacity: 0.07;
-          }
-        }
-
-        /* ========================================================= */
-        /* CINEMATIC INCOMING */
-        /* ========================================================= */
-
-        @keyframes incomingCore {
-
-          0% {
-            transform: translate(-50%, -50%) scale(0.15);
-            opacity: 0;
-          }
-
-          30% {
-            opacity: 0.35;
-          }
-
-          65% {
-            opacity: 0.18;
+            opacity: 1;
           }
 
           100% {
             transform: translate(-50%, -50%) scale(5);
             opacity: 0;
+            border-width: 1px;
           }
+
         }
 
-        @keyframes incomingRing {
+        @keyframes countdownRingSmall {
 
           0% {
-            transform: translate(-50%, -50%) scale(0.2);
-            opacity: 0;
-          }
-
-          15% {
-            opacity: 0.95;
-          }
-
-          45% {
-            opacity: 0.55;
-          }
-
-          100% {
-            transform: translate(-50%, -50%) scale(18);
-            opacity: 0;
-          }
-        }
-
-        @keyframes incomingRingInner {
-
-          0% {
-            transform: translate(-50%, -50%) scale(0.2);
+            transform: translate(-50%, -50%) scale(.4);
             opacity: 0;
           }
 
           25% {
-            opacity: 0.9;
+            opacity: .8;
           }
 
           100% {
-            transform: translate(-50%, -50%) scale(7);
+            transform: translate(-50%, -50%) scale(4);
             opacity: 0;
           }
+
         }
 
-        @keyframes incomingBeam {
+        /* ===================================================== */
+        /* COUNTDOWN NUMBER */
+        /* ===================================================== */
+
+        @keyframes countdownNumber {
 
           0% {
-            transform: scaleX(0);
             opacity: 0;
+            transform: scale(2.2);
+            filter: blur(18px);
           }
 
-          20% {
+          18% {
             opacity: 1;
-          }
-
-          55% {
-            transform: scaleX(1);
-            opacity: 0.9;
-          }
-
-          100% {
-            transform: scaleX(1.35);
-            opacity: 0;
-          }
-        }
-
-        @keyframes incomingLabel {
-
-          0% {
-            opacity: 0;
-            transform: translate(-50%, 18px);
-            filter: blur(8px);
+            transform: scale(.92);
+            filter: blur(0);
           }
 
           35% {
-            opacity: 1;
-            filter: blur(0);
+            transform: scale(1.04);
           }
 
-          70% {
-            opacity: 0.8;
+          55% {
+            transform: scale(1);
+          }
+
+          78% {
+            opacity: 1;
+            transform: scale(1.02);
           }
 
           100% {
             opacity: 0;
-            transform: translate(-50%, -8px);
+            transform: scale(.72);
+            filter: blur(10px);
           }
+
         }
 
-        @keyframes incomingTitle {
+        /* ===================================================== */
+        /* COUNTDOWN STATUS */
+        /* ===================================================== */
+
+        @keyframes countdownStatus {
 
           0% {
             opacity: 0;
-            transform: scale(0.72) translateY(30px);
-            filter: blur(24px);
-            letter-spacing: 0.08em;
+            transform: translateY(12px);
           }
 
           25% {
             opacity: 1;
-            transform: scale(1.04) translateY(-4px);
-            filter: blur(0);
-            letter-spacing: -0.055em;
           }
 
-          45% {
-            transform: scale(1);
+          75% {
+            opacity: .45;
           }
 
-          72% {
+          100% {
+            opacity: 0;
+            transform: translateY(-5px);
+          }
+
+        }
+
+        /* ===================================================== */
+        /* MYSTERY SCREEN */
+        /* ===================================================== */
+
+        @keyframes revealScreen {
+
+          0% {
+            opacity: 0;
+          }
+
+          18% {
+            opacity: 1;
+          }
+
+          75% {
             opacity: 1;
           }
 
           100% {
             opacity: 0;
-            transform: scale(1.08) translateY(-18px);
-            filter: blur(12px);
           }
+
         }
 
-        @keyframes incomingLine {
+        @keyframes mysteryText {
+
+          0% {
+            opacity: 0;
+            transform: scale(.72);
+            filter: blur(20px);
+            letter-spacing: .12em;
+          }
+
+          30% {
+            opacity: 1;
+            transform: scale(1.05);
+            filter: blur(0);
+            letter-spacing: -.04em;
+          }
+
+          60% {
+            transform: scale(1);
+          }
+
+          100% {
+            opacity: 0;
+            transform: scale(1.08);
+            filter: blur(10px);
+          }
+
+        }
+
+        @keyframes mysteryLine {
 
           0% {
             width: 0;
@@ -1470,37 +1573,37 @@ export default function DjScreen() {
           }
 
           35% {
-            width: 6rem;
+            width: 4rem;
             opacity: 1;
           }
 
-          70% {
-            width: 9rem;
-            opacity: 0.8;
-          }
-
           100% {
-            width: 10rem;
+            width: 9rem;
             opacity: 0;
           }
+
         }
 
-        /* ========================================================= */
+        /* ===================================================== */
         /* MESSAGE */
-        /* ========================================================= */
+        /* ===================================================== */
 
         @keyframes messageReveal {
 
           0% {
             opacity: 0;
-            transform: scale(0.72) translateY(40px);
-            filter: blur(22px);
+            transform: scale(.68) translateY(50px);
+            filter: blur(24px);
           }
 
-          55% {
+          45% {
             opacity: 1;
-            transform: scale(1.025) translateY(-4px);
+            transform: scale(1.035) translateY(-6px);
             filter: blur(0);
+          }
+
+          65% {
+            transform: scale(.985);
           }
 
           100% {
@@ -1508,13 +1611,14 @@ export default function DjScreen() {
             transform: scale(1) translateY(0);
             filter: blur(0);
           }
+
         }
 
         @keyframes badgePremium {
 
           0% {
             opacity: 0;
-            transform: translateY(-22px) scale(0.82);
+            transform: translateY(-22px) scale(.82);
             filter: blur(8px);
           }
 
@@ -1528,6 +1632,7 @@ export default function DjScreen() {
             opacity: 1;
             transform: translateY(0) scale(1);
           }
+
         }
 
         @keyframes badgeSweep {
@@ -1539,6 +1644,7 @@ export default function DjScreen() {
           45%, 100% {
             left: 140%;
           }
+
         }
 
         @keyframes energyPremium {
@@ -1560,12 +1666,121 @@ export default function DjScreen() {
             left: 110%;
             opacity: 0;
           }
+
         }
 
+        /* ===================================================== */
+        /* LOGO */
+        /* ===================================================== */
+
+        @keyframes logoHalo {
+
+          0%, 100% {
+            transform: scale(.95);
+            opacity: .18;
+          }
+
+          50% {
+            transform: scale(1.12);
+            opacity: .34;
+          }
+
+        }
+
+        @keyframes logoBreath {
+
+          0%, 100% {
+            transform: scale(1);
+          }
+
+          50% {
+            transform: scale(1.025);
+          }
+
+        }
+
+        @keyframes logoRing {
+
+          0%, 100% {
+            transform: scale(.96);
+            opacity: .28;
+          }
+
+          50% {
+            transform: scale(1.05);
+            opacity: .72;
+          }
+
+        }
+
+        @keyframes logoRingInner {
+
+          0%, 100% {
+            transform: scale(1);
+            opacity: .18;
+          }
+
+          50% {
+            transform: scale(.94);
+            opacity: .45;
+          }
+
+        }
+
+        /* ===================================================== */
+        /* PARTICLES */
+        /* ===================================================== */
+
+        @keyframes particleFloat {
+
+          0%, 100% {
+            transform: translate3d(0,0,0);
+            opacity: 0;
+          }
+
+          20% {
+            opacity: .25;
+          }
+
+          50% {
+            transform: translate3d(12px,-35px,0);
+            opacity: .5;
+          }
+
+          80% {
+            opacity: .15;
+          }
+
+        }
+
+        /* ===================================================== */
+        /* RINGS */
+        /* ===================================================== */
+
+        @keyframes slowPulse {
+
+          0%, 100% {
+            transform: translate(-50%, -50%) scale(.96);
+            opacity: .025;
+          }
+
+          50% {
+            transform: translate(-50%, -50%) scale(1.04);
+            opacity: .07;
+          }
+
+        }
+
+        /* ===================================================== */
+        /* SPONSOR */
+        /* ===================================================== */
+
         @keyframes sponsorSweep {
+
           to {
             transform: rotate(360deg);
           }
+
         }
 
         @keyframes sparkleFloat {
@@ -1577,7 +1792,12 @@ export default function DjScreen() {
           50% {
             transform: translateY(-10px) rotate(8deg);
           }
+
         }
+
+        /* ===================================================== */
+        /* GRAIN */
+        /* ===================================================== */
 
         @keyframes grain {
 
@@ -1600,20 +1820,21 @@ export default function DjScreen() {
           100% {
             transform: translate(0,0);
           }
+
         }
 
-        /* ========================================================= */
+        /* ===================================================== */
         /* REDUCED MOTION */
-        /* ========================================================= */
+        /* ===================================================== */
 
         @media (prefers-reduced-motion: reduce) {
 
           *,
           *::before,
           *::after {
-            animation-duration: 0.01ms !important;
+            animation-duration: .01ms !important;
             animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
+            transition-duration: .01ms !important;
           }
 
         }
