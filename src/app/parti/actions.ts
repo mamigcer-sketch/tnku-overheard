@@ -69,7 +69,6 @@ export async function updateMessage(id: string, content: string, location: strin
   revalidatePath('/dj');
 }
 
-// KULLANICININ MASADAN GÖNDERDİĞİ MESAJI KAYDETME
 export async function sendPartyMessage(formData: FormData) {
   try {
     const type = formData.get('type') as string;
@@ -79,16 +78,8 @@ export async function sendPartyMessage(formData: FormData) {
       return { error: "Mesaj içeriği boş olamaz!" };
     }
 
-    // 🔥 HATA BURADAYDI: Gelen tüm olası linç anahtarlarını (LINC, REZIL, LİNÇ) doğru konuma bağlıyoruz
-    const locationMapping: Record<string, string> = {
-      'ITIRAF': 'PARTY_ITIRAF',
-      'LINC': 'PARTY_LINC',
-      'REZIL': 'PARTY_REZIL',
-      'LİNÇ': 'PARTY_LİNÇ',
-      'OVERHEARD': 'PARTY_OVERHEARD'
-    };
-
-    const targetLocation = locationMapping[type] || 'PARTY_ITIRAF';
+    // Doğrudan formdan gelen türü location olarak kaydediyoruz
+    const targetLocation = type || 'PARTY_ITIRAF';
 
     await prisma.post.create({
       data: {

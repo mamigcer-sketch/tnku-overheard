@@ -10,9 +10,8 @@ export default function PartyInputPage() {
   const [passError, setPassError] = useState(false);
 
   const [content, setContent] = useState("");
-  // 🔥 HATA BURADAYDI: Görünen isimle veritabanı değeri aynı olmamalı. 
-  // Artık sadece görsel bir seçim tutuyoruz (ITIRAF, LINC, OVERHEARD)
-  const [type, setType] = useState("ITIRAF"); 
+  // 🔥 Doğrudan veritabanı formatıyla başlatıyoruz
+  const [type, setType] = useState("PARTY_ITIRAF"); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -40,13 +39,8 @@ export default function PartyInputPage() {
     setIsSubmitting(true);
 
     const formData = new FormData();
-    
-    // 🔥 ÇÖZÜM BURASI: Seçilen sekmeye göre veritabanına doğru ENUM / String değeri gidiyor.
-    let dbType = "PARTY_ITIRAF";
-    if (type === "LINC") dbType = "PARTY_LINC"; // veya senin DB'de PARTY_REZIL ise onu yazarsın
-    if (type === "OVERHEARD") dbType = "PARTY_OVERHEARD";
-
-    formData.append('type', dbType);
+    // Doğrudan seçilen türü yolluyoruz
+    formData.append('type', type);
     formData.append('content', content);
 
     const response = await sendPartyMessage(formData);
@@ -75,7 +69,7 @@ export default function PartyInputPage() {
     selection: "selection:bg-red-500/30"
   };
 
-  if (type === 'LINC') {
+  if (type === 'PARTY_LINC') {
     themeObj = {
       glow: "from-fuchsia-600/20",
       ambient: "bg-fuchsia-500/10",
@@ -86,7 +80,7 @@ export default function PartyInputPage() {
       icon: "text-fuchsia-500",
       selection: "selection:bg-fuchsia-500/30"
     };
-  } else if (type === 'OVERHEARD') {
+  } else if (type === 'PARTY_OVERHEARD') {
     themeObj = {
       glow: "from-cyan-600/20",
       ambient: "bg-cyan-500/10",
@@ -167,18 +161,17 @@ export default function PartyInputPage() {
 
           {/* Kategori Seçimi */}
           <div className="flex gap-1.5 bg-black/35 p-1.5 rounded-2xl border border-white/10">
-            <button type="button" onClick={() => setType('ITIRAF')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'ITIRAF' ? 'bg-red-500/15 border border-red-500/30 text-red-400 shadow-[0_0_20px_rgba(220,38,38,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
+            <button type="button" onClick={() => setType('PARTY_ITIRAF')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'PARTY_ITIRAF' ? 'bg-red-500/15 border border-red-500/30 text-red-400 shadow-[0_0_20px_rgba(220,38,38,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
               <Flame size={20} />
               <span className="text-[10px] font-black tracking-widest">İTİRAF</span>
             </button>
 
-            {/* 🔥 LİNÇ Tuşu artık state'e "LINC" atıyor */}
-            <button type="button" onClick={() => setType('LINC')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'LINC' ? 'bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_20px_rgba(192,38,211,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
+            <button type="button" onClick={() => setType('PARTY_LINC')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'PARTY_LINC' ? 'bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_20px_rgba(192,38,211,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
               <EyeOff size={20} />
               <span className="text-[10px] font-black tracking-widest">LİNÇ@</span>
             </button>
 
-            <button type="button" onClick={() => setType('OVERHEARD')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'OVERHEARD' ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 shadow-[0_0_20px_rgba(8,145,178,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
+            <button type="button" onClick={() => setType('PARTY_OVERHEARD')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'PARTY_OVERHEARD' ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-400 shadow-[0_0_20px_rgba(8,145,178,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
               <Ear size={20} />
               <span className="text-[10px] font-black tracking-widest">DUYDUM</span>
             </button>
