@@ -150,11 +150,23 @@ export default function PartyAdminPage() {
               let label = "İTİRAF";
               let color = "text-red-400";
               
-              if (msg.location === 'PARTY_REZIL' || msg.location === 'PARTY_LINC' || msg.location === 'PARTY_LİNÇ') { 
-                Icon = EyeOff; label = "LİNÇ@"; color = "text-fuchsia-400"; 
+              // 🔥 GÜNCELLENDİ: Tüm linç varyasyonları burada garantileniyor
+              if (
+                msg.location === 'PARTY_REZIL' || 
+                msg.location === 'PARTY_LINC' || 
+                msg.location === 'PARTY_LİNÇ' ||
+                msg.location?.includes('LINC') ||
+                msg.location?.includes('REZIL')
+              ) { 
+                Icon = EyeOff; 
+                label = "LİNÇ@"; 
+                color = "text-fuchsia-400"; 
               }
-              if (msg.location === 'PARTY_OVERHEARD') { 
-                Icon = Ear; label = "DUYDUM"; color = "text-cyan-400"; 
+              
+              if (msg.location === 'PARTY_OVERHEARD' || msg.location?.includes('OVERHEARD')) { 
+                Icon = Ear; 
+                label = "DUYDUM"; 
+                color = "text-cyan-400"; 
               }
 
               const isEditing = editingId === msg.id;
