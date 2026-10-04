@@ -6,7 +6,7 @@ export async function GET() {
     const latestMessage = await prisma.post.findFirst({
       where: {
         location: {
-          in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_OVERHEARD']
+          in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_OVERHEARD']
         },
         status: 'APPROVED'
       },
