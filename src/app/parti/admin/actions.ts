@@ -58,3 +58,11 @@ export async function clearActiveMessage() {
   
   revalidatePath('/dj');
 }
+export async function updateMessage(id: string, content: string, location: string) {
+  await prisma.post.update({
+    where: { id },
+    data: { content, location }
+  });
+  revalidatePath('/admin');
+  revalidatePath('/dj');
+}

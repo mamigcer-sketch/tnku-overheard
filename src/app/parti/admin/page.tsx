@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getPendingMessages, approveMessage, rejectMessage, clearActiveMessage } from './actions';
-import { Check, X, ShieldAlert, Loader2, Flame, EyeOff, Ear, RefreshCw, MonitorX } from 'lucide-react';
+import { getPendingMessages, approveMessage, rejectMessage, clearActiveMessage, updateMessage } from './actions';
+import { Check, X, ShieldAlert, Loader2, Flame, EyeOff, Ear, RefreshCw, MonitorX, Edit3, Save } from 'lucide-react';
 
 export default function PartyAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -11,25 +11,27 @@ export default function PartyAdminPage() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Verileri çekme fonksiyonu
+  // Düzenleme modunda olan mesajın ID'si ve geçici verileri için state'ler
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState("");
+  const [editLocation, setEditLocation] = useState("");
+
   const fetchMessages = async () => {
     const data = await getPendingMessages();
     setMessages(data);
     setLoading(false);
   };
 
-  // Manuel Yenileme Butonu İçin
   const handleManualRefresh = async () => {
     setIsRefreshing(true);
     await fetchMessages();
-    setTimeout(() => setIsRefreshing(false), 500); // Dönme animasyonu biraz görünsün diye
+    setTimeout(() => setIsRefreshing(false), 500);
   };
 
-  // Ekranı Temizleme Butonu İçin (İntroya Dön)
   const handleClearScreen = async () => {
     if (confirm("Ekrandaki mesajı kaldırıp Party İntro ekranına dönmek istediğine emin misin?")) {
       try {
-        await clearActiveMessage(); // actions.ts içinden çağırıyoruz
+        await clearActiveMessage();
         alert("Ekran temizlendi! Sahnede Party İntro'su dönüyor.");
       } catch (error) {
         console.error("Ekran temizlenirken hata oluştu:", error);
@@ -38,7 +40,6 @@ export default function PartyAdminPage() {
     }
   };
 
-  // Otomatik 3 saniyede bir yenileme
   useEffect(() => {
     const auth = sessionStorage.getItem('tnku_admin_auth');
     if (auth === 'true') {
@@ -61,14 +62,26 @@ export default function PartyAdminPage() {
   };
 
   const handleAction = async (id: string, actionType: 'APPROVE' | 'REJECT') => {
-    // Ekranda anında yok hissi vermek için UI'dan hemen siliyoruz
     setMessages((prev) => prev.filter((m) => m.id !== id));
-    
     if (actionType === 'APPROVE') {
       await approveMessage(id);
     } else {
       await rejectMessage(id);
     }
+  };
+
+  // Düzenleme modunu açma
+  const startEditing = (msg: any) => {
+    setEditingId(msg.id);
+    setEditContent(msg.content);
+    setEditLocation(msg.location);
+  };
+
+  // Düzenlemeyi kaydetme
+  const handleSaveEdit = async (id: string) => {
+    await updateMessage(id, editContent, editLocation);
+    setEditingId(null);
+    fetchMessages();
   };
 
   if (!isAuthenticated) {
@@ -100,7 +113,6 @@ export default function PartyAdminPage() {
           </h1>
           
           <div className="flex items-center gap-3">
-            {/* MANUEL YENİLEME BUTONU */}
             <button 
               onClick={handleManualRefresh}
               className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors active:scale-95"
@@ -115,7 +127,6 @@ export default function PartyAdminPage() {
           </div>
         </header>
 
-        {/* EKRANI TEMİZLE BUTONU (Yeni) */}
         <button 
           onClick={handleClearScreen}
           className="w-full flex items-center justify-center gap-2 mb-8 bg-red-900/40 hover:bg-red-600 border border-red-500/50 hover:border-red-500 text-red-100 py-4 rounded-xl font-black tracking-widest transition-all shadow-[0_0_15px_rgba(220,38,38,0.2)] hover:shadow-[0_0_25px_rgba(220,38,38,0.5)]"
@@ -139,31 +150,100 @@ export default function PartyAdminPage() {
               let label = "İTİRAF";
               let color = "text-red-400";
               
-              if (msg.location === 'PARTY_REZIL') { Icon = EyeOff; label = "REZİL@"; color = "text-fuchsia-400"; }
-              if (msg.location === 'PARTY_OVERHEARD') { Icon = Ear; label = "DUYDUM"; color = "text-cyan-400"; }
+              if (msg.location === 'PARTY_REZIL' || msg.location === 'PARTY_LINC' || msg.location === 'PARTY_LİNÇ') { 
+                Icon = EyeOff; label = "LİNÇ@"; color = "text-fuchsia-400"; 
+              }
+              if (msg.location === 'PARTY_OVERHEARD') { 
+                Icon = Ear; label = "DUYDUM"; color = "text-cyan-400"; 
+              }
+
+              const isEditing = editingId === msg.id;
 
               return (
                 <div key={msg.id} className="bg-[#111] border border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden transition-all">
-                  <div className={`flex items-center gap-2 text-xs font-black tracking-widest mb-3 ${color}`}>
-                    <Icon size={14} /> {label}
+                  
+                  {/* Üst Kısım: Kategori ve Düzenle Butonu */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className={`flex items-center gap-2 text-xs font-black tracking-widest ${color}`}>
+                      <Icon size={14} /> {label}
+                    </div>
+                    
+                    {!isEditing && (
+                      <button 
+                        onClick={() => startEditing(msg)}
+                        className="flex items-center gap-1 text-xs bg-white/5 hover:bg-white/10 text-gray-300 px-3 py-1.5 rounded-lg border border-white/10 transition-all font-bold"
+                      >
+                        <Edit3 size={13} /> Düzenle
+                      </button>
+                    )}
                   </div>
                   
-                  <p className="text-xl font-bold leading-snug mb-6">{msg.content}</p>
+                  {/* İçerik / Düzenleme Alanı */}
+                  {isEditing ? (
+                    <div className="space-y-3 mb-6">
+                      {/* Metin Düzenleme */}
+                      <textarea 
+                        value={editContent}
+                        onChange={(e) => setEditContent(e.target.value)}
+                        className="w-full bg-black/60 border border-white/20 rounded-xl p-3 text-white text-lg font-bold outline-none focus:border-red-500 resize-none h-24"
+                        maxLength={150}
+                      />
+
+                      {/* Kategori Değiştirme Butonları */}
+                      <div className="flex gap-2">
+                        <button 
+                          type="button"
+                          onClick={() => setEditLocation('PARTY_ITIRAF')}
+                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_ITIRAF' ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-white/5 border-white/10 text-gray-400'}`}
+                        >
+                          İTİRAF
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setEditLocation('PARTY_LINC')}
+                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_LINC' || editLocation === 'PARTY_REZIL' ? 'bg-fuchsia-500/20 border-fuchsia-500 text-fuchsia-400' : 'bg-white/5 border-white/10 text-gray-400'}`}
+                        >
+                          LİNÇ@
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setEditLocation('PARTY_OVERHEARD')}
+                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_OVERHEARD' ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-white/5 border-white/10 text-gray-400'}`}
+                        >
+                          DUYDUM
+                        </button>
+                      </div>
+
+                      {/* Kaydet Butonu */}
+                      <button 
+                        onClick={() => handleSaveEdit(msg.id)}
+                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition-all"
+                      >
+                        <Save size={16} /> DEĞİŞİKLİKLERİ KAYDET
+                      </button>
+                    </div>
+                  ) : (
+                    <p className="text-xl font-bold leading-snug mb-6">{msg.content}</p>
+                  )}
                   
-                  <div className="flex gap-3 mt-4">
-                    <button 
-                      onClick={() => handleAction(msg.id, 'REJECT')}
-                      className="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 border border-white/10 hover:border-red-500/50 py-3 rounded-xl transition-all font-bold"
-                    >
-                      <X size={20} /> ÇÖPE AT
-                    </button>
-                    <button 
-                      onClick={() => handleAction(msg.id, 'APPROVE')}
-                      className="flex-1 flex items-center justify-center gap-2 bg-green-500/20 hover:bg-green-500 text-green-400 hover:text-white border border-green-500/50 py-3 rounded-xl transition-all font-bold"
-                    >
-                      <Check size={20} /> EKRANA VER
-                    </button>
-                  </div>
+                  {/* Alt Butonlar */}
+                  {!isEditing && (
+                    <div className="flex gap-3 mt-4">
+                      <button 
+                        onClick={() => handleAction(msg.id, 'REJECT')}
+                        className="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-red-500/20 text-gray-400 hover:text-red-500 border border-white/10 hover:border-red-500/50 py-3 rounded-xl transition-all font-bold"
+                      >
+                        <X size={20} /> ÇÖPE AT
+                      </button>
+                      <button 
+                        onClick={() => handleAction(msg.id, 'APPROVE')}
+                        className="flex-1 flex items-center justify-center gap-2 bg-green-500/20 hover:bg-green-500 text-green-400 hover:text-white border border-green-500/50 py-3 rounded-xl transition-all font-bold"
+                      >
+                        <Check size={20} /> EKRANA VER
+                      </button>
+                    </div>
+                  )}
+
                 </div>
               );
             })}
