@@ -3,11 +3,11 @@
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-// Bekleyen mesajları getir (Eskiden yeniye doğru, önce atan önce onaylanır)
+// Bekleyen mesajları getir (Tüm olası location varyasyonları eklendi)
 export async function getPendingMessages() {
   return await prisma.post.findMany({
     where: {
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LİNÇ', 'PARTY_OVERHEARD'] },
+      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_IFSA', 'PARTY_OVERHEARD'] },
       status: 'PENDING'
     },
     orderBy: { createdAt: 'asc' }
@@ -17,10 +17,9 @@ export async function getPendingMessages() {
 // Mesajı onayla ve DJ ekranına fırlat
 export async function approveMessage(id: string) {
   // Önce daha önceden yayında olan mesaj varsa onları "COMPLETED" yapıp ekrandan düşürüyoruz
-  // Böylece iki mesaj üst üste binmez, sadece son onaylanan ekranda kalır.
   await prisma.post.updateMany({
     where: { 
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LİNÇ', 'PARTY_OVERHEARD'] },
+      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_IFSA', 'PARTY_OVERHEARD'] },
       status: 'APPROVED' 
     },
     data: { status: 'COMPLETED' }
@@ -36,6 +35,7 @@ export async function approveMessage(id: string) {
   });
   
   revalidatePath('/dj');
+  revalidatePath('/admin');
 }
 
 // Saçma sapan mesajları çöpe at
@@ -47,17 +47,19 @@ export async function rejectMessage(id: string) {
 
 // 🔥 EKRANI TEMİZLE BUTONU İÇİN ÇALIŞACAK KOD
 export async function clearActiveMessage() {
-  // Ekranda gösterilen (durumu APPROVED olan) tüm parti mesajlarını COMPLETED yapıp ekrandan düşürüyoruz
   await prisma.post.updateMany({
     where: { 
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LİNÇ', 'PARTY_OVERHEARD'] },
+      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_IFSA', 'PARTY_OVERHEARD'] },
       status: 'APPROVED' 
     },
     data: { status: 'COMPLETED' }
   });
   
   revalidatePath('/dj');
+  revalidatePath('/admin');
 }
+
+// 🔥 MESAJ VEYA KATEGORİ GÜNCELLEME
 export async function updateMessage(id: string, content: string, location: string) {
   await prisma.post.update({
     where: { id },
@@ -65,4 +67,32 @@ export async function updateMessage(id: string, content: string, location: strin
   });
   revalidatePath('/admin');
   revalidatePath('/dj');
+}
+
+// 🔥 MASADAN GÖNDERİLEN MESAJI KAYDETME
+export async function sendPartyMessage(formData: FormData) {
+  try {
+    const type = formData.get('type') as string;
+    const content = formData.get('content') as string;
+
+    if (!content || !content.trim()) {
+      return { error: "Mesaj içeriği boş olamaz!" };
+    }
+
+    const targetLocation = type || 'PARTY_ITIRAF';
+
+    await prisma.post.create({
+      data: {
+        type: 'PARTY_MODE', 
+        content: content.trim(),
+        location: targetLocation,
+        status: 'PENDING' 
+      },
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("Mesaj gönderilemedi:", error);
+    return { error: error.message || "Veritabanı kayıt hatası oluştu." };
+  }
 }
