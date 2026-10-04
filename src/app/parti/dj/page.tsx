@@ -166,17 +166,18 @@ export default function DjScreen() {
   let title = "İTİRAF";
   let Icon = Flame;
 
+  // 🔥 KESİN ÇÖZÜM: İçinde LINC, LİNÇ veya REZİL geçiyorsa direkt mor Linç@ yapıyoruz
   if (
-    message?.location === "PARTY_LİNÇ" ||
-    message?.location === "PARTY_LINC" ||
-    message?.location === "PARTY_REZIL"
+    message?.location?.includes("LINC") ||
+    message?.location?.includes("LİNÇ") ||
+    message?.location?.includes("REZIL")
   ) {
     accent = "#ed48ff";
     title = "LİNÇ@";
     Icon = EyeOff;
   }
 
-  if (message?.location === "PARTY_OVERHEARD") {
+  if (message?.location?.includes("OVERHEARD")) {
     accent = "#00e5ff";
     title = "DUYDUM";
     Icon = Ear;
