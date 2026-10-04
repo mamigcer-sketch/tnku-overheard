@@ -3,11 +3,11 @@
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-// Bekleyen mesajları getir (Eskiden yeniye doğru, önce atan önce onaylanır)
+// Bekleyen mesajları getir (Parti modu olanları direkt getiriyoruz, filtre takılmasın)
 export async function getPendingMessages() {
   return await prisma.post.findMany({
     where: {
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_OVERHEARD'] },
+      type: 'PARTY_MODE',
       status: 'PENDING'
     },
     orderBy: { createdAt: 'asc' }
@@ -16,21 +16,21 @@ export async function getPendingMessages() {
 
 // Mesajı onayla ve DJ ekranına fırlat
 export async function approveMessage(id: string) {
-  // Önce daha önceden yayında olan mesaj varsa onları "COMPLETED" yapıp ekrandan düşürüyoruz
+  // Önce daha önceden yayında olan parti mesajlarını COMPLETED yapıyoruz
   await prisma.post.updateMany({
     where: { 
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_OVERHEARD'] },
+      type: 'PARTY_MODE',
       status: 'APPROVED' 
     },
     data: { status: 'COMPLETED' }
   });
 
-  // Şimdi yeni seçtiğimiz mesajı yayına alıyoruz
+  // Seçilen mesajı yayına alıyoruz
   await prisma.post.update({
     where: { id },
     data: { 
       status: 'APPROVED', 
-      createdAt: new Date() // 🔥 Onaylandığı anı yeni gibi göster ki dev ekranda ilk bu çıksın
+      createdAt: new Date() 
     } 
   });
   
@@ -45,11 +45,11 @@ export async function rejectMessage(id: string) {
   });
 }
 
-// 🔥 EKRANI TEMİZLE BUTONU İÇİN ÇALIŞACAK KOD
+// Ekranda aktif olan mesajı temizle (İntroya dön)
 export async function clearActiveMessage() {
   await prisma.post.updateMany({
     where: { 
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_OVERHEARD'] },
+      type: 'PARTY_MODE',
       status: 'APPROVED' 
     },
     data: { status: 'COMPLETED' }
@@ -59,16 +59,17 @@ export async function clearActiveMessage() {
   revalidatePath('/admin');
 }
 
-// 🔥 ADMIN PANELİNDEN METİN VEYA KATEGORİ GÜNCELLEME
+// Admin panelinden metin veya kategori güncelleme
 export async function updateMessage(id: string, content: string, location: string) {
   await prisma.post.update({
     where: { id },
-    data: { content, location }
+    data: { content: content.trim(), location }
   });
   revalidatePath('/admin');
   revalidatePath('/dj');
 }
 
+// Kullanıcının masadan gönderdiği mesajı kaydetme
 export async function sendPartyMessage(formData: FormData) {
   try {
     const type = formData.get('type') as string;
@@ -78,7 +79,6 @@ export async function sendPartyMessage(formData: FormData) {
       return { error: "Mesaj içeriği boş olamaz!" };
     }
 
-    // Doğrudan formdan gelen türü location olarak kaydediyoruz
     const targetLocation = type || 'PARTY_ITIRAF';
 
     await prisma.post.create({
