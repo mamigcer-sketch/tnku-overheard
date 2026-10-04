@@ -7,7 +7,7 @@ import { revalidatePath } from 'next/cache';
 export async function getPendingMessages() {
   return await prisma.post.findMany({
     where: {
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_OVERHEARD'] },
+      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LİNÇ', 'PARTY_OVERHEARD'] },
       status: 'PENDING'
     },
     orderBy: { createdAt: 'asc' }
@@ -16,6 +16,17 @@ export async function getPendingMessages() {
 
 // Mesajı onayla ve DJ ekranına fırlat
 export async function approveMessage(id: string) {
+  // Önce daha önceden yayında olan mesaj varsa onları "COMPLETED" yapıp ekrandan düşürüyoruz
+  // Böylece iki mesaj üst üste binmez, sadece son onaylanan ekranda kalır.
+  await prisma.post.updateMany({
+    where: { 
+      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LİNÇ', 'PARTY_OVERHEARD'] },
+      status: 'APPROVED' 
+    },
+    data: { status: 'COMPLETED' }
+  });
+
+  // Şimdi yeni seçtiğimiz mesajı yayına alıyoruz
   await prisma.post.update({
     where: { id },
     data: { 
@@ -23,6 +34,7 @@ export async function approveMessage(id: string) {
       createdAt: new Date() // 🔥 Onaylandığı anı yeni gibi göster ki dev ekranda ilk bu çıksın
     } 
   });
+  
   revalidatePath('/dj');
 }
 
@@ -32,15 +44,17 @@ export async function rejectMessage(id: string) {
     where: { id }
   });
 }
+
+// 🔥 EKRANI TEMİZLE BUTONU İÇİN ÇALIŞACAK KOD
 export async function clearActiveMessage() {
-  // Burada veritabanındaki aktif/yayındaki mesajın durumunu güncelleyip
-  // ekrandan düşmesini sağlayacak kodu yazmalısın.
-  // Örneğin: Yayındaki mesajı bulup durumunu 'COMPLETED' veya 'CLEARED' yapabilirsin.
-  
-  /* ÖRNEK PRISMA KODU:
-  await prisma.message.updateMany({
-    where: { status: 'APPROVED_PARTY' }, // veya yayında olduğunu nasıl tutuyorsan
+  // Ekranda gösterilen (durumu APPROVED olan) tüm parti mesajlarını COMPLETED yapıp ekrandan düşürüyoruz
+  await prisma.post.updateMany({
+    where: { 
+      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LİNÇ', 'PARTY_OVERHEARD'] },
+      status: 'APPROVED' 
+    },
     data: { status: 'COMPLETED' }
   });
-  */
+  
+  revalidatePath('/dj');
 }
