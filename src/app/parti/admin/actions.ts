@@ -32,3 +32,15 @@ export async function rejectMessage(id: string) {
     where: { id }
   });
 }
+export async function clearActiveMessage() {
+  // Burada veritabanındaki aktif/yayındaki mesajın durumunu güncelleyip
+  // ekrandan düşmesini sağlayacak kodu yazmalısın.
+  // Örneğin: Yayındaki mesajı bulup durumunu 'COMPLETED' veya 'CLEARED' yapabilirsin.
+  
+  /* ÖRNEK PRISMA KODU:
+  await prisma.message.updateMany({
+    where: { status: 'APPROVED_PARTY' }, // veya yayında olduğunu nasıl tutuyorsan
+    data: { status: 'COMPLETED' }
+  });
+  */
+}

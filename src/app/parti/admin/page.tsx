@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { getPendingMessages, approveMessage, rejectMessage } from './actions';
-import { Check, X, ShieldAlert, Loader2, Flame, EyeOff, Ear, RefreshCw } from 'lucide-react';
+import { getPendingMessages, approveMessage, rejectMessage, clearActiveMessage } from './actions';
+import { Check, X, ShieldAlert, Loader2, Flame, EyeOff, Ear, RefreshCw, MonitorX } from 'lucide-react';
 
 export default function PartyAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -23,6 +23,19 @@ export default function PartyAdminPage() {
     setIsRefreshing(true);
     await fetchMessages();
     setTimeout(() => setIsRefreshing(false), 500); // Dönme animasyonu biraz görünsün diye
+  };
+
+  // Ekranı Temizleme Butonu İçin (İntroya Dön)
+  const handleClearScreen = async () => {
+    if (confirm("Ekrandaki mesajı kaldırıp Party İntro ekranına dönmek istediğine emin misin?")) {
+      try {
+        await clearActiveMessage(); // actions.ts içinden çağırıyoruz
+        alert("Ekran temizlendi! Sahnede Party İntro'su dönüyor.");
+      } catch (error) {
+        console.error("Ekran temizlenirken hata oluştu:", error);
+        alert("Ekran temizlenemedi, bir hata oluştu.");
+      }
+    }
   };
 
   // Otomatik 3 saniyede bir yenileme
@@ -87,10 +100,11 @@ export default function PartyAdminPage() {
           </h1>
           
           <div className="flex items-center gap-3">
-            {/* YENİ MANUEL YENİLEME BUTONU */}
+            {/* MANUEL YENİLEME BUTONU */}
             <button 
               onClick={handleManualRefresh}
               className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors active:scale-95"
+              title="Mesajları Yenile"
             >
               <RefreshCw size={18} className={`${isRefreshing ? "animate-spin text-white" : "text-gray-400"}`} />
             </button>
@@ -100,6 +114,15 @@ export default function PartyAdminPage() {
             </div>
           </div>
         </header>
+
+        {/* EKRANI TEMİZLE BUTONU (Yeni) */}
+        <button 
+          onClick={handleClearScreen}
+          className="w-full flex items-center justify-center gap-2 mb-8 bg-red-900/40 hover:bg-red-600 border border-red-500/50 hover:border-red-500 text-red-100 py-4 rounded-xl font-black tracking-widest transition-all shadow-[0_0_15px_rgba(220,38,38,0.2)] hover:shadow-[0_0_25px_rgba(220,38,38,0.5)]"
+        >
+          <MonitorX size={20} />
+          EKRANI TEMİZLE (İNTROYA DÖN)
+        </button>
 
         {loading ? (
           <div className="flex justify-center py-20"><Loader2 className="animate-spin text-red-500" size={40} /></div>
