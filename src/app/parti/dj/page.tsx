@@ -43,7 +43,6 @@ export default function DjScreen() {
 
       let transitionTitle = "YENİ İTİRAF";
 
-      // 🔥 HATA BURADAYDI: Veritabanından gelen tüm ihtimalleri (REZIL, LINC, LİNÇ) kapsadık
       if (
         newMsg.location === "PARTY_LİNÇ" ||
         newMsg.location === "PARTY_LINC" ||
@@ -167,7 +166,6 @@ export default function DjScreen() {
   let title = "İTİRAF";
   let Icon = Flame;
 
-  // 🔥 HATA BURADAYDI: Ekranda gösterilen rengi/başlığı belirleyen kısma da tüm ihtimalleri ekledik
   if (
     message?.location === "PARTY_LİNÇ" ||
     message?.location === "PARTY_LINC" ||
@@ -1073,23 +1071,6 @@ export default function DjScreen() {
           }
         }
 
-        @keyframes logoFlash {
-          0%, 38%, 100% {
-            opacity: 0;
-            transform: scale(.96);
-          }
-
-          43% {
-            opacity: .16;
-            transform: scale(1);
-          }
-
-          47% {
-            opacity: 0;
-            transform: scale(1.035);
-          }
-        }
-
         @keyframes particleFloat {
           0%, 100% {
             transform: translate3d(0,0,0);
@@ -1223,6 +1204,22 @@ export default function DjScreen() {
 
           100% {
             left: 110%;
+            opacity: 0;
+          }
+        }
+
+        @keyframes sponsorShine {
+          0%, 65% {
+            background-position: 200% 0;
+            opacity: 0;
+          }
+
+          75% {
+            opacity: .7;
+          }
+
+          100% {
+            background-position: -50% 0;
             opacity: 0;
           }
         }

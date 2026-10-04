@@ -10,7 +10,9 @@ export default function PartyInputPage() {
   const [passError, setPassError] = useState(false);
 
   const [content, setContent] = useState("");
-  const [type, setType] = useState("ITIRAF");
+  // 🔥 HATA BURADAYDI: Görünen isimle veritabanı değeri aynı olmamalı. 
+  // Artık sadece görsel bir seçim tutuyoruz (ITIRAF, LINC, OVERHEARD)
+  const [type, setType] = useState("ITIRAF"); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -38,7 +40,13 @@ export default function PartyInputPage() {
     setIsSubmitting(true);
 
     const formData = new FormData();
-    formData.append('type', type);
+    
+    // 🔥 ÇÖZÜM BURASI: Seçilen sekmeye göre veritabanına doğru ENUM / String değeri gidiyor.
+    let dbType = "PARTY_ITIRAF";
+    if (type === "LINC") dbType = "PARTY_LINC"; // veya senin DB'de PARTY_REZIL ise onu yazarsın
+    if (type === "OVERHEARD") dbType = "PARTY_OVERHEARD";
+
+    formData.append('type', dbType);
     formData.append('content', content);
 
     const response = await sendPartyMessage(formData);
@@ -67,7 +75,7 @@ export default function PartyInputPage() {
     selection: "selection:bg-red-500/30"
   };
 
-  if (type === 'LİNÇ') {
+  if (type === 'LINC') {
     themeObj = {
       glow: "from-fuchsia-600/20",
       ambient: "bg-fuchsia-500/10",
@@ -164,7 +172,8 @@ export default function PartyInputPage() {
               <span className="text-[10px] font-black tracking-widest">İTİRAF</span>
             </button>
 
-            <button type="button" onClick={() => setType('LİNÇ')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'LİNÇ' ? 'bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_20px_rgba(192,38,211,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
+            {/* 🔥 LİNÇ Tuşu artık state'e "LINC" atıyor */}
+            <button type="button" onClick={() => setType('LINC')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'LINC' ? 'bg-fuchsia-500/15 border border-fuchsia-500/30 text-fuchsia-400 shadow-[0_0_20px_rgba(192,38,211,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
               <EyeOff size={20} />
               <span className="text-[10px] font-black tracking-widest">LİNÇ@</span>
             </button>
