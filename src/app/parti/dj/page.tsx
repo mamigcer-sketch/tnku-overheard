@@ -108,13 +108,9 @@ export default function DjScreen() {
 
         if (!mounted) return;
 
-        /*
-         * ADMİN EKRANI TEMİZLEDİYSE (MESAJ YOKSA):
-         * Giriş (Intro) Ekranına geri dön
-         */
         if (!data || !data.message) {
           if (lastMsgId.current !== null) {
-            setVisible(false); // Önce mesajı ekrandan gizle
+            setVisible(false);
             setTimeout(() => {
               if (mounted) {
                 setMessage(null);
@@ -125,17 +121,12 @@ export default function DjScreen() {
           return;
         }
 
-        /*
-         * YENİ MESAJ GELDİYSE:
-         */
         if (lastMsgId.current !== data.message.id) {
           if (lastMsgId.current === null) {
-            // Intro ekranından ilk mesaja geçiş
             lastMsgId.current = data.message.id;
             setMessage(data.message);
             setVisible(true);
           } else {
-            // İki mesaj arası geçiş
             lastMsgId.current = data.message.id;
             runTransition(data.message);
           }
@@ -160,12 +151,6 @@ export default function DjScreen() {
       clearInterval(liveInterval);
     };
   }, []);
-
-  /*
-   * =========================================================
-   * KATEGORİ
-   * =========================================================
-   */
 
   let accent = "#ff3038";
   let title = "İTİRAF";
@@ -202,10 +187,6 @@ export default function DjScreen() {
       className="dj-screen relative min-h-screen overflow-hidden bg-[#030208] text-white flex flex-col justify-between p-6 md:p-10 select-none"
       style={{ "--accent": accent } as React.CSSProperties}
     >
-      {/* ========================================================= */}
-      {/* BACKGROUND */}
-      {/* ========================================================= */}
-
       <div className="absolute inset-0 bg-[#030208]" />
 
       <div
@@ -246,8 +227,6 @@ export default function DjScreen() {
         }}
       />
 
-      {/* Particles */}
-
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {particles.map((particle, index) => (
           <span
@@ -268,8 +247,6 @@ export default function DjScreen() {
         ))}
       </div>
 
-      {/* Background rings */}
-
       <div
         className="absolute left-1/2 top-1/2 w-[72vw] aspect-square rounded-full border opacity-[0.035] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_10s_ease-in-out_infinite]"
         style={{ borderColor: accent }}
@@ -285,8 +262,6 @@ export default function DjScreen() {
         style={{ borderColor: accent }}
       />
 
-      {/* Vignette */}
-
       <div
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{
@@ -294,8 +269,6 @@ export default function DjScreen() {
             "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.25) 68%, rgba(0,0,0,.78) 100%)",
         }}
       />
-
-      {/* Scanlines */}
 
       <div
         className="absolute inset-0 pointer-events-none z-[6] opacity-[0.035]"
@@ -305,8 +278,6 @@ export default function DjScreen() {
         }}
       />
 
-      {/* Grain */}
-
       <div
         className="absolute inset-0 pointer-events-none z-[7] opacity-[0.025] mix-blend-screen animate-[grain_.25s_steps(2)_infinite]"
         style={{
@@ -314,8 +285,6 @@ export default function DjScreen() {
             `url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.8' /%3E%3C/svg%3E")`,
         }}
       />
-
-      {/* Flash */}
 
       <div
         className={`absolute inset-0 z-[100] pointer-events-none transition-opacity duration-200 ${
@@ -325,10 +294,6 @@ export default function DjScreen() {
           background: `radial-gradient(circle at center, white 0%, ${accent}ee 10%, ${accent}55 25%, transparent 65%)`,
         }}
       />
-
-      {/* ========================================================= */}
-      {/* SİNEMATİK GEÇİŞ */}
-      {/* ========================================================= */}
 
       {transitionStep && (
         <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-black/80 backdrop-blur-2xl">
@@ -456,13 +421,8 @@ export default function DjScreen() {
         </div>
       )}
 
-      {/* ========================================================= */}
-      {/* HEADER */}
-      {/* ========================================================= */}
-
       {message && (
         <header className="relative z-20 flex justify-between items-start animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
-          {/* PREMIUM OVERHEARD PARTY LOGO */}
           <div className="relative group">
             <div
               className="absolute -inset-12 rounded-full blur-[55px] opacity-20 animate-[logoAura_6s_ease-in-out_infinite]"
@@ -526,7 +486,6 @@ export default function DjScreen() {
             </div>
           </div>
 
-          {/* LIVE INDICATOR */}
           <div className="relative group">
             <div className="absolute inset-0 rounded-full blur-xl opacity-20 bg-red-500" />
 
@@ -553,10 +512,6 @@ export default function DjScreen() {
         </header>
       )}
 
-      {/* ========================================================= */}
-      {/* MAIN STAGE */}
-      {/* ========================================================= */}
-
       <section className="relative z-10 flex-1 flex items-center justify-center text-center px-3">
         {message ? (
           <div
@@ -567,8 +522,6 @@ export default function DjScreen() {
                 : "opacity-0 translate-y-8 scale-[.94] blur-md"
             }`}
           >
-            {/* CATEGORY BADGE */}
-
             <div
               className="relative flex items-center gap-3 rounded-full border px-8 py-3.5 mb-9 md:mb-12 backdrop-blur-2xl overflow-hidden animate-[badgePremium_1s_cubic-bezier(.16,1,.3,1)]"
               style={{
@@ -593,8 +546,6 @@ export default function DjScreen() {
               </span>
             </div>
 
-            {/* MESSAGE */}
-
             <h1
               className="relative font-black uppercase leading-[1.02] tracking-[-0.065em] break-words max-w-[94vw] text-[clamp(4rem,10vw,11rem)] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]"
               style={{
@@ -603,8 +554,6 @@ export default function DjScreen() {
             >
               {message.content}
             </h1>
-
-            {/* ENERGY BAR */}
 
             <div
               className="relative mt-12 md:mt-16 h-px w-48 md:w-80 overflow-hidden rounded-full"
@@ -640,99 +589,73 @@ export default function DjScreen() {
             </div>
           </div>
         ) : (
-          /* ========================================================= */
-          /* YEPYENİ EFSANE GİRİŞ (INTRO/İDLE) EKRANI                  */
-          /* ========================================================= */
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-12 md:gap-20 w-full h-full p-6 z-50">
+          <div className="absolute inset-0 flex flex-col items-center justify-center w-full h-full p-6 z-50 animate-[idleEntrance_2s_cubic-bezier(.16,1,.3,1)_both]">
             
-            {/* DEV OVERHEARD PARTY LOGO */}
-            <div className="relative w-[85vw] md:w-[65vw] max-w-[900px] animate-[partyIntroLogo_1.5s_cubic-bezier(.16,1,.3,1)_both]">
-              <div
-                className="absolute -inset-10 rounded-full blur-[80px] opacity-30 animate-[logoAura_6s_ease-in-out_infinite]"
-                style={{ background: accent }}
-              />
+            <div 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] max-w-[800px] aspect-square rounded-full blur-[140px] opacity-20 animate-[cinematicBreathe_8s_ease-in-out_infinite]" 
+              style={{ background: accent }} 
+            />
 
+            <div className="relative w-[85vw] md:w-[65vw] max-w-[900px] animate-[cinematicLevitate_12s_ease-in-out_infinite]">
               <img
                 src="/overheard-party.png"
                 alt="Overheard Party"
-                className="relative z-10 w-full h-auto object-contain animate-[logoFloat_7s_ease-in-out_infinite]"
-                style={{ filter: `drop-shadow(0 0 35px ${accent}80)` }}
+                className="relative z-10 w-full h-auto object-contain"
+                style={{ filter: `drop-shadow(0 0 35px ${accent}50)` }}
               />
-
               <div
-                className="absolute inset-0 pointer-events-none bg-[linear-gradient(110deg,transparent_20%,rgba(255,255,255,.8)_45%,transparent_58%)] bg-[length:240%_100%] animate-[partyLogoShine_4s_ease-in-out_infinite]"
+                className="absolute inset-0 z-20 pointer-events-none bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,0.08)_50%,transparent_75%)] bg-[length:250%_100%] animate-[shimmer_6s_ease-in-out_infinite]"
               />
             </div>
 
-            {/* İKON VE LİNK BÖLÜMÜ */}
-            <div
-              className="flex flex-col md:flex-row items-center gap-8 md:gap-14 animate-[badgePremium_1.5s_cubic-bezier(.16,1,.3,1)_both]"
-              style={{ animationDelay: "0.3s" }}
-            >
+            <div className="mt-16 md:mt-24 relative group animate-[badgePremium_1.5s_cubic-bezier(.16,1,.3,1)_both]" style={{ animationDelay: "0.4s" }}>
               
-              {/* 5555.png LOGO */}
-              <div className="relative flex items-center justify-center w-28 h-28 md:w-36 md:h-36 rounded-full bg-black/40 border border-white/10 backdrop-blur-xl p-4 shadow-[0_20px_50px_rgba(0,0,0,.5)] group hover:scale-105 transition-transform duration-500">
-                <div
-                  className="absolute inset-0 rounded-full blur-xl opacity-30 animate-pulse"
-                  style={{ background: accent }}
-                />
-                <div className="absolute inset-0 bg-gradient-to-tr from-white/10 to-transparent rounded-full opacity-50" />
-                
-                <img
-                  src="/5555.png"
-                  alt="TNKU Logo"
-                  className="relative z-10 w-full h-full object-contain filter drop-shadow-[0_0_15px_rgba(255,255,255,.4)]"
-                />
-              </div>
+              <div
+                className="absolute -inset-1 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 animate-pulse"
+                style={{ background: accent }}
+              />
 
-              {/* MASADAN GÖNDER LİNK KUTUSU */}
-              <div className="relative group">
-                <div
-                  className="absolute -inset-3 rounded-3xl blur-2xl opacity-20 animate-pulse"
-                  style={{ background: accent }}
-                />
+              <div className="relative flex items-center rounded-full border border-white/[0.08] bg-black/40 backdrop-blur-3xl p-2 md:p-3 shadow-[0_30px_60px_rgba(0,0,0,0.6)]">
                 
-                <div className="relative flex flex-col items-center justify-center gap-3 rounded-3xl border border-white/[0.08] bg-black/50 backdrop-blur-2xl px-10 md:px-14 py-6 md:py-8 shadow-[0_20px_50px_rgba(0,0,0,.5)] hover:bg-white/[0.03] transition-colors duration-500">
-                  <div className="absolute top-0 w-1/2 h-[2px] bg-gradient-to-r from-transparent via-white/50 to-transparent opacity-30" />
-                  
-                  <div className="flex items-center gap-3 mb-1">
-                    <Zap
-                      size={24}
-                      style={{
-                        color: accent,
-                        filter: `drop-shadow(0 0 10px ${accent})`,
-                      }}
+                <div className="relative flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/[0.03] border border-white/10 shadow-inner">
+                  <img
+                    src="/5555.png"
+                    alt="TNKU"
+                    className="w-10 h-10 md:w-14 md:h-14 object-contain filter drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                  />
+                </div>
+
+                <div className="w-[1px] h-10 md:h-12 bg-white/[0.08] mx-4 md:mx-6" />
+
+                <div className="flex flex-col justify-center pr-6 md:pr-10">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span
+                      className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse"
+                      style={{ background: accent, boxShadow: `0 0 10px ${accent}` }}
                     />
-                    <span className="text-[10px] md:text-xs font-black tracking-[0.4em] text-white/50 uppercase">
-                      Partiye Mesaj Gönder
+                    <span className="text-[9px] md:text-[11px] font-black tracking-[0.4em] text-white/50 uppercase">
+                      Canlı Yayın • Katıl
                     </span>
                   </div>
-                  
                   <span
-                    className="text-2xl md:text-4xl font-black tracking-wider text-white"
-                    style={{ textShadow: `0 0 30px ${accent}60` }}
+                    className="text-2xl md:text-4xl font-black tracking-widest text-white leading-none mt-1"
+                    style={{ textShadow: `0 0 20px ${accent}40` }}
                   >
                     overheardparty.xyz/parti
                   </span>
                 </div>
-              </div>
 
+              </div>
             </div>
+
           </div>
         )}
       </section>
 
-      {/* ========================================================= */}
-      {/* FOOTER */}
-      {/* ========================================================= */}
-
       {message && (
         <footer className="relative z-20 flex justify-between items-end gap-4 animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
-          
-          {/* SOL ALT: 5555.png LOGOSU VE MESAJ GÖNDER LİNKİ */}
           <div className="flex flex-col md:flex-row items-start md:items-end gap-4">
             
-            {/* 5555 Logo (TNKU) */}
             <div className="relative flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-black/40 border border-white/10 backdrop-blur-xl p-2 shadow-[0_10px_30px_rgba(0,0,0,.5)] overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <img
@@ -749,7 +672,6 @@ export default function DjScreen() {
               className="relative group block"
               aria-label="Partiye mesaj gönder"
             >
-              {/* Hover glow */}
               <div
                 className="absolute -inset-3 rounded-2xl blur-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"
                 style={{
@@ -763,7 +685,6 @@ export default function DjScreen() {
                   boxShadow: "0 10px 40px rgba(0,0,0,.3)",
                 }}
               >
-                {/* Sol neon çizgi */}
                 <div
                   className="absolute left-0 top-1/2 -translate-y-1/2 w-[2px] h-8 md:h-10 rounded-full"
                   style={{
@@ -772,7 +693,6 @@ export default function DjScreen() {
                   }}
                 />
 
-                {/* Icon */}
                 <div className="relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-xl border border-white/[0.08] bg-white/[0.035]">
                   <Zap
                     size={17}
@@ -790,7 +710,6 @@ export default function DjScreen() {
                   />
                 </div>
 
-                {/* Yazılar */}
                 <div className="flex flex-col gap-1 min-w-0">
                   <span className="text-[7px] md:text-[8px] font-bold tracking-[0.35em] text-white/35">
                     MASADAN GÖNDER
@@ -812,13 +731,11 @@ export default function DjScreen() {
                   </div>
                 </div>
 
-                {/* Sağ ok */}
                 <div className="hidden md:flex ml-2 w-7 h-7 items-center justify-center rounded-full border border-white/[0.08] text-white/30 group-hover:text-white/80 transition-all duration-500">
                   →
                 </div>
               </div>
 
-              {/* Alt açıklama */}
               <div className="flex items-center gap-2 mt-2 ml-2 opacity-30 group-hover:opacity-60 transition-opacity duration-500">
                 <span
                   className="w-1 h-1 rounded-full"
@@ -833,10 +750,6 @@ export default function DjScreen() {
               </div>
             </a>
           </div>
-
-          {/* ===================================================== */}
-          {/* D6 SPONSOR */}
-          {/* ===================================================== */}
 
           <div className="relative group">
             <div
@@ -873,15 +786,7 @@ export default function DjScreen() {
         </footer>
       )}
 
-      {/* ========================================================= */}
-      {/* ANİMASYON MOTORU */}
-      {/* ========================================================= */}
-
       <style>{`
-        /* =========================================================
-           BACKGROUND
-        ========================================================= */
-
         @keyframes premiumAmbient {
           0%, 100% {
             transform: scale(1);
@@ -953,10 +858,6 @@ export default function DjScreen() {
             opacity: 0;
           }
         }
-
-        /* =========================================================
-           COUNTDOWN
-        ========================================================= */
 
         @keyframes countdownThump {
           0% {
@@ -1091,9 +992,47 @@ export default function DjScreen() {
           }
         }
 
-        /* =========================================================
-           PARTY INTRO
-        ========================================================= */
+        @keyframes idleEntrance {
+          0% {
+            opacity: 0;
+            transform: scale(0.9);
+            filter: blur(20px);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+            filter: blur(0);
+          }
+        }
+
+        @keyframes cinematicBreathe {
+          0%, 100% {
+            opacity: 0.15;
+            transform: translate(-50%, -50%) scale(0.9);
+          }
+          50% {
+            opacity: 0.3;
+            transform: translate(-50%, -50%) scale(1.1);
+          }
+        }
+
+        @keyframes cinematicLevitate {
+          0%, 100% {
+            transform: translateY(0);
+          }
+          50% {
+            transform: translateY(-15px);
+          }
+        }
+
+        @keyframes shimmer {
+          0% {
+            background-position: 200% 0;
+          }
+          100% {
+            background-position: -100% 0;
+          }
+        }
 
         @keyframes partyLogoShine {
           0% {
@@ -1151,10 +1090,6 @@ export default function DjScreen() {
             transform: scale(1.35);
           }
         }
-
-        /* =========================================================
-           PREMIUM OVERHEARD PARTY LOGO
-        ========================================================= */
 
         @keyframes logoAura {
           0%, 100% {
@@ -1221,10 +1156,6 @@ export default function DjScreen() {
           }
         }
 
-        /* =========================================================
-           PARTICLES / GRAIN
-        ========================================================= */
-
         @keyframes particleFloat {
           0%, 100% {
             transform: translate3d(0,0,0);
@@ -1288,10 +1219,6 @@ export default function DjScreen() {
             transform: translate(0,0);
           }
         }
-
-        /* =========================================================
-           MESSAGE
-        ========================================================= */
 
         @keyframes messageReveal {
           0% {
@@ -1366,10 +1293,6 @@ export default function DjScreen() {
           }
         }
 
-        /* =========================================================
-           SPONSOR
-        ========================================================= */
-
         @keyframes sponsorShine {
           0%, 65% {
             background-position: 200% 0;
@@ -1385,10 +1308,6 @@ export default function DjScreen() {
             opacity: 0;
           }
         }
-
-        /* =========================================================
-           REDUCED MOTION
-        ========================================================= */
 
         @media (prefers-reduced-motion: reduce) {
           *,
