@@ -150,13 +150,17 @@ export default function PartyAdminPage() {
               let label = "İTİRAF";
               let color = "text-red-400";
               
-              // 🔥 GÜNCELLENDİ: Tüm linç varyasyonları burada garantileniyor
+              // 🔥 GÜNCELLENDİ: LINC, REZIL, LİNÇ, İFŞA ve IFSA kelimelerinin tümü garantilendi
               if (
                 msg.location === 'PARTY_REZIL' || 
                 msg.location === 'PARTY_LINC' || 
                 msg.location === 'PARTY_LİNÇ' ||
+                msg.location === 'PARTY_IFSA' ||
                 msg.location?.includes('LINC') ||
-                msg.location?.includes('REZIL')
+                msg.location?.includes('REZIL') ||
+                msg.location?.includes('IFSA') ||
+                msg.location?.includes('İFŞA') ||
+                msg.location?.includes('LİNÇ')
               ) { 
                 Icon = EyeOff; 
                 label = "LİNÇ@"; 
@@ -213,7 +217,7 @@ export default function PartyAdminPage() {
                         <button 
                           type="button"
                           onClick={() => setEditLocation('PARTY_LINC')}
-                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_LINC' || editLocation === 'PARTY_REZIL' ? 'bg-fuchsia-500/20 border-fuchsia-500 text-fuchsia-400' : 'bg-white/5 border-white/10 text-gray-400'}`}
+                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_LINC' || editLocation === 'PARTY_REZIL' || editLocation === 'PARTY_IFSA' ? 'bg-fuchsia-500/20 border-fuchsia-500 text-fuchsia-400' : 'bg-white/5 border-white/10 text-gray-400'}`}
                         >
                           LİNÇ@
                         </button>
