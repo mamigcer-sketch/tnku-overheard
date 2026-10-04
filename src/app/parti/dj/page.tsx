@@ -321,10 +321,6 @@ export default function DjScreen() {
                     filter: `drop-shadow(0 0 25px ${accent}80)`,
                   }}
                 />
-
-                <div
-                  className="absolute inset-0 pointer-events-none bg-[linear-gradient(110deg,transparent_20%,rgba(255,255,255,.8)_45%,transparent_58%)] bg-[length:240%_100%] animate-[partyLogoShine_1.5s_ease-in-out_infinite]"
-                />
               </div>
 
               <div className="mt-5 text-[10px] md:text-sm font-black tracking-[0.65em] pl-[0.65em] text-white/50 animate-pulse">
@@ -461,15 +457,6 @@ export default function DjScreen() {
                 }}
               />
 
-              <div
-                className="absolute inset-0 z-20 pointer-events-none rounded-xl opacity-0 animate-[logoFlash_7s_ease-in-out_infinite]"
-                style={{
-                  background:
-                    "radial-gradient(ellipse at 50% 50%, rgba(255,255,255,.25), transparent 55%)",
-                  mixBlendMode: "screen",
-                }}
-              />
-
               <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 whitespace-nowrap">
                 <span
                   className="w-1.5 h-1.5 rounded-full animate-pulse"
@@ -602,9 +589,6 @@ export default function DjScreen() {
                 alt="Overheard Party"
                 className="relative z-10 w-full h-auto object-contain"
                 style={{ filter: `drop-shadow(0 0 35px ${accent}50)` }}
-              />
-              <div
-                className="absolute inset-0 z-20 pointer-events-none bg-[linear-gradient(110deg,transparent_25%,rgba(255,255,255,0.08)_50%,transparent_75%)] bg-[length:250%_100%] animate-[shimmer_6s_ease-in-out_infinite]"
               />
             </div>
 
@@ -1022,72 +1006,6 @@ export default function DjScreen() {
           }
           50% {
             transform: translateY(-15px);
-          }
-        }
-
-        @keyframes shimmer {
-          0% {
-            background-position: 200% 0;
-          }
-          100% {
-            background-position: -100% 0;
-          }
-        }
-
-        @keyframes partyLogoShine {
-          0% {
-            background-position: 180% 0;
-            opacity: 0;
-          }
-
-          20% {
-            opacity: 1;
-          }
-
-          60%, 100% {
-            background-position: -80% 0;
-            opacity: 0;
-          }
-        }
-
-        @keyframes partyIntroLogo {
-          0% {
-            opacity: 0;
-            transform: scale(.72);
-            filter: blur(18px);
-          }
-
-          35% {
-            opacity: 1;
-            transform: scale(1.025);
-            filter: blur(0);
-          }
-
-          70% {
-            transform: scale(.99);
-          }
-
-          100% {
-            opacity: 0;
-            transform: scale(1.08);
-            filter: blur(8px);
-          }
-        }
-
-        @keyframes partyIntroGlow {
-          0% {
-            opacity: 0;
-            transform: scale(.55);
-          }
-
-          35% {
-            opacity: 1;
-            transform: scale(1);
-          }
-
-          100% {
-            opacity: 0;
-            transform: scale(1.35);
           }
         }
 
