@@ -3,11 +3,10 @@
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-// Bekleyen mesajları getir (Parti modu olanları direkt getiriyoruz, filtre takılmasın)
+// 🔥 Bekleyen mesajları yakalamanın en garanti yolu (type veya location fark etmeksizin tüm PENDING olanlar)
 export async function getPendingMessages() {
   return await prisma.post.findMany({
     where: {
-      type: 'PARTY_MODE',
       status: 'PENDING'
     },
     orderBy: { createdAt: 'asc' }
@@ -16,10 +15,9 @@ export async function getPendingMessages() {
 
 // Mesajı onayla ve DJ ekranına fırlat
 export async function approveMessage(id: string) {
-  // Önce daha önceden yayında olan parti mesajlarını COMPLETED yapıyoruz
+  // Önce yayındaki eski mesajları COMPLETED yapıyoruz
   await prisma.post.updateMany({
     where: { 
-      type: 'PARTY_MODE',
       status: 'APPROVED' 
     },
     data: { status: 'COMPLETED' }
@@ -38,7 +36,7 @@ export async function approveMessage(id: string) {
   revalidatePath('/admin');
 }
 
-// Saçma sapan mesajları çöpe at
+// Saçma sapan mesajları sil
 export async function rejectMessage(id: string) {
   await prisma.post.delete({
     where: { id }
@@ -49,7 +47,6 @@ export async function rejectMessage(id: string) {
 export async function clearActiveMessage() {
   await prisma.post.updateMany({
     where: { 
-      type: 'PARTY_MODE',
       status: 'APPROVED' 
     },
     data: { status: 'COMPLETED' }
