@@ -8,7 +8,6 @@ import {
   Ear,
   Radio,
   Zap,
-  Sparkles,
 } from "lucide-react";
 
 export default function DjScreen() {
@@ -166,7 +165,6 @@ export default function DjScreen() {
   let title = "İTİRAF";
   let Icon = Flame;
 
-  // 🔥 KESİN ÇÖZÜM: İçinde LINC, LİNÇ veya REZİL geçiyorsa direkt mor Linç@ yapıyoruz
   if (
     message?.location?.includes("LINC") ||
     message?.location?.includes("LİNÇ") ||
@@ -182,6 +180,16 @@ export default function DjScreen() {
     title = "DUYDUM";
     Icon = Ear;
   }
+
+  // 🚀 AKILLI YAZI BOYUTU (TAŞMAYI SIFIRLAMAK İÇİN KARAKTER KONTROLÜ)
+  const getContentFontSize = (text: string) => {
+    const len = text ? text.length : 0;
+    if (len > 180) return "text-[1.2rem] md:text-[1.7rem] lg:text-[2.2rem] tracking-tight leading-[1.1] max-w-[94vw]";
+    if (len > 120) return "text-[1.5rem] md:text-[2.2rem] lg:text-[2.9rem] tracking-tight leading-[1.05] max-w-[94vw]";
+    if (len > 80) return "text-[2rem] md:text-[2.8rem] lg:text-[3.6rem] leading-[1.05] max-w-[94vw]";
+    if (len > 40) return "text-[2.8rem] md:text-[3.9rem] lg:text-[5.2rem] leading-[1.02] max-w-[94vw]";
+    return "text-[clamp(3.5rem,7.5vw,8.5rem)] leading-[0.98] max-w-[94vw]";
+  };
 
   const particles = [
     { left: "7%", top: "18%", delay: "0s", duration: "7s" },
@@ -199,8 +207,8 @@ export default function DjScreen() {
 
   return (
     <main
-      className="dj-screen relative min-h-screen overflow-hidden bg-[#030208] text-white flex flex-col justify-between p-6 md:p-10 select-none"
-      style={{ "--accent": accent } as React.CSSProperties}
+      className="dj-screen relative min-h-screen max-h-screen overflow-hidden bg-[#030208] text-white flex flex-col justify-between p-4 md:p-10 select-none"
+      style={{ "--accent": accent } as any}
     >
       <div className="absolute inset-0 bg-[#030208]" />
 
@@ -256,7 +264,7 @@ export default function DjScreen() {
                 "--delay": particle.delay,
                 "--duration": particle.duration,
                 animationDelay: particle.delay,
-              } as React.CSSProperties
+              } as any
             }
           />
         ))}
@@ -337,13 +345,20 @@ export default function DjScreen() {
                   }}
                 />
                 
-                {/* GEÇİŞ EKRANI - SCAP LOGOSU */}
-                <img
-                  src="/scap.png"
-                  alt="SCAP"
-                  className="mt-6 w-24 md:w-36 object-contain animate-pulse"
-                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 15px ${accent}80)` }}
-                />
+                {/* GEÇİŞ EKRANI - SCAP LOGOSU VEYA FALLBACK */}
+                <div className="relative mt-6 w-24 md:w-36 h-8 md:h-12 flex items-center justify-center">
+                  <img
+                    src="/scap.png"
+                    alt="SCAP"
+                    onError={(e: any) => {
+                      e.target.style.display = 'none';
+                      e.target.nextSibling.style.display = 'block';
+                    }}
+                    className="w-full h-full object-contain animate-pulse flex-shrink-0"
+                    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 15px ${accent}80)` }}
+                  />
+                  <span className="hidden font-serif italic text-2xl md:text-3xl font-extrabold tracking-widest text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.7)] animate-pulse">SCAP</span>
+                </div>
               </div>
 
               <div className="mt-5 text-[10px] md:text-sm font-black tracking-[0.65em] pl-[0.65em] text-white/50 animate-pulse">
@@ -450,7 +465,7 @@ export default function DjScreen() {
               }}
             />
 
-            <div className="relative w-64 md:w-80 lg:w-[390px] flex flex-col items-center">
+            <div className="relative w-56 md:w-80 flex flex-col items-center">
               <div className="relative w-full">
                 <img
                   src="/overheard-party.png"
@@ -481,7 +496,7 @@ export default function DjScreen() {
                   }}
                 />
 
-                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 whitespace-nowrap">
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 whitespace-nowrap">
                   <span
                     className="w-1.5 h-1.5 rounded-full animate-pulse"
                     style={{
@@ -490,19 +505,26 @@ export default function DjScreen() {
                     }}
                   />
 
-                  <span className="text-[7px] md:text-[8px] font-bold tracking-[0.48em] pl-[0.48em] text-white/35">
+                  <span className="text-[6px] md:text-[8px] font-bold tracking-[0.48em] pl-[0.48em] text-white/35">
                     LIVE EXPERIENCE
                   </span>
                 </div>
               </div>
 
-              {/* HEADER MESAJ EKRANI - SCAP LOGOSU */}
-              <img
-                src="/scap.png"
-                alt="SCAP"
-                className="mt-8 w-16 md:w-20 object-contain animate-[logoFloat_7s_ease-in-out_infinite]"
-                style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 10px ${accent}80)` }}
-              />
+              {/* HEADER MESAJ EKRANI - SCAP LOGOSU VEYA FALLBACK */}
+              <div className="relative mt-8 w-16 md:w-24 h-5 md:h-7 flex items-center justify-center">
+                <img
+                  src="/scap.png"
+                  alt="SCAP"
+                  onError={(e: any) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                  className="w-full h-full object-contain animate-[logoFloat_7s_ease-in-out_infinite] flex-shrink-0"
+                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 10px ${accent}80)` }}
+                />
+                <span className="hidden font-serif italic text-lg md:text-xl font-extrabold tracking-widest text-white/80 drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
+              </div>
             </div>
           </div>
 
@@ -532,18 +554,19 @@ export default function DjScreen() {
         </header>
       )}
 
-      <section className="relative z-10 flex-1 flex items-center justify-center text-center px-3">
+      {/* TAŞMAYI VE ASAGI KAYDIRMAYI %100 ENGELLEYEN MERKEZ ALAN */}
+      <section className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 overflow-hidden max-h-[58vh]">
         {message ? (
           <div
             key={message.id}
-            className={`w-full flex flex-col items-center transition-all duration-700 ${
+            className={`w-full flex flex-col items-center justify-center transition-all duration-700 max-h-full ${
               visible
                 ? "opacity-100 translate-y-0 scale-100"
                 : "opacity-0 translate-y-8 scale-[.94] blur-md"
             }`}
           >
             <div
-              className="relative flex items-center gap-3 rounded-full border px-8 py-3.5 mb-9 md:mb-12 backdrop-blur-2xl overflow-hidden animate-[badgePremium_1s_cubic-bezier(.16,1,.3,1)]"
+              className="relative flex items-center gap-3 rounded-full border px-6 md:px-8 py-2 md:py-3.5 mb-5 md:mb-8 backdrop-blur-2xl overflow-hidden flex-shrink-0 animate-[badgePremium_1s_cubic-bezier(.16,1,.3,1)]"
               style={{
                 borderColor: `${accent}90`,
                 color: accent,
@@ -559,24 +582,28 @@ export default function DjScreen() {
                 }}
               />
 
-              <Icon size={24} className="relative" />
+              <Icon size={20} className="relative md:scale-125" />
 
-              <span className="relative text-xl md:text-3xl font-black tracking-[0.32em] pl-[0.32em]">
+              <span className="relative text-base md:text-3xl font-black tracking-[0.32em] pl-[0.32em]">
                 {title}
               </span>
             </div>
 
+            {/* AKILLI, MAX BOYUTLANDIRILMIŞ VE ASLA TAŞMAYAN H1 */}
             <h1
-              className="relative font-black uppercase leading-[1.02] tracking-[-0.065em] break-words max-w-[94vw] text-[clamp(4rem,10vw,11rem)] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]"
+              className={`relative font-black uppercase tracking-[-0.04em] break-words max-w-[94vw] max-h-[42vh] overflow-hidden flex items-center justify-center px-1 select-none ${getContentFontSize(message.content)} animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]`}
               style={{
                 textShadow: `0 0 18px ${accent}35, 0 0 55px ${accent}40, 0 0 110px ${accent}20`,
+                display: "-webkit-box",
+                WebkitLineClamp: 5,
+                WebkitBoxOrient: "vertical",
               }}
             >
               {message.content}
             </h1>
 
             <div
-              className="relative mt-12 md:mt-16 h-px w-48 md:w-80 overflow-hidden rounded-full"
+              className="relative mt-6 md:mt-10 h-[2px] w-36 md:w-64 overflow-hidden rounded-full flex-shrink-0"
               style={{
                 background: `${accent}28`,
                 boxShadow: `0 0 25px ${accent}30`,
@@ -591,20 +618,20 @@ export default function DjScreen() {
               />
             </div>
 
-            <div className="mt-6 flex items-center gap-2 opacity-40">
+            <div className="mt-4 flex items-center gap-1.5 opacity-40 flex-shrink-0">
               <span
-                className="w-1 h-1 rounded-full"
-                style={{ background: accent }}
+                className="w-1 h-1 rounded-full animate-bounce"
+                style={{ background: accent, animationDelay: "0ms" }}
               />
 
               <span
-                className="w-1 h-1 rounded-full"
-                style={{ background: accent }}
+                className="w-1 h-1 rounded-full animate-bounce"
+                style={{ background: accent, animationDelay: "150ms" }}
               />
 
               <span
-                className="w-1 h-1 rounded-full"
-                style={{ background: accent }}
+                className="w-1 h-1 rounded-full animate-bounce"
+                style={{ background: accent, animationDelay: "300ms" }}
               />
             </div>
           </div>
@@ -616,7 +643,7 @@ export default function DjScreen() {
               style={{ background: accent }} 
             />
 
-            <div className="relative w-[85vw] md:w-[65vw] max-w-[900px] flex flex-col items-center animate-[cinematicLevitate_12s_ease-in-out_infinite]">
+            <div className="relative w-[85vw] md:w-[65vw] max-w-[900px] flex flex-col items-center animate-[cinematicLevitate_12s_ease-in-out_infinite] flex-shrink-0">
               <img
                 src="/overheard-party.png"
                 alt="Overheard Party"
@@ -624,16 +651,23 @@ export default function DjScreen() {
                 style={{ filter: `drop-shadow(0 0 35px ${accent}50)` }}
               />
 
-              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU */}
-              <img
-                src="/scap.png"
-                alt="SCAP"
-                className="mt-6 w-32 md:w-48 object-contain animate-pulse"
-                style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent}80)` }}
-              />
+              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU VEYA FALLBACK */}
+              <div className="relative mt-6 w-32 md:w-48 h-10 md:h-14 flex items-center justify-center">
+                <img
+                  src="/scap.png"
+                  alt="SCAP"
+                  onError={(e: any) => {
+                    e.target.style.display = 'none';
+                    e.target.nextSibling.style.display = 'block';
+                  }}
+                  className="w-full h-full object-contain animate-pulse flex-shrink-0"
+                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent}80)` }}
+                />
+                <span className="hidden font-serif italic text-3xl md:text-4xl font-extrabold tracking-widest text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.7)] animate-pulse">SCAP</span>
+              </div>
             </div>
 
-            <div className="mt-16 md:mt-24 relative group animate-[badgePremium_1.5s_cubic-bezier(.16,1,.3,1)_both]" style={{ animationDelay: "0.4s" }}>
+            <div className="mt-12 md:mt-20 relative group animate-[badgePremium_1.5s_cubic-bezier(.16,1,.3,1)_both] flex-shrink-0" style={{ animationDelay: "0.4s" }}>
               
               <div
                 className="absolute -inset-1 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 animate-pulse"
@@ -642,28 +676,28 @@ export default function DjScreen() {
 
               <div className="relative flex items-center rounded-full border border-white/[0.08] bg-black/40 backdrop-blur-3xl p-2 md:p-3 shadow-[0_30px_60px_rgba(0,0,0,0.6)]">
                 
-                <div className="relative flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/[0.03] border border-white/10 shadow-inner">
+                <div className="relative flex items-center justify-center w-14 h-14 md:w-20 md:h-20 rounded-full bg-white/[0.03] border border-white/10 shadow-inner">
                   <img
                     src="/5555.png"
                     alt="TNKU"
-                    className="w-10 h-10 md:w-14 md:h-14 object-contain filter drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                    className="w-8 h-8 md:w-14 md:h-14 object-contain filter drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
                   />
                 </div>
 
                 <div className="w-[1px] h-10 md:h-12 bg-white/[0.08] mx-4 md:mx-6" />
 
-                <div className="flex flex-col justify-center pr-6 md:pr-10">
-                  <div className="flex items-center gap-2 mb-1">
+                <div className="flex flex-col justify-center pr-6 md:pr-10 text-left">
+                  <div className="flex items-center gap-2 mb-0.5">
                     <span
                       className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse"
                       style={{ background: accent, boxShadow: `0 0 10px ${accent}` }}
                     />
-                    <span className="text-[9px] md:text-[11px] font-black tracking-[0.4em] text-white/50 uppercase">
+                    <span className="text-[8px] md:text-[11px] font-black tracking-[0.4em] text-white/50 uppercase">
                       Canlı Yayın • Katıl
                     </span>
                   </div>
                   <span
-                    className="text-2xl md:text-4xl font-black tracking-widest text-white leading-none mt-1"
+                    className="text-lg md:text-4xl font-black tracking-widest text-white leading-none mt-1"
                     style={{ textShadow: `0 0 20px ${accent}40` }}
                   >
                     overheardparty.xyz/parti
@@ -679,9 +713,9 @@ export default function DjScreen() {
 
       {message && (
         <footer className="relative z-20 flex justify-between items-end gap-4 animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
-          <div className="flex flex-col md:flex-row items-start md:items-end gap-4">
+          <div className="flex flex-col md:flex-row items-start md:items-end gap-3">
             
-            <div className="relative flex items-center justify-center w-16 h-16 md:w-20 md:h-20 rounded-full bg-black/40 border border-white/10 backdrop-blur-xl p-2 shadow-[0_10px_30px_rgba(0,0,0,.5)] overflow-hidden group">
+            <div className="relative flex items-center justify-center w-14 h-14 md:w-20 md:h-20 rounded-full bg-black/40 border border-white/10 backdrop-blur-xl p-1.5 md:p-2 shadow-[0_10px_30px_rgba(0,0,0,.5)] overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               <img
                 src="/5555.png"
@@ -705,7 +739,7 @@ export default function DjScreen() {
               />
 
               <div
-                className="relative flex items-center gap-4 md:gap-5 rounded-2xl border border-white/[0.08] bg-black/35 backdrop-blur-xl px-4 md:px-6 py-3 md:py-4 transition-all duration-500 group-hover:border-white/20 group-hover:bg-white/[0.045]"
+                className="relative flex items-center gap-3 md:gap-5 rounded-2xl border border-white/[0.08] bg-black/35 backdrop-blur-xl px-3 md:px-6 py-2.5 md:py-4 transition-all duration-500 group-hover:border-white/20 group-hover:bg-white/[0.045]"
                 style={{
                   boxShadow: "0 10px 40px rgba(0,0,0,.3)",
                 }}
@@ -718,9 +752,9 @@ export default function DjScreen() {
                   }}
                 />
 
-                <div className="relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 rounded-xl border border-white/[0.08] bg-white/[0.035]">
+                <div className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl border border-white/[0.08] bg-white/[0.035]">
                   <Zap
-                    size={17}
+                    size={15}
                     style={{
                       color: accent,
                       filter: `drop-shadow(0 0 8px ${accent})`,
@@ -735,18 +769,18 @@ export default function DjScreen() {
                   />
                 </div>
 
-                <div className="flex flex-col gap-1 min-w-0">
-                  <span className="text-[7px] md:text-[8px] font-bold tracking-[0.35em] text-white/35">
+                <div className="flex flex-col gap-0.5 md:gap-1 min-w-0 text-left">
+                  <span className="text-[6px] md:text-[8px] font-bold tracking-[0.35em] text-white/35">
                     MASADAN GÖNDER
                   </span>
 
                   <div className="flex items-center gap-2">
-                    <span className="font-black text-sm md:text-lg tracking-[0.08em] text-white">
+                    <span className="font-black text-xs md:text-lg tracking-[0.08em] text-white">
                       overheardparty.xyz/parti
                     </span>
 
                     <span
-                      className="text-sm md:text-base opacity-70 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                      className="text-xs md:text-base opacity-70 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
                       style={{
                         color: accent,
                       }}
@@ -761,7 +795,7 @@ export default function DjScreen() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 mt-2 ml-2 opacity-30 group-hover:opacity-60 transition-opacity duration-500">
+              <div className="flex items-center gap-2 mt-1.5 ml-2 opacity-30 group-hover:opacity-60 transition-opacity duration-500">
                 <span
                   className="w-1 h-1 rounded-full"
                   style={{
@@ -769,7 +803,7 @@ export default function DjScreen() {
                   }}
                 />
 
-                <span className="text-[7px] font-bold tracking-[0.28em]">
+                <span className="text-[6px] md:text-[7px] font-bold tracking-[0.28em]">
                   PARTİ AKIŞINA KATIL
                 </span>
               </div>
@@ -789,7 +823,7 @@ export default function DjScreen() {
                 PARTNER
               </span>
 
-              <div className="relative flex items-center justify-center min-w-[82px] md:min-w-[105px] h-[38px] md:h-[46px] rounded-xl border border-white/[0.07] bg-white/[0.025] backdrop-blur-xl px-3 overflow-hidden">
+              <div className="relative flex items-center justify-center min-w-[70px] md:min-w-[105px] h-[32px] md:h-[46px] rounded-xl border border-white/[0.07] bg-white/[0.025] backdrop-blur-xl px-2.5 overflow-hidden">
                 <div
                   className="absolute inset-0 pointer-events-none"
                   style={{
@@ -803,7 +837,7 @@ export default function DjScreen() {
                 <img
                   src="/D6.png"
                   alt="D6 Sosyal"
-                  className="relative z-10 h-7 md:h-8 w-auto max-w-[85px] object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+                  className="relative z-10 h-5 md:h-8 w-auto max-w-[85px] object-contain opacity-70 group-hover:opacity-100 transition-opacity duration-500"
                 />
               </div>
             </div>
@@ -811,456 +845,449 @@ export default function DjScreen() {
         </footer>
       )}
 
-      <style>{`
-        @keyframes premiumAmbient {
-          0%, 100% {
-            transform: scale(1);
-            opacity: .52;
-          }
-
-          50% {
-            transform: scale(1.16);
-            opacity: .9;
-          }
-        }
-
-        @keyframes stageLightLeft {
-          0%, 100% {
-            transform: translateX(-12%) rotate(-25deg) scale(1);
-            opacity: .08;
-          }
-
-          50% {
-            transform: translateX(18%) rotate(-17deg) scale(1.08);
-            opacity: .17;
-          }
-        }
-
-        @keyframes stageLightRight {
-          0%, 100% {
-            transform: translateX(12%) rotate(25deg) scale(1);
-            opacity: .07;
-          }
-
-          50% {
-            transform: translateX(-18%) rotate(17deg) scale(1.08);
-            opacity: .15;
-          }
-        }
-
-        @keyframes centerBeam {
-          0%, 100% {
-            transform: translate(-50%, -50%) scaleX(.65);
-            opacity: .03;
-          }
-
-          50% {
-            transform: translate(-50%, -50%) scaleX(1.25);
-            opacity: .09;
-          }
-        }
-
-        @keyframes lightSweep {
-          0% {
-            transform: translateX(-20%) rotate(25deg);
-            opacity: 0;
-          }
-
-          20% {
-            opacity: .04;
-          }
-
-          50% {
-            opacity: .06;
-          }
-
-          80% {
-            opacity: .02;
-          }
-
-          100% {
-            transform: translateX(280%) rotate(25deg);
-            opacity: 0;
-          }
-        }
-
-        @keyframes countdownThump {
-          0% {
-            opacity: 0;
-            transform: scale(1.8);
-            filter: blur(20px);
-          }
-
-          25% {
-            opacity: 1;
-            transform: scale(1);
-            filter: blur(0);
-          }
-
-          75% {
-            opacity: 1;
-            transform: scale(.95);
-            filter: blur(0);
-          }
-
-          100% {
-            opacity: 0;
-            transform: scale(.8);
-            filter: blur(10px);
-          }
-        }
-
-        @keyframes cinematicRing {
-          0% {
-            opacity: 1;
-            transform: scale(.2);
-            border-width: 10px;
-          }
-
-          100% {
-            opacity: 0;
-            transform: scale(2.2);
-            border-width: 0;
-          }
-        }
-
-        @keyframes cinematicText {
-          0% {
-            opacity: 0;
-            transform: scale(.85);
-            filter: blur(15px);
-            letter-spacing: .1em;
-            padding-left: .1em;
-          }
-
-          15% {
-            opacity: 1;
-            transform: scale(1);
-            filter: blur(0);
-            letter-spacing: .28em;
-            padding-left: .28em;
-          }
-
-          85% {
-            opacity: 1;
-            transform: scale(1);
-            filter: blur(0);
-            letter-spacing: .28em;
-            padding-left: .28em;
-          }
-
-          100% {
-            opacity: 0;
-            transform: scale(1.1);
-            filter: blur(10px);
-            letter-spacing: .35em;
-            padding-left: .35em;
-          }
-        }
-
-        @keyframes cinematicLine {
-          0% {
-            width: 0;
-            opacity: 0;
-          }
-
-          15% {
-            width: 250px;
-            opacity: 1;
-          }
-
-          85% {
-            width: 250px;
-            opacity: 1;
-          }
-
-          100% {
-            width: 350px;
-            opacity: 0;
-          }
-        }
-
-        @keyframes transitionGlow {
-          0%, 100% {
-            transform: scale(.75);
-            opacity: .1;
-          }
-
-          50% {
-            transform: scale(1.15);
-            opacity: .28;
-          }
-        }
-
-        @keyframes countdownOrbit {
-          to {
-            transform: rotate(360deg);
-          }
-        }
-
-        @keyframes countdownPulse {
-          0% {
-            opacity: .85;
-            transform: scale(.35);
-            box-shadow: 0 0 0 rgba(0,102,255,0);
-          }
-
-          55% {
-            opacity: .35;
-            transform: scale(1);
-            box-shadow: 0 0 70px rgba(0,102,255,.25);
-          }
-
-          100% {
-            opacity: 0;
-            transform: scale(1.65);
-          }
-        }
-
-        @keyframes idleEntrance {
-          0% {
-            opacity: 0;
-            transform: scale(0.9);
-            filter: blur(20px);
-          }
-          100% {
-            opacity: 1;
-            transform: scale(1);
-            filter: blur(0);
-          }
-        }
-
-        @keyframes cinematicBreathe {
-          0%, 100% {
-            opacity: 0.15;
-            transform: translate(-50%, -50%) scale(0.9);
-          }
-          50% {
-            opacity: 0.3;
-            transform: translate(-50%, -50%) scale(1.1);
-          }
-        }
-
-        @keyframes cinematicLevitate {
-          0%, 100% {
-            transform: translateY(0);
-          }
-          50% {
-            transform: translateY(-15px);
-          }
-        }
-
-        @keyframes logoAura {
-          0%, 100% {
-            transform: scale(.88);
-            opacity: .12;
-          }
-
-          50% {
-            transform: scale(1.12);
-            opacity: .28;
-          }
-        }
-
-        @keyframes logoGlow {
-          0%, 100% {
-            transform: scale(.985);
-            opacity: .25;
-            filter: brightness(1.1) saturate(1.2) blur(18px);
-          }
-
-          45% {
-            transform: scale(1.015);
-            opacity: .48;
-            filter: brightness(1.45) saturate(1.6) blur(16px);
-          }
-
-          52% {
-            transform: scale(1.02);
-            opacity: .6;
-            filter: brightness(1.7) saturate(1.8) blur(13px);
-          }
-
-          60% {
-            transform: scale(1);
-            opacity: .3;
-            filter: brightness(1.2) saturate(1.3) blur(18px);
-          }
-        }
-
-        @keyframes logoFloat {
-          0%, 100% {
-            transform: translateY(0) scale(1);
-          }
-
-          50% {
-            transform: translateY(-3px) scale(1.012);
-          }
-        }
-
-        @keyframes particleFloat {
-          0%, 100% {
-            transform: translate3d(0,0,0);
-            opacity: 0;
-          }
-
-          20% {
-            opacity: .25;
-          }
-
-          50% {
-            transform: translate3d(12px,-35px,0);
-            opacity: .5;
-          }
-
-          80% {
-            opacity: .15;
-          }
-        }
-
-        @keyframes slowPulse {
-          0%, 100% {
-            transform: translate(-50%, -50%) scale(.96);
-            opacity: .025;
-          }
-
-          50% {
-            transform: translate(-50%, -50%) scale(1.04);
-            opacity: .07;
-          }
-        }
-
-        @keyframes sparkleFloat {
-          0%, 100% {
-            transform: translateY(0) rotate(0deg);
-          }
-
-          50% {
-            transform: translateY(-10px) rotate(8deg);
-          }
-        }
-
-        @keyframes grain {
-          0% {
-            transform: translate(0,0);
-          }
-
-          25% {
-            transform: translate(2%,-1%);
-          }
-
-          50% {
-            transform: translate(-1%,2%);
-          }
-
-          75% {
-            transform: translate(-2%,-1%);
-          }
-
-          100% {
-            transform: translate(0,0);
-          }
-        }
-
-        @keyframes messageReveal {
-          0% {
-            opacity: 0;
-            transform: scale(.68) translateY(50px);
-            filter: blur(24px);
-          }
-
-          45% {
-            opacity: 1;
-            transform: scale(1.035) translateY(-6px);
-            filter: blur(0);
-          }
-
-          65% {
-            transform: scale(.985);
-          }
-
-          100% {
-            opacity: 1;
-            transform: scale(1) translateY(0);
-            filter: blur(0);
-          }
-        }
-
-        @keyframes badgePremium {
-          0% {
-            opacity: 0;
-            transform: translateY(-22px) scale(.82);
-            filter: blur(8px);
-          }
-
-          70% {
-            opacity: 1;
-            transform: translateY(2px) scale(1.02);
-            filter: blur(0);
-          }
-
-          100% {
-            opacity: 1;
-            transform: translateY(0) scale(1);
-          }
-        }
-
-        @keyframes badgeSweep {
-          0% {
-            left: -80%;
-          }
-
-          45%, 100% {
-            left: 140%;
-          }
-        }
-
-        @keyframes energyPremium {
-          0% {
-            left: -55%;
-            opacity: 0;
-          }
-
-          20% {
-            opacity: 1;
-          }
-
-          75% {
-            opacity: 1;
-          }
-
-          100% {
-            left: 110%;
-            opacity: 0;
-          }
-        }
-
-        @keyframes sponsorShine {
-          0%, 65% {
-            background-position: 200% 0;
-            opacity: 0;
-          }
-
-          75% {
-            opacity: .7;
-          }
-
-          100% {
-            background-position: -50% 0;
-            opacity: 0;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: .01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: .01ms !important;
-          }
-        }
-      `}</style>
+      {/* TÜM HATALARI ENGELLEYEN HIZLI & GÜVENLİ CSS ENJEKSİYONU */}
+      <style dangerouslySetInnerHTML={{ __html: stylesCSS }} />
     </main>
   );
 }
+
+const stylesCSS = `
+  @keyframes premiumAmbient {
+    0%, 100% {
+      transform: scale(1);
+      opacity: .52;
+    }
+
+    50% {
+      transform: scale(1.16);
+      opacity: .9;
+    }
+  }
+
+  @keyframes stageLightLeft {
+    0%, 100% {
+      transform: translateX(-12%) rotate(-25deg) scale(1);
+      opacity: .08;
+    }
+
+    50% {
+      transform: translateX(18%) rotate(-17deg) scale(1.08);
+      opacity: .17;
+    }
+  }
+
+  @keyframes stageLightRight {
+    0%, 100% {
+      transform: translateX(12%) rotate(25deg) scale(1);
+      opacity: .07;
+    }
+
+    50% {
+      transform: translateX(-18%) rotate(17deg) scale(1.08);
+      opacity: .15;
+    }
+  }
+
+  @keyframes centerBeam {
+    0%, 100% {
+      transform: translate(-50%, -50%) scaleX(.65);
+      opacity: .03;
+    }
+
+    50% {
+      transform: translate(-50%, -50%) scaleX(1.25);
+      opacity: .09;
+    }
+  }
+
+  @keyframes lightSweep {
+    0% {
+      transform: translateX(-20%) rotate(25deg);
+      opacity: 0;
+    }
+
+    20% {
+      opacity: .04;
+    }
+
+    50% {
+      opacity: .06;
+    }
+
+    80% {
+      opacity: .02;
+    }
+
+    100% {
+      transform: translateX(280%) rotate(25deg);
+      opacity: 0;
+    }
+  }
+
+  @keyframes countdownThump {
+    0% {
+      opacity: 0;
+      transform: scale(1.8);
+      filter: blur(20px);
+    }
+
+    25% {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+    }
+
+    75% {
+      opacity: 1;
+      transform: scale(.95);
+      filter: blur(0);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(.8);
+      filter: blur(10px);
+    }
+  }
+
+  @keyframes cinematicRing {
+    0% {
+      opacity: 1;
+      transform: scale(.2);
+      border-width: 10px;
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(2.2);
+      border-width: 0;
+    }
+  }
+
+  @keyframes cinematicText {
+    0% {
+      opacity: 0;
+      transform: scale(.85);
+      filter: blur(15px);
+      letter-spacing: .1em;
+      padding-left: .1em;
+    }
+
+    15% {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+      letter-spacing: .28em;
+      padding-left: .28em;
+    }
+
+    85% {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+      letter-spacing: .28em;
+      padding-left: .28em;
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(1.1);
+      filter: blur(10px);
+      letter-spacing: .35em;
+      padding-left: .35em;
+    }
+  }
+
+  @keyframes cinematicLine {
+    0% {
+      width: 0;
+      opacity: 0;
+    }
+
+    15% {
+      width: 250px;
+      opacity: 1;
+    }
+
+    85% {
+      width: 250px;
+      opacity: 1;
+    }
+
+    100% {
+      width: 350px;
+      opacity: 0;
+    }
+  }
+
+  @keyframes transitionGlow {
+    0%, 100% {
+      transform: scale(.75);
+      opacity: .1;
+    }
+
+    50% {
+      transform: scale(1.15);
+      opacity: .28;
+    }
+  }
+
+  @keyframes countdownOrbit {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes countdownPulse {
+    0% {
+      opacity: .85;
+      transform: scale(.35);
+      box-shadow: 0 0 0 rgba(0,102,255,0);
+    }
+
+    55% {
+      opacity: .35;
+      transform: scale(1);
+      box-shadow: 0 0 70px rgba(0,102,255,.25);
+    }
+
+    100% {
+      opacity: 0;
+      transform: scale(1.65);
+    }
+  }
+
+  @keyframes idleEntrance {
+    0% {
+      opacity: 0;
+      transform: scale(0.9);
+      filter: blur(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes cinematicBreathe {
+    0%, 100% {
+      opacity: 0.15;
+      transform: translate(-50%, -50%) scale(0.9);
+    }
+    50% {
+      opacity: 0.3;
+      transform: translate(-50%, -50%) scale(1.1);
+    }
+  }
+
+  @keyframes cinematicLevitate {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-15px);
+    }
+  }
+
+  @keyframes logoAura {
+    0%, 100% {
+      transform: scale(.88);
+      opacity: .12;
+    }
+
+    50% {
+      transform: scale(1.12);
+      opacity: .28;
+    }
+  }
+
+  @keyframes logoGlow {
+    0%, 100% {
+      transform: scale(.985);
+      opacity: .25;
+      filter: brightness(1.1) saturate(1.2) blur(18px);
+    }
+
+    45% {
+      transform: scale(1.015);
+      opacity: .48;
+      filter: brightness(1.45) saturate(1.6) blur(16px);
+    }
+
+    52% {
+      transform: scale(1.02);
+      opacity: .6;
+      filter: brightness(1.7) saturate(1.8) blur(13px);
+    }
+
+    60% {
+      transform: scale(1);
+      opacity: .3;
+      filter: brightness(1.2) saturate(1.3) blur(18px);
+    }
+  }
+
+  @keyframes logoFloat {
+    0%, 100% {
+      transform: translateY(0) scale(1);
+    }
+
+    50% {
+      transform: translateY(-3px) scale(1.012);
+    }
+  }
+
+  @keyframes particleFloat {
+    0%, 100% {
+      transform: translate3d(0,0,0);
+      opacity: 0;
+    }
+
+    20% {
+      opacity: .25;
+    }
+
+    50% {
+      transform: translate3d(12px,-35px,0);
+      opacity: .5;
+    }
+
+    80% {
+      opacity: .15;
+    }
+  }
+
+  @keyframes slowPulse {
+    0%, 100% {
+      transform: translate(-50%, -50%) scale(.96);
+      opacity: .025;
+    }
+
+    50% {
+      transform: translate(-50%, -50%) scale(1.04);
+      opacity: .07;
+    }
+  }
+
+  @keyframes grain {
+    0% {
+      transform: translate(0,0);
+    }
+
+    25% {
+      transform: translate(2%,-1%);
+    }
+
+    50% {
+      transform: translate(-1%,2%);
+    }
+
+    75% {
+      transform: translate(-2%,-1%);
+    }
+
+    100% {
+      transform: translate(0,0);
+    }
+  }
+
+  @keyframes messageReveal {
+    0% {
+      opacity: 0;
+      transform: scale(.68) translateY(50px);
+      filter: blur(24px);
+    }
+
+    45% {
+      opacity: 1;
+      transform: scale(1.035) translateY(-6px);
+      filter: blur(0);
+    }
+
+    65% {
+      transform: scale(.985);
+    }
+
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes badgePremium {
+    0% {
+      opacity: 0;
+      transform: translateY(-22px) scale(.82);
+      filter: blur(8px);
+    }
+
+    70% {
+      opacity: 1;
+      transform: translateY(2px) scale(1.02);
+      filter: blur(0);
+    }
+
+    100% {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  @keyframes badgeSweep {
+    0% {
+      left: -80%;
+    }
+
+    45%, 100% {
+      left: 140%;
+    }
+  }
+
+  @keyframes energyPremium {
+    0% {
+      left: -55%;
+      opacity: 0;
+    }
+
+    20% {
+      opacity: 1;
+    }
+
+    75% {
+      opacity: 1;
+    }
+
+    100% {
+      left: 110%;
+      opacity: 0;
+    }
+  }
+
+  @keyframes sponsorShine {
+    0%, 65% {
+      background-position: 200% 0;
+      opacity: 0;
+    }
+
+    75% {
+      opacity: .7;
+    }
+
+    100% {
+      background-position: -50% 0;
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: .01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: .01ms !important;
+    }
+  }
+`;
