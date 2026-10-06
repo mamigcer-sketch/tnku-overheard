@@ -339,14 +339,14 @@ export default function DjScreen() {
                 <img
                   src="/overheard-party.png"
                   alt="OVERHEARD PARTY"
-                  className="relative w-full h-auto object-contain"
+                  className="relative w-full h-auto object-contain animate-[logoFloat_7s_ease-in-out_infinite]"
                   style={{
                     filter: `drop-shadow(0 0 25px ${accent}80)`,
                   }}
                 />
                 
-                {/* GEÇİŞ EKRANI - SCAP LOGOSU (TAM GENİŞLİK) */}
-                <div className="relative mt-8 w-[90%] flex items-center justify-center">
+                {/* GEÇİŞ EKRANI - SCAP LOGOSU */}
+                <div className="relative mt-5 w-32 md:w-44 flex items-center justify-center">
                   <img
                     src="/scap.png"
                     alt="SCAP"
@@ -355,9 +355,9 @@ export default function DjScreen() {
                       e.target.nextSibling.style.display = 'block';
                     }}
                     className="w-full h-auto object-contain animate-pulse flex-shrink-0"
-                    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 35px ${accent}) drop-shadow(0 0 15px rgba(255,255,255,0.4))` }}
+                    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent}60)` }}
                   />
-                  <span className="hidden font-serif italic text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-widest text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
+                  <span className="hidden font-serif italic text-3xl md:text-5xl font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
                 </div>
               </div>
 
@@ -465,7 +465,7 @@ export default function DjScreen() {
               }}
             />
 
-            <div className="relative w-56 md:w-80 lg:w-[390px] flex flex-col items-center">
+            <div className="relative w-56 md:w-80 lg:w-[320px] flex flex-col items-center">
               <div className="relative w-full">
                 <img
                   src="/overheard-party.png"
@@ -495,24 +495,10 @@ export default function DjScreen() {
                     `,
                   }}
                 />
-
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 whitespace-nowrap">
-                  <span
-                    className="w-1.5 h-1.5 rounded-full animate-pulse"
-                    style={{
-                      background: accent,
-                      boxShadow: `0 0 12px ${accent}`,
-                    }}
-                  />
-
-                  <span className="text-[6px] md:text-[8px] font-bold tracking-[0.48em] pl-[0.48em] text-white/35">
-                    LIVE EXPERIENCE
-                  </span>
-                </div>
               </div>
 
-              {/* HEADER MESAJ EKRANI - SCAP LOGOSU (TAM GENİŞLİK) */}
-              <div className="relative mt-8 w-[90%] flex items-center justify-center">
+              {/* 🚀 ORTALANMIŞ VE KÜÇÜLTÜLMÜŞ SCAP LOGOSU */}
+              <div className="relative mt-2 mb-2.5 w-24 md:w-32 flex items-center justify-center">
                 <img
                   src="/scap.png"
                   alt="SCAP"
@@ -521,9 +507,23 @@ export default function DjScreen() {
                     e.target.nextSibling.style.display = 'block';
                   }}
                   className="w-full h-auto object-contain animate-[logoFloat_7s_ease-in-out_infinite] flex-shrink-0"
-                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent}) drop-shadow(0 0 8px rgba(255,255,255,0.3))` }}
+                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 8px ${accent}60)` }}
                 />
-                <span className="hidden font-serif italic text-4xl md:text-6xl font-extrabold tracking-widest text-white/90 drop-shadow-[0_0_15px_rgba(255,255,255,0.7)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
+                <span className="hidden font-serif italic text-lg md:text-2xl font-extrabold tracking-widest text-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.7)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
+              </div>
+
+              <div className="relative flex items-center gap-1.5 whitespace-nowrap animate-pulse">
+                <span
+                  className="w-1 h-1 rounded-full animate-ping"
+                  style={{
+                    background: accent,
+                    boxShadow: `0 0 8px ${accent}`,
+                  }}
+                />
+
+                <span className="text-[5px] md:text-[7px] font-bold tracking-[0.48em] pl-[0.48em] text-white/35">
+                  LIVE EXPERIENCE
+                </span>
               </div>
             </div>
           </div>
@@ -651,8 +651,8 @@ export default function DjScreen() {
                 style={{ filter: `drop-shadow(0 0 35px ${accent}50)` }}
               />
 
-              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU (TAM GENİŞLİK) */}
-              <div className="relative mt-10 w-[90%] flex items-center justify-center">
+              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU (KİBAR BOYUT) */}
+              <div className="relative mt-5 w-32 md:w-44 flex items-center justify-center">
                 <img
                   src="/scap.png"
                   alt="SCAP"
@@ -661,9 +661,9 @@ export default function DjScreen() {
                     e.target.nextSibling.style.display = 'block';
                   }}
                   className="w-full h-auto object-contain animate-pulse flex-shrink-0"
-                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 30px ${accent}) drop-shadow(0 0 10px rgba(255,255,255,0.4))` }}
+                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 15px ${accent}60)` }}
                 />
-                <span className="hidden font-serif italic text-6xl md:text-8xl lg:text-[7rem] font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
+                <span className="hidden font-serif italic text-3xl md:text-5xl font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
               </div>
             </div>
 
@@ -906,7 +906,7 @@ const stylesCSS = `
       opacity: 0;
     }
 
-    20% {
+    25% {
       opacity: .04;
     }
 
@@ -1096,7 +1096,7 @@ const stylesCSS = `
       opacity: .12;
     }
 
-    50% {
+    55% {
       transform: scale(1.12);
       opacity: .28;
     }
