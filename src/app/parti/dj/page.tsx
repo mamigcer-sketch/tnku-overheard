@@ -514,9 +514,9 @@ export default function DjScreen() {
             </div>
           </div>
 
-          {/* 🚀 ORTA GRUP: SCAP LOGOSU (EKRANIN TAM MERKEZİNDE, ÜSTTE) */}
+          {/* 🚀 ORTA GRUP: SCAP LOGOSU (TAM MERKEZDE - BÜYÜTÜLDÜ) */}
           <div className="absolute left-1/2 -translate-x-1/2 top-0 md:top-1 flex flex-col items-center justify-center z-30">
-            <div className="relative w-36 md:w-52 h-10 md:h-14 flex items-center justify-center">
+            <div className="relative w-48 md:w-68 lg:w-80 h-14 md:h-20 flex items-center justify-center">
               <img
                 src="/scap.png"
                 alt="SCAP"
@@ -525,9 +525,9 @@ export default function DjScreen() {
                   e.target.nextSibling.style.display = 'block';
                 }}
                 className="w-full h-full object-contain animate-[logoFloat_7s_ease-in-out_infinite] flex-shrink-0"
-                style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 12px ${accent}80)` }}
+                style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 15px ${accent}90)` }}
               />
-              <span className="hidden font-serif italic text-2xl md:text-3xl font-extrabold tracking-widest text-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.7)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
+              <span className="hidden font-serif italic text-3xl md:text-5xl font-extrabold tracking-widest text-white/90 drop-shadow-[0_0_12px_rgba(255,255,255,0.7)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
             </div>
           </div>
 
@@ -624,17 +624,17 @@ export default function DjScreen() {
 
             <div className="mt-4 flex items-center gap-1.5 opacity-40 flex-shrink-0">
               <span
-                className="w-1 h-1 rounded-full animate-bounce"
+                className="w-1.5 h-1.5 rounded-full animate-bounce"
                 style={{ background: accent, animationDelay: "0ms" }}
               />
 
               <span
-                className="w-1 h-1 rounded-full animate-bounce"
+                className="w-1.5 h-1.5 rounded-full animate-bounce"
                 style={{ background: accent, animationDelay: "150ms" }}
               />
 
               <span
-                className="w-1 h-1 rounded-full animate-bounce"
+                className="w-1.5 h-1.5 rounded-full animate-bounce"
                 style={{ background: accent, animationDelay: "300ms" }}
               />
             </div>
@@ -910,7 +910,7 @@ const stylesCSS = `
       opacity: 0;
     }
 
-    20% {
+    25% {
       opacity: .04;
     }
 
