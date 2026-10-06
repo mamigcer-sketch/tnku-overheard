@@ -327,7 +327,7 @@ export default function DjScreen() {
                 }}
               />
 
-              <div className="relative w-[50vw] max-w-[700px] animate-[partyIntroLogo_1.5s_cubic-bezier(.16,1,.3,1)_forwards]">
+              <div className="relative w-[50vw] max-w-[700px] flex flex-col items-center animate-[partyIntroLogo_1.5s_cubic-bezier(.16,1,.3,1)_forwards]">
                 <img
                   src="/overheard-party.png"
                   alt="OVERHEARD PARTY"
@@ -335,6 +335,14 @@ export default function DjScreen() {
                   style={{
                     filter: `drop-shadow(0 0 25px ${accent}80)`,
                   }}
+                />
+                
+                {/* GEÇİŞ EKRANI - SCAP LOGOSU */}
+                <img
+                  src="/scap.png"
+                  alt="SCAP"
+                  className="mt-6 w-24 md:w-36 object-contain animate-pulse"
+                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 15px ${accent}80)` }}
                 />
               </div>
 
@@ -434,7 +442,7 @@ export default function DjScreen() {
 
       {message && (
         <header className="relative z-20 flex justify-between items-start animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
-          <div className="relative group">
+          <div className="relative group flex flex-col">
             <div
               className="absolute -inset-12 rounded-full blur-[55px] opacity-20 animate-[logoAura_6s_ease-in-out_infinite]"
               style={{
@@ -442,49 +450,59 @@ export default function DjScreen() {
               }}
             />
 
-            <div className="relative w-64 md:w-80 lg:w-[390px]">
-              <img
-                src="/overheard-party.png"
-                alt=""
-                aria-hidden="true"
-                className="absolute inset-0 w-full h-auto object-contain blur-[18px] opacity-35 animate-[logoGlow_4.5s_ease-in-out_infinite]"
-                style={{
-                  filter: `
-                    brightness(1.3)
-                    saturate(1.5)
-                    drop-shadow(0 0 25px ${accent})
-                  `,
-                }}
-              />
-
-              <img
-                src="/overheard-party.png"
-                alt="OVERHEARD PARTY"
-                className="relative z-10 w-full h-auto object-contain animate-[logoFloat_7s_ease-in-out_infinite]"
-                style={{
-                  filter: `
-                    brightness(1.08)
-                    contrast(1.08)
-                    drop-shadow(0 0 4px rgba(255,255,255,.5))
-                    drop-shadow(0 0 12px ${accent}b0)
-                    drop-shadow(0 0 32px ${accent}55)
-                  `,
-                }}
-              />
-
-              <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 whitespace-nowrap">
-                <span
-                  className="w-1.5 h-1.5 rounded-full animate-pulse"
+            <div className="relative w-64 md:w-80 lg:w-[390px] flex flex-col items-center">
+              <div className="relative w-full">
+                <img
+                  src="/overheard-party.png"
+                  alt=""
+                  aria-hidden="true"
+                  className="absolute inset-0 w-full h-auto object-contain blur-[18px] opacity-35 animate-[logoGlow_4.5s_ease-in-out_infinite]"
                   style={{
-                    background: accent,
-                    boxShadow: `0 0 12px ${accent}`,
+                    filter: `
+                      brightness(1.3)
+                      saturate(1.5)
+                      drop-shadow(0 0 25px ${accent})
+                    `,
                   }}
                 />
 
-                <span className="text-[7px] md:text-[8px] font-bold tracking-[0.48em] pl-[0.48em] text-white/35">
-                  LIVE EXPERIENCE
-                </span>
+                <img
+                  src="/overheard-party.png"
+                  alt="OVERHEARD PARTY"
+                  className="relative z-10 w-full h-auto object-contain animate-[logoFloat_7s_ease-in-out_infinite]"
+                  style={{
+                    filter: `
+                      brightness(1.08)
+                      contrast(1.08)
+                      drop-shadow(0 0 4px rgba(255,255,255,.5))
+                      drop-shadow(0 0 12px ${accent}b0)
+                      drop-shadow(0 0 32px ${accent}55)
+                    `,
+                  }}
+                />
+
+                <div className="absolute -bottom-5 left-1/2 -translate-x-1/2 flex items-center gap-2 whitespace-nowrap">
+                  <span
+                    className="w-1.5 h-1.5 rounded-full animate-pulse"
+                    style={{
+                      background: accent,
+                      boxShadow: `0 0 12px ${accent}`,
+                    }}
+                  />
+
+                  <span className="text-[7px] md:text-[8px] font-bold tracking-[0.48em] pl-[0.48em] text-white/35">
+                    LIVE EXPERIENCE
+                  </span>
+                </div>
               </div>
+
+              {/* HEADER MESAJ EKRANI - SCAP LOGOSU */}
+              <img
+                src="/scap.png"
+                alt="SCAP"
+                className="mt-8 w-16 md:w-20 object-contain animate-[logoFloat_7s_ease-in-out_infinite]"
+                style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 10px ${accent}80)` }}
+              />
             </div>
           </div>
 
@@ -598,12 +616,20 @@ export default function DjScreen() {
               style={{ background: accent }} 
             />
 
-            <div className="relative w-[85vw] md:w-[65vw] max-w-[900px] animate-[cinematicLevitate_12s_ease-in-out_infinite]">
+            <div className="relative w-[85vw] md:w-[65vw] max-w-[900px] flex flex-col items-center animate-[cinematicLevitate_12s_ease-in-out_infinite]">
               <img
                 src="/overheard-party.png"
                 alt="Overheard Party"
                 className="relative z-10 w-full h-auto object-contain"
                 style={{ filter: `drop-shadow(0 0 35px ${accent}50)` }}
+              />
+
+              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU */}
+              <img
+                src="/scap.png"
+                alt="SCAP"
+                className="mt-6 w-32 md:w-48 object-contain animate-pulse"
+                style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent}80)` }}
               />
             </div>
 
