@@ -339,14 +339,14 @@ export default function DjScreen() {
                 <img
                   src="/overheard-party.png"
                   alt="OVERHEARD PARTY"
-                  className="relative w-full h-auto object-contain animate-[logoFloat_7s_ease-in-out_infinite]"
+                  className="relative w-full h-auto object-contain"
                   style={{
                     filter: `drop-shadow(0 0 25px ${accent}80)`,
                   }}
                 />
                 
                 {/* GEÇİŞ EKRANI - SCAP LOGOSU */}
-                <div className="relative mt-5 w-32 md:w-44 flex items-center justify-center">
+                <div className="relative mt-5 w-40 md:w-56 h-12 md:h-16 flex items-center justify-center">
                   <img
                     src="/scap.png"
                     alt="SCAP"
@@ -354,7 +354,7 @@ export default function DjScreen() {
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'block';
                     }}
-                    className="w-full h-auto object-contain animate-pulse flex-shrink-0"
+                    className="w-full h-full object-contain animate-pulse flex-shrink-0"
                     style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent}60)` }}
                   />
                   <span className="hidden font-serif italic text-3xl md:text-5xl font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
@@ -457,6 +457,7 @@ export default function DjScreen() {
 
       {message && (
         <header className="relative z-20 flex justify-between items-start animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
+          {/* SOL GRUP: OVERHEARD PARTY */}
           <div className="relative group flex flex-col">
             <div
               className="absolute -inset-12 rounded-full blur-[55px] opacity-20 animate-[logoAura_6s_ease-in-out_infinite]"
@@ -495,39 +496,42 @@ export default function DjScreen() {
                     `,
                   }}
                 />
-              </div>
+                
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 whitespace-nowrap animate-pulse">
+                  <span
+                    className="w-1 h-1 rounded-full animate-ping"
+                    style={{
+                      background: accent,
+                      boxShadow: `0 0 8px ${accent}`,
+                    }}
+                  />
 
-              {/* 🚀 ORTALANMIŞ VE KÜÇÜLTÜLMÜŞ SCAP LOGOSU */}
-              <div className="relative mt-2 mb-2.5 w-24 md:w-32 flex items-center justify-center">
-                <img
-                  src="/scap.png"
-                  alt="SCAP"
-                  onError={(e: any) => {
-                    e.target.style.display = 'none';
-                    e.target.nextSibling.style.display = 'block';
-                  }}
-                  className="w-full h-auto object-contain animate-[logoFloat_7s_ease-in-out_infinite] flex-shrink-0"
-                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 8px ${accent}60)` }}
-                />
-                <span className="hidden font-serif italic text-lg md:text-2xl font-extrabold tracking-widest text-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.7)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
-              </div>
-
-              <div className="relative flex items-center gap-1.5 whitespace-nowrap animate-pulse">
-                <span
-                  className="w-1 h-1 rounded-full animate-ping"
-                  style={{
-                    background: accent,
-                    boxShadow: `0 0 8px ${accent}`,
-                  }}
-                />
-
-                <span className="text-[5px] md:text-[7px] font-bold tracking-[0.48em] pl-[0.48em] text-white/35">
-                  LIVE EXPERIENCE
-                </span>
+                  <span className="text-[5px] md:text-[7px] font-bold tracking-[0.48em] pl-[0.48em] text-white/35">
+                    LIVE EXPERIENCE
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
+          {/* 🚀 ORTA GRUP: SCAP LOGOSU (EKRANIN TAM MERKEZİNDE, ÜSTTE) */}
+          <div className="absolute left-1/2 -translate-x-1/2 top-0 md:top-1 flex flex-col items-center justify-center z-30">
+            <div className="relative w-36 md:w-52 h-10 md:h-14 flex items-center justify-center">
+              <img
+                src="/scap.png"
+                alt="SCAP"
+                onError={(e: any) => {
+                  e.target.style.display = 'none';
+                  e.target.nextSibling.style.display = 'block';
+                }}
+                className="w-full h-full object-contain animate-[logoFloat_7s_ease-in-out_infinite] flex-shrink-0"
+                style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 12px ${accent}80)` }}
+              />
+              <span className="hidden font-serif italic text-2xl md:text-3xl font-extrabold tracking-widest text-white/90 drop-shadow-[0_0_10px_rgba(255,255,255,0.7)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
+            </div>
+          </div>
+
+          {/* SAĞ GRUP: CANLI PARTİ AKIŞI */}
           <div className="relative group">
             <div className="absolute inset-0 rounded-full blur-xl opacity-20 bg-red-500" />
 
@@ -651,8 +655,8 @@ export default function DjScreen() {
                 style={{ filter: `drop-shadow(0 0 35px ${accent}50)` }}
               />
 
-              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU (KİBAR BOYUT) */}
-              <div className="relative mt-5 w-32 md:w-44 flex items-center justify-center">
+              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU */}
+              <div className="relative mt-5 w-40 md:w-56 h-12 md:h-16 flex items-center justify-center">
                 <img
                   src="/scap.png"
                   alt="SCAP"
@@ -660,7 +664,7 @@ export default function DjScreen() {
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'block';
                   }}
-                  className="w-full h-auto object-contain animate-pulse flex-shrink-0"
+                  className="w-full h-full object-contain animate-pulse flex-shrink-0"
                   style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 15px ${accent}60)` }}
                 />
                 <span className="hidden font-serif italic text-3xl md:text-5xl font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
@@ -906,7 +910,7 @@ const stylesCSS = `
       opacity: 0;
     }
 
-    25% {
+    20% {
       opacity: .04;
     }
 
