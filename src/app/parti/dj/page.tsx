@@ -345,8 +345,8 @@ export default function DjScreen() {
                   }}
                 />
                 
-                {/* GEÇİŞ EKRANI - SCAP LOGOSU VEYA FALLBACK */}
-                <div className="relative mt-6 w-24 md:w-36 h-8 md:h-12 flex items-center justify-center">
+                {/* GEÇİŞ EKRANI - SCAP LOGOSU (TAM GENİŞLİK) */}
+                <div className="relative mt-8 w-[90%] flex items-center justify-center">
                   <img
                     src="/scap.png"
                     alt="SCAP"
@@ -354,14 +354,14 @@ export default function DjScreen() {
                       e.target.style.display = 'none';
                       e.target.nextSibling.style.display = 'block';
                     }}
-                    className="w-full h-full object-contain animate-pulse flex-shrink-0"
-                    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 15px ${accent}80)` }}
+                    className="w-full h-auto object-contain animate-pulse flex-shrink-0"
+                    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 35px ${accent}) drop-shadow(0 0 15px rgba(255,255,255,0.4))` }}
                   />
-                  <span className="hidden font-serif italic text-2xl md:text-3xl font-extrabold tracking-widest text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.7)] animate-pulse">SCAP</span>
+                  <span className="hidden font-serif italic text-5xl md:text-7xl lg:text-8xl font-extrabold tracking-widest text-white drop-shadow-[0_0_20px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
                 </div>
               </div>
 
-              <div className="mt-5 text-[10px] md:text-sm font-black tracking-[0.65em] pl-[0.65em] text-white/50 animate-pulse">
+              <div className="mt-8 text-[10px] md:text-sm font-black tracking-[0.65em] pl-[0.65em] text-white/50 animate-pulse">
                 PARTİ AKIYOR
               </div>
             </div>
@@ -465,7 +465,7 @@ export default function DjScreen() {
               }}
             />
 
-            <div className="relative w-56 md:w-80 flex flex-col items-center">
+            <div className="relative w-56 md:w-80 lg:w-[390px] flex flex-col items-center">
               <div className="relative w-full">
                 <img
                   src="/overheard-party.png"
@@ -511,8 +511,8 @@ export default function DjScreen() {
                 </div>
               </div>
 
-              {/* HEADER MESAJ EKRANI - SCAP LOGOSU VEYA FALLBACK */}
-              <div className="relative mt-8 w-16 md:w-24 h-5 md:h-7 flex items-center justify-center">
+              {/* HEADER MESAJ EKRANI - SCAP LOGOSU (TAM GENİŞLİK) */}
+              <div className="relative mt-8 w-[90%] flex items-center justify-center">
                 <img
                   src="/scap.png"
                   alt="SCAP"
@@ -520,10 +520,10 @@ export default function DjScreen() {
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'block';
                   }}
-                  className="w-full h-full object-contain animate-[logoFloat_7s_ease-in-out_infinite] flex-shrink-0"
-                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 10px ${accent}80)` }}
+                  className="w-full h-auto object-contain animate-[logoFloat_7s_ease-in-out_infinite] flex-shrink-0"
+                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent}) drop-shadow(0 0 8px rgba(255,255,255,0.3))` }}
                 />
-                <span className="hidden font-serif italic text-lg md:text-xl font-extrabold tracking-widest text-white/80 drop-shadow-[0_0_8px_rgba(255,255,255,0.6)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
+                <span className="hidden font-serif italic text-4xl md:text-6xl font-extrabold tracking-widest text-white/90 drop-shadow-[0_0_15px_rgba(255,255,255,0.7)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
               </div>
             </div>
           </div>
@@ -651,8 +651,8 @@ export default function DjScreen() {
                 style={{ filter: `drop-shadow(0 0 35px ${accent}50)` }}
               />
 
-              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU VEYA FALLBACK */}
-              <div className="relative mt-6 w-32 md:w-48 h-10 md:h-14 flex items-center justify-center">
+              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU (TAM GENİŞLİK) */}
+              <div className="relative mt-10 w-[90%] flex items-center justify-center">
                 <img
                   src="/scap.png"
                   alt="SCAP"
@@ -660,10 +660,10 @@ export default function DjScreen() {
                     e.target.style.display = 'none';
                     e.target.nextSibling.style.display = 'block';
                   }}
-                  className="w-full h-full object-contain animate-pulse flex-shrink-0"
-                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent}80)` }}
+                  className="w-full h-auto object-contain animate-pulse flex-shrink-0"
+                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 30px ${accent}) drop-shadow(0 0 10px rgba(255,255,255,0.4))` }}
                 />
-                <span className="hidden font-serif italic text-3xl md:text-4xl font-extrabold tracking-widest text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.7)] animate-pulse">SCAP</span>
+                <span className="hidden font-serif italic text-6xl md:text-8xl lg:text-[7rem] font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
               </div>
             </div>
 
