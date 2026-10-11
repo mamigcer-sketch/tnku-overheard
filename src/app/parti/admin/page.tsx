@@ -11,7 +11,6 @@ export default function PartyAdminPage() {
   const [loading, setLoading] = useState(true);
   const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Düzenleme modunda olan mesajın ID'si ve geçici verileri için state'ler
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editLocation, setEditLocation] = useState("");
@@ -40,15 +39,16 @@ export default function PartyAdminPage() {
     }
   };
 
-  // 🚀 YENİ EKLENTİ: TÜMÜNÜ SİL
+  // 🔥 KRİTİK DÜZELTME: Tümünü silme işlemi artık veritabanını şişirmesin diye sıralı çalışıyor
   const handleRejectAll = async () => {
     if (messages.length === 0) return;
     if (confirm(`Bekleyen ${messages.length} sorunun hepsini çöpe atmak istediğine emin misin? Bu işlem geri alınamaz!`)) {
       setLoading(true);
       try {
-        // Tüm mesajları reddet (veritabanından kaldır/reddet)
-        await Promise.all(messages.map((m) => rejectMessage(m.id)));
-        setMessages([]); // Ekranı temizle
+        for (const m of messages) {
+          await rejectMessage(m.id);
+        }
+        setMessages([]); 
       } catch (error) {
         console.error("Toplu silme işleminde hata:", error);
         alert("Bazı mesajlar silinirken hata oluştu.");
@@ -79,6 +79,7 @@ export default function PartyAdminPage() {
   };
 
   const handleAction = async (id: string, actionType: 'APPROVE' | 'REJECT') => {
+    // Ekranda anında kaybediyoruz
     setMessages((prev) => prev.filter((m) => m.id !== id));
     if (actionType === 'APPROVE') {
       await approveMessage(id);
@@ -87,14 +88,12 @@ export default function PartyAdminPage() {
     }
   };
 
-  // Düzenleme modunu açma
   const startEditing = (msg: any) => {
     setEditingId(msg.id);
     setEditContent(msg.content);
     setEditLocation(msg.location);
   };
 
-  // Düzenlemeyi kaydetme
   const handleSaveEdit = async (id: string) => {
     await updateMessage(id, editContent, editLocation);
     setEditingId(null);
@@ -124,7 +123,6 @@ export default function PartyAdminPage() {
   return (
     <main className="min-h-screen bg-[#050505] text-white p-4 pb-24 relative overflow-hidden">
       
-      {/* Redflag Background Ambiyans */}
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,rgba(255,0,0,0.1)_0%,transparent_50%)]" />
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_bottom_left,rgba(0,255,50,0.05)_0%,transparent_50%)]" />
 
@@ -150,7 +148,6 @@ export default function PartyAdminPage() {
           </div>
         </header>
 
-        {/* EKRAN KONTROL BUTONLARI */}
         <div className="grid grid-cols-1 gap-3 mb-8">
           <button 
             onClick={handleClearScreen}
@@ -185,7 +182,6 @@ export default function PartyAdminPage() {
           <div className="space-y-4">
             {messages.map((msg) => {
               
-              // Tüm mesajlar tek konsept (SORU) olarak geliyor
               let Icon = HelpCircle;
               let label = "YENİ SORU";
               let color = "text-white";
@@ -195,7 +191,6 @@ export default function PartyAdminPage() {
               return (
                 <div key={msg.id} className="bg-[#0a0a0a] border border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden transition-all">
                   
-                  {/* Üst Kısım: Kategori ve Düzenle Butonu */}
                   <div className="flex items-center justify-between mb-4">
                     <div className={`flex items-center gap-2 text-xs font-black tracking-widest ${color} bg-white/5 px-3 py-1.5 rounded-md border border-white/10`}>
                       <Icon size={14} className="text-red-500" /> {label}
@@ -211,18 +206,14 @@ export default function PartyAdminPage() {
                     )}
                   </div>
                   
-                  {/* İçerik / Düzenleme Alanı */}
                   {isEditing ? (
                     <div className="space-y-3 mb-6">
-                      {/* Metin Düzenleme */}
                       <textarea 
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
                         className="w-full bg-black/60 border border-white/20 rounded-xl p-3 text-white text-lg font-bold outline-none focus:border-red-500 resize-none h-24"
                         maxLength={150}
                       />
-
-                      {/* Kaydet Butonu */}
                       <button 
                         onClick={() => handleSaveEdit(msg.id)}
                         className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)]"
@@ -234,7 +225,6 @@ export default function PartyAdminPage() {
                     <p className="text-xl font-bold leading-snug mb-6 text-gray-100">{msg.content}</p>
                   )}
                   
-                  {/* Alt Butonlar */}
                   {!isEditing && (
                     <div className="flex gap-3 mt-4">
                       <button 
@@ -251,7 +241,6 @@ export default function PartyAdminPage() {
                       </button>
                     </div>
                   )}
-
                 </div>
               );
             })}

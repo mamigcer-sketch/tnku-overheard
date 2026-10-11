@@ -10,8 +10,8 @@ export default function PartyInputPage() {
   const [passError, setPassError] = useState(false);
 
   const [content, setContent] = useState("");
-  // 🔥 Doğrudan SORU formatıyla başlatıyoruz
-  const [type, setType] = useState("PARTY_QUESTION"); 
+  // 🔥 KRİTİK DÜZELTME: Veritabanının çökmemesi için arka planda PARTY_ITIRAF kullanıyoruz ama konsept tamamen SORU.
+  const [type, setType] = useState("PARTY_ITIRAF"); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
 
@@ -39,20 +39,22 @@ export default function PartyInputPage() {
     setIsSubmitting(true);
 
     const formData = new FormData();
-    // Doğrudan SORU türünü yolluyoruz
     formData.append('type', type);
     formData.append('content', content);
 
-    const response = await sendPartyMessage(formData);
-
-    if (response?.error) {
-      alert("Hata: " + response.error);
-      setIsSubmitting(false);
-      return;
+    try {
+      const response = await sendPartyMessage(formData);
+      if (response?.error) {
+        alert("Hata: " + response.error);
+        setIsSubmitting(false);
+        return;
+      }
+      setSuccess(true);
+      setContent("");
+    } catch (error) {
+      alert("Gönderilirken bir hata oluştu!");
     }
-
-    setSuccess(true);
-    setContent("");
+    
     setIsSubmitting(false);
     setTimeout(() => setSuccess(false), 3000); 
   };
@@ -160,17 +162,12 @@ export default function PartyInputPage() {
         ))}
       </div>
 
-      {/* Arkada değişen dinamik atmosfer ışığı */}
       <div className={`fixed inset-0 bg-gradient-to-b ${themeObj.glow} to-[#030303] opacity-40 pointer-events-none transition-all duration-1000`}></div>
-      
-      {/* Üstteki yoğunlaşan parıltı */}
       <div className={`fixed -top-32 left-1/2 -translate-x-1/2 w-[620px] h-[360px] rounded-full blur-[120px] pointer-events-none transition-colors duration-1000 ${themeObj.ambient}`}></div>
-      
       <div className="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.06] mix-blend-overlay pointer-events-none"></div>
 
       <div className={`w-full max-w-[520px] bg-[#09070c]/92 backdrop-blur-2xl border border-white/10 rounded-[2rem] p-7 md:p-8 shadow-[0_35px_100px_rgba(0,0,0,.6)] relative overflow-hidden z-10 before:absolute before:inset-x-0 before:top-0 before:h-px before:bg-gradient-to-r before:from-transparent ${themeObj.line} before:to-transparent transition-all duration-700`}>
 
-        {/* Başlık Alanı */}
         <div className="text-center mb-8 relative z-10">
           <div className={`inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 backdrop-blur-md transition-colors duration-700 ${themeObj.iconBox}`}>
             <Flag size={32} className={themeObj.icon} fill="currentColor" />
@@ -182,8 +179,6 @@ export default function PartyInputPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-5 relative z-10">
-
-          {/* SADECE Soru Kutusu Kaldı */}
           <div className="relative group">
             <div className="absolute left-5 top-5 text-red-500/50">
               <HelpCircle size={20} />
@@ -200,7 +195,6 @@ export default function PartyInputPage() {
             </div>
           </div>
 
-          {/* Gönder Butonu */}
           <button 
             type="submit" 
             disabled={isSubmitting || !content.trim() || success}
@@ -220,11 +214,9 @@ export default function PartyInputPage() {
               <><Send size={18} /> EKRANA SORU FIRLAT</>
             )}
           </button>
-
         </form>
       </div>
 
-      {/* Bayrak animasyonu için keyframes */}
       <style dangerouslySetInnerHTML={{ __html: `
         @keyframes floatFlag {
           0%, 100% {
