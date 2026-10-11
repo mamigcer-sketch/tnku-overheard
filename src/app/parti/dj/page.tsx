@@ -259,6 +259,11 @@ export default function DjScreen() {
       />
 
       <div
+        className="absolute left-1/2 top-1/2 w-[30vw] aspect-square rounded-full border opacity-[0.04] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_5s_ease-in-out_infinite]"
+        style={{ borderColor: "white" }}
+      />
+
+      <div
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{
           background:
@@ -287,7 +292,7 @@ export default function DjScreen() {
           flash ? "opacity-100" : "opacity-0"
         }`}
         style={{
-          background: `radial-gradient(circle at center, white 0%, rgba(255,255,255,0.8) 15%, transparent 75%)`,
+          background: `radial-gradient(circle at center, white 0%, rgba(255,0,21,0.6) 15%, transparent 75%)`,
         }}
       />
 
@@ -295,53 +300,20 @@ export default function DjScreen() {
         <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-black/85 backdrop-blur-3xl">
           <div
             className="absolute w-[40vw] aspect-square rounded-full blur-[120px] opacity-20 animate-[transitionGlow_2s_ease-in-out_infinite]"
-            style={{ background: "white" }}
+            style={{ background: accentRed }}
           />
 
-          {transitionStep === "PARTY" ? (
-            <div className="relative flex flex-col items-center justify-center">
-              <div
-                className="absolute w-[42vw] max-w-[760px] aspect-[2.7/1] rounded-full blur-[90px] animate-[partyIntroGlow_1.5s_ease-out_forwards]"
-                style={{
-                  background: accentRed,
-                  opacity: 0.15,
-                }}
-              />
-
-              <div className="relative w-[50vw] max-w-[700px] flex flex-col items-center animate-[partyIntroLogo_1.5s_cubic-bezier(.16,1,.3,1)_forwards]">
-                {/* SADECE SCAP LOGOSU */}
-                <div className="relative w-56 md:w-80 h-16 md:h-24 flex items-center justify-center">
-                  <img
-                    src="/scap.png"
-                    alt="SCAP"
-                    onError={(e: any) => {
-                      e.target.style.display = 'none';
-                      e.target.nextSibling.style.display = 'block';
-                    }}
-                    className="w-full h-full object-contain animate-pulse flex-shrink-0"
-                    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 25px rgba(255,255,255,0.4))` }}
-                  />
-                  <span className="hidden font-serif italic text-4xl md:text-6xl font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
-                </div>
-              </div>
-
-              <div className="mt-8 text-[12px] md:text-base font-black tracking-[0.65em] pl-[0.65em] text-white/70 animate-pulse">
-                SORULAR YÜKLENİYOR
-              </div>
-            </div>
-          ) : transitionStep === "3" ||
-            transitionStep === "2" ||
-            transitionStep === "1" ? (
+          {transitionStep === "3" || transitionStep === "2" || transitionStep === "1" ? (
             <div className="relative flex items-center justify-center">
-              <div className="absolute w-[24vw] max-w-[340px] aspect-square rounded-full border border-white/20" />
+              <div className="absolute w-[24vw] max-w-[340px] aspect-square rounded-full border border-red-500/30" />
 
-              <div className="absolute w-[20vw] max-w-[290px] aspect-square rounded-full border border-white/10 animate-[countdownOrbit_2.1s_linear_infinite]" />
+              <div className="absolute w-[20vw] max-w-[290px] aspect-square rounded-full border border-red-500/20 animate-[countdownOrbit_2.1s_linear_infinite]" />
 
               <div
                 key={`ring-${transitionStep}`}
                 className="absolute w-[16vw] max-w-[240px] aspect-square rounded-full border-2 animate-[cinematicRing_700ms_ease-out_forwards]"
                 style={{
-                  borderColor: "white",
+                  borderColor: accentRed,
                 }}
               />
 
@@ -349,8 +321,8 @@ export default function DjScreen() {
                 key={`tick-${transitionStep}`}
                 className="absolute w-[26vw] max-w-[380px] aspect-square rounded-full animate-[countdownPulse_700ms_ease-out_forwards]"
                 style={{
-                  border: `1px solid white`,
-                  opacity: 0.2,
+                  border: `1px solid ${accentRed}`,
+                  opacity: 0.3,
                 }}
               />
 
@@ -359,18 +331,18 @@ export default function DjScreen() {
                 className="relative z-10 font-black text-white leading-none animate-[countdownThump_700ms_cubic-bezier(.16,1,.3,1)_forwards]"
                 style={{
                   fontSize: "clamp(11rem, 28vw, 28rem)",
-                  WebkitTextStroke: "2px rgba(255,255,255,.3)",
-                  textShadow: `0 0 20px rgba(255,255,255,1), 0 0 60px rgba(255,255,255,0.5)`,
+                  WebkitTextStroke: `2px ${accentRed}`,
+                  textShadow: `0 0 20px ${accentRed}, 0 0 60px rgba(255,0,0,0.6)`,
                 }}
               >
                 {transitionStep}
               </h1>
 
-              <div className="absolute -bottom-24 md:-bottom-28 flex items-center gap-3 text-[9px] md:text-xs font-black tracking-[0.5em] pl-[0.5em] text-white/50">
+              <div className="absolute -bottom-24 md:-bottom-28 flex items-center gap-3 text-[9px] md:text-xs font-black tracking-[0.5em] pl-[0.5em] text-red-500/70">
                 <span
                   className="w-10 md:w-16 h-px"
                   style={{
-                    background: `linear-gradient(to right, transparent, white)`,
+                    background: `linear-gradient(to right, transparent, ${accentRed})`,
                   }}
                 />
 
@@ -379,7 +351,7 @@ export default function DjScreen() {
                 <span
                   className="w-10 md:w-16 h-px"
                   style={{
-                    background: `linear-gradient(to left, transparent, white)`,
+                    background: `linear-gradient(to left, transparent, ${accentRed})`,
                   }}
                 />
               </div>
@@ -389,7 +361,7 @@ export default function DjScreen() {
               <div
                 className="mb-6 h-px animate-[cinematicLine_1.8s_ease-out_forwards]"
                 style={{
-                  background: `linear-gradient(90deg, transparent, white, transparent)`,
+                  background: `linear-gradient(90deg, transparent, ${accentRed}, transparent)`,
                 }}
               />
 
@@ -398,7 +370,7 @@ export default function DjScreen() {
                 className="relative font-black uppercase text-center text-white animate-[cinematicText_1.8s_cubic-bezier(0.16,1,0.3,1)_forwards]"
                 style={{
                   fontSize: "clamp(3rem, 7vw, 7rem)",
-                  textShadow: `0 0 40px rgba(255,255,255,0.5)`,
+                  textShadow: `0 0 40px ${accentRed}`,
                 }}
               >
                 {transitionStep}
@@ -407,11 +379,11 @@ export default function DjScreen() {
               <div
                 className="mt-6 h-px animate-[cinematicLine_1.8s_ease-out_forwards]"
                 style={{
-                  background: `linear-gradient(90deg, transparent, white, transparent)`,
+                  background: `linear-gradient(90deg, transparent, ${accentRed}, transparent)`,
                 }}
               />
 
-              <span className="absolute -bottom-14 text-xs font-bold tracking-[0.6em] pl-[0.6em] text-white/60 animate-pulse">
+              <span className="absolute -bottom-14 text-xs font-bold tracking-[0.6em] pl-[0.6em] text-red-500/60 animate-pulse">
                 HAZIRLAN
               </span>
             </div>
@@ -952,7 +924,7 @@ const stylesCSS = `
     55% {
       opacity: .45;
       transform: scale(1);
-      box-shadow: 0 0 80px rgba(255,255,255,.35);
+      box-shadow: 0 0 80px rgba(255,0,0,.35);
     }
 
     100% {
