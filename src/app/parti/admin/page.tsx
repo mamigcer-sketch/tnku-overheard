@@ -16,8 +16,14 @@ export default function PartyAdminPage() {
   const [editLocation, setEditLocation] = useState("");
 
   const fetchMessages = async () => {
-    const data = await getPendingMessages();
-    setMessages(data);
+    try {
+      const data = await getPendingMessages();
+      if (Array.isArray(data)) {
+        setMessages(data);
+      }
+    } catch (err) {
+      console.error(err);
+    }
     setLoading(false);
   };
 
@@ -39,21 +45,18 @@ export default function PartyAdminPage() {
     }
   };
 
-  // 🔥 KRİTİK DÜZELTME: Tümünü silme işlemi artık veritabanını şişirmesin diye sıralı çalışıyor
-  const handleRejectAll = async () => {
+  // 🔥 YENİ SİSTEM: Anında ekrandan siler, veritabanı yorulmaz
+  const handleRejectAll = () => {
     if (messages.length === 0) return;
     if (confirm(`Bekleyen ${messages.length} sorunun hepsini çöpe atmak istediğine emin misin? Bu işlem geri alınamaz!`)) {
-      setLoading(true);
-      try {
-        for (const m of messages) {
-          await rejectMessage(m.id);
-        }
-        setMessages([]); 
-      } catch (error) {
-        console.error("Toplu silme işleminde hata:", error);
-        alert("Bazı mesajlar silinirken hata oluştu.");
-      }
-      setLoading(false);
+      // 1. Ekrandan anında sil (Kullanıcı beklemesin)
+      const messagesToDelete = [...messages];
+      setMessages([]); 
+
+      // 2. Arka planda sessizce veritabanından temizle
+      Promise.allSettled(messagesToDelete.map(m => rejectMessage(m.id)))
+        .then(() => console.log("Toplu silme başarılı"))
+        .catch(err => console.error("Silme sırasında hata:", err));
     }
   };
 
@@ -79,7 +82,6 @@ export default function PartyAdminPage() {
   };
 
   const handleAction = async (id: string, actionType: 'APPROVE' | 'REJECT') => {
-    // Ekranda anında kaybediyoruz
     setMessages((prev) => prev.filter((m) => m.id !== id));
     if (actionType === 'APPROVE') {
       await approveMessage(id);

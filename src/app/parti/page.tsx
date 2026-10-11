@@ -10,7 +10,8 @@ export default function PartyInputPage() {
   const [passError, setPassError] = useState(false);
 
   const [content, setContent] = useState("");
-  // 🔥 KRİTİK DÜZELTME: Veritabanının çökmemesi için arka planda PARTY_ITIRAF kullanıyoruz ama konsept tamamen SORU.
+  
+  // 🔥 KRİTİK: Veritabanının çökmemesi için arka planda PARTY_ITIRAF gönderiyoruz ama ekranda her şey SORU konseptinde!
   const [type, setType] = useState("PARTY_ITIRAF"); 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -51,15 +52,14 @@ export default function PartyInputPage() {
       }
       setSuccess(true);
       setContent("");
-    } catch (error) {
-      alert("Gönderilirken bir hata oluştu!");
+    } catch (err) {
+      console.error(err);
     }
     
     setIsSubmitting(false);
     setTimeout(() => setSuccess(false), 3000); 
   };
 
-  // Dinamik Tema Ayarları (REDFLAG EDITION)
   let themeObj = {
     glow: "from-red-600/25",
     ambient: "bg-red-500/15",
@@ -71,7 +71,6 @@ export default function PartyInputPage() {
     selection: "selection:bg-red-500/40"
   };
 
-  // 🚩 Kırmızı ve Yeşil Bayrak Animasyonları
   const backgroundFlags = [
     { left: "10%", top: "20%", delay: "0s", duration: "12s", color: "#ff0015" },
     { left: "80%", top: "15%", delay: "2s", duration: "14s", color: "#00ff44" },
@@ -84,8 +83,6 @@ export default function PartyInputPage() {
   if (!isAuthenticated) {
     return (
       <main className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 selection:bg-red-500/30 relative overflow-hidden">
-        
-        {/* Şifre Ekranı Arkası Bayraklar */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-50">
           {backgroundFlags.map((flag, index) => (
             <div
@@ -142,8 +139,6 @@ export default function PartyInputPage() {
 
   return (
     <main className={`min-h-screen bg-[#050208] text-white flex items-center justify-center p-4 md:p-8 transition-colors duration-700 relative overflow-hidden ${themeObj.selection}`}>
-
-      {/* 🚩 KIRMIZI VE YEŞİL BAYRAKLAR */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
         {backgroundFlags.map((flag, index) => (
           <div
