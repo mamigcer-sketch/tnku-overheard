@@ -20,6 +20,8 @@ export default function DjScreen() {
 
   const isTransitioning = useRef(false);
   const lastMsgId = useRef<string | null>(null);
+  
+  const isInitialLoad = useRef(true); 
 
   useEffect(() => {
     let mounted = true;
@@ -40,7 +42,6 @@ export default function DjScreen() {
 
       setMessage(newMsg);
 
-      // 🚀 HER ŞEY SADECE "YENİ SORU" OLARAK GELECEK
       setTransitionStep("YENİ SORU");
 
       await delay(1800);
@@ -108,19 +109,22 @@ export default function DjScreen() {
               }
             }, 500);
           }
+          isInitialLoad.current = false;
           return;
         }
 
         if (lastMsgId.current !== data.message.id) {
-          if (lastMsgId.current === null) {
-            lastMsgId.current = data.message.id;
+          lastMsgId.current = data.message.id;
+
+          if (isInitialLoad.current) {
             setMessage(data.message);
             setVisible(true);
           } else {
-            lastMsgId.current = data.message.id;
             runTransition(data.message);
           }
         }
+
+        isInitialLoad.current = false;
       } catch (error) {
         console.error("Mesaj çekilemedi", error);
       }
@@ -153,7 +157,6 @@ export default function DjScreen() {
   let title = "SORU";
   let Icon = HelpCircle;
 
-  // 🚀 AKILLI YAZI BOYUTU (TAŞMAYI SIFIRLAMAK İÇİN KARAKTER KONTROLÜ)
   const getContentFontSize = (text: string) => {
     const len = text ? text.length : 0;
     if (len > 180) return "text-[1.2rem] md:text-[1.7rem] lg:text-[2.2rem] tracking-tight leading-[1.1] max-w-[94vw]";
@@ -163,7 +166,6 @@ export default function DjScreen() {
     return "text-[clamp(3.5rem,7.5vw,8.5rem)] leading-[0.98] max-w-[94vw]";
   };
 
-  // 🚩 Kırmızı ve Yeşil Bayrak Animasyonları
   const backgroundFlags = [
     { left: "8%", top: "15%", delay: "0s", duration: "12s", color: accentRed },
     { left: "82%", top: "20%", delay: "2s", duration: "14s", color: accentGreen },
@@ -181,7 +183,6 @@ export default function DjScreen() {
     >
       <div className="absolute inset-0 bg-[#050505]" />
 
-      {/* MERKEZ IŞIĞI */}
       <div
         className="absolute inset-[-20%] animate-[premiumAmbient_12s_ease-in-out_infinite]"
         style={{
@@ -189,7 +190,6 @@ export default function DjScreen() {
         }}
       />
 
-      {/* SOL KIRMIZI IŞIK */}
       <div
         className="absolute top-[-45%] left-[-18%] w-[65vw] h-[190vh] blur-[115px] opacity-[0.15] animate-[stageLightLeft_14s_ease-in-out_infinite]"
         style={{
@@ -198,7 +198,6 @@ export default function DjScreen() {
         }}
       />
 
-      {/* SAĞ YEŞİL IŞIK */}
       <div
         className="absolute top-[-45%] right-[-18%] w-[60vw] h-[190vh] blur-[125px] opacity-[0.12] animate-[stageLightRight_17s_ease-in-out_infinite]"
         style={{
@@ -222,7 +221,6 @@ export default function DjScreen() {
         }}
       />
 
-      {/* 🚩 KIRMIZI VE YEŞİL BAYRAKLAR */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
         {backgroundFlags.map((flag, index) => (
           <div
@@ -395,7 +393,6 @@ export default function DjScreen() {
         <header className="relative z-20 flex justify-between items-start animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
           <div className="w-1/4"></div>
 
-          {/* 🚀 ORTA GRUP: SCAP LOGOSU (TAM MERKEZDE) */}
           <div className="absolute left-1/2 -translate-x-1/2 top-0 md:top-1 flex flex-col items-center justify-center z-30">
             <div className="relative w-48 md:w-68 lg:w-80 h-14 md:h-20 flex items-center justify-center">
               <img
@@ -412,7 +409,6 @@ export default function DjScreen() {
             </div>
           </div>
 
-          {/* SAĞ GRUP: CANLI YAYIN */}
           <div className="relative group w-1/4 flex justify-end">
             <div className="absolute inset-0 rounded-full blur-xl opacity-20 bg-white" />
 
@@ -439,7 +435,6 @@ export default function DjScreen() {
         </header>
       )}
 
-      {/* TAŞMAYI VE ASAGI KAYDIRMAYI %100 ENGELLEYEN MERKEZ ALAN */}
       <section className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 overflow-hidden max-h-[58vh]">
         {message ? (
           <div
@@ -474,7 +469,6 @@ export default function DjScreen() {
               </span>
             </div>
 
-            {/* AKILLI, MAX BOYUTLANDIRILMIŞ VE ASLA TAŞMAYAN H1 */}
             <h1
               className={`relative font-black uppercase tracking-[-0.04em] break-words max-w-[94vw] max-h-[42vh] overflow-hidden flex items-center justify-center px-1 select-none ${getContentFontSize(message.content)} animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]`}
               style={{
@@ -529,7 +523,6 @@ export default function DjScreen() {
             />
 
             <div className="relative w-[85vw] md:w-[65vw] max-w-[900px] flex flex-col items-center animate-[cinematicLevitate_12s_ease-in-out_infinite] flex-shrink-0">
-              {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU */}
               <div className="relative w-56 md:w-80 h-16 md:h-24 flex items-center justify-center">
                 <img
                   src="/scap.png"
@@ -709,7 +702,6 @@ export default function DjScreen() {
         </footer>
       )}
 
-      {/* TÜM HATALARI ENGELLEYEN HIZLI & GÜVENLİ CSS ENJEKSİYONU */}
       <style dangerouslySetInnerHTML={{ __html: stylesCSS }} />
     </main>
   );
