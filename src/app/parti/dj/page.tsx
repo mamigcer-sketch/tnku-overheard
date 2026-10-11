@@ -157,12 +157,13 @@ export default function DjScreen() {
 
   /*
    * =========================================================
-   * KATEGORİ RENKLERİ VE İKONLARI
+   * KATEGORİ RENKLERİ VE İKONLARI (REDFLAG KONSEPTİ)
    * =========================================================
    */
 
-  let accent = "#ff3038";
-  let title = "İTİRAF";
+  // 🚩 REDFLAG TEMA: Çok daha yırtıcı ve koyu bir kırmızı tonu
+  let accent = "#ff0015";
+  let title = "REDFLAG";
   let Icon = Flame;
 
   if (
@@ -207,20 +208,21 @@ export default function DjScreen() {
 
   return (
     <main
-      className="dj-screen relative min-h-screen max-h-screen overflow-hidden bg-[#030208] text-white flex flex-col justify-between p-4 md:p-10 select-none"
+      className="dj-screen relative min-h-screen max-h-screen overflow-hidden bg-[#050000] text-white flex flex-col justify-between p-4 md:p-10 select-none"
       style={{ "--accent": accent } as any}
     >
-      <div className="absolute inset-0 bg-[#030208]" />
+      <div className="absolute inset-0 bg-[#050000]" />
 
+      {/* REDFLAG AMBİYANS IŞIĞI */}
       <div
         className="absolute inset-[-20%] animate-[premiumAmbient_12s_ease-in-out_infinite]"
         style={{
-          background: `radial-gradient(ellipse at 50% 45%, ${accent}42 0%, ${accent}18 22%, transparent 58%)`,
+          background: `radial-gradient(ellipse at 50% 45%, ${accent}55 0%, ${accent}15 35%, transparent 65%)`,
         }}
       />
 
       <div
-        className="absolute top-[-45%] left-[-18%] w-[65vw] h-[190vh] blur-[115px] opacity-[0.12] animate-[stageLightLeft_14s_ease-in-out_infinite]"
+        className="absolute top-[-45%] left-[-18%] w-[65vw] h-[190vh] blur-[115px] opacity-[0.15] animate-[stageLightLeft_14s_ease-in-out_infinite]"
         style={{
           background: accent,
           transform: "rotate(-25deg)",
@@ -228,7 +230,7 @@ export default function DjScreen() {
       />
 
       <div
-        className="absolute top-[-45%] right-[-18%] w-[60vw] h-[190vh] blur-[125px] opacity-[0.10] animate-[stageLightRight_17s_ease-in-out_infinite]"
+        className="absolute top-[-45%] right-[-18%] w-[60vw] h-[190vh] blur-[125px] opacity-[0.15] animate-[stageLightRight_17s_ease-in-out_infinite]"
         style={{
           background: accent,
           transform: "rotate(25deg)",
@@ -236,14 +238,14 @@ export default function DjScreen() {
       />
 
       <div
-        className="absolute left-1/2 top-1/2 w-[34vw] h-[130vh] -translate-x-1/2 -translate-y-1/2 blur-[90px] opacity-[0.06] animate-[centerBeam_9s_ease-in-out_infinite]"
+        className="absolute left-1/2 top-1/2 w-[34vw] h-[130vh] -translate-x-1/2 -translate-y-1/2 blur-[90px] opacity-[0.08] animate-[centerBeam_9s_ease-in-out_infinite]"
         style={{
           background: `linear-gradient(90deg, transparent, ${accent}, transparent)`,
         }}
       />
 
       <div
-        className="absolute left-[-30%] top-[-60%] w-[45vw] h-[220vh] rotate-[25deg] blur-[80px] opacity-[0.035] animate-[lightSweep_11s_ease-in-out_infinite]"
+        className="absolute left-[-30%] top-[-60%] w-[45vw] h-[220vh] rotate-[25deg] blur-[80px] opacity-[0.04] animate-[lightSweep_11s_ease-in-out_infinite]"
         style={{
           background:
             "linear-gradient(90deg, transparent, white, transparent)",
@@ -254,13 +256,13 @@ export default function DjScreen() {
         {particles.map((particle, index) => (
           <span
             key={index}
-            className="absolute w-[3px] h-[3px] rounded-full opacity-20 animate-[particleFloat_var(--duration)_ease-in-out_infinite]"
+            className="absolute w-[3px] h-[3px] rounded-full opacity-30 animate-[particleFloat_var(--duration)_ease-in-out_infinite]"
             style={
               {
                 left: particle.left,
                 top: particle.top,
                 background: accent,
-                boxShadow: `0 0 12px ${accent}`,
+                boxShadow: `0 0 15px ${accent}`,
                 "--delay": particle.delay,
                 "--duration": particle.duration,
                 animationDelay: particle.delay,
@@ -271,17 +273,17 @@ export default function DjScreen() {
       </div>
 
       <div
-        className="absolute left-1/2 top-1/2 w-[72vw] aspect-square rounded-full border opacity-[0.035] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_10s_ease-in-out_infinite]"
+        className="absolute left-1/2 top-1/2 w-[72vw] aspect-square rounded-full border opacity-[0.04] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_10s_ease-in-out_infinite]"
         style={{ borderColor: accent }}
       />
 
       <div
-        className="absolute left-1/2 top-1/2 w-[52vw] aspect-square rounded-full border opacity-[0.05] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_7s_ease-in-out_infinite_reverse]"
+        className="absolute left-1/2 top-1/2 w-[52vw] aspect-square rounded-full border opacity-[0.06] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_7s_ease-in-out_infinite_reverse]"
         style={{ borderColor: accent }}
       />
 
       <div
-        className="absolute left-1/2 top-1/2 w-[30vw] aspect-square rounded-full border opacity-[0.035] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_5s_ease-in-out_infinite]"
+        className="absolute left-1/2 top-1/2 w-[30vw] aspect-square rounded-full border opacity-[0.04] -translate-x-1/2 -translate-y-1/2 animate-[slowPulse_5s_ease-in-out_infinite]"
         style={{ borderColor: accent }}
       />
 
@@ -289,7 +291,7 @@ export default function DjScreen() {
         className="absolute inset-0 pointer-events-none z-[5]"
         style={{
           background:
-            "radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,.25) 68%, rgba(0,0,0,.78) 100%)",
+            "radial-gradient(ellipse at center, transparent 30%, rgba(5,0,0,.45) 68%, rgba(5,0,0,.85) 100%)",
         }}
       />
 
@@ -297,12 +299,12 @@ export default function DjScreen() {
         className="absolute inset-0 pointer-events-none z-[6] opacity-[0.035]"
         style={{
           background:
-            "repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(255,255,255,.8) 4px, transparent 5px)",
+            "repeating-linear-gradient(to bottom, transparent 0px, transparent 3px, rgba(255,0,0,.8) 4px, transparent 5px)",
         }}
       />
 
       <div
-        className="absolute inset-0 pointer-events-none z-[7] opacity-[0.025] mix-blend-screen animate-[grain_.25s_steps(2)_infinite]"
+        className="absolute inset-0 pointer-events-none z-[7] opacity-[0.035] mix-blend-screen animate-[grain_.25s_steps(2)_infinite]"
         style={{
           backgroundImage:
             `url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='.8' /%3E%3C/svg%3E")`,
@@ -314,14 +316,14 @@ export default function DjScreen() {
           flash ? "opacity-100" : "opacity-0"
         }`}
         style={{
-          background: `radial-gradient(circle at center, white 0%, ${accent}ee 10%, ${accent}55 25%, transparent 65%)`,
+          background: `radial-gradient(circle at center, white 0%, ${accent}ff 15%, ${accent}66 35%, transparent 75%)`,
         }}
       />
 
       {transitionStep && (
-        <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-black/80 backdrop-blur-2xl">
+        <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-black/85 backdrop-blur-3xl">
           <div
-            className="absolute w-[40vw] aspect-square rounded-full blur-[120px] opacity-30 animate-[transitionGlow_2s_ease-in-out_infinite]"
+            className="absolute w-[40vw] aspect-square rounded-full blur-[120px] opacity-40 animate-[transitionGlow_2s_ease-in-out_infinite]"
             style={{ background: accent }}
           />
 
@@ -331,22 +333,13 @@ export default function DjScreen() {
                 className="absolute w-[42vw] max-w-[760px] aspect-[2.7/1] rounded-full blur-[90px] animate-[partyIntroGlow_1.5s_ease-out_forwards]"
                 style={{
                   background: accent,
-                  opacity: 0.2,
+                  opacity: 0.25,
                 }}
               />
 
               <div className="relative w-[50vw] max-w-[700px] flex flex-col items-center animate-[partyIntroLogo_1.5s_cubic-bezier(.16,1,.3,1)_forwards]">
-                <img
-                  src="/overheard-party.png"
-                  alt="OVERHEARD PARTY"
-                  className="relative w-full h-auto object-contain"
-                  style={{
-                    filter: `drop-shadow(0 0 25px ${accent}80)`,
-                  }}
-                />
-                
-                {/* GEÇİŞ EKRANI - SCAP LOGOSU */}
-                <div className="relative mt-5 w-40 md:w-56 h-12 md:h-16 flex items-center justify-center">
+                {/* SADECE SCAP LOGOSU */}
+                <div className="relative w-56 md:w-80 h-16 md:h-24 flex items-center justify-center">
                   <img
                     src="/scap.png"
                     alt="SCAP"
@@ -355,23 +348,23 @@ export default function DjScreen() {
                       e.target.nextSibling.style.display = 'block';
                     }}
                     className="w-full h-full object-contain animate-pulse flex-shrink-0"
-                    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent}60)` }}
+                    style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 25px ${accent}80)` }}
                   />
-                  <span className="hidden font-serif italic text-3xl md:text-5xl font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
+                  <span className="hidden font-serif italic text-4xl md:text-6xl font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,0,0,0.8)] animate-pulse">SCAP</span>
                 </div>
               </div>
 
-              <div className="mt-8 text-[10px] md:text-sm font-black tracking-[0.65em] pl-[0.65em] text-white/50 animate-pulse">
-                PARTİ AKIYOR
+              <div className="mt-8 text-[12px] md:text-base font-black tracking-[0.65em] pl-[0.65em] text-red-500/70 animate-pulse">
+                REDFLAG PARTY
               </div>
             </div>
           ) : transitionStep === "3" ||
             transitionStep === "2" ||
             transitionStep === "1" ? (
             <div className="relative flex items-center justify-center">
-              <div className="absolute w-[24vw] max-w-[340px] aspect-square rounded-full border border-white/10" />
+              <div className="absolute w-[24vw] max-w-[340px] aspect-square rounded-full border border-red-500/20" />
 
-              <div className="absolute w-[20vw] max-w-[290px] aspect-square rounded-full border border-white/5 animate-[countdownOrbit_2.1s_linear_infinite]" />
+              <div className="absolute w-[20vw] max-w-[290px] aspect-square rounded-full border border-red-500/10 animate-[countdownOrbit_2.1s_linear_infinite]" />
 
               <div
                 key={`ring-${transitionStep}`}
@@ -386,7 +379,7 @@ export default function DjScreen() {
                 className="absolute w-[26vw] max-w-[380px] aspect-square rounded-full animate-[countdownPulse_700ms_ease-out_forwards]"
                 style={{
                   border: `1px solid ${accent}`,
-                  opacity: 0.3,
+                  opacity: 0.4,
                 }}
               />
 
@@ -395,14 +388,14 @@ export default function DjScreen() {
                 className="relative z-10 font-black text-white leading-none animate-[countdownThump_700ms_cubic-bezier(.16,1,.3,1)_forwards]"
                 style={{
                   fontSize: "clamp(11rem, 28vw, 28rem)",
-                  WebkitTextStroke: "1px rgba(255,255,255,.18)",
-                  textShadow: `0 0 18px ${accent}, 0 0 55px ${accent}90, 0 0 130px ${accent}40`,
+                  WebkitTextStroke: "2px rgba(255,0,0,.3)",
+                  textShadow: `0 0 20px ${accent}, 0 0 60px ${accent}90, 0 0 140px ${accent}50`,
                 }}
               >
                 {transitionStep}
               </h1>
 
-              <div className="absolute -bottom-24 md:-bottom-28 flex items-center gap-3 text-[9px] md:text-xs font-black tracking-[0.5em] pl-[0.5em] text-white/40">
+              <div className="absolute -bottom-24 md:-bottom-28 flex items-center gap-3 text-[9px] md:text-xs font-black tracking-[0.5em] pl-[0.5em] text-white/50">
                 <span
                   className="w-10 md:w-16 h-px"
                   style={{
@@ -434,7 +427,7 @@ export default function DjScreen() {
                 className="relative font-black uppercase text-center text-white animate-[cinematicText_1.8s_cubic-bezier(0.16,1,0.3,1)_forwards]"
                 style={{
                   fontSize: "clamp(3rem, 7vw, 7rem)",
-                  textShadow: `0 0 40px ${accent}80`,
+                  textShadow: `0 0 40px ${accent}90`,
                 }}
               >
                 {transitionStep}
@@ -447,7 +440,7 @@ export default function DjScreen() {
                 }}
               />
 
-              <span className="absolute -bottom-14 text-xs font-bold tracking-[0.6em] pl-[0.6em] text-white/50 animate-pulse">
+              <span className="absolute -bottom-14 text-xs font-bold tracking-[0.6em] pl-[0.6em] text-red-500/60 animate-pulse">
                 HAZIRLAN
               </span>
             </div>
@@ -457,64 +450,10 @@ export default function DjScreen() {
 
       {message && (
         <header className="relative z-20 flex justify-between items-start animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
-          {/* SOL GRUP: OVERHEARD PARTY */}
-          <div className="relative group flex flex-col">
-            <div
-              className="absolute -inset-12 rounded-full blur-[55px] opacity-20 animate-[logoAura_6s_ease-in-out_infinite]"
-              style={{
-                background: `radial-gradient(circle, ${accent} 0%, transparent 68%)`,
-              }}
-            />
+          {/* SOL GRUP TAMAMEN KALDIRILDI */}
+          <div className="w-1/4"></div>
 
-            <div className="relative w-56 md:w-80 lg:w-[320px] flex flex-col items-center">
-              <div className="relative w-full">
-                <img
-                  src="/overheard-party.png"
-                  alt=""
-                  aria-hidden="true"
-                  className="absolute inset-0 w-full h-auto object-contain blur-[18px] opacity-35 animate-[logoGlow_4.5s_ease-in-out_infinite]"
-                  style={{
-                    filter: `
-                      brightness(1.3)
-                      saturate(1.5)
-                      drop-shadow(0 0 25px ${accent})
-                    `,
-                  }}
-                />
-
-                <img
-                  src="/overheard-party.png"
-                  alt="OVERHEARD PARTY"
-                  className="relative z-10 w-full h-auto object-contain animate-[logoFloat_7s_ease-in-out_infinite]"
-                  style={{
-                    filter: `
-                      brightness(1.08)
-                      contrast(1.08)
-                      drop-shadow(0 0 4px rgba(255,255,255,.5))
-                      drop-shadow(0 0 12px ${accent}b0)
-                      drop-shadow(0 0 32px ${accent}55)
-                    `,
-                  }}
-                />
-                
-                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-1.5 whitespace-nowrap animate-pulse">
-                  <span
-                    className="w-1 h-1 rounded-full animate-ping"
-                    style={{
-                      background: accent,
-                      boxShadow: `0 0 8px ${accent}`,
-                    }}
-                  />
-
-                  <span className="text-[5px] md:text-[7px] font-bold tracking-[0.48em] pl-[0.48em] text-white/35">
-                    LIVE EXPERIENCE
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 🚀 ORTA GRUP: SCAP LOGOSU (TAM MERKEZDE - BÜYÜTÜLDÜ) */}
+          {/* 🚀 ORTA GRUP: SCAP LOGOSU (TAM MERKEZDE) */}
           <div className="absolute left-1/2 -translate-x-1/2 top-0 md:top-1 flex flex-col items-center justify-center z-30">
             <div className="relative w-48 md:w-68 lg:w-80 h-14 md:h-20 flex items-center justify-center">
               <img
@@ -527,15 +466,15 @@ export default function DjScreen() {
                 className="w-full h-full object-contain animate-[logoFloat_7s_ease-in-out_infinite] flex-shrink-0"
                 style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 15px ${accent}90)` }}
               />
-              <span className="hidden font-serif italic text-3xl md:text-5xl font-extrabold tracking-widest text-white/90 drop-shadow-[0_0_12px_rgba(255,255,255,0.7)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
+              <span className="hidden font-serif italic text-3xl md:text-5xl font-extrabold tracking-widest text-white/90 drop-shadow-[0_0_12px_rgba(255,0,0,0.7)] animate-[logoFloat_7s_ease-in-out_infinite]">SCAP</span>
             </div>
           </div>
 
           {/* SAĞ GRUP: CANLI PARTİ AKIŞI */}
-          <div className="relative group">
-            <div className="absolute inset-0 rounded-full blur-xl opacity-20 bg-red-500" />
+          <div className="relative group w-1/4 flex justify-end">
+            <div className="absolute inset-0 rounded-full blur-xl opacity-30 bg-red-600" />
 
-            <div className="relative flex items-center gap-3 rounded-full border border-white/[0.08] bg-black/40 backdrop-blur-xl px-4 md:px-5 py-2.5 md:py-3 shadow-[0_15px_50px_rgba(0,0,0,.35)]">
+            <div className="relative flex items-center gap-3 rounded-full border border-red-500/20 bg-black/60 backdrop-blur-xl px-4 md:px-5 py-2.5 md:py-3 shadow-[0_15px_50px_rgba(255,0,0,.25)]">
               <span
                 className={`w-2 h-2 rounded-full transition-all duration-300 ${
                   live
@@ -543,14 +482,14 @@ export default function DjScreen() {
                     : "opacity-30 scale-75"
                 }`}
                 style={{
-                  background: "#ff3038",
-                  boxShadow: "0 0 15px #ff3038",
+                  background: "#ff0015",
+                  boxShadow: "0 0 15px #ff0015",
                 }}
               />
 
-              <Radio size={15} className="text-red-500" />
+              <Radio size={15} className="text-[#ff0015]" />
 
-              <span className="font-black tracking-[0.22em] text-[9px] md:text-xs text-white/80">
+              <span className="font-black tracking-[0.22em] text-[9px] md:text-xs text-white/90">
                 CANLI PARTİ AKIŞI
               </span>
             </div>
@@ -574,15 +513,15 @@ export default function DjScreen() {
               style={{
                 borderColor: `${accent}90`,
                 color: accent,
-                background: `${accent}10`,
-                boxShadow: `0 0 35px ${accent}20, inset 0 0 25px ${accent}08`,
+                background: `${accent}15`,
+                boxShadow: `0 0 40px ${accent}25, inset 0 0 30px ${accent}10`,
               }}
             >
               <div
                 className="absolute inset-y-0 left-[-80%] w-[45%] skew-x-[-20deg] animate-[badgeSweep_4s_ease-in-out_infinite]"
                 style={{
                   background:
-                    "linear-gradient(90deg, transparent, rgba(255,255,255,.2), transparent)",
+                    "linear-gradient(90deg, transparent, rgba(255,255,255,.25), transparent)",
                 }}
               />
 
@@ -597,7 +536,7 @@ export default function DjScreen() {
             <h1
               className={`relative font-black uppercase tracking-[-0.04em] break-words max-w-[94vw] max-h-[42vh] overflow-hidden flex items-center justify-center px-1 select-none ${getContentFontSize(message.content)} animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]`}
               style={{
-                textShadow: `0 0 18px ${accent}35, 0 0 55px ${accent}40, 0 0 110px ${accent}20`,
+                textShadow: `0 0 20px ${accent}45, 0 0 65px ${accent}50, 0 0 130px ${accent}30`,
                 display: "-webkit-box",
                 WebkitLineClamp: 5,
                 WebkitBoxOrient: "vertical",
@@ -609,20 +548,20 @@ export default function DjScreen() {
             <div
               className="relative mt-6 md:mt-10 h-[2px] w-36 md:w-64 overflow-hidden rounded-full flex-shrink-0"
               style={{
-                background: `${accent}28`,
-                boxShadow: `0 0 25px ${accent}30`,
+                background: `${accent}35`,
+                boxShadow: `0 0 30px ${accent}40`,
               }}
             >
               <div
                 className="absolute inset-y-0 left-[-50%] w-1/2 animate-[energyPremium_2.8s_ease-in-out_infinite]"
                 style={{
                   background: `linear-gradient(90deg, transparent, ${accent}, white, ${accent}, transparent)`,
-                  boxShadow: `0 0 20px ${accent}`,
+                  boxShadow: `0 0 25px ${accent}`,
                 }}
               />
             </div>
 
-            <div className="mt-4 flex items-center gap-1.5 opacity-40 flex-shrink-0">
+            <div className="mt-4 flex items-center gap-1.5 opacity-50 flex-shrink-0">
               <span
                 className="w-1.5 h-1.5 rounded-full animate-bounce"
                 style={{ background: accent, animationDelay: "0ms" }}
@@ -643,20 +582,13 @@ export default function DjScreen() {
           <div className="absolute inset-0 flex flex-col items-center justify-center w-full h-full p-6 z-50 animate-[idleEntrance_2s_cubic-bezier(.16,1,.3,1)_both]">
             
             <div 
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] max-w-[800px] aspect-square rounded-full blur-[140px] opacity-20 animate-[cinematicBreathe_8s_ease-in-out_infinite]" 
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70vw] max-w-[800px] aspect-square rounded-full blur-[140px] opacity-25 animate-[cinematicBreathe_8s_ease-in-out_infinite]" 
               style={{ background: accent }} 
             />
 
             <div className="relative w-[85vw] md:w-[65vw] max-w-[900px] flex flex-col items-center animate-[cinematicLevitate_12s_ease-in-out_infinite] flex-shrink-0">
-              <img
-                src="/overheard-party.png"
-                alt="Overheard Party"
-                className="relative z-10 w-full h-auto object-contain"
-                style={{ filter: `drop-shadow(0 0 35px ${accent}50)` }}
-              />
-
               {/* BOŞ EKRAN MERKEZİ - SCAP LOGOSU */}
-              <div className="relative mt-5 w-40 md:w-56 h-12 md:h-16 flex items-center justify-center">
+              <div className="relative w-56 md:w-80 h-16 md:h-24 flex items-center justify-center">
                 <img
                   src="/scap.png"
                   alt="SCAP"
@@ -665,26 +597,28 @@ export default function DjScreen() {
                     e.target.nextSibling.style.display = 'block';
                   }}
                   className="w-full h-full object-contain animate-pulse flex-shrink-0"
-                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 15px ${accent}60)` }}
+                  style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 25px ${accent}80)` }}
                 />
-                <span className="hidden font-serif italic text-3xl md:text-5xl font-extrabold tracking-widest text-white drop-shadow-[0_0_15px_rgba(255,255,255,0.8)] animate-pulse">SCAP</span>
+                <span className="hidden font-serif italic text-5xl md:text-7xl font-extrabold tracking-widest text-white drop-shadow-[0_0_20px_rgba(255,0,0,0.8)] animate-pulse">SCAP</span>
               </div>
             </div>
 
             <div className="mt-12 md:mt-20 relative group animate-[badgePremium_1.5s_cubic-bezier(.16,1,.3,1)_both] flex-shrink-0" style={{ animationDelay: "0.4s" }}>
               
               <div
-                className="absolute -inset-1 rounded-full blur-xl opacity-20 group-hover:opacity-40 transition-opacity duration-700 animate-pulse"
+                className="absolute -inset-1 rounded-full blur-xl opacity-30 group-hover:opacity-50 transition-opacity duration-700 animate-pulse"
                 style={{ background: accent }}
               />
 
-              <div className="relative flex items-center rounded-full border border-white/[0.08] bg-black/40 backdrop-blur-3xl p-2 md:p-3 shadow-[0_30px_60px_rgba(0,0,0,0.6)]">
+              <div className="relative flex items-center rounded-full border border-red-500/20 bg-black/50 backdrop-blur-3xl p-2 md:p-3 shadow-[0_30px_60px_rgba(255,0,0,0.25)]">
                 
                 <div className="relative flex items-center justify-center w-14 h-14 md:w-20 md:h-20 rounded-full bg-white/[0.03] border border-white/10 shadow-inner">
-                  <img
-                    src="/5555.png"
-                    alt="TNKU"
-                    className="w-8 h-8 md:w-14 md:h-14 object-contain filter drop-shadow-[0_0_10px_rgba(255,255,255,0.2)]"
+                  <Flame
+                    size={28}
+                    style={{
+                      color: accent,
+                      filter: `drop-shadow(0 0 10px ${accent})`,
+                    }}
                   />
                 </div>
 
@@ -696,13 +630,13 @@ export default function DjScreen() {
                       className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full animate-pulse"
                       style={{ background: accent, boxShadow: `0 0 10px ${accent}` }}
                     />
-                    <span className="text-[8px] md:text-[11px] font-black tracking-[0.4em] text-white/50 uppercase">
-                      Canlı Yayın • Katıl
+                    <span className="text-[8px] md:text-[11px] font-black tracking-[0.4em] text-white/60 uppercase">
+                      REDFLAG YAYINI
                     </span>
                   </div>
                   <span
                     className="text-lg md:text-4xl font-black tracking-widest text-white leading-none mt-1"
-                    style={{ textShadow: `0 0 20px ${accent}40` }}
+                    style={{ textShadow: `0 0 20px ${accent}50` }}
                   >
                     overheardparty.xyz/parti
                   </span>
@@ -719,15 +653,8 @@ export default function DjScreen() {
         <footer className="relative z-20 flex justify-between items-end gap-4 animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
           <div className="flex flex-col md:flex-row items-start md:items-end gap-3">
             
-            <div className="relative flex items-center justify-center w-14 h-14 md:w-20 md:h-20 rounded-full bg-black/40 border border-white/10 backdrop-blur-xl p-1.5 md:p-2 shadow-[0_10px_30px_rgba(0,0,0,.5)] overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <img
-                src="/5555.png"
-                alt="TNKU Logo"
-                className="relative z-10 w-full h-full object-contain filter drop-shadow-[0_0_10px_rgba(255,255,255,.2)]"
-              />
-            </div>
-
+            {/* SOL ALT LOGO TAMAMEN KALDIRILDI, SADECE MASADAN GÖNDER BUTONU KALDI */}
+            
             <a
               href="https://overheardparty.xyz/parti"
               target="_blank"
@@ -736,16 +663,16 @@ export default function DjScreen() {
               aria-label="Partiye mesaj gönder"
             >
               <div
-                className="absolute -inset-3 rounded-2xl blur-2xl opacity-0 group-hover:opacity-20 transition-opacity duration-500"
+                className="absolute -inset-3 rounded-2xl blur-2xl opacity-0 group-hover:opacity-30 transition-opacity duration-500"
                 style={{
                   background: accent,
                 }}
               />
 
               <div
-                className="relative flex items-center gap-3 md:gap-5 rounded-2xl border border-white/[0.08] bg-black/35 backdrop-blur-xl px-3 md:px-6 py-2.5 md:py-4 transition-all duration-500 group-hover:border-white/20 group-hover:bg-white/[0.045]"
+                className="relative flex items-center gap-3 md:gap-5 rounded-2xl border border-red-500/20 bg-black/50 backdrop-blur-xl px-3 md:px-6 py-2.5 md:py-4 transition-all duration-500 group-hover:border-red-500/40 group-hover:bg-red-950/20"
                 style={{
-                  boxShadow: "0 10px 40px rgba(0,0,0,.3)",
+                  boxShadow: "0 10px 40px rgba(255,0,0,.15)",
                 }}
               >
                 <div
@@ -757,24 +684,24 @@ export default function DjScreen() {
                 />
 
                 <div className="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl border border-white/[0.08] bg-white/[0.035]">
-                  <Zap
-                    size={15}
+                  <Flame
+                    size={18}
                     style={{
                       color: accent,
-                      filter: `drop-shadow(0 0 8px ${accent})`,
+                      filter: `drop-shadow(0 0 10px ${accent})`,
                     }}
                   />
 
                   <span
                     className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"
                     style={{
-                      boxShadow: `inset 0 0 18px ${accent}20`,
+                      boxShadow: `inset 0 0 18px ${accent}30`,
                     }}
                   />
                 </div>
 
                 <div className="flex flex-col gap-0.5 md:gap-1 min-w-0 text-left">
-                  <span className="text-[6px] md:text-[8px] font-bold tracking-[0.35em] text-white/35">
+                  <span className="text-[6px] md:text-[8px] font-bold tracking-[0.35em] text-white/50">
                     MASADAN GÖNDER
                   </span>
 
@@ -784,7 +711,7 @@ export default function DjScreen() {
                     </span>
 
                     <span
-                      className="text-xs md:text-base opacity-70 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                      className="text-xs md:text-base opacity-80 transition-all duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
                       style={{
                         color: accent,
                       }}
@@ -794,12 +721,12 @@ export default function DjScreen() {
                   </div>
                 </div>
 
-                <div className="hidden md:flex ml-2 w-7 h-7 items-center justify-center rounded-full border border-white/[0.08] text-white/30 group-hover:text-white/80 transition-all duration-500">
+                <div className="hidden md:flex ml-2 w-7 h-7 items-center justify-center rounded-full border border-red-500/20 text-white/40 group-hover:text-white/90 group-hover:border-red-500/50 transition-all duration-500">
                   →
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 mt-1.5 ml-2 opacity-30 group-hover:opacity-60 transition-opacity duration-500">
+              <div className="flex items-center gap-2 mt-1.5 ml-2 opacity-40 group-hover:opacity-80 transition-opacity duration-500">
                 <span
                   className="w-1 h-1 rounded-full"
                   style={{
@@ -807,8 +734,8 @@ export default function DjScreen() {
                   }}
                 />
 
-                <span className="text-[6px] md:text-[7px] font-bold tracking-[0.28em]">
-                  PARTİ AKIŞINA KATIL
+                <span className="text-[6px] md:text-[7px] font-bold tracking-[0.28em] text-red-500/80">
+                  REDFLAG'E KATIL
                 </span>
               </div>
             </a>
@@ -816,14 +743,14 @@ export default function DjScreen() {
 
           <div className="relative group">
             <div
-              className="absolute inset-0 rounded-xl blur-xl opacity-10"
+              className="absolute inset-0 rounded-xl blur-xl opacity-15"
               style={{
                 background: accent,
               }}
             />
 
             <div className="relative flex items-center gap-3">
-              <span className="hidden md:block text-[7px] font-bold tracking-[0.35em] text-white/25">
+              <span className="hidden md:block text-[7px] font-bold tracking-[0.35em] text-white/30">
                 PARTNER
               </span>
 
@@ -832,7 +759,7 @@ export default function DjScreen() {
                   className="absolute inset-0 pointer-events-none"
                   style={{
                     background:
-                      "linear-gradient(110deg, transparent 20%, rgba(255,255,255,.14) 48%, transparent 62%)",
+                      "linear-gradient(110deg, transparent 20%, rgba(255,0,0,.15) 48%, transparent 62%)",
                     backgroundSize: "240% 100%",
                     animation: "sponsorShine 4.5s ease-in-out infinite",
                   }}
@@ -1032,7 +959,7 @@ const stylesCSS = `
 
     50% {
       transform: scale(1.15);
-      opacity: .28;
+      opacity: .35;
     }
   }
 
@@ -1046,13 +973,13 @@ const stylesCSS = `
     0% {
       opacity: .85;
       transform: scale(.35);
-      box-shadow: 0 0 0 rgba(0,102,255,0);
+      box-shadow: 0 0 0 rgba(255,0,0,0);
     }
 
     55% {
-      opacity: .35;
+      opacity: .45;
       transform: scale(1);
-      box-shadow: 0 0 70px rgba(0,102,255,.25);
+      box-shadow: 0 0 80px rgba(255,0,0,.35);
     }
 
     100% {
@@ -1080,7 +1007,7 @@ const stylesCSS = `
       transform: translate(-50%, -50%) scale(0.9);
     }
     50% {
-      opacity: 0.3;
+      opacity: 0.35;
       transform: translate(-50%, -50%) scale(1.1);
     }
   }
@@ -1149,28 +1076,28 @@ const stylesCSS = `
     }
 
     20% {
-      opacity: .25;
+      opacity: .35;
     }
 
     50% {
       transform: translate3d(12px,-35px,0);
-      opacity: .5;
+      opacity: .6;
     }
 
     80% {
-      opacity: .15;
+      opacity: .25;
     }
   }
 
   @keyframes slowPulse {
     0%, 100% {
       transform: translate(-50%, -50%) scale(.96);
-      opacity: .025;
+      opacity: .035;
     }
 
     50% {
       transform: translate(-50%, -50%) scale(1.04);
-      opacity: .07;
+      opacity: .08;
     }
   }
 
