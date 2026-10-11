@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getPendingMessages, approveMessage, rejectMessage, clearActiveMessage, updateMessage } from './actions';
-import { Check, X, ShieldAlert, Loader2, Flame, EyeOff, Ear, RefreshCw, MonitorX, Edit3, Save } from 'lucide-react';
+import { Check, X, ShieldAlert, Loader2, HelpCircle, RefreshCw, MonitorX, Edit3, Save, Trash2, Flag } from 'lucide-react';
 
 export default function PartyAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -29,14 +29,31 @@ export default function PartyAdminPage() {
   };
 
   const handleClearScreen = async () => {
-    if (confirm("Ekrandaki mesajı kaldırıp Party İntro ekranına dönmek istediğine emin misin?")) {
+    if (confirm("Ekrandaki soruyu kaldırıp bekleme ekranına dönmek istediğine emin misin?")) {
       try {
         await clearActiveMessage();
-        alert("Ekran temizlendi! Sahnede Party İntro'su dönüyor.");
+        alert("Ekran temizlendi! Sahnede bekleme ekranı dönüyor.");
       } catch (error) {
         console.error("Ekran temizlenirken hata oluştu:", error);
         alert("Ekran temizlenemedi, bir hata oluştu.");
       }
+    }
+  };
+
+  // 🚀 YENİ EKLENTİ: TÜMÜNÜ SİL
+  const handleRejectAll = async () => {
+    if (messages.length === 0) return;
+    if (confirm(`Bekleyen ${messages.length} sorunun hepsini çöpe atmak istediğine emin misin? Bu işlem geri alınamaz!`)) {
+      setLoading(true);
+      try {
+        // Tüm mesajları reddet (veritabanından kaldır/reddet)
+        await Promise.all(messages.map((m) => rejectMessage(m.id)));
+        setMessages([]); // Ekranı temizle
+      } catch (error) {
+        console.error("Toplu silme işleminde hata:", error);
+        alert("Bazı mesajlar silinirken hata oluştu.");
+      }
+      setLoading(false);
     }
   };
 
@@ -86,30 +103,36 @@ export default function PartyAdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6">
-        <ShieldAlert size={64} className="text-red-500 mb-6" />
-        <h1 className="text-2xl font-black mb-8 tracking-widest">MODERASYON GİRİŞİ</h1>
-        <form onSubmit={handleLogin} className="w-full max-w-xs space-y-4">
+      <main className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-red-900/10 pointer-events-none" />
+        <ShieldAlert size={64} className="text-red-600 mb-6 relative z-10" />
+        <h1 className="text-2xl font-black mb-8 tracking-widest text-red-500 relative z-10">REDFLAG MODERASYON</h1>
+        <form onSubmit={handleLogin} className="w-full max-w-xs space-y-4 relative z-10">
           <input 
             type="password"
             value={passcode}
             onChange={(e) => setPasscode(e.target.value)}
             placeholder="Admin Şifresi"
-            className="w-full bg-[#111] border border-white/20 rounded-xl p-4 text-center text-xl tracking-widest outline-none focus:border-red-500 transition-colors"
+            className="w-full bg-[#111] border border-red-500/20 rounded-xl p-4 text-center text-xl tracking-widest outline-none focus:border-red-500 transition-colors shadow-[0_0_15px_rgba(255,0,0,0.1)]"
           />
-          <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl transition-all">GİRİŞ YAP</button>
+          <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(255,0,0,0.3)]">GİRİŞ YAP</button>
         </form>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white p-4 pb-24">
-      <div className="max-w-xl mx-auto">
+    <main className="min-h-screen bg-[#050505] text-white p-4 pb-24 relative overflow-hidden">
+      
+      {/* Redflag Background Ambiyans */}
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,rgba(255,0,0,0.1)_0%,transparent_50%)]" />
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_bottom_left,rgba(0,255,50,0.05)_0%,transparent_50%)]" />
+
+      <div className="max-w-xl mx-auto relative z-10">
         
         <header className="flex items-center justify-between py-6 border-b border-white/10 mb-6">
-          <h1 className="text-xl font-black tracking-widest text-red-500 flex items-center gap-2">
-            <ShieldAlert size={24} /> KONTROL 
+          <h1 className="text-xl font-black tracking-widest text-red-500 flex items-center gap-2 drop-shadow-[0_0_8px_rgba(255,0,0,0.5)]">
+            <Flag size={24} fill="currentColor" /> REDFLAG KONTROL 
           </h1>
           
           <div className="flex items-center gap-3">
@@ -118,70 +141,64 @@ export default function PartyAdminPage() {
               className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors active:scale-95"
               title="Mesajları Yenile"
             >
-              <RefreshCw size={18} className={`${isRefreshing ? "animate-spin text-white" : "text-gray-400"}`} />
+              <RefreshCw size={18} className={`${isRefreshing ? "animate-spin text-white" : "text-red-400"}`} />
             </button>
             
-            <div className="text-sm font-bold bg-white/10 px-4 py-2.5 rounded-lg border border-white/5">
+            <div className="text-sm font-bold bg-white/5 px-4 py-2.5 rounded-lg border border-red-500/20">
               BEKLEYEN: <span className="text-red-400">{messages.length}</span>
             </div>
           </div>
         </header>
 
-        <button 
-          onClick={handleClearScreen}
-          className="w-full flex items-center justify-center gap-2 mb-8 bg-red-900/40 hover:bg-red-600 border border-red-500/50 hover:border-red-500 text-red-100 py-4 rounded-xl font-black tracking-widest transition-all shadow-[0_0_15px_rgba(220,38,38,0.2)] hover:shadow-[0_0_25px_rgba(220,38,38,0.5)]"
-        >
-          <MonitorX size={20} />
-          EKRANI TEMİZLE (İNTROYA DÖN)
-        </button>
+        {/* EKRAN KONTROL BUTONLARI */}
+        <div className="grid grid-cols-1 gap-3 mb-8">
+          <button 
+            onClick={handleClearScreen}
+            className="w-full flex items-center justify-center gap-2 bg-red-950/50 hover:bg-red-900 border border-red-500/30 hover:border-red-500 text-red-100 py-3.5 rounded-xl font-black tracking-widest transition-all shadow-[0_0_15px_rgba(255,0,0,0.2)]"
+          >
+            <MonitorX size={20} />
+            EKRANDAKİ SORUYU KALDIR
+          </button>
+
+          <button 
+            onClick={handleRejectAll}
+            disabled={messages.length === 0}
+            className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-black tracking-widest transition-all ${
+              messages.length === 0 
+              ? 'bg-gray-900 text-gray-700 border border-gray-800 cursor-not-allowed'
+              : 'bg-black hover:bg-red-950 border border-white/10 hover:border-red-500 text-gray-400 hover:text-red-400'
+            }`}
+          >
+            <Trash2 size={20} />
+            BEKLEYEN TÜM SORULARI ÇÖPE AT
+          </button>
+        </div>
 
         {loading ? (
           <div className="flex justify-center py-20"><Loader2 className="animate-spin text-red-500" size={40} /></div>
         ) : messages.length === 0 ? (
           <div className="text-center text-gray-500 py-20 font-bold tracking-widest uppercase flex flex-col items-center gap-4">
-            <Check size={48} className="text-green-500/50" />
-            Ekrana Verilecek Mesaj Yok
+            <Check size={48} className="text-green-500/30" />
+            Ekrana Verilecek Soru Yok
           </div>
         ) : (
           <div className="space-y-4">
             {messages.map((msg) => {
               
-              let Icon = Flame;
-              let label = "İTİRAF";
-              let color = "text-red-400";
+              // Tüm mesajlar tek konsept (SORU) olarak geliyor
+              let Icon = HelpCircle;
+              let label = "YENİ SORU";
+              let color = "text-white";
               
-              // 🔥 GÜNCELLENDİ: LINC, REZIL, LİNÇ, İFŞA ve IFSA kelimelerinin tümü garantilendi
-              if (
-                msg.location === 'PARTY_REZIL' || 
-                msg.location === 'PARTY_LINC' || 
-                msg.location === 'PARTY_LİNÇ' ||
-                msg.location === 'PARTY_IFSA' ||
-                msg.location?.includes('LINC') ||
-                msg.location?.includes('REZIL') ||
-                msg.location?.includes('IFSA') ||
-                msg.location?.includes('İFŞA') ||
-                msg.location?.includes('LİNÇ')
-              ) { 
-                Icon = EyeOff; 
-                label = "LİNÇ@"; 
-                color = "text-fuchsia-400"; 
-              }
-              
-              if (msg.location === 'PARTY_OVERHEARD' || msg.location?.includes('OVERHEARD')) { 
-                Icon = Ear; 
-                label = "DUYDUM"; 
-                color = "text-cyan-400"; 
-              }
-
               const isEditing = editingId === msg.id;
 
               return (
-                <div key={msg.id} className="bg-[#111] border border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden transition-all">
+                <div key={msg.id} className="bg-[#0a0a0a] border border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden transition-all">
                   
                   {/* Üst Kısım: Kategori ve Düzenle Butonu */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className={`flex items-center gap-2 text-xs font-black tracking-widest ${color}`}>
-                      <Icon size={14} /> {label}
+                  <div className="flex items-center justify-between mb-4">
+                    <div className={`flex items-center gap-2 text-xs font-black tracking-widest ${color} bg-white/5 px-3 py-1.5 rounded-md border border-white/10`}>
+                      <Icon size={14} className="text-red-500" /> {label}
                     </div>
                     
                     {!isEditing && (
@@ -205,41 +222,16 @@ export default function PartyAdminPage() {
                         maxLength={150}
                       />
 
-                      {/* Kategori Değiştirme Butonları */}
-                      <div className="flex gap-2">
-                        <button 
-                          type="button"
-                          onClick={() => setEditLocation('PARTY_ITIRAF')}
-                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_ITIRAF' ? 'bg-red-500/20 border-red-500 text-red-400' : 'bg-white/5 border-white/10 text-gray-400'}`}
-                        >
-                          İTİRAF
-                        </button>
-                        <button 
-                          type="button"
-                          onClick={() => setEditLocation('PARTY_LINC')}
-                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_LINC' || editLocation === 'PARTY_REZIL' || editLocation === 'PARTY_IFSA' ? 'bg-fuchsia-500/20 border-fuchsia-500 text-fuchsia-400' : 'bg-white/5 border-white/10 text-gray-400'}`}
-                        >
-                          LİNÇ@
-                        </button>
-                        <button 
-                          type="button"
-                          onClick={() => setEditLocation('PARTY_OVERHEARD')}
-                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_OVERHEARD' ? 'bg-cyan-500/20 border-cyan-500 text-cyan-400' : 'bg-white/5 border-white/10 text-gray-400'}`}
-                        >
-                          DUYDUM
-                        </button>
-                      </div>
-
                       {/* Kaydet Butonu */}
                       <button 
                         onClick={() => handleSaveEdit(msg.id)}
-                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition-all"
+                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)]"
                       >
                         <Save size={16} /> DEĞİŞİKLİKLERİ KAYDET
                       </button>
                     </div>
                   ) : (
-                    <p className="text-xl font-bold leading-snug mb-6">{msg.content}</p>
+                    <p className="text-xl font-bold leading-snug mb-6 text-gray-100">{msg.content}</p>
                   )}
                   
                   {/* Alt Butonlar */}
@@ -253,7 +245,7 @@ export default function PartyAdminPage() {
                       </button>
                       <button 
                         onClick={() => handleAction(msg.id, 'APPROVE')}
-                        className="flex-1 flex items-center justify-center gap-2 bg-green-500/20 hover:bg-green-500 text-green-400 hover:text-white border border-green-500/50 py-3 rounded-xl transition-all font-bold"
+                        className="flex-1 flex items-center justify-center gap-2 bg-white/5 hover:bg-white text-gray-300 hover:text-black border border-white/10 hover:border-white py-3 rounded-xl transition-all font-bold shadow-lg"
                       >
                         <Check size={20} /> EKRANA VER
                       </button>
