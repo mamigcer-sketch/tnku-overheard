@@ -140,7 +140,7 @@ export default function PartyAdminPage() {
         ) : messages.length === 0 ? (
           <div className="text-center text-gray-500 py-20 font-bold tracking-widest uppercase flex flex-col items-center gap-4">
             <Check size={48} className="text-green-500/50" />
-            Ekrana Verilecek Mesaj Yok
+            Ekrana Verilecek Meysaj Yok
           </div>
         ) : (
           <div className="space-y-4">
