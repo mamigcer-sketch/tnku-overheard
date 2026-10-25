@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Skull, Ghost, Zap, Radio, MessageCircle } from "lucide-react";
+import { Skull, Ghost, Radio, MessageCircle } from "lucide-react";
 
 type PartyMessage = {
   id: string | number;
@@ -18,6 +18,15 @@ const PARTICLES = [
   ["90%", "88%", "0.8s", "5s", "w-[7px] h-[7px]"],
   ["35%", "60%", "2.5s", "4s", "w-[3px] h-[3px]"],
 ] as const;
+
+// ⚰️ Özel Tabut (Coffin) İkonu
+const Coffin = ({ size = 24, className = "", style = {} }: any) => (
+  <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} style={style}>
+    <polygon points="8 2 16 2 20 7 15 22 9 22 4 7" />
+    <path d="M12 7v8" />
+    <path d="M9 10h6" />
+  </svg>
+);
 
 export default function DjScreen() {
   const [message, setMessage] = useState<PartyMessage | null>(null);
@@ -125,7 +134,7 @@ export default function DjScreen() {
   const location = message?.location ?? "";
   let accent = "#ff2200"; 
   let title = "İTİRAF";
-  let Icon = Skull;
+  let Icon: any = Skull;
 
   if (location.includes("LINC") || location.includes("LİNÇ") || location.includes("REZIL")) {
     accent = "#8a00e6"; 
@@ -134,7 +143,7 @@ export default function DjScreen() {
   } else if (location.includes("OVERHEARD")) {
     accent = "#00ff22"; 
     title = "DUYDUM";
-    Icon = Zap;
+    Icon = Coffin;
   }
 
   const content = message?.content ?? "";
@@ -152,6 +161,7 @@ export default function DjScreen() {
       className="dj-screen relative flex min-h-screen max-h-screen flex-col justify-between overflow-hidden bg-black p-4 text-white md:p-10 select-none" 
       style={{ "--accent": accent } as React.CSSProperties}
     >
+      {/* 🚀 ARKA PLAN RESMİ */}
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-80"
         style={{ backgroundImage: "url('/halloween-bg.jpg')" }}
@@ -160,6 +170,7 @@ export default function DjScreen() {
       <div className="absolute inset-0 z-0 bg-gradient-to-t from-black/90 via-transparent to-black/70 pointer-events-none" />
       <div className="absolute inset-0 z-0 radial-vignette pointer-events-none" />
 
+      {/* Köz/Kıvılcım Efektleri */}
       <div className="absolute inset-0 z-[3] pointer-events-none overflow-hidden">
         {PARTICLES.map(([left, top, delay, duration, size], i) => (
           <span 
@@ -231,7 +242,6 @@ export default function DjScreen() {
 
       {message && (
         <header className="relative z-20 flex items-start justify-between animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
-          
           {/* BÜYÜTÜLEN SOL ÜST LOGO EKLENTİSİ */}
           <div className="relative flex w-1/4 justify-start">
             <div className="relative flex items-center justify-center w-24 h-24 md:w-32 md:h-32 rounded-full bg-black/60 border border-white/15 backdrop-blur-xl p-2 md:p-3 shadow-[0_10px_30px_rgba(255,106,0,.2)] overflow-hidden">
@@ -294,6 +304,7 @@ export default function DjScreen() {
           </div>
         ) : (
           <div className="absolute inset-0 z-50 flex h-full w-full flex-col items-center justify-center p-6 animate-[idleEntrance_2s_cubic-bezier(.16,1,.3,1)_both]">
+            <div className="absolute left-1/2 top-1/2 aspect-square w-[70vw] max-w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px] animate-[cinematicBreathe_8s_ease-in-out_infinite]" style={{ background: accent, opacity: .2 }} />
             <div className="relative flex w-[85vw] max-w-[900px] flex-shrink-0 flex-col items-center md:w-[65vw]">
               <div className="flex h-20 w-64 items-center justify-center md:h-32 md:w-96">
                 <img 
@@ -325,7 +336,6 @@ export default function DjScreen() {
               </div>
             </a>
           </div>
-          
           <div className="w-1/4"></div>
         </footer>
       )}
