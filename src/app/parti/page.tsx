@@ -21,7 +21,7 @@ export default function PartyInputPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const CORRECT_PASSWORD = "offday"; 
+    const CORRECT_PASSWORD = "parti2026"; 
 
     if (passcode.trim() === CORRECT_PASSWORD) {
       setIsAuthenticated(true);
@@ -58,7 +58,6 @@ export default function PartyInputPage() {
     setTimeout(() => setSuccess(false), 3000); 
   };
 
-  // 🎃 HALLOWEEN DİNAMİK TEMA AYARLARI
   let themeObj = {
     glow: "from-[#ff6a00]/25",
     ambient: "bg-[#ff6a00]/15",
@@ -142,7 +141,6 @@ export default function PartyInputPage() {
   return (
     <main className={`min-h-screen bg-black text-white flex items-center justify-center p-4 md:p-8 transition-colors duration-700 relative overflow-hidden ${themeObj.selection}`}>
       
-      {/* 🚀 ARKA PLAN RESMİ */}
       <div className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat opacity-40" style={{ backgroundImage: "url('/halloween-bg.jpg')" }} />
       <div className="absolute inset-0 z-0 bg-black/80 mix-blend-multiply pointer-events-none" />
 
@@ -164,7 +162,6 @@ export default function PartyInputPage() {
 
         <form onSubmit={handleSubmit} className="space-y-4 relative z-10">
           
-          {/* 🎃 KATEGORİ SEÇsİMİ (GERİ GELDİ) */}
           <div className="flex gap-1.5 bg-black/50 p-1.5 rounded-2xl border border-white/10 backdrop-blur-sm">
             <button type="button" onClick={() => setType('PARTY_ITIRAF')} className={`flex-1 min-w-0 h-[76px] flex flex-col items-center justify-center gap-1 rounded-xl transition-all duration-300 ${type === 'PARTY_ITIRAF' ? 'bg-[#ff6a00]/20 border border-[#ff6a00]/40 text-[#ff6a00] shadow-[0_0_20px_rgba(255,106,0,0.2)]' : 'border border-transparent text-gray-500 hover:text-gray-300'}`}>
               <Skull size={20} />
