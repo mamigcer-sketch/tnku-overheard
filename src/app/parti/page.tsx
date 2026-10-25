@@ -21,7 +21,7 @@ export default function PartyInputPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    const CORRECT_PASSWORD = "parti2026"; 
+    const CORRECT_PASSWORD = "offday"; 
 
     if (passcode.trim() === CORRECT_PASSWORD) {
       setIsAuthenticated(true);
