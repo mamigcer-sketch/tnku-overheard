@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getPendingMessages, approveMessage, rejectMessage, clearActiveMessage, updateMessage } from './actions';
-import { Check, X, ShieldAlert, Loader2, HelpCircle, RefreshCw, MonitorX, Edit3, Save, Trash2, Flag } from 'lucide-react';
+import { Check, X, ShieldAlert, Loader2, Skull, Ghost, Zap, RefreshCw, MonitorX, Edit3, Save, Trash2 } from 'lucide-react';
 
 export default function PartyAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -34,26 +34,23 @@ export default function PartyAdminPage() {
   };
 
   const handleClearScreen = async () => {
-    if (confirm("Ekrandaki soruyu kaldırıp bekleme ekranına dönmek istediğine emin misin?")) {
+    if (confirm("Ekrandaki mesajı kaldırıp bekleme ekranına dönmek istediğine emin misin?")) {
       try {
         await clearActiveMessage();
         alert("Ekran temizlendi! Sahnede bekleme ekranı dönüyor.");
       } catch (error) {
-        console.error("Ekran temizlenirken hata oluştu:", error);
-        alert("Ekran temizlenemedi, bir hata oluştu.");
+        console.error("Ekran temizlenirken hata:", error);
       }
     }
   };
 
   const handleRejectAll = () => {
     if (messages.length === 0) return;
-    if (confirm(`Bekleyen ${messages.length} sorunun hepsini çöpe atmak istediğine emin misin? Bu işlem geri alınamaz!`)) {
+    if (confirm(`Bekleyen ${messages.length} mesajın hepsini çöpe atmak istediğine emin misin?`)) {
       const messagesToDelete = [...messages];
       setMessages([]); 
-
       Promise.allSettled(messagesToDelete.map(m => rejectMessage(m.id)))
-        .then(() => console.log("Toplu silme başarılı"))
-        .catch(err => console.error("Silme sırasında hata:", err));
+        .then(() => console.log("Toplu silme başarılı"));
     }
   };
 
@@ -90,7 +87,7 @@ export default function PartyAdminPage() {
   const startEditing = (msg: any) => {
     setEditingId(msg.id);
     setEditContent(msg.content);
-    setEditLocation(msg.location);
+    setEditLocation(msg.location || 'PARTY_ITIRAF');
   };
 
   const handleSaveEdit = async (id: string) => {
@@ -101,48 +98,46 @@ export default function PartyAdminPage() {
 
   if (!isAuthenticated) {
     return (
-      <main className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
-        <div className="absolute inset-0 bg-red-900/10 pointer-events-none" />
-        <ShieldAlert size={64} className="text-red-600 mb-6 relative z-10" />
-        <h1 className="text-2xl font-black mb-8 tracking-widest text-red-500 relative z-10">MODERASYON</h1>
+      <main className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[#ff6a00]/5 pointer-events-none" />
+        <ShieldAlert size={64} className="text-[#ff6a00] mb-6 relative z-10" />
+        <h1 className="text-2xl font-black mb-8 tracking-widest text-[#ff6a00] relative z-10">MODERASYON GİRİŞİ</h1>
         <form onSubmit={handleLogin} className="w-full max-w-xs space-y-4 relative z-10">
           <input 
             type="password"
             value={passcode}
             onChange={(e) => setPasscode(e.target.value)}
             placeholder="Admin Şifresi"
-            className="w-full bg-[#111] border border-red-500/20 rounded-xl p-4 text-center text-xl tracking-widest outline-none focus:border-red-500 transition-colors shadow-[0_0_15px_rgba(255,0,0,0.1)]"
+            className="w-full bg-[#111] border border-white/20 rounded-xl p-4 text-center text-xl tracking-widest outline-none focus:border-[#ff6a00] transition-colors"
           />
-          <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(255,0,0,0.3)]">GİRİŞ YAP</button>
+          <button type="submit" className="w-full bg-[#ff6a00] hover:bg-[#ff8a33] text-black font-black py-4 rounded-xl transition-all shadow-[0_0_20px_rgba(255,106,0,0.3)]">GİRİŞ YAP</button>
         </form>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-[#050505] text-white p-4 pb-24 relative overflow-hidden">
-      
-      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,rgba(255,0,0,0.1)_0%,transparent_50%)]" />
-      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_bottom_left,rgba(0,255,50,0.05)_0%,transparent_50%)]" />
+    <main className="min-h-screen bg-[#050308] text-white p-4 pb-24 relative overflow-hidden">
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_top_right,rgba(255,106,0,0.1)_0%,transparent_50%)]" />
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_bottom_left,rgba(157,0,255,0.08)_0%,transparent_50%)]" />
 
       <div className="max-w-xl mx-auto relative z-10">
         
         <header className="flex items-center justify-between py-6 border-b border-white/10 mb-6">
-          <h1 className="text-xl font-black tracking-widest text-red-500 flex items-center gap-2 drop-shadow-[0_0_8px_rgba(255,0,0,0.5)]">
-            <Flag size={24} fill="currentColor" /> KONTROL 
+          <h1 className="text-xl font-black tracking-widest text-white flex items-center gap-2">
+            <Skull size={24} className="text-[#ff6a00]" /> KONTROL 
           </h1>
           
           <div className="flex items-center gap-3">
             <button 
               onClick={handleManualRefresh}
               className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-colors active:scale-95"
-              title="Mesajları Yenile"
             >
-              <RefreshCw size={18} className={`${isRefreshing ? "animate-spin text-white" : "text-red-400"}`} />
+              <RefreshCw size={18} className={`${isRefreshing ? "animate-spin text-white" : "text-gray-400"}`} />
             </button>
             
-            <div className="text-sm font-bold bg-white/5 px-4 py-2.5 rounded-lg border border-red-500/20">
-              BEKLEYEN: <span className="text-red-400">{messages.length}</span>
+            <div className="text-sm font-bold bg-white/5 px-4 py-2.5 rounded-lg border border-white/10">
+              BEKLEYEN: <span className="text-[#ff6a00]">{messages.length}</span>
             </div>
           </div>
         </header>
@@ -150,10 +145,9 @@ export default function PartyAdminPage() {
         <div className="grid grid-cols-1 gap-3 mb-8">
           <button 
             onClick={handleClearScreen}
-            className="w-full flex items-center justify-center gap-2 bg-red-950/50 hover:bg-red-900 border border-red-500/30 hover:border-red-500 text-red-100 py-3.5 rounded-xl font-black tracking-widest transition-all shadow-[0_0_15px_rgba(255,0,0,0.2)]"
+            className="w-full flex items-center justify-center gap-2 bg-[#ff6a00]/10 hover:bg-[#ff6a00]/20 border border-[#ff6a00]/30 hover:border-[#ff6a00] text-[#ffaa77] py-3.5 rounded-xl font-black tracking-widest transition-all"
           >
-            <MonitorX size={20} />
-            EKRANDAKİ SORUYU KALDIR
+            <MonitorX size={20} /> EKRANI TEMİZLE
           </button>
 
           <button 
@@ -162,37 +156,51 @@ export default function PartyAdminPage() {
             className={`w-full flex items-center justify-center gap-2 py-3.5 rounded-xl font-black tracking-widest transition-all ${
               messages.length === 0 
               ? 'bg-gray-900 text-gray-700 border border-gray-800 cursor-not-allowed'
-              : 'bg-black hover:bg-red-950 border border-white/10 hover:border-red-500 text-gray-400 hover:text-red-400'
+              : 'bg-black hover:bg-red-950/40 border border-white/10 hover:border-red-500 text-gray-400 hover:text-red-400'
             }`}
           >
-            <Trash2 size={20} />
-            BEKLEYEN TÜM SORULARI ÇÖPE AT
+            <Trash2 size={20} /> TÜMÜNÜ ÇÖPE AT
           </button>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20"><Loader2 className="animate-spin text-red-500" size={40} /></div>
+          <div className="flex justify-center py-20"><Loader2 className="animate-spin text-[#ff6a00]" size={40} /></div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-gray-500 py-20 font-bold tracking-widest flex flex-col items-center gap-4">
-            <Check size={48} className="text-green-500/30" />
-            Ekrana Verilecek Soru Yok
+          <div className="text-center text-gray-600 py-20 font-bold tracking-widest flex flex-col items-center gap-4">
+            <Check size={48} className="text-green-500/20" />
+            Bekleyen Mesaj Yok
           </div>
         ) : (
           <div className="space-y-4">
             {messages.map((msg) => {
               
-              let Icon = HelpCircle;
-              let label = "YENİ SORU";
-              let color = "text-white";
+              let Icon = Skull;
+              let label = "İTİRAF";
+              let color = "text-[#ff6a00]";
+              let bg = "bg-[#ff6a00]/10 border-[#ff6a00]/30";
               
+              if (msg.location?.includes('LINC') || msg.location?.includes('LİNÇ') || msg.location?.includes('REZIL')) { 
+                Icon = Ghost; 
+                label = "LİNÇ@"; 
+                color = "text-[#9d00ff]"; 
+                bg = "bg-[#9d00ff]/10 border-[#9d00ff]/30";
+              }
+              
+              if (msg.location?.includes('OVERHEARD')) { 
+                Icon = Zap; 
+                label = "DUYDUM"; 
+                color = "text-[#00ff33]"; 
+                bg = "bg-[#00ff33]/10 border-[#00ff33]/30";
+              }
+
               const isEditing = editingId === msg.id;
 
               return (
-                <div key={msg.id} className="bg-[#0a0a0a] border border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden transition-all">
+                <div key={msg.id} className="bg-[#0a060d] border border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden transition-all">
                   
                   <div className="flex items-center justify-between mb-4">
-                    <div className={`flex items-center gap-2 text-xs font-black tracking-widest ${color} bg-white/5 px-3 py-1.5 rounded-md border border-white/10`}>
-                      <Icon size={14} className="text-red-500" /> {label}
+                    <div className={`flex items-center gap-2 text-xs font-black tracking-widest ${color} ${bg} px-3 py-1.5 rounded-md border`}>
+                      <Icon size={14} /> {label}
                     </div>
                     
                     {!isEditing && (
@@ -210,12 +218,38 @@ export default function PartyAdminPage() {
                       <textarea 
                         value={editContent}
                         onChange={(e) => setEditContent(e.target.value)}
-                        className="w-full bg-black/60 border border-white/20 rounded-xl p-3 text-white text-lg font-bold outline-none focus:border-red-500 resize-none h-24"
+                        className="w-full bg-black/60 border border-white/20 rounded-xl p-3 text-white text-lg font-bold outline-none focus:border-[#ff6a00] resize-none h-24"
                         maxLength={150}
                       />
+                      
+                      {/* 🎃 Kategori Değiştirme (HALLOWEEN) */}
+                      <div className="flex gap-2">
+                        <button 
+                          type="button"
+                          onClick={() => setEditLocation('PARTY_ITIRAF')}
+                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_ITIRAF' ? 'bg-[#ff6a00]/20 border-[#ff6a00] text-[#ffaa77]' : 'bg-white/5 border-white/10 text-gray-400'}`}
+                        >
+                          İTİRAF
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setEditLocation('PARTY_LINC')}
+                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation?.includes('LINC') || editLocation?.includes('REZIL') ? 'bg-[#9d00ff]/20 border-[#9d00ff] text-[#ccaaff]' : 'bg-white/5 border-white/10 text-gray-400'}`}
+                        >
+                          LİNÇ@
+                        </button>
+                        <button 
+                          type="button"
+                          onClick={() => setEditLocation('PARTY_OVERHEARD')}
+                          className={`flex-1 py-2 text-xs font-black rounded-lg border transition-all ${editLocation === 'PARTY_OVERHEARD' ? 'bg-[#00ff33]/20 border-[#00ff33] text-[#aaffbb]' : 'bg-white/5 border-white/10 text-gray-400'}`}
+                        >
+                          DUYDUM
+                        </button>
+                      </div>
+
                       <button 
                         onClick={() => handleSaveEdit(msg.id)}
-                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)]"
+                        className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2.5 rounded-xl transition-all shadow-[0_0_15px_rgba(37,99,235,0.4)] mt-2"
                       >
                         <Save size={16} /> DEĞİŞİKLİKLERİ KAYDET
                       </button>
