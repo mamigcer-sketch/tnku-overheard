@@ -45,15 +45,12 @@ export default function PartyAdminPage() {
     }
   };
 
-  // 🔥 YENİ SİSTEM: Anında ekrandan siler, veritabanı yorulmaz
   const handleRejectAll = () => {
     if (messages.length === 0) return;
     if (confirm(`Bekleyen ${messages.length} sorunun hepsini çöpe atmak istediğine emin misin? Bu işlem geri alınamaz!`)) {
-      // 1. Ekrandan anında sil (Kullanıcı beklemesin)
       const messagesToDelete = [...messages];
       setMessages([]); 
 
-      // 2. Arka planda sessizce veritabanından temizle
       Promise.allSettled(messagesToDelete.map(m => rejectMessage(m.id)))
         .then(() => console.log("Toplu silme başarılı"))
         .catch(err => console.error("Silme sırasında hata:", err));
@@ -107,7 +104,7 @@ export default function PartyAdminPage() {
       <main className="min-h-screen bg-[#050505] text-white flex flex-col items-center justify-center p-6 relative overflow-hidden">
         <div className="absolute inset-0 bg-red-900/10 pointer-events-none" />
         <ShieldAlert size={64} className="text-red-600 mb-6 relative z-10" />
-        <h1 className="text-2xl font-black mb-8 tracking-widest text-red-500 relative z-10">REDFLAG MODERASYON</h1>
+        <h1 className="text-2xl font-black mb-8 tracking-widest text-red-500 relative z-10">MODERASYON</h1>
         <form onSubmit={handleLogin} className="w-full max-w-xs space-y-4 relative z-10">
           <input 
             type="password"
@@ -132,7 +129,7 @@ export default function PartyAdminPage() {
         
         <header className="flex items-center justify-between py-6 border-b border-white/10 mb-6">
           <h1 className="text-xl font-black tracking-widest text-red-500 flex items-center gap-2 drop-shadow-[0_0_8px_rgba(255,0,0,0.5)]">
-            <Flag size={24} fill="currentColor" /> REDFLAG KONTROL 
+            <Flag size={24} fill="currentColor" /> KONTROL 
           </h1>
           
           <div className="flex items-center gap-3">
@@ -176,14 +173,9 @@ export default function PartyAdminPage() {
         {loading ? (
           <div className="flex justify-center py-20"><Loader2 className="animate-spin text-red-500" size={40} /></div>
         ) : messages.length === 0 ? (
-          <div className="text-center text-gray-500 py-20 font-bold tracking-widest uppercase flex flex-col items-center gap-4">
-<<<<<<< HEAD
-            <Check size={48} className="text-green-500/50" />
-            Ekrana Verilecek Mesaj Yok
-=======
+          <div className="text-center text-gray-500 py-20 font-bold tracking-widest flex flex-col items-center gap-4">
             <Check size={48} className="text-green-500/30" />
             Ekrana Verilecek Soru Yok
->>>>>>> 0598091b2e8fc6b191ac4b0cdeb0905bedc460db
           </div>
         ) : (
           <div className="space-y-4">
