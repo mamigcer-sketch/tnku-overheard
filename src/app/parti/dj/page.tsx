@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Skull, Ghost, Zap, Radio, MessageCircle, Sparkles } from "lucide-react";
+import { Skull, Ghost, Zap, Radio, Sparkles } from "lucide-react";
 
 type PartyMessage = {
   id: string | number;
@@ -205,7 +205,7 @@ export default function DjScreen() {
 
       <div className={`absolute inset-0 z-[100] pointer-events-none transition-opacity duration-200 ${flash ? "opacity-100" : "opacity-0"}`} style={{ background: `radial-gradient(circle at center, white 0%, ${accent}99 15%, transparent 75%)` }} />
 
-      {/* 3, 2, 1 GERİ SAYIM INTROSU (KORUNDU) */}
+      {/* 3, 2, 1 GERİ SAYIM INTROSU */}
       {transitionStep && (
         <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-[#050309]/95 backdrop-blur-2xl">
           <div className="absolute h-[40vw] w-[40vw] rounded-full blur-[120px] opacity-30 animate-[transitionGlow_2s_ease-in-out_infinite]" style={{ background: accent }} />
@@ -228,7 +228,7 @@ export default function DjScreen() {
         </div>
       )}
 
-      {/* HEADER (HER ZAMAN DURUR) */}
+      {/* HEADER */}
       <header className="relative z-20 flex items-start justify-between">
         <div className="relative flex w-1/4 justify-start">
           <div className="relative flex items-center justify-center w-24 h-24 md:w-32 md:h-32 rounded-full bg-black/60 border border-white/15 backdrop-blur-xl p-2 md:p-3 shadow-[0_10px_30px_rgba(255,106,0,.2)] overflow-hidden">
@@ -251,8 +251,8 @@ export default function DjScreen() {
         </div>
       </header>
 
-      {/* MERKEZ ALAN (SADECE MESAJ GELDİĞİNDE GÖSTERİLİR, BEKLEME EKRANI KALDIRILDI) */}
-      <section className="relative z-10 flex max-h-[75vh] flex-1 flex-col items-center justify-center overflow-hidden px-2 text-center">
+      {/* MERKEZ ALAN */}
+      <section className="relative z-10 flex max-h-[82vh] flex-1 flex-col items-center justify-center overflow-hidden px-2 text-center">
         {message && (
           <div key={message.id} className={`flex h-full max-h-full w-full flex-col items-center justify-center transition-all duration-700 ${visible ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[.94] blur-md opacity-0"}`}>
             
@@ -263,7 +263,7 @@ export default function DjScreen() {
             </div>
 
             {isPhoto ? (
-              <div className="relative flex h-[62vh] max-h-[65vh] w-[94vw] max-w-[1250px] items-center justify-center rounded-3xl overflow-hidden border-2 border-white/20 p-2 bg-black/75 backdrop-blur-2xl shadow-[0_0_100px_rgba(255,106,0,0.45)] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]">
+              <div className="relative flex h-[68vh] max-h-[72vh] w-[96vw] max-w-[1350px] items-center justify-center rounded-3xl overflow-hidden border-2 border-white/20 p-2 bg-black/75 backdrop-blur-2xl shadow-[0_0_100px_rgba(255,106,0,0.45)] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]">
                 <img 
                   src={content} 
                   alt="Kostüm" 
@@ -271,7 +271,7 @@ export default function DjScreen() {
                 />
               </div>
             ) : (
-              <h1 className="relative flex max-h-[42vh] max-w-[94vw] items-center justify-center overflow-hidden break-words px-1 font-black uppercase leading-[.98] tracking-[-.04em] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]" style={{ fontSize: getContentFontSize(content), textShadow: `0 0 25px ${accent}50, 0 0 75px ${accent}40, 0 0 150px ${accent}30`, display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical" }}>{content}</h1>
+              <h1 className="relative flex max-h-[46vh] max-w-[94vw] items-center justify-center overflow-hidden break-words px-1 font-black uppercase leading-[.98] tracking-[-.04em] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]" style={{ fontSize: getContentFontSize(content), textShadow: `0 0 25px ${accent}50, 0 0 75px ${accent}40, 0 0 150px ${accent}30`, display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical" }}>{content}</h1>
             )}
 
             {!isPhoto && (
@@ -288,25 +288,8 @@ export default function DjScreen() {
         )}
       </section>
 
-      {/* FOOTER */}
-      <footer className="relative z-20 flex items-end justify-between gap-4">
-        <div className="flex flex-col items-start gap-3 md:items-end">
-          <a href="https://overheardparty.xyz/parti" target="_blank" rel="noopener noreferrer" aria-label="Partiye mesaj gönder" className="relative group block">
-            <div className="absolute -inset-3 rounded-2xl opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-30" style={{ background: accent }} />
-            <div className="relative flex items-center gap-3 rounded-2xl border border-white/15 bg-black/65 px-3 py-2.5 backdrop-blur-xl transition-all duration-500 group-hover:border-white/30 md:gap-5 md:px-6 md:py-4" style={{ boxShadow: "0 10px 40px rgba(0,0,0,.3)" }}>
-              <div className="absolute left-0 top-1/2 h-8 w-[2px] -translate-y-1/2 rounded-full md:h-10" style={{ background: `linear-gradient(to bottom,transparent,${accent},transparent)`, boxShadow: `0 0 14px ${accent}` }} />
-              <div className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-white/15 bg-white/5 md:h-10 md:w-10"><MessageCircle size={18} style={{ color: accent }} /></div>
-              <div className="flex min-w-0 flex-col gap-0.5 text-left md:gap-1">
-                <span className="text-[6px] font-bold tracking-[.35em] text-white/50 md:text-[8px]">MASADAN GÖNDER</span>
-                <div className="flex items-center gap-2"><span className="text-xs font-black tracking-[.04em] text-white md:text-lg">overheardparty.xyz/parti</span><span className="text-xs md:text-base" style={{ color: accent }}>↗</span></div>
-              </div>
-              <div className="ml-2 hidden h-7 w-7 items-center justify-center rounded-full border border-white/20 text-white/70 transition-all group-hover:border-white/50 md:flex">→</div>
-            </div>
-            <div className="ml-2 mt-1.5 flex items-center gap-2 opacity-65"><span className="h-1 w-1 rounded-full" style={{ background: accent }} /><span className="text-[6px] font-bold tracking-[.28em] text-white/55 md:text-[7px]">İTİRAF GÖNDER</span></div>
-          </a>
-        </div>
-        <div className="w-1/4"></div>
-      </footer>
+      {/* ALT KISIM TAMAMEN TEMİZLENDİ */}
+      <div className="h-2 w-full pointer-events-none" />
 
       <style dangerouslySetInnerHTML={{ __html: stylesCSS }} />
     </main>
