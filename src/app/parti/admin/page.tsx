@@ -59,7 +59,7 @@ export default function PartyAdminPage() {
     }
   };
 
-  // Galeriden fotoğraf seçildiğinde optimize edip Base64 formatına çevirir
+  // Fotoğrafı Vercel sınırlarına uygun şekilde küçültüp sıkıştıran fonksiyon
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -69,13 +69,30 @@ export default function PartyAdminPage() {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 1600;
-        const scale = Math.min(1, MAX_WIDTH / img.width);
-        canvas.width = img.width * scale;
-        canvas.height = img.height * scale;
+        const MAX_WIDTH = 1280;
+        const MAX_HEIGHT = 720;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height = Math.round((height * MAX_WIDTH) / width);
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width = Math.round((width * MAX_HEIGHT) / height);
+            height = MAX_HEIGHT;
+          }
+        }
+
+        canvas.width = width;
+        canvas.height = height;
         const ctx = canvas.getContext("2d");
-        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
-        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+        ctx?.drawImage(img, 0, 0, width, height);
+        
+        // JPEG kalitesini 0.72 yaparak boyutu 200 KB civarına düşürür
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.72);
         setSelectedImage(compressedBase64);
       };
       img.src = event.target?.result as string;
@@ -83,7 +100,6 @@ export default function PartyAdminPage() {
     reader.readAsDataURL(file);
   };
 
-  // Fotoğrafı sahneye direkt fırlatma
   const handleBroadcastImage = async () => {
     if (!selectedImage) return;
     setIsUploadingImg(true);
@@ -100,15 +116,16 @@ export default function PartyAdminPage() {
       });
 
       if (res.ok) {
-        alert("Fotoğraf sahneye yansıtıldı!");
+        alert("Fotoğraf başarıyla sahneye yansıtıldı!");
         setSelectedImage(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
       } else {
-        alert("Fotoğraf gönderilirken hata oluştu.");
+        const errorData = await res.json().catch(() => null);
+        alert("Hata: " + (errorData?.message || "Sunucu fotoğrafı kabul etmedi."));
       }
     } catch (err) {
       console.error(err);
-      alert("Bağlantı hatası!");
+      alert("Bağlantı hatası oluştu!");
     } finally {
       setIsUploadingImg(false);
     }
@@ -224,8 +241,8 @@ export default function PartyAdminPage() {
               className="w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/15 hover:border-[#ff6a00]/50 rounded-xl cursor-pointer bg-white/5 hover:bg-white/10 transition-all text-center"
             >
               <UploadCloud size={32} className="text-[#ff6a00] mb-2" />
-              <span className="text-sm font-bold text-gray-200">Galeriden Yatay Fotoğraf Seç</span>
-              <span className="text-[11px] text-gray-500 mt-1">PNG, JPG veya WEBP</span>
+              <span className="text-sm font-bold text-gray-200">Galeriden Fotoğraf Seç</span>
+              <span className="text-[11px] text-gray-500 mt-1">Otomatik optimize edilerek ekrana gönderilir</span>
             </label>
           ) : (
             <div className="space-y-3">
