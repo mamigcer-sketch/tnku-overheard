@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getPendingMessages, approveMessage, rejectMessage, clearActiveMessage, updateMessage } from './actions';
-import { Check, X, ShieldAlert, Loader2, Skull, Ghost, Zap, RefreshCw, MonitorX, Edit3, Save, Trash2 } from 'lucide-react';
+import { Check, X, ShieldAlert, Loader2, Skull, Ghost, Zap, RefreshCw, MonitorX, Edit3, Save, Trash2, ImagePlus, UploadCloud } from 'lucide-react';
 
 export default function PartyAdminPage() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -14,6 +14,11 @@ export default function PartyAdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState("");
   const [editLocation, setEditLocation] = useState("");
+
+  // Fotoğraf Yükleme State'leri
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isUploadingImg, setIsUploadingImg] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fetchMessages = async () => {
     try {
@@ -34,7 +39,7 @@ export default function PartyAdminPage() {
   };
 
   const handleClearScreen = async () => {
-    if (confirm("Ekrandaki mesajı kaldırıp bekleme ekranına dönmek istediğine emin misin?")) {
+    if (confirm("Ekrandaki içeriği kaldırıp bekleme ekranına dönmek istediğine emin misin?")) {
       try {
         await clearActiveMessage();
         alert("Ekran temizlendi! Sahnede bekleme ekranı dönüyor.");
@@ -54,6 +59,61 @@ export default function PartyAdminPage() {
     }
   };
 
+  // Galeriden fotoğraf seçildiğinde optimize edip Base64 formatına çevirir
+  const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 1600;
+        const scale = Math.min(1, MAX_WIDTH / img.width);
+        canvas.width = img.width * scale;
+        canvas.height = img.height * scale;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, canvas.width, canvas.height);
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.85);
+        setSelectedImage(compressedBase64);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Fotoğrafı sahneye direkt fırlatma
+  const handleBroadcastImage = async () => {
+    if (!selectedImage) return;
+    setIsUploadingImg(true);
+
+    try {
+      const res = await fetch("/api/parti", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          content: selectedImage,
+          location: "PARTY_PHOTO",
+          approved: true,
+        }),
+      });
+
+      if (res.ok) {
+        alert("Fotoğraf sahneye yansıtıldı!");
+        setSelectedImage(null);
+        if (fileInputRef.current) fileInputRef.current.value = "";
+      } else {
+        alert("Fotoğraf gönderilirken hata oluştu.");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Bağlantı hatası!");
+    } finally {
+      setIsUploadingImg(false);
+    }
+  };
+
   useEffect(() => {
     const auth = sessionStorage.getItem('tnku_admin_auth');
     if (auth === 'true') {
@@ -66,7 +126,7 @@ export default function PartyAdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode === "offdayadmin") {
+    if (passcode === "admin2026") {
       setIsAuthenticated(true);
       sessionStorage.setItem('tnku_admin_auth', 'true');
       fetchMessages();
@@ -142,6 +202,54 @@ export default function PartyAdminPage() {
           </div>
         </header>
 
+        {/* FOTOĞRAF YÜKLEME KUTUSU */}
+        <div className="mb-6 bg-black/60 border border-[#ff6a00]/30 p-4 rounded-2xl backdrop-blur-xl">
+          <div className="flex items-center gap-2 mb-3 text-sm font-black tracking-widest text-[#ffaa77]">
+            <ImagePlus size={18} className="text-[#ff6a00]" />
+            SAHNEYE YATAY FOTOĞRAF YANSIT
+          </div>
+
+          <input 
+            type="file" 
+            accept="image/*" 
+            ref={fileInputRef} 
+            onChange={handleImageSelect} 
+            className="hidden" 
+            id="admin-photo-input"
+          />
+
+          {!selectedImage ? (
+            <label 
+              htmlFor="admin-photo-input"
+              className="w-full flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/15 hover:border-[#ff6a00]/50 rounded-xl cursor-pointer bg-white/5 hover:bg-white/10 transition-all text-center"
+            >
+              <UploadCloud size={32} className="text-[#ff6a00] mb-2" />
+              <span className="text-sm font-bold text-gray-200">Galeriden Yatay Fotoğraf Seç</span>
+              <span className="text-[11px] text-gray-500 mt-1">PNG, JPG veya WEBP</span>
+            </label>
+          ) : (
+            <div className="space-y-3">
+              <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-white/20 bg-black">
+                <img src={selectedImage} alt="Önizleme" className="w-full h-full object-contain" />
+                <button 
+                  onClick={() => { setSelectedImage(null); if (fileInputRef.current) fileInputRef.current.value = ""; }}
+                  className="absolute top-2 right-2 p-1.5 rounded-full bg-black/80 text-white hover:bg-red-600 transition-colors"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+
+              <button 
+                onClick={handleBroadcastImage}
+                disabled={isUploadingImg}
+                className="w-full flex items-center justify-center gap-2 bg-[#ff6a00] hover:bg-[#ff8a33] text-black font-black py-3 rounded-xl transition-all shadow-[0_0_20px_rgba(255,106,0,0.3)] disabled:opacity-50"
+              >
+                {isUploadingImg ? <Loader2 size={18} className="animate-spin" /> : <><UploadCloud size={18} /> FOTOĞRAFI SAHNEYE YANSIT</>}
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="grid grid-cols-1 gap-3 mb-8">
           <button 
             onClick={handleClearScreen}
@@ -173,7 +281,6 @@ export default function PartyAdminPage() {
         ) : (
           <div className="space-y-4">
             {messages.map((msg) => {
-              
               let Icon = Skull;
               let label = "İTİRAF";
               let color = "text-[#ff6a00]";
@@ -197,7 +304,6 @@ export default function PartyAdminPage() {
 
               return (
                 <div key={msg.id} className="bg-[#0a060d] border border-white/10 p-5 rounded-2xl shadow-lg relative overflow-hidden transition-all">
-                  
                   <div className="flex items-center justify-between mb-4">
                     <div className={`flex items-center gap-2 text-xs font-black tracking-widest ${color} ${bg} px-3 py-1.5 rounded-md border`}>
                       <Icon size={14} /> {label}
@@ -222,7 +328,6 @@ export default function PartyAdminPage() {
                         maxLength={150}
                       />
                       
-                      {/* 🎃 Kategori Değiştirme (HALLOWEEN) */}
                       <div className="flex gap-2">
                         <button 
                           type="button"

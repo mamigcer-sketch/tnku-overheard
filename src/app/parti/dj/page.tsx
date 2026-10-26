@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Skull, Ghost, Zap, Radio, MessageCircle } from "lucide-react";
+import { Skull, Ghost, Zap, Radio, MessageCircle, Camera } from "lucide-react";
 
 type PartyMessage = {
   id: string | number;
@@ -64,10 +64,14 @@ export default function DjScreen() {
       setMessage(newMsg);
 
       let transitionTitle = "YENİ İTİRAF";
-      if (["PARTY_LİNÇ", "PARTY_LINC", "PARTY_REZIL"].includes(newMsg.location ?? "")) {
+      if (newMsg.location === "PARTY_PHOTO") {
+        transitionTitle = "GÜNÜN KARESİ 📸";
+      } else if (["PARTY_LİNÇ", "PARTY_LINC", "PARTY_REZIL"].includes(newMsg.location ?? "")) {
         transitionTitle = "YENİ LİNÇ@";
+      } else if (newMsg.location === "PARTY_OVERHEARD") {
+        transitionTitle = "YENİ DUYDUM";
       }
-      if (newMsg.location === "PARTY_OVERHEARD") transitionTitle = "YENİ DUYDUM";
+
       setTransitionStep(transitionTitle);
       await delay(1500);
       if (!mounted) return;
@@ -135,11 +139,17 @@ export default function DjScreen() {
   }, []);
 
   const location = message?.location ?? "";
+  const isPhoto = location === "PARTY_PHOTO" || message?.content?.startsWith("data:image");
+
   let accent = "#ff6a00";
   let title = "İTİRAF";
-  let Icon = Skull;
+  let Icon: any = Skull;
 
-  if (location.includes("LINC") || location.includes("LİNÇ") || location.includes("REZIL")) {
+  if (isPhoto) {
+    accent = "#ffaa00";
+    title = "CANLI YAYIN";
+    Icon = Camera;
+  } else if (location.includes("LINC") || location.includes("LİNÇ") || location.includes("REZIL")) {
     accent = "#a36bff";
     title = "LİNÇ@";
     Icon = Ghost;
@@ -219,7 +229,6 @@ export default function DjScreen() {
 
       {message && (
         <header className="relative z-20 flex items-start justify-between animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
-          {/* SOL ÜST BÜYÜK 5555 LOGOSU */}
           <div className="relative flex w-1/4 justify-start">
             <div className="relative flex items-center justify-center w-24 h-24 md:w-32 md:h-32 rounded-full bg-black/60 border border-white/15 backdrop-blur-xl p-2 md:p-3 shadow-[0_10px_30px_rgba(255,106,0,.2)] overflow-hidden">
               <img src="/5555.png" alt="5555" className="relative z-10 h-full w-full object-contain" style={{ filter: `drop-shadow(0 0 10px ${accent}80)` }} />
@@ -242,16 +251,32 @@ export default function DjScreen() {
         </header>
       )}
 
-      <section className="relative z-10 flex max-h-[58vh] flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center">
+      {/* MERKEZ ALAN (METİN VEYA YATAY FOTOĞRAF) */}
+      <section className="relative z-10 flex max-h-[64vh] flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center">
         {message ? (
           <div key={message.id} className={`flex max-h-full w-full flex-col items-center justify-center transition-all duration-700 ${visible ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[.94] blur-md opacity-0"}`}>
-            <div className="relative mb-5 flex flex-shrink-0 items-center gap-3 overflow-hidden rounded-full border px-6 py-2 backdrop-blur-2xl md:mb-8 md:px-8 md:py-3.5" style={{ borderColor: `${accent}90`, color: accent, background: `${accent}15`, boxShadow: `0 0 45px ${accent}30, inset 0 0 35px ${accent}15` }}>
+            
+            <div className="relative mb-4 flex flex-shrink-0 items-center gap-3 overflow-hidden rounded-full border px-6 py-2 backdrop-blur-2xl md:mb-6 md:px-8 md:py-3" style={{ borderColor: `${accent}90`, color: accent, background: `${accent}15`, boxShadow: `0 0 45px ${accent}30, inset 0 0 35px ${accent}15` }}>
               <div className="absolute inset-y-0 left-[-80%] w-[45%] skew-x-[-20deg] animate-[badgeSweep_4s_ease-in-out_infinite]" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)" }} />
               <Icon size={20} className="relative md:scale-125" />
-              <span className="relative pl-[.32em] text-base font-black tracking-[.32em] md:text-3xl">{title}</span>
+              <span className="relative pl-[.32em] text-base font-black tracking-[.32em] md:text-2xl">{title}</span>
             </div>
-            <h1 className="relative flex max-h-[42vh] max-w-[94vw] items-center justify-center overflow-hidden break-words px-1 font-black uppercase leading-[.98] tracking-[-.04em] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]" style={{ fontSize: getContentFontSize(content), textShadow: `0 0 25px ${accent}50, 0 0 75px ${accent}40, 0 0 150px ${accent}30`, display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical" }}>{content}</h1>
-            <div className="relative mt-6 h-[2px] w-36 flex-shrink-0 overflow-hidden rounded-full md:mt-10 md:w-64" style={{ background: `${accent}40`, boxShadow: `0 0 35px ${accent}50` }}>
+
+            {isPhoto ? (
+              /* 📸 YATAY FOTOĞRAF SAHNE ÇERÇEVESİ */
+              <div className="relative max-h-[48vh] w-auto max-w-[90vw] aspect-video rounded-3xl overflow-hidden border-2 border-white/20 p-2 bg-black/60 backdrop-blur-xl shadow-[0_0_80px_rgba(255,106,0,0.35)] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]">
+                <img 
+                  src={content} 
+                  alt="Sahne Fotoğrafı" 
+                  className="w-full h-full object-contain rounded-2xl" 
+                />
+              </div>
+            ) : (
+              /* NORMAL METİN */
+              <h1 className="relative flex max-h-[42vh] max-w-[94vw] items-center justify-center overflow-hidden break-words px-1 font-black uppercase leading-[.98] tracking-[-.04em] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]" style={{ fontSize: getContentFontSize(content), textShadow: `0 0 25px ${accent}50, 0 0 75px ${accent}40, 0 0 150px ${accent}30`, display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical" }}>{content}</h1>
+            )}
+
+            <div className="relative mt-5 h-[2px] w-36 flex-shrink-0 overflow-hidden rounded-full md:mt-8 md:w-64" style={{ background: `${accent}40`, boxShadow: `0 0 35px ${accent}50` }}>
               <div className="absolute inset-y-0 left-[-50%] w-1/2 animate-[energyPremium_2.8s_ease-in-out_infinite]" style={{ background: `linear-gradient(90deg,transparent,${accent},white,${accent},transparent)`, boxShadow: `0 0 30px ${accent}` }} />
             </div>
             <div className="mt-4 flex flex-shrink-0 items-center gap-1.5 opacity-60">
@@ -298,8 +323,6 @@ export default function DjScreen() {
               <div className="ml-2 mt-1.5 flex items-center gap-2 opacity-65"><span className="h-1 w-1 rounded-full" style={{ background: accent }} /><span className="text-[6px] font-bold tracking-[.28em] text-white/55 md:text-[7px]">İTİRAF GÖNDER</span></div>
             </a>
           </div>
-          
-          {/* SAĞ ALT D6 LOGOSU KALDIRILDI, SADECE BOŞLUK BIRAKILDI */}
           <div className="w-1/4"></div>
         </footer>
       )}
