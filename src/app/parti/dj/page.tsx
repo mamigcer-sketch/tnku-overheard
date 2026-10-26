@@ -47,8 +47,10 @@ export default function DjScreen() {
   const [flash, setFlash] = useState(false);
   const [live, setLive] = useState(true);
   const [transitionStep, setTransitionStep] = useState<string | null>(null);
+  
   const isTransitioning = useRef(false);
-  const lastMsgId = useRef<string | number | null>(null);
+  const currentMsgId = useRef<string | number | null>(null);
+  const shownMessageIds = useRef<Set<string | number>>(new Set());
 
   useEffect(() => {
     let mounted = true;
@@ -98,23 +100,31 @@ export default function DjScreen() {
         const data = await res.json();
         if (!mounted) return;
 
-        // Admin ekranı temizle dediyse temizle
+        // Admin ekranı temizle dediyse ekranı boşalt
         if (data?.cleared) {
           setVisible(false);
           setTimeout(() => {
             if (mounted) {
               setMessage(null);
-              lastMsgId.current = null;
+              currentMsgId.current = null;
             }
           }, 400);
           return;
         }
 
-        // Yeni geçerli bir mesaj/fotoğraf varsa ekrana al
-        if (data?.message && data.message.id && lastMsgId.current !== data.message.id) {
-          lastMsgId.current = data.message.id;
-          void runTransition(data.message);
+        const incoming = data?.message;
+        if (!incoming || !incoming.id) return;
+
+        // EĞER BU MESAJ DAHA ÖNCE GÖSTERİLDİYSE VEYA ŞU AN EKRANDAYSA TEKRAR OYNATMA
+        if (currentMsgId.current === incoming.id || shownMessageIds.current.has(incoming.id)) {
+          return;
         }
+
+        // Yeni mesajı listeye al ve bir kez oynat
+        currentMsgId.current = incoming.id;
+        shownMessageIds.current.add(incoming.id);
+        void runTransition(incoming);
+
       } catch (error) {
         console.error("Mesaj çekilemedi", error);
       }
@@ -166,7 +176,6 @@ export default function DjScreen() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_42%,rgba(104,42,19,.32),transparent_44%),radial-gradient(ellipse_at_82%_40%,rgba(45,25,77,.42),transparent_48%),linear-gradient(115deg,#100907,#08060b_52%,#0a0711)]" />
       <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 45%, ${accent}18, transparent 62%)` }} />
 
-      {/* Cadılar Bayramı Arka Planı */}
       <div className="halloween-moon"><div className="halloween-moon-halo" /><div className="halloween-moon-core" /></div>
       <svg className="halloween-castle" viewBox="0 0 1600 420" preserveAspectRatio="none" aria-hidden="true">
         <path d="M0 420V300H90V240H125V185H160V270H205V220H245V285H330V175H360V125H390V175H425V300H510V255H560V190H590V255H650V330H770V275H820V210H850V165H880V210H915V300H1010V230H1055V175H1085V230H1120V315H1210V260H1255V205H1285V260H1330V320H1430V220H1470V165H1500V220H1535V290H1600V420Z" fill="#030206" />
@@ -197,7 +206,6 @@ export default function DjScreen() {
 
       <div className={`absolute inset-0 z-[100] pointer-events-none transition-opacity duration-200 ${flash ? "opacity-100" : "opacity-0"}`} style={{ background: `radial-gradient(circle at center, white 0%, ${accent}99 15%, transparent 75%)` }} />
 
-      {/* 3, 2, 1 GERİ SAYIM INTROSU */}
       {transitionStep && (
         <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-[#050309]/95 backdrop-blur-2xl">
           <div className="absolute h-[40vw] w-[40vw] rounded-full blur-[120px] opacity-30 animate-[transitionGlow_2s_ease-in-out_infinite]" style={{ background: accent }} />
@@ -280,7 +288,6 @@ export default function DjScreen() {
         )}
       </section>
 
-      {/* Sol alttaki link kutusu tamamen temizlendi */}
       <div className="h-2 w-full pointer-events-none" />
 
       <style dangerouslySetInnerHTML={{ __html: stylesCSS }} />
