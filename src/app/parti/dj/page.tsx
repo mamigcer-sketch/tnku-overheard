@@ -73,7 +73,7 @@ export default function DjScreen() {
       }
 
       setTransitionStep(transitionTitle);
-      await delay(1500);
+      await delay(1300);
       if (!mounted) return;
       for (const number of ["3", "2", "1"]) {
         setTransitionStep(number);
@@ -174,6 +174,7 @@ export default function DjScreen() {
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_42%,rgba(104,42,19,.32),transparent_44%),radial-gradient(ellipse_at_82%_40%,rgba(45,25,77,.42),transparent_48%),linear-gradient(115deg,#100907,#08060b_52%,#0a0711)]" />
       <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 45%, ${accent}18, transparent 62%)` }} />
 
+      {/* Cadılar Bayramı Arka Planı (Şato, Ay, Kargalar, Sis) */}
       <div className="halloween-moon"><div className="halloween-moon-halo" /><div className="halloween-moon-core" /></div>
       <svg className="halloween-castle" viewBox="0 0 1600 420" preserveAspectRatio="none" aria-hidden="true">
         <path d="M0 420V300H90V240H125V185H160V270H205V220H245V285H330V175H360V125H390V175H425V300H510V255H560V190H590V255H650V330H770V275H820V210H850V165H880V210H915V300H1010V230H1055V175H1085V230H1120V315H1210V260H1255V205H1285V260H1330V320H1430V220H1470V165H1500V220H1535V290H1600V420Z" fill="#030206" />
@@ -204,6 +205,7 @@ export default function DjScreen() {
 
       <div className={`absolute inset-0 z-[100] pointer-events-none transition-opacity duration-200 ${flash ? "opacity-100" : "opacity-0"}`} style={{ background: `radial-gradient(circle at center, white 0%, ${accent}99 15%, transparent 75%)` }} />
 
+      {/* 3, 2, 1 GERİ SAYIM INTROSU (KORUNDU) */}
       {transitionStep && (
         <div className="absolute inset-0 z-[90] flex items-center justify-center overflow-hidden bg-[#050309]/95 backdrop-blur-2xl">
           <div className="absolute h-[40vw] w-[40vw] rounded-full blur-[120px] opacity-30 animate-[transitionGlow_2s_ease-in-out_infinite]" style={{ background: accent }} />
@@ -226,33 +228,32 @@ export default function DjScreen() {
         </div>
       )}
 
-      {message && (
-        <header className="relative z-20 flex items-start justify-between animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
-          <div className="relative flex w-1/4 justify-start">
-            <div className="relative flex items-center justify-center w-24 h-24 md:w-32 md:h-32 rounded-full bg-black/60 border border-white/15 backdrop-blur-xl p-2 md:p-3 shadow-[0_10px_30px_rgba(255,106,0,.2)] overflow-hidden">
-              <img src="/5555.png" alt="5555" className="relative z-10 h-full w-full object-contain" style={{ filter: `drop-shadow(0 0 10px ${accent}80)` }} />
-            </div>
+      {/* HEADER (HER ZAMAN DURUR) */}
+      <header className="relative z-20 flex items-start justify-between">
+        <div className="relative flex w-1/4 justify-start">
+          <div className="relative flex items-center justify-center w-24 h-24 md:w-32 md:h-32 rounded-full bg-black/60 border border-white/15 backdrop-blur-xl p-2 md:p-3 shadow-[0_10px_30px_rgba(255,106,0,.2)] overflow-hidden">
+            <img src="/5555.png" alt="5555" className="relative z-10 h-full w-full object-contain" style={{ filter: `drop-shadow(0 0 10px ${accent}80)` }} />
           </div>
-          
-          <div className="absolute left-1/2 top-0 z-30 flex -translate-x-1/2 flex-col items-center md:top-1">
-            <div className="flex h-14 w-48 items-center justify-center md:h-20 md:w-68">
-              <img src="/scap.png" alt="SCAP" className="h-full w-full object-contain animate-[logoFloat_7s_ease-in-out_infinite]" style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent})` }} onError={(e) => { e.currentTarget.style.display = "none"; }} />
-            </div>
+        </div>
+        
+        <div className="absolute left-1/2 top-0 z-30 flex -translate-x-1/2 flex-col items-center md:top-1">
+          <div className="flex h-14 w-48 items-center justify-center md:h-20 md:w-68">
+            <img src="/scap.png" alt="SCAP" className="h-full w-full object-contain animate-[logoFloat_7s_ease-in-out_infinite]" style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 20px ${accent})` }} onError={(e) => { e.currentTarget.style.display = "none"; }} />
           </div>
-          <div className="relative flex w-1/4 justify-end">
-            <div className="absolute inset-0 rounded-full bg-[#ff6a00] opacity-25 blur-xl" />
-            <div className="relative flex items-center gap-3 rounded-full border border-white/15 bg-black/70 px-4 py-2.5 backdrop-blur-xl md:px-5 md:py-3">
-              <span className={`h-2 w-2 rounded-full transition-all ${live ? "scale-100 opacity-100" : "scale-75 opacity-30"}`} style={{ background: "#ff6a00", boxShadow: "0 0 15px #ff6a00" }} />
-              <Radio size={15} className="text-[#ff8a3d]" />
-              <span className="text-[9px] font-black tracking-[.22em] text-white/85 md:text-xs">HALLOWEEN YAYINI</span>
-            </div>
+        </div>
+        <div className="relative flex w-1/4 justify-end">
+          <div className="absolute inset-0 rounded-full bg-[#ff6a00] opacity-25 blur-xl" />
+          <div className="relative flex items-center gap-3 rounded-full border border-white/15 bg-black/70 px-4 py-2.5 backdrop-blur-xl md:px-5 md:py-3">
+            <span className={`h-2 w-2 rounded-full transition-all ${live ? "scale-100 opacity-100" : "scale-75 opacity-30"}`} style={{ background: "#ff6a00", boxShadow: "0 0 15px #ff6a00" }} />
+            <Radio size={15} className="text-[#ff8a3d]" />
+            <span className="text-[9px] font-black tracking-[.22em] text-white/85 md:text-xs">HALLOWEEN YAYINI</span>
           </div>
-        </header>
-      )}
+        </div>
+      </header>
 
-      {/* MERKEZ ALAN */}
+      {/* MERKEZ ALAN (SADECE MESAJ GELDİĞİNDE GÖSTERİLİR, BEKLEME EKRANI KALDIRILDI) */}
       <section className="relative z-10 flex max-h-[75vh] flex-1 flex-col items-center justify-center overflow-hidden px-2 text-center">
-        {message ? (
+        {message && (
           <div key={message.id} className={`flex h-full max-h-full w-full flex-col items-center justify-center transition-all duration-700 ${visible ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[.94] blur-md opacity-0"}`}>
             
             <div className="relative mb-2 flex flex-shrink-0 items-center gap-3 overflow-hidden rounded-full border px-6 py-1.5 backdrop-blur-2xl md:mb-3 md:px-8 md:py-2" style={{ borderColor: `${accent}90`, color: accent, background: `${accent}15`, boxShadow: `0 0 45px ${accent}30, inset 0 0 35px ${accent}15` }}>
@@ -262,7 +263,6 @@ export default function DjScreen() {
             </div>
 
             {isPhoto ? (
-              /* DAHA BÜYÜK FOTOĞRAF ALANI */
               <div className="relative flex h-[62vh] max-h-[65vh] w-[94vw] max-w-[1250px] items-center justify-center rounded-3xl overflow-hidden border-2 border-white/20 p-2 bg-black/75 backdrop-blur-2xl shadow-[0_0_100px_rgba(255,106,0,0.45)] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]">
                 <img 
                   src={content} 
@@ -285,49 +285,28 @@ export default function DjScreen() {
               </>
             )}
           </div>
-        ) : (
-          <div className="absolute inset-0 z-50 flex h-full w-full flex-col items-center justify-center p-6 animate-[idleEntrance_2s_cubic-bezier(.16,1,.3,1)_both]">
-            <div className="absolute left-1/2 top-1/2 aspect-square w-[70vw] max-w-[800px] -translate-x-1/2 -translate-y-1/2 rounded-full blur-[140px] animate-[cinematicBreathe_8s_ease-in-out_infinite]" style={{ background: accent, opacity: .2 }} />
-            <div className="relative flex w-[85vw] max-w-[900px] flex-shrink-0 flex-col items-center md:w-[65vw]">
-              <div className="flex h-16 w-56 items-center justify-center md:h-24 md:w-80">
-                <img src="/scap.png" alt="SCAP" className="h-full w-full object-contain" style={{ filter: `brightness(0) invert(1) drop-shadow(0 0 35px ${accent}90)` }} onError={(e) => { e.currentTarget.style.display = "none"; }} />
-              </div>
-            </div>
-            <a href="https://overheardparty.xyz/parti" target="_blank" rel="noopener noreferrer" className="relative group mt-12 flex-shrink-0 animate-[badgePremium_1.5s_cubic-bezier(.16,1,.3,1)_both] md:mt-20">
-              <div className="absolute -inset-1 rounded-full opacity-30 blur-xl transition-opacity duration-700 group-hover:opacity-50" style={{ background: accent }} />
-              <div className="relative flex items-center rounded-full border border-white/15 bg-black/65 p-2 shadow-[0_30px_60px_rgba(0,0,0,.4)] backdrop-blur-3xl md:p-3">
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border border-[#ff6a00]/30 bg-[#ff6a00]/10 md:h-20 md:w-20"><Skull size={28} style={{ color: accent, filter: `drop-shadow(0 0 12px ${accent})` }} /></div>
-                <div className="mx-4 h-10 w-px bg-white/15 md:mx-6 md:h-12" />
-                <div className="flex flex-col justify-center pr-4 text-left md:pr-10">
-                  <span className="mb-1 text-[8px] font-black uppercase tracking-[.35em] text-white/55 md:text-[11px]">HALLOWEEN YAYINI</span>
-                  <span className="mt-1 text-sm font-black tracking-wide text-white md:text-3xl">overheardparty.xyz/parti</span>
-                </div>
-              </div>
-            </a>
-          </div>
         )}
       </section>
 
-      {message && (
-        <footer className="relative z-20 flex items-end justify-between gap-4 animate-[messageReveal_1s_cubic-bezier(.16,1,.3,1)]">
-          <div className="flex flex-col items-start gap-3 md:items-end">
-            <a href="https://overheardparty.xyz/parti" target="_blank" rel="noopener noreferrer" aria-label="Partiye mesaj gönder" className="relative group block">
-              <div className="absolute -inset-3 rounded-2xl opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-30" style={{ background: accent }} />
-              <div className="relative flex items-center gap-3 rounded-2xl border border-white/15 bg-black/65 px-3 py-2.5 backdrop-blur-xl transition-all duration-500 group-hover:border-white/30 md:gap-5 md:px-6 md:py-4" style={{ boxShadow: "0 10px 40px rgba(0,0,0,.3)" }}>
-                <div className="absolute left-0 top-1/2 h-8 w-[2px] -translate-y-1/2 rounded-full md:h-10" style={{ background: `linear-gradient(to bottom,transparent,${accent},transparent)`, boxShadow: `0 0 14px ${accent}` }} />
-                <div className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-white/15 bg-white/5 md:h-10 md:w-10"><MessageCircle size={18} style={{ color: accent }} /></div>
-                <div className="flex min-w-0 flex-col gap-0.5 text-left md:gap-1">
-                  <span className="text-[6px] font-bold tracking-[.35em] text-white/50 md:text-[8px]">MASADAN GÖNDER</span>
-                  <div className="flex items-center gap-2"><span className="text-xs font-black tracking-[.04em] text-white md:text-lg">overheardparty.xyz/parti</span><span className="text-xs md:text-base" style={{ color: accent }}>↗</span></div>
-                </div>
-                <div className="ml-2 hidden h-7 w-7 items-center justify-center rounded-full border border-white/20 text-white/70 transition-all group-hover:border-white/50 md:flex">→</div>
+      {/* FOOTER */}
+      <footer className="relative z-20 flex items-end justify-between gap-4">
+        <div className="flex flex-col items-start gap-3 md:items-end">
+          <a href="https://overheardparty.xyz/parti" target="_blank" rel="noopener noreferrer" aria-label="Partiye mesaj gönder" className="relative group block">
+            <div className="absolute -inset-3 rounded-2xl opacity-0 blur-2xl transition-opacity duration-500 group-hover:opacity-30" style={{ background: accent }} />
+            <div className="relative flex items-center gap-3 rounded-2xl border border-white/15 bg-black/65 px-3 py-2.5 backdrop-blur-xl transition-all duration-500 group-hover:border-white/30 md:gap-5 md:px-6 md:py-4" style={{ boxShadow: "0 10px 40px rgba(0,0,0,.3)" }}>
+              <div className="absolute left-0 top-1/2 h-8 w-[2px] -translate-y-1/2 rounded-full md:h-10" style={{ background: `linear-gradient(to bottom,transparent,${accent},transparent)`, boxShadow: `0 0 14px ${accent}` }} />
+              <div className="relative flex h-8 w-8 items-center justify-center rounded-xl border border-white/15 bg-white/5 md:h-10 md:w-10"><MessageCircle size={18} style={{ color: accent }} /></div>
+              <div className="flex min-w-0 flex-col gap-0.5 text-left md:gap-1">
+                <span className="text-[6px] font-bold tracking-[.35em] text-white/50 md:text-[8px]">MASADAN GÖNDER</span>
+                <div className="flex items-center gap-2"><span className="text-xs font-black tracking-[.04em] text-white md:text-lg">overheardparty.xyz/parti</span><span className="text-xs md:text-base" style={{ color: accent }}>↗</span></div>
               </div>
-              <div className="ml-2 mt-1.5 flex items-center gap-2 opacity-65"><span className="h-1 w-1 rounded-full" style={{ background: accent }} /><span className="text-[6px] font-bold tracking-[.28em] text-white/55 md:text-[7px]">İTİRAF GÖNDER</span></div>
-            </a>
-          </div>
-          <div className="w-1/4"></div>
-        </footer>
-      )}
+              <div className="ml-2 hidden h-7 w-7 items-center justify-center rounded-full border border-white/20 text-white/70 transition-all group-hover:border-white/50 md:flex">→</div>
+            </div>
+            <div className="ml-2 mt-1.5 flex items-center gap-2 opacity-65"><span className="h-1 w-1 rounded-full" style={{ background: accent }} /><span className="text-[6px] font-bold tracking-[.28em] text-white/55 md:text-[7px]">İTİRAF GÖNDER</span></div>
+          </a>
+        </div>
+        <div className="w-1/4"></div>
+      </footer>
 
       <style dangerouslySetInnerHTML={{ __html: stylesCSS }} />
     </main>
@@ -374,8 +353,6 @@ const stylesCSS = `
   @keyframes cinematicLine { 0%{width:0;opacity:0} 15%{width:250px;opacity:1} 85%{width:250px;opacity:1} 100%{width:350px;opacity:0} }
   @keyframes transitionGlow { 0%,100%{transform:scale(.75);opacity:.1} 50%{transform:scale(1.15);opacity:.35} }
   @keyframes countdownOrbit { to{transform:rotate(360deg)} }
-  @keyframes idleEntrance { 0%{opacity:0;transform:scale(.9);filter:blur(20px)} 100%{opacity:1;transform:scale(1);filter:blur(0)} }
-  @keyframes cinematicBreathe { 0%,100%{opacity:.15;transform:translate(-50%,-50%) scale(.9)} 50%{opacity:.35;transform:translate(-50%,-50%) scale(1.1)} }
   @keyframes logoFloat { 0%,100%{transform:translateY(0) scale(1)} 50%{transform:translateY(-3px) scale(1.012)} }
   @keyframes particleFloat { 0%,100%{transform:translate3d(0,0,0);opacity:0} 20%{opacity:.45} 50%{transform:translate3d(12px,-35px,0);opacity:.8} 80%{opacity:.35} }
   @keyframes grain { 0%{transform:translate(0,0)} 25%{transform:translate(2%,-1%)} 50%{transform:translate(-1%,2%)} 75%{transform:translate(-2%,-1%)} 100%{transform:translate(0,0)} }
