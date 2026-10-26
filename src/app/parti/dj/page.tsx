@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Skull, Ghost, Zap, Radio, MessageCircle, Camera } from "lucide-react";
+import { Skull, Ghost, Zap, Radio, MessageCircle, Sparkles } from "lucide-react";
 
 type PartyMessage = {
   id: string | number;
@@ -64,8 +64,8 @@ export default function DjScreen() {
       setMessage(newMsg);
 
       let transitionTitle = "YENİ İTİRAF";
-      if (newMsg.location === "PARTY_PHOTO") {
-        transitionTitle = "GÜNÜN KARESİ 📸";
+      if (newMsg.location === "PARTY_PHOTO" || newMsg.content?.startsWith("data:image")) {
+        transitionTitle = "KOSTÜMÜ PUANLA!";
       } else if (["PARTY_LİNÇ", "PARTY_LINC", "PARTY_REZIL"].includes(newMsg.location ?? "")) {
         transitionTitle = "YENİ LİNÇ@";
       } else if (newMsg.location === "PARTY_OVERHEARD") {
@@ -147,8 +147,8 @@ export default function DjScreen() {
 
   if (isPhoto) {
     accent = "#ffaa00";
-    title = "CANLI YAYIN";
-    Icon = Camera;
+    title = "KOSTÜMÜ PUANLA!";
+    Icon = Sparkles;
   } else if (location.includes("LINC") || location.includes("LİNÇ") || location.includes("REZIL")) {
     accent = "#a36bff";
     title = "LİNÇ@";
@@ -170,11 +170,10 @@ export default function DjScreen() {
   };
 
   return (
-    <main className="dj-screen relative flex min-h-screen max-h-screen flex-col justify-between overflow-hidden bg-[#08060b] p-4 text-white md:p-10 select-none" style={{ "--accent": accent } as React.CSSProperties}>
+    <main className="dj-screen relative flex min-h-screen max-h-screen flex-col justify-between overflow-hidden bg-[#08060b] p-3 text-white md:p-8 select-none" style={{ "--accent": accent } as React.CSSProperties}>
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_18%_42%,rgba(104,42,19,.32),transparent_44%),radial-gradient(ellipse_at_82%_40%,rgba(45,25,77,.42),transparent_48%),linear-gradient(115deg,#100907,#08060b_52%,#0a0711)]" />
       <div className="absolute inset-0 z-[1] pointer-events-none" style={{ background: `radial-gradient(ellipse at 50% 45%, ${accent}18, transparent 62%)` }} />
 
-      {/* Moon and haunted silhouettes */}
       <div className="halloween-moon"><div className="halloween-moon-halo" /><div className="halloween-moon-core" /></div>
       <svg className="halloween-castle" viewBox="0 0 1600 420" preserveAspectRatio="none" aria-hidden="true">
         <path d="M0 420V300H90V240H125V185H160V270H205V220H245V285H330V175H360V125H390V175H425V300H510V255H560V190H590V255H650V330H770V275H820V210H850V165H880V210H915V300H1010V230H1055V175H1085V230H1120V315H1210V260H1255V205H1285V260H1330V320H1430V220H1470V165H1500V220H1535V290H1600V420Z" fill="#030206" />
@@ -251,37 +250,40 @@ export default function DjScreen() {
         </header>
       )}
 
-      {/* MERKEZ ALAN (METİN VEYA YATAY FOTOĞRAF) */}
-      <section className="relative z-10 flex max-h-[64vh] flex-1 flex-col items-center justify-center overflow-hidden px-4 text-center">
+      {/* MERKEZ ALAN */}
+      <section className="relative z-10 flex max-h-[75vh] flex-1 flex-col items-center justify-center overflow-hidden px-2 text-center">
         {message ? (
-          <div key={message.id} className={`flex max-h-full w-full flex-col items-center justify-center transition-all duration-700 ${visible ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[.94] blur-md opacity-0"}`}>
+          <div key={message.id} className={`flex h-full max-h-full w-full flex-col items-center justify-center transition-all duration-700 ${visible ? "translate-y-0 scale-100 opacity-100" : "translate-y-8 scale-[.94] blur-md opacity-0"}`}>
             
-            <div className="relative mb-4 flex flex-shrink-0 items-center gap-3 overflow-hidden rounded-full border px-6 py-2 backdrop-blur-2xl md:mb-6 md:px-8 md:py-3" style={{ borderColor: `${accent}90`, color: accent, background: `${accent}15`, boxShadow: `0 0 45px ${accent}30, inset 0 0 35px ${accent}15` }}>
+            <div className="relative mb-2 flex flex-shrink-0 items-center gap-3 overflow-hidden rounded-full border px-6 py-1.5 backdrop-blur-2xl md:mb-3 md:px-8 md:py-2" style={{ borderColor: `${accent}90`, color: accent, background: `${accent}15`, boxShadow: `0 0 45px ${accent}30, inset 0 0 35px ${accent}15` }}>
               <div className="absolute inset-y-0 left-[-80%] w-[45%] skew-x-[-20deg] animate-[badgeSweep_4s_ease-in-out_infinite]" style={{ background: "linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent)" }} />
               <Icon size={20} className="relative md:scale-125" />
               <span className="relative pl-[.32em] text-base font-black tracking-[.32em] md:text-2xl">{title}</span>
             </div>
 
             {isPhoto ? (
-              /* 📸 YATAY FOTOĞRAF SAHNE ÇERÇEVESİ */
-              <div className="relative max-h-[48vh] w-auto max-w-[90vw] aspect-video rounded-3xl overflow-hidden border-2 border-white/20 p-2 bg-black/60 backdrop-blur-xl shadow-[0_0_80px_rgba(255,106,0,0.35)] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]">
+              /* DAHA BÜYÜK FOTOĞRAF ALANI */
+              <div className="relative flex h-[62vh] max-h-[65vh] w-[94vw] max-w-[1250px] items-center justify-center rounded-3xl overflow-hidden border-2 border-white/20 p-2 bg-black/75 backdrop-blur-2xl shadow-[0_0_100px_rgba(255,106,0,0.45)] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]">
                 <img 
                   src={content} 
-                  alt="Sahne Fotoğrafı" 
-                  className="w-full h-full object-contain rounded-2xl" 
+                  alt="Kostüm" 
+                  className="h-full w-full object-contain rounded-2xl drop-shadow-[0_10px_25px_rgba(0,0,0,0.9)]" 
                 />
               </div>
             ) : (
-              /* NORMAL METİN */
               <h1 className="relative flex max-h-[42vh] max-w-[94vw] items-center justify-center overflow-hidden break-words px-1 font-black uppercase leading-[.98] tracking-[-.04em] animate-[messageReveal_1.15s_cubic-bezier(.16,1,.3,1)_both]" style={{ fontSize: getContentFontSize(content), textShadow: `0 0 25px ${accent}50, 0 0 75px ${accent}40, 0 0 150px ${accent}30`, display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical" }}>{content}</h1>
             )}
 
-            <div className="relative mt-5 h-[2px] w-36 flex-shrink-0 overflow-hidden rounded-full md:mt-8 md:w-64" style={{ background: `${accent}40`, boxShadow: `0 0 35px ${accent}50` }}>
-              <div className="absolute inset-y-0 left-[-50%] w-1/2 animate-[energyPremium_2.8s_ease-in-out_infinite]" style={{ background: `linear-gradient(90deg,transparent,${accent},white,${accent},transparent)`, boxShadow: `0 0 30px ${accent}` }} />
-            </div>
-            <div className="mt-4 flex flex-shrink-0 items-center gap-1.5 opacity-60">
-              {[0, 150, 300].map((delay) => <span key={delay} className="h-1.5 w-1.5 animate-bounce rounded-full" style={{ background: accent, animationDelay: `${delay}ms` }} />)}
-            </div>
+            {!isPhoto && (
+              <>
+                <div className="relative mt-5 h-[2px] w-36 flex-shrink-0 overflow-hidden rounded-full md:mt-8 md:w-64" style={{ background: `${accent}40`, boxShadow: `0 0 35px ${accent}50` }}>
+                  <div className="absolute inset-y-0 left-[-50%] w-1/2 animate-[energyPremium_2.8s_ease-in-out_infinite]" style={{ background: `linear-gradient(90deg,transparent,${accent},white,${accent},transparent)`, boxShadow: `0 0 30px ${accent}` }} />
+                </div>
+                <div className="mt-4 flex flex-shrink-0 items-center gap-1.5 opacity-60">
+                  {[0, 150, 300].map((delay) => <span key={delay} className="h-1.5 w-1.5 animate-bounce rounded-full" style={{ background: accent, animationDelay: `${delay}ms` }} />)}
+                </div>
+              </>
+            )}
           </div>
         ) : (
           <div className="absolute inset-0 z-50 flex h-full w-full flex-col items-center justify-center p-6 animate-[idleEntrance_2s_cubic-bezier(.16,1,.3,1)_both]">
@@ -366,11 +368,6 @@ const stylesCSS = `
   @keyframes ghostAppearLeft { 0%,100%{opacity:0;transform:translate3d(-10px,15px,0) scale(.9)} 15%,35%{opacity:.4;transform:translate3d(5px,-5px,0) scale(1)} 55%{opacity:.15;transform:translate3d(25px,-15px,0) scale(1.08)} 70%{opacity:0} }
   @keyframes ghostAppearRight { 0%,100%{opacity:0;transform:translate3d(12px,12px,0) scale(.85)} 18%,38%{opacity:.35;transform:translate3d(-8px,-8px,0) scale(1)} 58%{opacity:.12;transform:translate3d(-25px,-18px,0) scale(1.1)} 75%{opacity:0} }
 
-  @keyframes premiumAmbient { 0%,100%{transform:scale(1);opacity:.52} 50%{transform:scale(1.16);opacity:.9} }
-  @keyframes stageLightLeft { 0%,100%{transform:translateX(-12%) rotate(-25deg) scale(1);opacity:.08} 50%{transform:translateX(18%) rotate(-17deg) scale(1.08);opacity:.17} }
-  @keyframes stageLightRight { 0%,100%{transform:translateX(12%) rotate(25deg) scale(1);opacity:.07} 50%{transform:translateX(-18%) rotate(17deg) scale(1.08);opacity:.15} }
-  @keyframes centerBeam { 0%,100%{transform:translate(-50%,-50%) scaleX(.65);opacity:.03} 50%{transform:translate(-50%,-50%) scaleX(1.25);opacity:.09} }
-  @keyframes lightSweep { 0%{transform:translateX(-20%) rotate(25deg);opacity:0} 25%{opacity:.04} 50%{opacity:.06} 80%{opacity:.02} 100%{transform:translateX(280%) rotate(25deg);opacity:0} }
   @keyframes countdownThump { 0%{opacity:0;transform:scale(1.8);filter:blur(20px)} 25%{opacity:1;transform:scale(1);filter:blur(0)} 75%{opacity:1;transform:scale(.95);filter:blur(0)} 100%{opacity:0;transform:scale(.8);filter:blur(10px)} }
   @keyframes cinematicRing { 0%{opacity:1;transform:scale(.2);border-width:10px} 100%{opacity:0;transform:scale(2.2);border-width:0} }
   @keyframes cinematicText { 0%{opacity:0;transform:scale(.85);filter:blur(15px);letter-spacing:.1em;padding-left:.1em} 15%{opacity:1;transform:scale(1);filter:blur(0);letter-spacing:.28em;padding-left:.28em} 85%{opacity:1;transform:scale(1);filter:blur(0);letter-spacing:.28em;padding-left:.28em} 100%{opacity:0;transform:scale(1.1);filter:blur(10px);letter-spacing:.35em;padding-left:.35em} }
@@ -383,10 +380,8 @@ const stylesCSS = `
   @keyframes particleFloat { 0%,100%{transform:translate3d(0,0,0);opacity:0} 20%{opacity:.45} 50%{transform:translate3d(12px,-35px,0);opacity:.8} 80%{opacity:.35} }
   @keyframes grain { 0%{transform:translate(0,0)} 25%{transform:translate(2%,-1%)} 50%{transform:translate(-1%,2%)} 75%{transform:translate(-2%,-1%)} 100%{transform:translate(0,0)} }
   @keyframes messageReveal { 0%{opacity:0;transform:scale(.68) translateY(50px);filter:blur(24px)} 45%{opacity:1;transform:scale(1.035) translateY(-6px);filter:blur(0)} 65%{transform:scale(.985)} 100%{opacity:1;transform:scale(1) translateY(0);filter:blur(0)} }
-  @keyframes badgePremium { 0%{opacity:0;transform:translateY(-22px) scale(.82);filter:blur(8px)} 70%{opacity:1;transform:translateY(2px) scale(1.02);filter:blur(0)} 100%{opacity:1;transform:translateY(0) scale(1)} }
   @keyframes badgeSweep { 0%{left:-80%} 45%,100%{left:140%} }
   @keyframes energyPremium { 0%{left:-55%;opacity:0} 20%{opacity:1} 75%{opacity:1} 100%{left:110%;opacity:0} }
-  @keyframes sponsorShine { 0%,65%{background-position:200% 0;opacity:0} 75%{opacity:.7} 100%{background-position:-50% 0;opacity:0} }
 
   @media (prefers-reduced-motion: reduce) {
     *,*::before,*::after { animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; }
