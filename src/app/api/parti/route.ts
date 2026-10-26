@@ -1,26 +1,38 @@
-import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { NextResponse } from "next/server";
+
+let activeBroadcast: { id: string | number; content: string; location?: string | null } | null = null;
 
 export async function GET() {
-  try {
-    const latestMessage = await prisma.post.findFirst({
-      where: {
-        location: {
-          in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_OVERHEARD']
-        },
-        status: 'APPROVED'
+  return NextResponse.json(
+    { message: activeBroadcast },
+    {
+      headers: {
+        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
       },
-      orderBy: {
-        createdAt: 'desc',
-      },
-    });
+    }
+  );
+}
 
-    return NextResponse.json({ message: latestMessage || null }, { 
-      headers: { 
-        'Cache-Control': 'no-store, no-cache, must-validate, max-age=0' 
-      } 
-    });
-  } catch (error: any) {
-    return NextResponse.json({ message: null, error: error.message }, { status: 500 });
+export async function POST(req: Request) {
+  try {
+    const body = await req.json();
+
+    if (body.action === "CLEAR") {
+      activeBroadcast = null;
+      return NextResponse.json({ success: true, message: "Temizlendi" });
+    }
+
+    if (body.content) {
+      activeBroadcast = {
+        id: Date.now(),
+        content: body.content,
+        location: body.location || "PARTY_ITIRAF",
+      };
+      return NextResponse.json({ success: true, message: activeBroadcast });
+    }
+
+    return NextResponse.json({ error: "İçerik bulunamadı" }, { status: 400 });
+  } catch (err) {
+    return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
   }
 }
