@@ -15,7 +15,6 @@ export default function PartyAdminPage() {
   const [editContent, setEditContent] = useState("");
   const [editLocation, setEditLocation] = useState("");
 
-  // Fotoğraf Yükleme State'leri
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [isUploadingImg, setIsUploadingImg] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -41,10 +40,15 @@ export default function PartyAdminPage() {
   const handleClearScreen = async () => {
     if (confirm("Ekrandaki içeriği kaldırıp bekleme ekranına dönmek istediğine emin misin?")) {
       try {
-        await clearActiveMessage();
-        alert("Ekran temizlendi! Sahnede bekleme ekranı dönüyor.");
+        await fetch("/api/parti", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ action: "CLEAR" }),
+        });
+        await clearActiveMessage().catch(() => {});
+        alert("Ekran temizlendi!");
       } catch (error) {
-        console.error("Ekran temizlenirken hata:", error);
+        console.error("Hata:", error);
       }
     }
   };
@@ -59,7 +63,6 @@ export default function PartyAdminPage() {
     }
   };
 
-  // Fotoğrafı Vercel sınırlarına uygun şekilde küçültüp sıkıştıran fonksiyon
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -69,30 +72,22 @@ export default function PartyAdminPage() {
       const img = new Image();
       img.onload = () => {
         const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 1280;
-        const MAX_HEIGHT = 720;
+        const MAX_WIDTH = 960;
         let width = img.width;
         let height = img.height;
 
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height = Math.round((height * MAX_WIDTH) / width);
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width = Math.round((width * MAX_HEIGHT) / height);
-            height = MAX_HEIGHT;
-          }
+        if (width > MAX_WIDTH) {
+          height = Math.round((height * MAX_WIDTH) / width);
+          width = MAX_WIDTH;
         }
 
         canvas.width = width;
         canvas.height = height;
         const ctx = canvas.getContext("2d");
         ctx?.drawImage(img, 0, 0, width, height);
-        
-        // JPEG kalitesini 0.72 yaparak boyutu 200 KB civarına düşürür
-        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.72);
+
+        // Maksimum 70-100 KB boyut için sıkıştırma
+        const compressedBase64 = canvas.toDataURL("image/jpeg", 0.65);
         setSelectedImage(compressedBase64);
       };
       img.src = event.target?.result as string;
@@ -111,17 +106,15 @@ export default function PartyAdminPage() {
         body: JSON.stringify({
           content: selectedImage,
           location: "PARTY_PHOTO",
-          approved: true,
         }),
       });
 
       if (res.ok) {
-        alert("Fotoğraf başarıyla sahneye yansıtıldı!");
+        alert("Fotoğraf sahneye başarıyla yansıtıldı!");
         setSelectedImage(null);
         if (fileInputRef.current) fileInputRef.current.value = "";
       } else {
-        const errorData = await res.json().catch(() => null);
-        alert("Hata: " + (errorData?.message || "Sunucu fotoğrafı kabul etmedi."));
+        alert("Sunucu hatası: Fotoğraf iletilemedi.");
       }
     } catch (err) {
       console.error(err);
@@ -153,8 +146,20 @@ export default function PartyAdminPage() {
   };
 
   const handleAction = async (id: string, actionType: 'APPROVE' | 'REJECT') => {
+    const targetMsg = messages.find((m) => m.id === id);
     setMessages((prev) => prev.filter((m) => m.id !== id));
+
     if (actionType === 'APPROVE') {
+      if (targetMsg) {
+        await fetch("/api/parti", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            content: targetMsg.content,
+            location: targetMsg.location,
+          }),
+        }).catch(() => {});
+      }
       await approveMessage(id);
     } else {
       await rejectMessage(id);
@@ -199,7 +204,6 @@ export default function PartyAdminPage() {
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_at_bottom_left,rgba(157,0,255,0.08)_0%,transparent_50%)]" />
 
       <div className="max-w-xl mx-auto relative z-10">
-        
         <header className="flex items-center justify-between py-6 border-b border-white/10 mb-6">
           <h1 className="text-xl font-black tracking-widest text-white flex items-center gap-2">
             <Skull size={24} className="text-[#ff6a00]" /> KONTROL 
@@ -242,7 +246,7 @@ export default function PartyAdminPage() {
             >
               <UploadCloud size={32} className="text-[#ff6a00] mb-2" />
               <span className="text-sm font-bold text-gray-200">Galeriden Fotoğraf Seç</span>
-              <span className="text-[11px] text-gray-500 mt-1">Otomatik optimize edilerek ekrana gönderilir</span>
+              <span className="text-[11px] text-gray-500 mt-1">Otomatik optimize edilip ekrana basılır</span>
             </label>
           ) : (
             <div className="space-y-3">
