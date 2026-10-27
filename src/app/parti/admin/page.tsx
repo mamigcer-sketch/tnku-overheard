@@ -136,7 +136,7 @@ export default function PartyAdminPage() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    if (passcode === "offdayadmin") {
+    if (passcode === "godbless") {
       setIsAuthenticated(true);
       sessionStorage.setItem('tnku_admin_auth', 'true');
       fetchMessages();
