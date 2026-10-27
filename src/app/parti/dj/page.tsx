@@ -66,7 +66,7 @@ export default function DjScreen() {
 
       let transitionTitle = "YENİ İTİRAF";
       if (newMsg.location === "PARTY_PHOTO" || newMsg.content?.startsWith("data:image")) {
-        transitionTitle = "KOSTÜMÜ PUANLA!";
+        transitionTitle = "GECENİN EN GÜZEL KARESİ!";
       } else if (["PARTY_LİNÇ", "PARTY_LINC", "PARTY_REZIL"].includes(newMsg.location ?? "")) {
         transitionTitle = "YENİ LİNÇ@";
       } else if (newMsg.location === "PARTY_OVERHEARD") {
@@ -149,7 +149,7 @@ export default function DjScreen() {
 
   if (isPhoto) {
     accent = "#ffaa00";
-    title = "KOSTÜMÜ PUANLA!";
+    title = "GECENİN EN GÜZEL KARESİ!";
     Icon = Sparkles;
   } else if (location.includes("LINC") || location.includes("LİNÇ") || location.includes("REZIL")) {
     accent = "#a36bff";
