@@ -10,7 +10,6 @@ export default function PartyVotePage() {
   const [stats, setStats] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  // Kullanıcıya özel benzersiz ID oluştur veya getir
   useEffect(() => {
     let id = localStorage.getItem('tnku_vote_uuid');
     if (!id) {
@@ -20,7 +19,6 @@ export default function PartyVotePage() {
     setUserUuid(id);
   }, []);
 
-  // Canlı verileri çek
   const fetchStats = async () => {
     if (!userUuid) return;
     try {
@@ -31,24 +29,30 @@ export default function PartyVotePage() {
         setUserVote(data.userVote);
       }
     } catch (e) {
-      console.error(e);
+      console.error("Veri çekme hatası:", e);
     }
   };
 
   useEffect(() => {
+    if (!userUuid) return;
     fetchStats();
-    const interval = setInterval(fetchStats, 2000); // 2 saniyede bir oyları güncelle
+    const interval = setInterval(fetchStats, 2000);
     return () => clearInterval(interval);
   }, [userUuid]);
 
   const handleVote = async (genre: 'POP' | 'RAP' | 'ROCK') => {
     if (loading) return;
     setLoading(true);
-    setUserVote(genre); // Hızlı feedback
+    setUserVote(genre); // Anında görsel tepki (optimistic update)
     
-    await castVote(userUuid, genre);
-    await fetchStats();
-    setLoading(false);
+    try {
+      await castVote(userUuid, genre);
+      await fetchStats();
+    } catch (err) {
+      console.error("Oy verme hatası:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const options = [
@@ -85,7 +89,7 @@ export default function PartyVotePage() {
               <button
                 key={item.id}
                 onClick={() => handleVote(item.id as any)}
-                className={`w-full relative overflow-hidden rounded-2xl p-5 border text-left transition-all duration-300 active:scale-[0.98] ${
+                className={`w-full relative overflow-hidden rounded-2xl p-5 border text-left transition-all duration-300 active:scale-[0.98] cursor-pointer ${
                   isSelected 
                     ? `${item.border} ${item.bg} shadow-[0_0_30px_rgba(168,85,247,0.2)]` 
                     : 'border-white/10 bg-black/40 hover:border-white/20'
