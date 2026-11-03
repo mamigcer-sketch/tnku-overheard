@@ -41,9 +41,10 @@ export default function PartyVotePage() {
   }, [userUuid]);
 
   const handleVote = async (genre: 'POP' | 'RAP' | 'ROCK') => {
+    alert("Butona basıldı, tarz: " + genre); // <-- Bunu ekle
     if (loading) return;
     setLoading(true);
-    setUserVote(genre); // Anında görsel tepki (optimistic update)
+    setUserVote(genre);
     
     try {
       await castVote(userUuid, genre);
