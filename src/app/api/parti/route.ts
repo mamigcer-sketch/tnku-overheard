@@ -1,38 +1,44 @@
-import { NextResponse } from "next/server";
+import { NextResponse } from 'next/server';
+import prisma from '@/lib/prisma';
 
-let activeBroadcast: { id: string | number; content: string; location?: string | null } | null = null;
-
-export async function GET() {
-  return NextResponse.json(
-    { message: activeBroadcast },
-    {
-      headers: {
-        "Cache-Control": "no-store, no-cache, must-revalidate, proxy-revalidate",
-      },
-    }
-  );
-}
-
-export async function POST(req: Request) {
+export async function GET(request: Request) {
   try {
-    const body = await req.json();
+    const { searchParams } = new URL(request.url);
+    const userUuid = searchParams.get('uuid');
 
-    if (body.action === "CLEAR") {
-      activeBroadcast = null;
-      return NextResponse.json({ success: true, message: "Temizlendi" });
+    const votes = await prisma.vote.findMany();
+    const totalVotes = votes.length;
+
+    const popCount = votes.filter(v => v.genre === 'POP').length;
+    const rapCount = votes.filter(v => v.genre === 'RAP').length;
+    const rockCount = votes.filter(v => v.genre === 'ROCK').length;
+
+    const popPercent = totalVotes > 0 ? Math.round((popCount / totalVotes) * 100) : 0;
+    const rapPercent = totalVotes > 0 ? Math.round((rapCount / totalVotes) * 100) : 0;
+    const rockPercent = totalVotes > 0 ? Math.round((rockCount / totalVotes) * 100) : 0;
+
+    let userVote: string | null = null;
+    if (userUuid) {
+      const vote = votes.find(v => v.userUuid === userUuid);
+      if (vote) userVote = vote.genre;
     }
 
-    if (body.content) {
-      activeBroadcast = {
-        id: Date.now(),
-        content: body.content,
-        location: body.location || "PARTY_ITIRAF",
-      };
-      return NextResponse.json({ success: true, message: activeBroadcast });
-    }
+    let leading = 'POP';
+    if (rapCount > popCount && rapCount >= rockCount) leading = 'RAP';
+    else if (rockCount > popCount && rockCount > rapCount) leading = 'ROCK';
 
-    return NextResponse.json({ error: "İçerik bulunamadı" }, { status: 400 });
-  } catch (err) {
-    return NextResponse.json({ error: "Sunucu hatası" }, { status: 500 });
+    return NextResponse.json({
+      totalVotes,
+      userVote,
+      leading,
+      stats: {
+        POP: { count: popCount, percent: popPercent },
+        RAP: { count: rapCount, percent: rapPercent },
+        ROCK: { count: rockCount, percent: rockPercent },
+      }
+    });
+  } catch (error: any) {
+    console.error("API Hatası:", error);
+    return NextResponse.json({ error: "Veriler alınamadı." }, { status: 500 });
   }
 }
