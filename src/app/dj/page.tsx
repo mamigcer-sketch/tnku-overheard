@@ -1,46 +1,139 @@
 "use client";
 
 import { useEffect, useState, useRef } from 'react';
-import { Flame, Disc, Music2, Camera } from 'lucide-react';
+import { getActiveMessage } from '../admin/actions';
+import { Flame, Skull, Eye, Sparkles, Camera } from 'lucide-react';
 import Image from 'next/image';
 
-export default function DjScreen() {
-  const [stats, setStats] = useState<any>(null);
-  const [leading, setLeading] = useState<string>("POP");
+const CATEGORY_THEMES: Record<
+  string,
+  {
+    label: string;
+    icon: any;
+    hex: string;
+    textAccent: string;
+    lineGradient: string;
+  }
+> = {
+  PARTY_ITIRAF: {
+    label: 'MASUM İTİRAF',
+    icon: Sparkles,
+    hex: '#f59e0b',
+    textAccent: 'text-amber-400',
+    lineGradient: 'from-transparent via-amber-500 to-transparent',
+  },
+  PARTY_LINC: {
+    label: 'BÜYÜK GÜNAH',
+    icon: Flame,
+    hex: '#dc2626',
+    textAccent: 'text-red-500',
+    lineGradient: 'from-transparent via-red-600 to-transparent',
+  },
+  PARTY_LİNÇ: {
+    label: 'BÜYÜK GÜNAH',
+    icon: Flame,
+    hex: '#dc2626',
+    textAccent: 'text-red-500',
+    lineGradient: 'from-transparent via-red-600 to-transparent',
+  },
+  PARTY_REZIL: {
+    label: 'REZİLLİK & UTANÇ',
+    icon: Skull,
+    hex: '#a855f7',
+    textAccent: 'text-purple-400',
+    lineGradient: 'from-transparent via-purple-500 to-transparent',
+  },
+  PARTY_IFSA: {
+    label: 'İFŞA & GİZLİ SIR',
+    icon: Eye,
+    hex: '#f43f5e',
+    textAccent: 'text-rose-500',
+    lineGradient: 'from-transparent via-rose-500 to-transparent',
+  },
+  PARTY_OVERHEARD: {
+    label: 'GÜNAH İTİRAFI',
+    icon: Flame,
+    hex: '#dc2626',
+    textAccent: 'text-red-500',
+    lineGradient: 'from-transparent via-red-600 to-transparent',
+  },
+};
+
+export default function DjConfessionScreen() {
+  const [displayedMessage, setDisplayedMessage] = useState<any>(null);
+  const [pendingRevealMessage, setPendingRevealMessage] = useState<any>(null);
+  const [countdown, setCountdown] = useState<number | null>(null);
+
   const [floatingEmojis, setFloatingEmojis] = useState<{ id: number; emoji: string; left: number }[]>([]);
-  const [photoState, setPhotoState] = useState<{ active: boolean; photoUrl: string | null; caption: string }>({
+  const [photoState, setPhotoState] = useState<{ active: boolean; photoUrl: string | null }>({
     active: false,
     photoUrl: null,
-    caption: 'GECENİN EN GÜZEL KARESİ 📸',
   });
 
+  const lastMessageIdRef = useRef<string | null>(null);
+  const isFirstFetchRef = useRef<boolean>(true);
   const processedReactionIds = useRef<Set<number>>(new Set());
 
-  // Oylama verileri
+  // Aktif günahı kontrol et ve yeni günah geldiyse 3-2-1 sayacını başlat
   useEffect(() => {
-    const fetchStats = async () => {
+    const fetchActive = async () => {
       try {
-        const res = await fetch("/api/parti?t=" + Date.now(), { cache: "no-store" });
-        const data = await res.json();
-        if (data && data.stats) {
-          setStats(data.stats);
-          setLeading(data.leading || "POP");
+        const msg = await getActiveMessage();
+
+        if (!msg) {
+          lastMessageIdRef.current = null;
+          setDisplayedMessage(null);
+          setPendingRevealMessage(null);
+          setCountdown(null);
+          isFirstFetchRef.current = false;
+          return;
+        }
+
+        if (isFirstFetchRef.current) {
+          isFirstFetchRef.current = false;
+          lastMessageIdRef.current = msg.id;
+          setDisplayedMessage(msg);
+          return;
+        }
+
+        if (msg.id !== lastMessageIdRef.current) {
+          lastMessageIdRef.current = msg.id;
+          setPendingRevealMessage(msg);
+          setCountdown(3);
+        } else if (countdown === null) {
+          setDisplayedMessage(msg);
         }
       } catch (e) {
         console.error(e);
       }
     };
 
-    fetchStats();
-    const interval = setInterval(fetchStats, 2000);
+    fetchActive();
+    const interval = setInterval(fetchActive, 1200);
     return () => clearInterval(interval);
-  }, []);
+  }, [countdown]);
+
+  // 3 -> 2 -> 1 Geri Sayım Zamanlayıcısı
+  useEffect(() => {
+    if (countdown === null) return;
+
+    const timer = setTimeout(() => {
+      if (countdown > 1) {
+        setCountdown(countdown - 1);
+      } else {
+        setDisplayedMessage(pendingRevealMessage);
+        setCountdown(null);
+      }
+    }, 850);
+
+    return () => clearTimeout(timer);
+  }, [countdown, pendingRevealMessage]);
 
   // Fotoğraf Modu Kontrolü
   useEffect(() => {
     const fetchPhotoState = async () => {
       try {
-        const res = await fetch("/api/photo?t=" + Date.now(), { cache: "no-store" });
+        const res = await fetch('/api/photo?t=' + Date.now(), { cache: 'no-store' });
         const data = await res.json();
         if (data) setPhotoState(data);
       } catch (e) {
@@ -53,21 +146,21 @@ export default function DjScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  // Emojiler
+  // Uçuşan Canlı Tepki Emojileri
   useEffect(() => {
     const fetchReactions = async () => {
       try {
-        const res = await fetch("/api/reaction?t=" + Date.now(), { cache: "no-store" });
+        const res = await fetch('/api/reaction?t=' + Date.now(), { cache: 'no-store' });
         const data = await res.json();
         if (data && data.reactions) {
           data.reactions.forEach((item: { id: number; emoji: string }) => {
             if (!processedReactionIds.current.has(item.id)) {
               processedReactionIds.current.add(item.id);
-              const left = Math.random() * 80 + 10;
+              const left = Math.random() * 84 + 8;
               setFloatingEmojis((prev) => [...prev, { id: item.id, emoji: item.emoji, left }]);
               setTimeout(() => {
                 setFloatingEmojis((prev) => prev.filter((e) => e.id !== item.id));
-              }, 2500);
+              }, 2600);
             }
           });
         }
@@ -81,71 +174,45 @@ export default function DjScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  const genres = [
-    { 
-      id: "POP", 
-      title: "TÜRKÇE POP", 
-      icon: Flame, 
-      color: "from-pink-500 to-rose-600", 
-      hex: "#ec4899",
-      bgImage: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14?q=80&w=1000&auto=format&fit=crop"
-    },
-    { 
-      id: "RAP", 
-      title: "TÜRKÇE RAP", 
-      icon: Disc, 
-      color: "from-purple-500 to-indigo-600", 
-      hex: "#a855f7",
-      bgImage: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?q=80&w=1000&auto=format&fit=crop"
-    },
-    { 
-      id: "ROCK", 
-      title: "TÜRKÇE ROCK", 
-      icon: Music2, 
-      color: "from-amber-500 to-red-600", 
-      hex: "#f59e0b",
-      bgImage: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?q=80&w=1000&auto=format&fit=crop"
-    },
-  ];
+  const activeSource = countdown !== null ? pendingRevealMessage : displayedMessage;
+  const currentTheme = activeSource
+    ? CATEGORY_THEMES[activeSource.location] || CATEGORY_THEMES.PARTY_LINC
+    : CATEGORY_THEMES.PARTY_LINC;
+  const CategoryIcon = currentTheme.icon;
 
-  const leadingObj = genres.find(g => g.id === leading) || genres[0];
+  // LED Ekran için dev punto ölçekleme
+  const getTextSizeClass = (len: number) => {
+    if (len <= 45) return 'text-6xl md:text-[7.5rem] leading-[1.08]';
+    if (len <= 110) return 'text-4xl md:text-7xl leading-[1.15]';
+    if (len <= 200) return 'text-3xl md:text-6xl leading-[1.2]';
+    return 'text-2xl md:text-5xl leading-[1.25]';
+  };
 
   return (
-    <main className="min-h-screen bg-[#030107] text-white flex flex-col justify-between p-6 md:p-10 select-none relative overflow-hidden">
-      
-      {/* 📸 CANLI FOTOĞRAF MODU (ADMİN'DEN GÖNDERİLİNCE AÇILIR) */}
+    <main className="h-screen w-screen bg-black text-white flex flex-col justify-between px-8 py-6 md:px-14 md:py-8 select-none relative overflow-hidden">
+      {/* CANLI FOTOĞRAF MODU */}
       {photoState.active && photoState.photoUrl && (
-        <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-6 md:p-12 animate-fade-in backdrop-blur-3xl">
-          <div className="absolute inset-0 bg-gradient-to-t from-purple-900/40 via-transparent to-pink-900/30 blur-3xl" />
-          
-          {/* Logo & Başlık */}
-          <div className="relative z-10 text-center mb-6">
-            <div className="inline-flex items-center gap-3 bg-white/10 border border-white/20 px-6 py-2.5 rounded-full backdrop-blur-md mb-3 animate-bounce">
-              <Camera className="text-pink-400" size={24} />
-              <span className="text-sm font-black tracking-widest text-white uppercase">GECENİN EN GÜZEL KARESİ 📸</span>
-            </div>
-          </div>
-
-          {/* Fotoğraf Frame */}
-          <div className="relative z-10 max-w-5xl max-h-[75vh] w-full h-full rounded-[3rem] overflow-hidden border-4 border-white/20 shadow-[0_0_100px_rgba(236,72,153,0.4)] bg-black/50 p-3">
-            <img 
-              src={photoState.photoUrl} 
-              alt="Gecenin Kare" 
-              className="w-full h-full object-contain rounded-[2.5rem]" 
-            />
-          </div>
+        <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6">
+          <span className="text-sm md:text-base font-black tracking-[0.4em] text-amber-400 uppercase mb-4 flex items-center gap-2">
+            <Camera size={20} /> GECENİN KARESİ
+          </span>
+          <img
+            src={photoState.photoUrl}
+            alt="Gecenin Karesi"
+            className="max-w-[92vw] max-h-[82vh] object-contain"
+          />
         </div>
       )}
 
-      {/* Uçuşan Emojiler */}
+      {/* Uçuşan Tepki Emojileri */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-40">
         {floatingEmojis.map((item) => (
           <div
             key={item.id}
-            className="absolute bottom-10 text-6xl animate-fade-in"
+            className="absolute bottom-8 text-6xl md:text-8xl"
             style={{
               left: `${item.left}%`,
-              animation: 'floatUpDj 2.5s ease-out forwards'
+              animation: 'floatUpDj 2.6s ease-out forwards',
             }}
           >
             {item.emoji}
@@ -153,127 +220,151 @@ export default function DjScreen() {
         ))}
       </div>
 
-      {/* Arka Plan Atmosfer Işığı */}
-      <div 
-        className="absolute inset-0 transition-all duration-1000 opacity-25 pointer-events-none filter blur-[140px] animate-pulse"
-        style={{ background: `radial-gradient(circle at 50% 50%, ${leadingObj.hex} 0%, transparent 70%)` }}
+      {/* SAHNE ARKA PLAN IŞIĞI */}
+      <div
+        className="absolute inset-0 transition-all duration-1000 pointer-events-none"
+        style={{
+          background:
+            countdown !== null
+              ? 'radial-gradient(circle at 50% 50%, rgba(220, 38, 38, 0.42) 0%, rgba(0, 0, 0, 1) 70%)'
+              : `radial-gradient(circle at 50% 52%, ${currentTheme.hex}33 0%, rgba(0, 0, 0, 1) 68%)`,
+        }}
       />
 
-      {/* Header */}
-      <header className="relative z-10 flex justify-between items-center bg-black/50 backdrop-blur-2xl border border-white/10 px-8 py-5 rounded-3xl shadow-2xl">
-        <div className="flex items-center gap-5">
-          <div className="relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black/60 flex items-center justify-center">
-            <Image 
-              src="/5555.png" 
-              alt="Logo" 
-              fill 
-              className="object-contain p-2"
-            />
+      {/* Üst Sahne Spot Hüzmesi */}
+      <div
+        className="absolute -top-40 left-1/2 -translate-x-1/2 w-[90vw] h-[420px] opacity-25 blur-[130px] pointer-events-none transition-colors duration-1000"
+        style={{ backgroundColor: countdown !== null ? '#ef4444' : currentTheme.hex }}
+      />
+
+      {/* KUTUSUZ ÜST BİLGİ ŞERİDİ & BÜYÜTÜLMÜŞ LOGO */}
+      <header className="relative z-10 flex items-center justify-between">
+        <div className="flex items-center gap-5 md:gap-6">
+          <div className="relative w-20 h-20 md:w-28 md:h-28 shrink-0">
+            <Image src="/5555.png" alt="Logo" fill className="object-contain" />
           </div>
           <div>
-            <span className="text-xs font-black tracking-[0.4em] text-purple-400 uppercase block mb-1">CANLI OYLAMA</span>
-            <h1 className="text-2xl md:text-4xl font-black tracking-wider uppercase">MÜZİK SEÇİMİ</h1>
+            <span className="text-xs md:text-sm font-black tracking-[0.45em] text-red-500 uppercase block mb-1">
+              ANONİM İTİRAF HATTI
+            </span>
+            <h1 className="text-xl md:text-3xl font-black tracking-[0.18em] uppercase text-white/95">
+              GÜNAH ÇIKARMA GECESİ
+            </h1>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-6 py-3.5 rounded-2xl backdrop-blur-md shadow-xl">
-          <div className="text-right">
-            <span className="text-[10px] font-black tracking-widest text-gray-400 block uppercase">ŞU AN SALONUN FAVORİSİ</span>
-            <span className="text-xl font-black tracking-wider uppercase" style={{ color: leadingObj.hex }}>
-              {leadingObj.title} 🔥
-            </span>
-          </div>
+        <div className="flex items-center gap-2.5">
+          <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping" />
+          <span className="text-xs md:text-sm font-black tracking-[0.35em] text-white/60 uppercase">
+            CANLI
+          </span>
         </div>
       </header>
 
-      {/* 3'lü Sütun Kartlar */}
-      <section className="relative z-10 my-auto grid grid-cols-1 md:grid-cols-3 gap-8 max-w-7xl w-full mx-auto py-6">
-        {genres.map((g) => {
-          const percent = stats ? stats[g.id]?.percent || 0 : 0;
-          const isLeading = leading === g.id;
-          const Icon = g.icon;
+      {/* MERKEZ SAHNE: 3-2-1 SAYACI / DEV GÜNAH METNİ / BEKLEME EKRANI */}
+      <section className="relative z-10 my-auto w-full max-w-[92vw] mx-auto text-center flex flex-col items-center justify-center">
+        {countdown !== null ? (
+          /* 3 - 2 - 1 DRAMATİK GERİ SAYIM */
+          <div className="flex flex-col items-center justify-center">
+            <span className="text-sm md:text-2xl font-black tracking-[0.55em] text-red-500 uppercase mb-2 animate-pulse">
+              YENİ GÜNAH GELİYOR
+            </span>
 
-          return (
-            <div 
-              key={g.id}
-              className={`relative flex flex-col justify-between p-8 rounded-[2.5rem] border transition-all duration-700 overflow-hidden group ${
-                isLeading 
-                  ? 'scale-105 z-20 shadow-[0_0_70px_rgba(0,0,0,0.95)] animate-[pulse_3s_infinite]' 
-                  : 'opacity-50 scale-95 border-white/10'
-              }`}
-              style={{
-                borderColor: isLeading ? g.hex : 'rgba(255,255,255,0.1)',
-                boxShadow: isLeading ? `0 0 60px ${g.hex}60` : 'none'
-              }}
-            >
-              <div 
-                className={`absolute inset-0 bg-cover bg-center transition-transform duration-1000 ${isLeading ? 'scale-110 animate-pulse' : 'scale-100'}`}
-                style={{ backgroundImage: `url(${g.bgImage})` }}
+            <div className="relative flex items-center justify-center">
+              <div
+                key={`ring-${countdown}`}
+                style={{ animation: 'shockwave 0.85s ease-out forwards' }}
+                className="absolute w-56 h-56 md:w-96 md:h-96 rounded-full border-4 border-red-500/70 pointer-events-none"
               />
-              <div className={`absolute inset-0 transition-opacity duration-700 ${isLeading ? 'bg-gradient-to-t from-black via-black/80 to-black/40' : 'bg-black/90'}`} />
 
-              <div className="relative z-10 flex items-center justify-between">
-                <div 
-                  className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-2xl border border-white/20 backdrop-blur-md"
-                  style={{ background: isLeading ? g.hex : 'rgba(0,0,0,0.6)', color: '#fff' }}
-                >
-                  <Icon size={34} className={isLeading ? 'animate-bounce' : ''} />
-                </div>
-
-                {isLeading && (
-                  <div className="flex items-center gap-2 bg-white text-black font-black text-xs px-4 py-1.5 rounded-full tracking-widest shadow-2xl uppercase">
-                    <div className="flex items-end gap-0.5 h-3">
-                      <span className="w-1 bg-black animate-[ping_1s_infinite_100ms] h-full rounded-full" />
-                      <span className="w-1 bg-black animate-[ping_1s_infinite_300ms] h-2/3 rounded-full" />
-                      <span className="w-1 bg-black animate-[ping_1s_infinite_200ms] h-full rounded-full" />
-                    </div>
-                    <span>👑 SALONUN LİDERİ</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="relative z-10 mt-6">
-                <h2 className={`font-black tracking-wider uppercase ${isLeading ? 'text-3xl md:text-4xl text-white drop-shadow-md' : 'text-xl text-gray-300'}`}>
-                  {g.title}
-                </h2>
-              </div>
-
-              <div className="relative z-10 my-8 text-center">
-                <span 
-                  className={`font-black tracking-tighter block transition-all duration-500 drop-shadow-[0_10px_25px_rgba(0,0,0,0.9)] ${
-                    isLeading ? 'text-7xl md:text-9xl animate-pulse' : 'text-6xl md:text-7xl'
-                  }`} 
-                  style={{ color: isLeading ? g.hex : '#fff' }}
-                >
-                  {percent}%
-                </span>
-              </div>
-
-              <div className="relative z-10 w-full bg-black/90 rounded-2xl border border-white/20 h-6 p-1 backdrop-blur-md overflow-hidden">
-                <div 
-                  className={`h-full rounded-xl transition-all duration-1000 bg-gradient-to-r ${g.color} relative overflow-hidden`}
-                  style={{ width: `${Math.max(percent, 4)}%`, boxShadow: isLeading ? `0 0 30px ${g.hex}` : 'none' }}
-                >
-                  {isLeading && (
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent animate-pulse" />
-                  )}
-                </div>
-              </div>
+              <span
+                key={`num-${countdown}`}
+                style={{
+                  animation: 'countdownSlam 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                  textShadow: '0 0 80px rgba(220, 38, 38, 0.95), 0 0 160px rgba(220, 38, 38, 0.6)',
+                }}
+                className="text-[13rem] md:text-[22rem] font-black leading-none text-white tracking-tighter"
+              >
+                {countdown}
+              </span>
             </div>
-          );
-        })}
+          </div>
+        ) : displayedMessage ? (
+          /* KUTUSUZ VE TIRNAKSIZ DEV SAHNE İTİRAFI */
+          <div
+            key={displayedMessage.id}
+            style={{ animation: 'confessionReveal 0.75s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}
+            className="w-full flex flex-col items-center"
+          >
+            <div className="flex items-center justify-center gap-4 mb-6 md:mb-10 w-full max-w-3xl">
+              <div className={`h-[2px] flex-1 bg-gradient-to-r ${currentTheme.lineGradient} opacity-70`} />
+              <div className={`flex items-center gap-2.5 text-base md:text-2xl font-black tracking-[0.35em] uppercase ${currentTheme.textAccent}`}>
+                <CategoryIcon size={26} />
+                <span>{currentTheme.label}</span>
+              </div>
+              <div className={`h-[2px] flex-1 bg-gradient-to-r ${currentTheme.lineGradient} opacity-70`} />
+            </div>
+
+            <blockquote
+              style={{
+                textShadow: `0 0 60px ${currentTheme.hex}55, 0 10px 40px rgba(0,0,0,0.95)`,
+              }}
+              className={`font-black text-white tracking-tight break-words max-w-[88vw] mx-auto ${getTextSizeClass(
+                displayedMessage.content.length
+              )}`}
+            >
+              {displayedMessage.content}
+            </blockquote>
+
+            <div className="mt-10 md:mt-14 flex items-center justify-center gap-4 text-white/50 text-xs md:text-lg font-black tracking-[0.35em] uppercase">
+              <span>AFFEDİLİR Mİ? TELEFONDAN TEPKİ GÖNDER</span>
+              <span className="text-xl md:text-2xl">🔥 😱 🙏 💀</span>
+            </div>
+          </div>
+        ) : (
+          /* KUTUSUZ BEKLEME EKRANI */
+          <div className="flex flex-col items-center justify-center max-w-5xl mx-auto">
+            <Flame
+              size={64}
+              className="text-red-600 mb-6 animate-pulse drop-shadow-[0_0_35px_rgba(220,38,38,0.8)]"
+            />
+            <h2
+              style={{ textShadow: '0 0 70px rgba(220, 38, 38, 0.45)' }}
+              className="text-5xl md:text-8xl font-black tracking-[0.12em] uppercase text-white mb-6 leading-none"
+            >
+              GÜNAH ÇIKARMA KÜRSÜSÜ
+            </h2>
+            <p className="text-lg md:text-3xl text-white/60 font-bold tracking-wide max-w-3xl leading-relaxed">
+              İçinde tuttuğun sırları ve en büyük günahlarını anonim gönder; dev ekranda yargılansın.
+            </p>
+          </div>
+        )}
       </section>
 
-      <footer className="relative z-10 text-center pt-2">
-        <span className="text-gray-500 font-bold tracking-[0.3em] text-xs uppercase">
-          OFFDAY ORGANİZASYON SAHNE SİSTEMİ
+      {/* KUTUSUZ ALT BİLGİ */}
+      <footer className="relative z-10 text-center">
+        <span className="text-white/30 font-black tracking-[0.45em] text-[10px] md:text-xs uppercase">
+          TNKU OVERHEARD • OFFDAY SAHNE SİSTEMİ
         </span>
       </footer>
 
       <style jsx global>{`
         @keyframes floatUpDj {
           0% { transform: translateY(0px) scale(0.8); opacity: 1; }
-          100% { transform: translateY(-400px) scale(1.6); opacity: 0; }
+          100% { transform: translateY(-480px) scale(1.7); opacity: 0; }
+        }
+        @keyframes countdownSlam {
+          0% { opacity: 0; transform: scale(2.4); filter: blur(12px); }
+          25% { opacity: 1; transform: scale(0.95); filter: blur(0px); }
+          100% { opacity: 0.9; transform: scale(1.05); }
+        }
+        @keyframes shockwave {
+          0% { opacity: 0.9; transform: scale(0.4); }
+          100% { opacity: 0; transform: scale(2.6); }
+        }
+        @keyframes confessionReveal {
+          0% { opacity: 0; transform: scale(1.18); filter: blur(10px); }
+          100% { opacity: 1; transform: scale(1); filter: blur(0px); }
         }
       `}</style>
     </main>

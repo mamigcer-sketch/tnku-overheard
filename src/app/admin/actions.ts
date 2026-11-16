@@ -3,96 +3,133 @@
 import prisma from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
-// Bekleyen mesajları getir (Tüm olası location varyasyonları eklendi)
+const PARTY_LOCATIONS = [
+  'PARTY_ITIRAF',
+  'PARTY_REZIL',
+  'PARTY_LINC',
+  'PARTY_LİNÇ',
+  'PARTY_IFSA',
+  'PARTY_OVERHEARD',
+];
+
+// Bekleyen günahları getir
 export async function getPendingMessages() {
   return await prisma.post.findMany({
     where: {
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_IFSA', 'PARTY_OVERHEARD'] },
-      status: 'PENDING'
+      location: { in: PARTY_LOCATIONS },
+      status: 'PENDING',
     },
-    orderBy: { createdAt: 'asc' }
+    orderBy: { createdAt: 'asc' },
   });
 }
 
-// Mesajı onayla ve DJ ekranına fırlat
-export async function approveMessage(id: string) {
-  // Önce daha önceden yayında olan mesaj varsa onları "COMPLETED" yapıp ekrandan düşürüyoruz
-  await prisma.post.updateMany({
-    where: { 
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_IFSA', 'PARTY_OVERHEARD'] },
-      status: 'APPROVED' 
+// Şu an DJ ekranında yayında olan aktif günahı getir
+export async function getActiveMessage() {
+  return await prisma.post.findFirst({
+    where: {
+      location: { in: PARTY_LOCATIONS },
+      status: 'APPROVED',
     },
-    data: { status: 'COMPLETED' }
+    orderBy: { createdAt: 'desc' },
+  });
+}
+
+// Günahı onayla ve DJ ekranına fırlat
+export async function approveMessage(id: string) {
+  await prisma.post.updateMany({
+    where: {
+      location: { in: PARTY_LOCATIONS },
+      status: 'APPROVED',
+    },
+    data: { status: 'COMPLETED' },
   });
 
-  // Şimdi yeni seçtiğimiz mesajı yayına alıyoruz
   await prisma.post.update({
     where: { id },
-    data: { 
-      status: 'APPROVED', 
-      createdAt: new Date() // 🔥 Onaylandığı anı yeni gibi göster ki dev ekranda ilk bu çıksın
-    } 
+    data: {
+      status: 'APPROVED',
+      createdAt: new Date(),
+    },
   });
-  
+
   revalidatePath('/dj');
   revalidatePath('/admin');
 }
 
-// Saçma sapan mesajları çöpe at
+// Uygunsuz / boş mesajları sil
 export async function rejectMessage(id: string) {
   await prisma.post.delete({
-    where: { id }
+    where: { id },
   });
+
+  revalidatePath('/admin');
 }
 
-// 🔥 EKRANI TEMİZLE BUTONU İÇİN ÇALIŞACAK KOD
+// DJ ekranındaki aktif günahı kaldır (Bekleme moduna dön)
 export async function clearActiveMessage() {
   await prisma.post.updateMany({
-    where: { 
-      location: { in: ['PARTY_ITIRAF', 'PARTY_REZIL', 'PARTY_LINC', 'PARTY_LİNÇ', 'PARTY_IFSA', 'PARTY_OVERHEARD'] },
-      status: 'APPROVED' 
+    where: {
+      location: { in: PARTY_LOCATIONS },
+      status: 'APPROVED',
     },
-    data: { status: 'COMPLETED' }
+    data: { status: 'COMPLETED' },
   });
-  
+
   revalidatePath('/dj');
   revalidatePath('/admin');
 }
 
-// 🔥 MESAJ VEYA KATEGORİ GÜNCELLEME
+// Yayına almadan önce yazım hatası / sansür düzenlemesi yap
 export async function updateMessage(id: string, content: string, location: string) {
   await prisma.post.update({
     where: { id },
-    data: { content, location }
+    data: { content, location },
   });
+
   revalidatePath('/admin');
   revalidatePath('/dj');
 }
 
-// 🔥 MASADAN GÖNDERİLEN MESAJI KAYDETME
+// Katılımcı ekranından gönderilen günahı kaydet
 export async function sendPartyMessage(formData: FormData) {
   try {
     const type = formData.get('type') as string;
     const content = formData.get('content') as string;
 
     if (!content || !content.trim()) {
-      return { error: "Mesaj içeriği boş olamaz!" };
+      return { error: 'Günah metni boş olamaz!' };
+    }
+
+    if (content.trim().length > 300) {
+      return { error: 'Günahın en fazla 300 karakter olabilir!' };
     }
 
     const targetLocation = type || 'PARTY_ITIRAF';
 
     await prisma.post.create({
       data: {
-        type: 'PARTY_MODE', 
+        type: 'PARTY_MODE',
         content: content.trim(),
         location: targetLocation,
-        status: 'PENDING' 
+        status: 'PENDING',
       },
     });
 
     return { success: true };
   } catch (error: any) {
-    console.error("Mesaj gönderilemedi:", error);
-    return { error: error.message || "Veritabanı kayıt hatası oluştu." };
+    console.error('Günah gönderilemedi:', error);
+    return { error: error.message || 'Veritabanı kayıt hatası oluştu.' };
   }
+}
+
+// Tüm parti/günah itiraflarını veritabanından kalıcı olarak sil
+export async function deleteAllMessages() {
+  await prisma.post.deleteMany({
+    where: {
+      location: { in: PARTY_LOCATIONS },
+    },
+  });
+
+  revalidatePath('/dj');
+  revalidatePath('/admin');
 }
