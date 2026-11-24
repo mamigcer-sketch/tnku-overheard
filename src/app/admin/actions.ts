@@ -12,6 +12,18 @@ const PARTY_LOCATIONS = [
   'PARTY_OVERHEARD',
 ];
 
+// Parti giriş şifresi kontrolü
+export async function verifyPartyPassword(password: string) {
+  const normalized = (password || '').trim().toLocaleLowerCase('tr-TR');
+  return normalized === 'scap';
+}
+
+// Admin paneli giriş şifresi kontrolü
+export async function verifyAdminPassword(password: string) {
+  const normalized = (password || '').trim().toLocaleLowerCase('tr-TR');
+  return normalized === 'dayılar';
+}
+
 // Bekleyen günahları getir
 export async function getPendingMessages() {
   return await prisma.post.findMany({

@@ -9,6 +9,7 @@ import {
   clearActiveMessage,
   updateMessage,
   deleteAllMessages,
+  verifyAdminPassword,
 } from './actions';
 import {
   ShieldAlert,
@@ -24,6 +25,10 @@ import {
   EyeOff,
   ChevronDown,
   ChevronUp,
+  Lock,
+  KeyRound,
+  ArrowRight,
+  LogOut,
 } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, { label: string; badge: string }> = {
@@ -36,6 +41,14 @@ const CATEGORY_LABELS: Record<string, { label: string; badge: string }> = {
 };
 
 export default function AdminConfessionPage() {
+  // Admin Şifre Kontrol State
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // Panel State
   const [pendingList, setPendingList] = useState<any[]>([]);
   const [activeMessage, setActiveMessage] = useState<any>(null);
   const [loading, setLoading] = useState(false);
@@ -50,6 +63,45 @@ export default function AdminConfessionPage() {
   const [showPhotoTools, setShowPhotoTools] = useState(false);
   const [isPhotoActive, setIsPhotoActive] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('gunah_admin_unlocked');
+      if (saved === '1') {
+        setIsUnlocked(true);
+      }
+      setAuthChecked(true);
+    }
+  }, []);
+
+  const handleUnlock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (authLoading || !passwordInput.trim()) return;
+
+    setAuthLoading(true);
+    setAuthError(null);
+
+    try {
+      const ok = await verifyAdminPassword(passwordInput);
+      if (ok) {
+        localStorage.setItem('gunah_admin_unlocked', '1');
+        setIsUnlocked(true);
+        setPasswordInput('');
+      } else {
+        setAuthError('Yetkisiz giriş! Admin şifresi hatalı.');
+      }
+    } catch (err) {
+      setAuthError('Bağlantı hatası, tekrar dene.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleLock = () => {
+    localStorage.removeItem('gunah_admin_unlocked');
+    setIsUnlocked(false);
+    setPasswordInput('');
+  };
 
   const notify = (text: string) => {
     setMsg(text);
@@ -74,10 +126,11 @@ export default function AdminConfessionPage() {
   };
 
   useEffect(() => {
+    if (!isUnlocked) return;
     fetchAll();
     const interval = setInterval(fetchAll, 2500);
     return () => clearInterval(interval);
-  }, []);
+  }, [isUnlocked]);
 
   const handleApprove = async (id: string) => {
     if (loading) return;
@@ -206,6 +259,74 @@ export default function AdminConfessionPage() {
     }
   };
 
+  if (!authChecked) {
+    return <main className="min-h-screen bg-[#040103]" />;
+  }
+
+  // ADMİN ŞİFRE GİRİŞ EKRANI
+  if (!isUnlocked) {
+    return (
+      <main className="min-h-screen bg-[#040103] text-white flex flex-col items-center justify-center p-5 relative overflow-hidden select-none">
+        <div
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle at 50% 25%, rgba(220, 38, 38, 0.22) 0%, rgba(4, 1, 3, 1) 65%)',
+          }}
+        />
+
+        <div className="w-full max-w-[400px] bg-[#0b0407]/95 backdrop-blur-2xl border border-red-500/25 rounded-[2.5rem] p-7 md:p-8 shadow-2xl relative z-10 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-400">
+            <ShieldAlert size={32} />
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.25em] text-red-400 uppercase mb-1.5">
+            <Lock size={11} /> YETKİLİ KONTROL PANELİ
+          </div>
+
+          <h1 className="text-xl md:text-2xl font-black tracking-wider text-white uppercase mb-2">
+            GÜNAH MODERASYONU
+          </h1>
+          <p className="text-xs text-gray-400 mb-6">
+            Sahne ekranını yönetmek için admin şifresini gir.
+          </p>
+
+          <form onSubmit={handleUnlock} className="space-y-4">
+            <div className="relative">
+              <KeyRound
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+              />
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                placeholder="Admin şifresi..."
+                autoComplete="off"
+                className="w-full rounded-2xl bg-black/70 border border-white/15 focus:border-red-500 pl-11 pr-4 py-4 text-sm font-bold text-white placeholder-gray-600 outline-none transition-all text-center tracking-widest"
+              />
+            </div>
+
+            {authError && (
+              <div className="p-3 rounded-xl bg-red-500/15 border border-red-500/40 text-red-300 text-xs font-bold">
+                {authError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={authLoading || !passwordInput.trim()}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-700 via-red-600 to-rose-600 disabled:opacity-35 text-white font-black text-xs tracking-[0.2em] uppercase flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
+            >
+              <span>{authLoading ? 'DOĞRULANIYOR...' : 'PANELİ AÇ'}</span>
+              <ArrowRight size={16} />
+            </button>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  // ADMİN MODERASYON PANELİ
   return (
     <main className="min-h-screen bg-[#040103] text-white p-4 md:p-8 flex flex-col items-center relative overflow-x-hidden select-none">
       <div className="w-full max-w-[650px] bg-[#0b0407]/95 backdrop-blur-2xl border border-red-500/20 rounded-[2.5rem] p-5 md:p-8 shadow-2xl relative z-10">
@@ -225,12 +346,22 @@ export default function AdminConfessionPage() {
             </div>
           </div>
 
-          <button
-            onClick={fetchAll}
-            className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 cursor-pointer"
-          >
-            <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={fetchAll}
+              title="Yenile"
+              className="p-2.5 bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl text-gray-300 cursor-pointer"
+            >
+              <RefreshCw size={18} className={loading ? 'animate-spin' : ''} />
+            </button>
+            <button
+              onClick={handleLock}
+              title="Paneli Kilitle"
+              className="p-2.5 bg-white/5 hover:bg-red-500/20 border border-white/10 rounded-xl text-gray-400 hover:text-red-300 cursor-pointer"
+            >
+              <LogOut size={18} />
+            </button>
+          </div>
         </div>
 
         {msg && (

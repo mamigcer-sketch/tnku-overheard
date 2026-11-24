@@ -237,13 +237,27 @@ export default function DjConfessionScreen() {
         style={{ backgroundColor: countdown !== null ? '#ef4444' : currentTheme.hex }}
       />
 
-      {/* KUTUSUZ ÜST BİLGİ ŞERİDİ & BÜYÜTÜLMÜŞ LOGO */}
+      {/* KUTUSUZ ÜST BİLGİ ŞERİDİ & ÇİFT LOGO (5555 + SCAP) */}
       <header className="relative z-10 flex items-center justify-between">
-        <div className="flex items-center gap-5 md:gap-6">
-          <div className="relative w-20 h-20 md:w-28 md:h-28 shrink-0">
-            <Image src="/5555.png" alt="Logo" fill className="object-contain" />
+        <div className="flex items-center gap-4 md:gap-6">
+          <div className="flex items-center gap-3 md:gap-4 shrink-0">
+            <div className="relative w-20 h-20 md:w-28 md:h-28">
+              <Image src="/5555.png" alt="Overheard Logo" fill className="object-contain" />
+            </div>
+
+            <span className="text-white/30 font-black text-lg md:text-2xl select-none">×</span>
+
+            <div className="relative w-24 h-24 md:w-36 md:h-28">
+              <Image
+                src="/scap.png"
+                alt="Scap Logo"
+                fill
+                className="object-contain brightness-0 invert drop-shadow-[0_0_14px_rgba(255,255,255,0.4)]"
+              />
+            </div>
           </div>
-          <div>
+
+          <div className="pl-2 md:pl-3 border-l border-white/15">
             <span className="text-xs md:text-sm font-black tracking-[0.45em] text-red-500 uppercase block mb-1">
               ANONİM İTİRAF HATTI
             </span>
@@ -332,7 +346,7 @@ export default function DjConfessionScreen() {
               style={{ textShadow: '0 0 70px rgba(220, 38, 38, 0.45)' }}
               className="text-5xl md:text-8xl font-black tracking-[0.12em] uppercase text-white mb-6 leading-none"
             >
-              GÜNAH ÇIKARMA KÜRSÜSÜ
+              OVERHEARD - OFFDAY SUNAR!
             </h2>
             <p className="text-lg md:text-3xl text-white/60 font-bold tracking-wide max-w-3xl leading-relaxed">
               İçinde tuttuğun sırları ve en büyük günahlarını anonim gönder; dev ekranda yargılansın.

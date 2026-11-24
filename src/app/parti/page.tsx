@@ -1,9 +1,20 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
-import { sendPartyMessage } from '../admin/actions';
-import { Flame, Skull, Eye, Sparkles, Send, CheckCircle2, Lock, RotateCcw } from 'lucide-react';
+import { sendPartyMessage, verifyPartyPassword } from '../admin/actions';
+import {
+  Flame,
+  Skull,
+  Eye,
+  Sparkles,
+  Send,
+  CheckCircle2,
+  Lock,
+  RotateCcw,
+  KeyRound,
+  ArrowRight,
+} from 'lucide-react';
 
 const SIN_CATEGORIES = [
   {
@@ -56,12 +67,52 @@ const REACTION_EMOJIS = [
 ];
 
 export default function ConfessionPartyPage() {
+  // Şifre Kontrol State
+  const [authChecked, setAuthChecked] = useState(false);
+  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [authLoading, setAuthLoading] = useState(false);
+
+  // İtiraf Form State
   const [selectedType, setSelectedType] = useState<string>('PARTY_LINC');
   const [content, setContent] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [flyingEmojis, setFlyingEmojis] = useState<{ id: number; emoji: string; left: number }[]>([]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('gunah_parti_unlocked');
+      if (saved === '1') {
+        setIsUnlocked(true);
+      }
+      setAuthChecked(true);
+    }
+  }, []);
+
+  const handleUnlock = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (authLoading || !passwordInput.trim()) return;
+
+    setAuthLoading(true);
+    setAuthError(null);
+
+    try {
+      const ok = await verifyPartyPassword(passwordInput);
+      if (ok) {
+        localStorage.setItem('gunah_parti_unlocked', '1');
+        setIsUnlocked(true);
+      } else {
+        setAuthError('Hatalı şifre! Mekandaki şifreyi kontrol et.');
+      }
+    } catch (err) {
+      setAuthError('Bağlantı hatası, tekrar dene.');
+    } finally {
+      setAuthLoading(false);
+    }
+  };
 
   const currentTheme = SIN_CATEGORIES.find((c) => c.id === selectedType) || SIN_CATEGORIES[1];
 
@@ -116,6 +167,80 @@ export default function ConfessionPartyPage() {
     }
   };
 
+  if (!authChecked) {
+    return <main className="min-h-screen bg-[#030102]" />;
+  }
+
+  // ŞİFRE GİRİŞ EKRANI
+  if (!isUnlocked) {
+    return (
+      <main className="min-h-screen bg-[#030102] text-white flex flex-col items-center justify-center px-6 py-10 relative overflow-hidden select-none">
+        <div
+          className="fixed inset-0 pointer-events-none"
+          style={{
+            background: 'radial-gradient(circle at 50% 25%, rgba(220, 38, 38, 0.25) 0%, rgba(3, 1, 2, 1) 65%)',
+          }}
+        />
+
+        <div className="w-full max-w-[400px] mx-auto relative z-10 text-center">
+          <div className="relative w-28 h-28 mx-auto mb-5">
+            <Image
+              src="/5555.png"
+              alt="TNKU Overheard Logo"
+              fill
+              priority
+              className="object-contain drop-shadow-[0_0_25px_rgba(220,38,38,0.45)]"
+            />
+          </div>
+
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.28em] text-red-400 uppercase mb-2">
+            <Lock size={12} /> ÖZEL ETKİNLİK GİRİŞİ
+          </div>
+
+          <h1 className="text-2xl md:text-3xl font-black tracking-[0.12em] text-white uppercase mb-2">
+            GÜNAH ÇIKARMA GECESİ
+          </h1>
+          <p className="text-white/50 text-xs font-medium mb-7 leading-relaxed">
+            İtiraf kürsüsüne bağlanmak için gece şifresini gir.
+          </p>
+
+          <form onSubmit={handleUnlock} className="space-y-4">
+            <div className="relative">
+              <KeyRound
+                size={18}
+                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none"
+              />
+              <input
+                type="password"
+                value={passwordInput}
+                onChange={(e) => setPasswordInput(e.target.value)}
+                placeholder="Giriş şifresi..."
+                autoComplete="off"
+                className="w-full rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/15 focus:border-red-500/80 pl-11 pr-4 py-4 text-sm font-bold text-white placeholder-white/30 outline-none transition-all text-center tracking-widest"
+              />
+            </div>
+
+            {authError && (
+              <div className="p-3 rounded-2xl bg-red-500/15 border border-red-500/40 text-red-300 text-xs font-bold">
+                {authError}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={authLoading || !passwordInput.trim()}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-700 via-red-600 to-rose-600 disabled:opacity-35 text-white font-black text-xs tracking-[0.22em] uppercase flex items-center justify-center gap-2 shadow-[0_0_35px_rgba(220,38,38,0.45)] transition-all active:scale-[0.98] cursor-pointer"
+            >
+              <span>{authLoading ? 'KONTROL EDİLİYOR...' : 'İÇERİ GİR'}</span>
+              <ArrowRight size={16} />
+            </button>
+          </form>
+        </div>
+      </main>
+    );
+  }
+
+  // ANA İTİRAF EKRANI
   return (
     <main className="min-h-screen bg-[#030102] text-white flex flex-col items-center justify-between px-5 py-7 md:py-10 relative overflow-hidden select-none">
       {/* Seçilen Günaha Göre Değişen Sahne Atmosfer Işığı */}
@@ -142,7 +267,7 @@ export default function ConfessionPartyPage() {
         ))}
       </div>
 
-      {/* ANA İÇERİK (Kutusuz, Tam Ekran Mobil Kulüp Arayüzü) */}
+      {/* ANA İÇERİK */}
       <div className="w-full max-w-[460px] mx-auto flex-1 flex flex-col justify-center relative z-10">
         {/* LOGO & BAŞLIK ALANI */}
         <div className="text-center mb-7">
