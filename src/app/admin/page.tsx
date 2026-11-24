@@ -280,14 +280,14 @@ export default function AdminConfessionPage() {
           </div>
 
           <div className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.25em] text-red-400 uppercase mb-1.5">
-            <Lock size={11} /> YETKİLİ KONTROL PANELİ
+            <Lock size={11} /> POPOPOPORNOOOOOO 
           </div>
 
           <h1 className="text-xl md:text-2xl font-black tracking-wider text-white uppercase mb-2">
-            GÜNAH MODERASYONU
+            SEKSSS OGLUUM
           </h1>
           <p className="text-xs text-gray-400 mb-6">
-            Sahne ekranını yönetmek için admin şifresini gir.
+             admin şifresini gir SİKMİİİİİM
           </p>
 
           <form onSubmit={handleUnlock} className="space-y-4">
