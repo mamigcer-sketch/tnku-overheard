@@ -29,6 +29,8 @@ import {
   KeyRound,
   ArrowRight,
   LogOut,
+  Film,
+  Square,
 } from 'lucide-react';
 
 const CATEGORY_LABELS: Record<string, { label: string; badge: string }> = {
@@ -53,6 +55,9 @@ export default function AdminConfessionPage() {
   const [activeMessage, setActiveMessage] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+
+  // Intro Video State
+  const [isVideoActive, setIsVideoActive] = useState(false);
 
   // Düzenleme State
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -110,16 +115,21 @@ export default function AdminConfessionPage() {
 
   const fetchAll = async () => {
     try {
-      const [pending, active] = await Promise.all([
+      const [pending, active, photoRes, videoRes] = await Promise.all([
         getPendingMessages(),
         getActiveMessage(),
+        fetch(`/api/photo?t=${Date.now()}`),
+        fetch(`/api/video?t=${Date.now()}`),
       ]);
+
       setPendingList(pending || []);
       setActiveMessage(active || null);
 
-      const photoRes = await fetch(`/api/photo?t=${Date.now()}`);
       const photoData = await photoRes.json();
       if (photoData) setIsPhotoActive(photoData.active);
+
+      const videoData = await videoRes.json();
+      if (videoData) setIsVideoActive(videoData.active);
     } catch (e) {
       console.error('Admin veri çekme hatası:', e);
     }
@@ -128,9 +138,46 @@ export default function AdminConfessionPage() {
   useEffect(() => {
     if (!isUnlocked) return;
     fetchAll();
-    const interval = setInterval(fetchAll, 2500);
+    const interval = setInterval(fetchAll, 2000);
     return () => clearInterval(interval);
   }, [isUnlocked]);
+
+  // Intro Video Başlat / Durdur
+  const handlePlayIntroVideo = async (loop: boolean) => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      await fetch('/api/video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'play', loop }),
+      });
+      setIsVideoActive(true);
+      notify(loop ? '🔁 Video Sürekli Döngüde (Loop) Yayında!' : '🎬 Intro Videosu 1 Kez Oynatılıyor!');
+    } catch (e) {
+      notify('❌ Video başlatılamadı.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleStopIntroVideo = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      await fetch('/api/video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stop' }),
+      });
+      setIsVideoActive(false);
+      notify('⏹️ Video Durduruldu, Sahneye Dönüldü.');
+    } catch (e) {
+      notify('❌ Video durdurulamadı.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleApprove = async (id: string) => {
     if (loading) return;
@@ -280,14 +327,14 @@ export default function AdminConfessionPage() {
           </div>
 
           <div className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.25em] text-red-400 uppercase mb-1.5">
-            <Lock size={11} /> POPOPOPORNOOOOOO 
+            <Lock size={11} />porno paneli
           </div>
 
           <h1 className="text-xl md:text-2xl font-black tracking-wider text-white uppercase mb-2">
-            SEKSSS OGLUUM
+            seks seks pornoo
           </h1>
           <p className="text-xs text-gray-400 mb-6">
-             admin şifresini gir SİKMİİİİİM
+            ekranını yönetmek için seks şifresini gir.
           </p>
 
           <form onSubmit={handleUnlock} className="space-y-4">
@@ -369,6 +416,36 @@ export default function AdminConfessionPage() {
             {msg}
           </div>
         )}
+
+        {/* 🎬 INTRO / LOOP VİDEO TAM EKRAN KONTROLÜ */}
+        <div className="mb-6">
+          {isVideoActive ? (
+            <button
+              onClick={handleStopIntroVideo}
+              disabled={loading}
+              className="w-full py-4 px-5 rounded-2xl bg-red-600 hover:bg-red-500 text-white font-black text-xs tracking-[0.2em] uppercase flex items-center justify-center gap-2.5 shadow-[0_0_30px_rgba(220,38,38,0.5)] animate-pulse cursor-pointer"
+            >
+              <Square size={16} fill="currentColor" /> VİDEO YAYINDA — DURDUR VE SAHNEYE DÖN
+            </button>
+          ) : (
+            <div className="grid grid-cols-2 gap-2.5">
+              <button
+                onClick={() => handlePlayIntroVideo(false)}
+                disabled={loading}
+                className="py-4 px-3 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black text-[11px] tracking-[0.15em] uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.25)] transition-all active:scale-95 cursor-pointer"
+              >
+                <Film size={16} /> INTRO (1 KEZ)
+              </button>
+              <button
+                onClick={() => handlePlayIntroVideo(true)}
+                disabled={loading}
+                className="py-4 px-3 rounded-2xl bg-gradient-to-r from-red-700 to-rose-600 hover:from-red-600 hover:to-rose-500 text-white font-black text-[11px] tracking-[0.15em] uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(220,38,38,0.3)] transition-all active:scale-95 cursor-pointer"
+              >
+                <RefreshCw size={16} /> SÜREKLİ LOOP
+              </button>
+            </div>
+          )}
+        </div>
 
         {/* ŞU AN DEV EKRANDA YAYINDA OLAN GÜNAH */}
         <div className="mb-7 p-5 rounded-3xl bg-gradient-to-br from-red-950/50 to-black border border-red-500/40 shadow-[0_0_30px_rgba(220,38,38,0.15)]">
@@ -572,4 +649,4 @@ export default function AdminConfessionPage() {
       </div>
     </main>
   );
-}
+} 

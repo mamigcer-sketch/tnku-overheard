@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { getActiveMessage } from '../admin/actions';
-import { Flame, Skull, Eye, Sparkles, Camera } from 'lucide-react';
+import { Flame, Skull, Eye, Sparkles, Camera, Volume2 } from 'lucide-react';
 import Image from 'next/image';
 
 const CATEGORY_THEMES: Record<
@@ -70,6 +70,15 @@ export default function DjConfessionScreen() {
     photoUrl: null,
   });
 
+  // Tam Ekran Intro / Loop Video State
+  const [videoState, setVideoState] = useState<{ active: boolean; loop: boolean; startedAt: number }>({
+    active: false,
+    loop: false,
+    startedAt: 0,
+  });
+  const [isVideoMutedFallback, setIsVideoMutedFallback] = useState(false);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+
   const lastMessageIdRef = useRef<string | null>(null);
   const isFirstFetchRef = useRef<boolean>(true);
   const processedReactionIds = useRef<Set<number>>(new Set());
@@ -128,6 +137,69 @@ export default function DjConfessionScreen() {
 
     return () => clearTimeout(timer);
   }, [countdown, pendingRevealMessage]);
+
+  // Intro / Loop Video Modu Kontrolü
+  useEffect(() => {
+    const fetchVideoState = async () => {
+      try {
+        const res = await fetch('/api/video?t=' + Date.now(), { cache: 'no-store' });
+        const data = await res.json();
+        if (data) {
+          setVideoState((prev) => {
+            if (
+              prev.active !== data.active ||
+              prev.loop !== data.loop ||
+              prev.startedAt !== data.startedAt
+            ) {
+              return data;
+            }
+            return prev;
+          });
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    };
+
+    fetchVideoState();
+    const interval = setInterval(fetchVideoState, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // Video başladığında sesiyle oynatmayı dene
+  useEffect(() => {
+    if (!videoState.active || !videoRef.current) return;
+    const vid = videoRef.current;
+    vid.currentTime = 0;
+    vid.muted = false;
+    setIsVideoMutedFallback(false);
+
+    vid.play().catch(() => {
+      vid.muted = true;
+      setIsVideoMutedFallback(true);
+      vid.play().catch((err) => console.error('Video oynatma hatası:', err));
+    });
+  }, [videoState.active, videoState.loop, videoState.startedAt]);
+
+  const handleVideoEnded = async () => {
+    setVideoState({ active: false, loop: false, startedAt: 0 });
+    try {
+      await fetch('/api/video', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'stop' }),
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleUnmuteVideo = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = false;
+      setIsVideoMutedFallback(false);
+    }
+  };
 
   // Fotoğraf Modu Kontrolü
   useEffect(() => {
@@ -190,8 +262,31 @@ export default function DjConfessionScreen() {
 
   return (
     <main className="h-screen w-screen bg-black text-white flex flex-col justify-between px-8 py-6 md:px-14 md:py-8 select-none relative overflow-hidden">
+      {/* 🎬 TAM EKRAN INTRO / LOOP VİDEO MODU */}
+      {videoState.active && (
+        <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
+          <video
+            key={`${videoState.startedAt}-${videoState.loop}`}
+            ref={videoRef}
+            src="/intro.mp4"
+            loop={videoState.loop}
+            playsInline
+            onEnded={videoState.loop ? undefined : handleVideoEnded}
+            className="w-screen h-screen object-contain bg-black"
+          />
+          {isVideoMutedFallback && (
+            <button
+              onClick={handleUnmuteVideo}
+              className="fixed bottom-8 right-8 z-50 px-5 py-3 rounded-full bg-red-600 text-white font-black text-xs tracking-widest uppercase flex items-center gap-2 shadow-2xl animate-bounce cursor-pointer"
+            >
+              <Volume2 size={18} /> SESİ AÇ
+            </button>
+          )}
+        </div>
+      )}
+
       {/* CANLI FOTOĞRAF MODU */}
-      {photoState.active && photoState.photoUrl && (
+      {!videoState.active && photoState.active && photoState.photoUrl && (
         <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6">
           <span className="text-sm md:text-base font-black tracking-[0.4em] text-amber-400 uppercase mb-4 flex items-center gap-2">
             <Camera size={20} /> GECENİN KARESİ
