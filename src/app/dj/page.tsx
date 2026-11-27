@@ -90,7 +90,7 @@ export default function DjOverheardScreen() {
       try {
         const res = await fetch('/api/video?t=' + Date.now(), { cache: 'no-store' });
         const data = await res.json();
-        if (data) {
+        if (data && typeof data.active === 'boolean') {
           setVideoState((prev) => {
             if (
               prev.active !== data.active ||
@@ -112,20 +112,30 @@ export default function DjOverheardScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  // Video başladığında sesiyle oynatmayı dene
+  // Video başladığında sesiyle oynatmayı dene, Chrome engellerse sessiz başlat
   useEffect(() => {
     if (!videoState.active || !videoRef.current) return;
     const vid = videoRef.current;
-    vid.currentTime = 0;
-    vid.muted = false;
-    setIsVideoMutedFallback(false);
 
-    vid.play().catch(() => {
-      vid.muted = true;
-      setIsVideoMutedFallback(true);
-      vid.play().catch((err) => console.error('Video oynatma hatası:', err));
-    });
-  }, [videoState.active, videoState.loop, videoState.startedAt]);
+    const startPlayback = async () => {
+      try {
+        vid.currentTime = 0;
+        vid.muted = false;
+        setIsVideoMutedFallback(false);
+        await vid.play();
+      } catch {
+        try {
+          vid.muted = true;
+          setIsVideoMutedFallback(true);
+          await vid.play();
+        } catch (err) {
+          console.error('Video oynatma hatası:', err);
+        }
+      }
+    };
+
+    startPlayback();
+  }, [videoState.active, videoState.startedAt]);
 
   const handleVideoEnded = async () => {
     setVideoState({ active: false, loop: false, startedAt: 0 });
@@ -206,9 +216,11 @@ export default function DjOverheardScreen() {
       {videoState.active && (
         <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
           <video
-            key={`${videoState.startedAt}-${videoState.loop}`}
+            key={videoState.startedAt}
             ref={videoRef}
             src="/intro.mp4"
+            preload="auto"
+            muted={isVideoMutedFallback}
             loop={videoState.loop}
             playsInline
             onEnded={videoState.loop ? undefined : handleVideoEnded}
