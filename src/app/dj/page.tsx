@@ -2,64 +2,10 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { getActiveMessage } from '../admin/actions';
-import { Flame, Skull, Eye, Sparkles, Camera, Volume2 } from 'lucide-react';
+import { Sparkles, Camera, Volume2 } from 'lucide-react';
 import Image from 'next/image';
 
-const CATEGORY_THEMES: Record<
-  string,
-  {
-    label: string;
-    icon: any;
-    hex: string;
-    textAccent: string;
-    lineGradient: string;
-  }
-> = {
-  PARTY_ITIRAF: {
-    label: 'MASUM İTİRAF',
-    icon: Sparkles,
-    hex: '#f59e0b',
-    textAccent: 'text-amber-400',
-    lineGradient: 'from-transparent via-amber-500 to-transparent',
-  },
-  PARTY_LINC: {
-    label: 'BÜYÜK GÜNAH',
-    icon: Flame,
-    hex: '#dc2626',
-    textAccent: 'text-red-500',
-    lineGradient: 'from-transparent via-red-600 to-transparent',
-  },
-  PARTY_LİNÇ: {
-    label: 'BÜYÜK GÜNAH',
-    icon: Flame,
-    hex: '#dc2626',
-    textAccent: 'text-red-500',
-    lineGradient: 'from-transparent via-red-600 to-transparent',
-  },
-  PARTY_REZIL: {
-    label: 'REZİLLİK & UTANÇ',
-    icon: Skull,
-    hex: '#a855f7',
-    textAccent: 'text-purple-400',
-    lineGradient: 'from-transparent via-purple-500 to-transparent',
-  },
-  PARTY_IFSA: {
-    label: 'İFŞA & GİZLİ SIR',
-    icon: Eye,
-    hex: '#f43f5e',
-    textAccent: 'text-rose-500',
-    lineGradient: 'from-transparent via-rose-500 to-transparent',
-  },
-  PARTY_OVERHEARD: {
-    label: 'GÜNAH İTİRAFI',
-    icon: Flame,
-    hex: '#dc2626',
-    textAccent: 'text-red-500',
-    lineGradient: 'from-transparent via-red-600 to-transparent',
-  },
-};
-
-export default function DjConfessionScreen() {
+export default function DjOverheardScreen() {
   const [displayedMessage, setDisplayedMessage] = useState<any>(null);
   const [pendingRevealMessage, setPendingRevealMessage] = useState<any>(null);
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -83,7 +29,7 @@ export default function DjConfessionScreen() {
   const isFirstFetchRef = useRef<boolean>(true);
   const processedReactionIds = useRef<Set<number>>(new Set());
 
-  // Aktif günahı kontrol et ve yeni günah geldiyse 3-2-1 sayacını başlat
+  // Aktif itirafı kontrol et ve yeni mesaj geldiyse 3-2-1 sayacını başlat
   useEffect(() => {
     const fetchActive = async () => {
       try {
@@ -246,12 +192,6 @@ export default function DjConfessionScreen() {
     return () => clearInterval(interval);
   }, []);
 
-  const activeSource = countdown !== null ? pendingRevealMessage : displayedMessage;
-  const currentTheme = activeSource
-    ? CATEGORY_THEMES[activeSource.location] || CATEGORY_THEMES.PARTY_LINC
-    : CATEGORY_THEMES.PARTY_LINC;
-  const CategoryIcon = currentTheme.icon;
-
   // LED Ekran için dev punto ölçekleme
   const getTextSizeClass = (len: number) => {
     if (len <= 45) return 'text-6xl md:text-[7.5rem] leading-[1.08]';
@@ -261,7 +201,7 @@ export default function DjConfessionScreen() {
   };
 
   return (
-    <main className="h-screen w-screen bg-black text-white flex flex-col justify-between px-8 py-6 md:px-14 md:py-8 select-none relative overflow-hidden">
+    <main className="h-screen w-screen bg-[#02040a] text-white flex flex-col justify-between px-8 py-6 md:px-14 md:py-8 select-none relative overflow-hidden">
       {/* 🎬 TAM EKRAN INTRO / LOOP VİDEO MODU */}
       {videoState.active && (
         <div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
@@ -277,7 +217,7 @@ export default function DjConfessionScreen() {
           {isVideoMutedFallback && (
             <button
               onClick={handleUnmuteVideo}
-              className="fixed bottom-8 right-8 z-50 px-5 py-3 rounded-full bg-red-600 text-white font-black text-xs tracking-widest uppercase flex items-center gap-2 shadow-2xl animate-bounce cursor-pointer"
+              className="fixed bottom-8 right-8 z-50 px-5 py-3 rounded-full bg-blue-600 text-white font-black text-xs tracking-widest uppercase flex items-center gap-2 shadow-2xl animate-bounce cursor-pointer"
             >
               <Volume2 size={18} /> SESİ AÇ
             </button>
@@ -288,7 +228,7 @@ export default function DjConfessionScreen() {
       {/* CANLI FOTOĞRAF MODU */}
       {!videoState.active && photoState.active && photoState.photoUrl && (
         <div className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center p-6">
-          <span className="text-sm md:text-base font-black tracking-[0.4em] text-amber-400 uppercase mb-4 flex items-center gap-2">
+          <span className="text-sm md:text-base font-black tracking-[0.4em] text-blue-400 uppercase mb-4 flex items-center gap-2">
             <Camera size={20} /> GECENİN KARESİ
           </span>
           <img
@@ -321,76 +261,69 @@ export default function DjConfessionScreen() {
         style={{
           background:
             countdown !== null
-              ? 'radial-gradient(circle at 50% 50%, rgba(220, 38, 38, 0.42) 0%, rgba(0, 0, 0, 1) 70%)'
-              : `radial-gradient(circle at 50% 52%, ${currentTheme.hex}33 0%, rgba(0, 0, 0, 1) 68%)`,
+              ? 'radial-gradient(circle at 50% 50%, rgba(37, 99, 235, 0.45) 0%, rgba(2, 4, 10, 1) 70%)'
+              : 'radial-gradient(circle at 50% 52%, rgba(37, 99, 235, 0.26) 0%, rgba(2, 4, 10, 1) 68%)',
         }}
       />
 
       {/* Üst Sahne Spot Hüzmesi */}
       <div
         className="absolute -top-40 left-1/2 -translate-x-1/2 w-[90vw] h-[420px] opacity-25 blur-[130px] pointer-events-none transition-colors duration-1000"
-        style={{ backgroundColor: countdown !== null ? '#ef4444' : currentTheme.hex }}
+        style={{ backgroundColor: countdown !== null ? '#3b82f6' : '#2563eb' }}
       />
 
-      {/* KUTUSUZ ÜST BİLGİ ŞERİDİ & ÇİFT LOGO (5555 + SCAP) */}
+      {/* KUTUSUZ ÜST BİLGİ ŞERİDİ & BÜYÜK OVERHEARD LOGOSU */}
       <header className="relative z-10 flex items-center justify-between">
-        <div className="flex items-center gap-4 md:gap-6">
-          <div className="flex items-center gap-3 md:gap-4 shrink-0">
-            <div className="relative w-20 h-20 md:w-28 md:h-28">
-              <Image src="/5555.png" alt="Overheard Logo" fill className="object-contain" />
-            </div>
-
-            <span className="text-white/30 font-black text-lg md:text-2xl select-none">×</span>
-
-            <div className="relative w-24 h-24 md:w-36 md:h-28">
-              <Image
-                src="/scap.png"
-                alt="Scap Logo"
-                fill
-                className="object-contain brightness-0 invert drop-shadow-[0_0_14px_rgba(255,255,255,0.4)]"
-              />
-            </div>
+        <div className="flex items-center gap-5 md:gap-7">
+          <div className="relative w-28 h-28 md:w-40 md:h-40 shrink-0">
+            <Image
+              src="/5555.png"
+              alt="Overheard Logo"
+              fill
+              priority
+              className="object-contain drop-shadow-[0_0_24px_rgba(59,130,246,0.45)]"
+            />
           </div>
 
-          <div className="pl-2 md:pl-3 border-l border-white/15">
-            <span className="text-xs md:text-sm font-black tracking-[0.45em] text-red-500 uppercase block mb-1">
+          <div className="pl-4 md:pl-6 border-l border-white/15">
+            <span className="text-xs md:text-sm font-black tracking-[0.45em] text-blue-400 uppercase block mb-1.5">
               ANONİM İTİRAF HATTI
             </span>
-            <h1 className="text-xl md:text-3xl font-black tracking-[0.18em] uppercase text-white/95">
-              GÜNAH ÇIKARMA GECESİ
+            <h1 className="text-2xl md:text-4xl font-black tracking-[0.18em] uppercase text-white/95">
+              OVERHEARD PARTY
             </h1>
           </div>
         </div>
 
         <div className="flex items-center gap-2.5">
-          <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-ping" />
+          <span className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping" />
           <span className="text-xs md:text-sm font-black tracking-[0.35em] text-white/60 uppercase">
             CANLI
           </span>
         </div>
       </header>
 
-      {/* MERKEZ SAHNE: 3-2-1 SAYACI / DEV GÜNAH METNİ / BEKLEME EKRANI */}
+      {/* MERKEZ SAHNE: 3-2-1 SAYACI / DEV İTİRAF METNİ / BEKLEME EKRANI */}
       <section className="relative z-10 my-auto w-full max-w-[92vw] mx-auto text-center flex flex-col items-center justify-center">
         {countdown !== null ? (
           /* 3 - 2 - 1 DRAMATİK GERİ SAYIM */
           <div className="flex flex-col items-center justify-center">
-            <span className="text-sm md:text-2xl font-black tracking-[0.55em] text-red-500 uppercase mb-2 animate-pulse">
-              YENİ GÜNAH GELİYOR
+            <span className="text-sm md:text-2xl font-black tracking-[0.55em] text-blue-400 uppercase mb-2 animate-pulse">
+              YENİ İTİRAF GELİYOR
             </span>
 
             <div className="relative flex items-center justify-center">
               <div
                 key={`ring-${countdown}`}
                 style={{ animation: 'shockwave 0.85s ease-out forwards' }}
-                className="absolute w-56 h-56 md:w-96 md:h-96 rounded-full border-4 border-red-500/70 pointer-events-none"
+                className="absolute w-56 h-56 md:w-96 md:h-96 rounded-full border-4 border-blue-500/70 pointer-events-none"
               />
 
               <span
                 key={`num-${countdown}`}
                 style={{
                   animation: 'countdownSlam 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards',
-                  textShadow: '0 0 80px rgba(220, 38, 38, 0.95), 0 0 160px rgba(220, 38, 38, 0.6)',
+                  textShadow: '0 0 80px rgba(59, 130, 246, 0.95), 0 0 160px rgba(37, 99, 235, 0.65)',
                 }}
                 className="text-[13rem] md:text-[22rem] font-black leading-none text-white tracking-tighter"
               >
@@ -406,17 +339,17 @@ export default function DjConfessionScreen() {
             className="w-full flex flex-col items-center"
           >
             <div className="flex items-center justify-center gap-4 mb-6 md:mb-10 w-full max-w-3xl">
-              <div className={`h-[2px] flex-1 bg-gradient-to-r ${currentTheme.lineGradient} opacity-70`} />
-              <div className={`flex items-center gap-2.5 text-base md:text-2xl font-black tracking-[0.35em] uppercase ${currentTheme.textAccent}`}>
-                <CategoryIcon size={26} />
-                <span>{currentTheme.label}</span>
+              <div className="h-[2px] flex-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-70" />
+              <div className="flex items-center gap-2.5 text-base md:text-2xl font-black tracking-[0.35em] uppercase text-blue-400">
+                <Sparkles size={26} />
+                <span>ANONİM İTİRAF</span>
               </div>
-              <div className={`h-[2px] flex-1 bg-gradient-to-r ${currentTheme.lineGradient} opacity-70`} />
+              <div className="h-[2px] flex-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-70" />
             </div>
 
             <blockquote
               style={{
-                textShadow: `0 0 60px ${currentTheme.hex}55, 0 10px 40px rgba(0,0,0,0.95)`,
+                textShadow: '0 0 60px rgba(59, 130, 246, 0.45), 0 10px 40px rgba(0,0,0,0.95)',
               }}
               className={`font-black text-white tracking-tight break-words max-w-[88vw] mx-auto ${getTextSizeClass(
                 displayedMessage.content.length
@@ -426,25 +359,25 @@ export default function DjConfessionScreen() {
             </blockquote>
 
             <div className="mt-10 md:mt-14 flex items-center justify-center gap-4 text-white/50 text-xs md:text-lg font-black tracking-[0.35em] uppercase">
-              <span>AFFEDİLİR Mİ? TELEFONDAN TEPKİ GÖNDER</span>
-              <span className="text-xl md:text-2xl">🔥 😱 🙏 💀</span>
+              <span>NE DİYORSUN? TELEFONDAN TEPKİ GÖNDER</span>
+              <span className="text-xl md:text-2xl">🔥 😱 😂 💀</span>
             </div>
           </div>
         ) : (
           /* KUTUSUZ BEKLEME EKRANI */
           <div className="flex flex-col items-center justify-center max-w-5xl mx-auto">
-            <Flame
+            <Sparkles
               size={64}
-              className="text-red-600 mb-6 animate-pulse drop-shadow-[0_0_35px_rgba(220,38,38,0.8)]"
+              className="text-blue-500 mb-6 animate-pulse drop-shadow-[0_0_35px_rgba(59,130,246,0.85)]"
             />
             <h2
-              style={{ textShadow: '0 0 70px rgba(220, 38, 38, 0.45)' }}
-              className="text-5xl md:text-8xl font-black tracking-[0.12em] uppercase text-white mb-6 leading-none"
+              style={{ textShadow: '0 0 70px rgba(59, 130, 246, 0.5)' }}
+              className="text-5xl md:text-8xl font-black tracking-[0.14em] uppercase text-white mb-6 leading-none"
             >
-              OVERHEARD - OFFDAY SUNAR!
+              OVERHEARD PARTY
             </h2>
             <p className="text-lg md:text-3xl text-white/60 font-bold tracking-wide max-w-3xl leading-relaxed">
-              İçinde tuttuğun sırları ve en büyük günahlarını anonim gönder; dev ekranda yargılansın.
+              İçinde tuttuğun her şeyi anonim gönder; dev ekranda herkes görsün.
             </p>
           </div>
         )}
@@ -453,7 +386,7 @@ export default function DjConfessionScreen() {
       {/* KUTUSUZ ALT BİLGİ */}
       <footer className="relative z-10 text-center">
         <span className="text-white/30 font-black tracking-[0.45em] text-[10px] md:text-xs uppercase">
-          TNKU OVERHEARD • OFFDAY SAHNE SİSTEMİ
+          TNKU OVERHEARD • CANLI SAHNE SİSTEMİ
         </span>
       </footer>
 

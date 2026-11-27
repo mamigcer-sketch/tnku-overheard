@@ -1,127 +1,37 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
-import { sendPartyMessage, verifyPartyPassword } from '../admin/actions';
+import { sendPartyMessage } from '../admin/actions';
 import {
-  Flame,
-  Skull,
-  Eye,
-  Sparkles,
   Send,
   CheckCircle2,
   Lock,
   RotateCcw,
-  KeyRound,
-  ArrowRight,
+  Sparkles,
 } from 'lucide-react';
 
-const SIN_CATEGORIES = [
-  {
-    id: 'PARTY_ITIRAF',
-    title: 'Masum İtiraf',
-    desc: 'Küçük kaçamaklar',
-    icon: Sparkles,
-    hex: '#f59e0b',
-    activeCard: 'border-amber-500/70 bg-amber-500/15 text-amber-200 shadow-[0_0_30px_rgba(245,158,11,0.2)]',
-    buttonGradient: 'from-amber-600 via-amber-500 to-orange-500 shadow-[0_0_35px_rgba(245,158,11,0.35)]',
-    focusRing: 'focus:border-amber-500/70',
-  },
-  {
-    id: 'PARTY_LINC',
-    title: 'Büyük Günah',
-    desc: 'Affedilmez itiraf',
-    icon: Flame,
-    hex: '#dc2626',
-    activeCard: 'border-red-500/80 bg-red-600/20 text-red-200 shadow-[0_0_30px_rgba(220,38,38,0.3)]',
-    buttonGradient: 'from-red-700 via-red-600 to-rose-600 shadow-[0_0_35px_rgba(220,38,38,0.45)]',
-    focusRing: 'focus:border-red-500/80',
-  },
-  {
-    id: 'PARTY_REZIL',
-    title: 'Rezillik',
-    desc: 'Yüz kızartan anı',
-    icon: Skull,
-    hex: '#a855f7',
-    activeCard: 'border-purple-500/80 bg-purple-600/20 text-purple-200 shadow-[0_0_30px_rgba(168,85,247,0.25)]',
-    buttonGradient: 'from-purple-700 via-purple-600 to-indigo-600 shadow-[0_0_35px_rgba(168,85,247,0.4)]',
-    focusRing: 'focus:border-purple-500/80',
-  },
-  {
-    id: 'PARTY_IFSA',
-    title: 'İfşa & Sır',
-    desc: 'Ortaya dökülsün',
-    icon: Eye,
-    hex: '#f43f5e',
-    activeCard: 'border-rose-500/80 bg-rose-600/20 text-rose-200 shadow-[0_0_30px_rgba(244,63,94,0.25)]',
-    buttonGradient: 'from-rose-700 via-rose-600 to-pink-600 shadow-[0_0_35px_rgba(244,63,94,0.4)]',
-    focusRing: 'focus:border-rose-500/80',
-  },
-];
-
 const REACTION_EMOJIS = [
-  { emoji: '🔥', label: 'Yandın' },
+  { emoji: '🔥', label: 'Yandı' },
   { emoji: '😱', label: 'Oha' },
-  { emoji: '🙏', label: 'Affet' },
-  { emoji: '💀', label: 'Gömün' },
+  { emoji: '😂', label: 'Koptum' },
+  { emoji: '💀', label: 'Öldüm' },
 ];
 
-export default function ConfessionPartyPage() {
-  // Şifre Kontrol State
-  const [authChecked, setAuthChecked] = useState(false);
-  const [isUnlocked, setIsUnlocked] = useState(false);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [authError, setAuthError] = useState<string | null>(null);
-  const [authLoading, setAuthLoading] = useState(false);
-
+export default function OverheardPartyPage() {
   // İtiraf Form State
-  const [selectedType, setSelectedType] = useState<string>('PARTY_LINC');
   const [content, setContent] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [submitted, setSubmitted] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [flyingEmojis, setFlyingEmojis] = useState<{ id: number; emoji: string; left: number }[]>([]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('gunah_parti_unlocked');
-      if (saved === '1') {
-        setIsUnlocked(true);
-      }
-      setAuthChecked(true);
-    }
-  }, []);
-
-  const handleUnlock = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (authLoading || !passwordInput.trim()) return;
-
-    setAuthLoading(true);
-    setAuthError(null);
-
-    try {
-      const ok = await verifyPartyPassword(passwordInput);
-      if (ok) {
-        localStorage.setItem('gunah_parti_unlocked', '1');
-        setIsUnlocked(true);
-      } else {
-        setAuthError('Hatalı şifre! Mekandaki şifreyi kontrol et.');
-      }
-    } catch (err) {
-      setAuthError('Bağlantı hatası, tekrar dene.');
-    } finally {
-      setAuthLoading(false);
-    }
-  };
-
-  const currentTheme = SIN_CATEGORIES.find((c) => c.id === selectedType) || SIN_CATEGORIES[1];
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (loading) return;
 
     if (!content.trim()) {
-      setErrorMsg('İtiraf etmek için önce günahını yazmalısın.');
+      setErrorMsg('Göndermek için önce itirafını yazmalısın.');
       return;
     }
 
@@ -130,7 +40,7 @@ export default function ConfessionPartyPage() {
 
     try {
       const formData = new FormData();
-      formData.append('type', selectedType);
+      formData.append('type', 'PARTY_OVERHEARD');
       formData.append('content', content.trim());
 
       const result = await sendPartyMessage(formData);
@@ -167,87 +77,13 @@ export default function ConfessionPartyPage() {
     }
   };
 
-  if (!authChecked) {
-    return <main className="min-h-screen bg-[#030102]" />;
-  }
-
-  // ŞİFRE GİRİŞ EKRANI
-  if (!isUnlocked) {
-    return (
-      <main className="min-h-screen bg-[#030102] text-white flex flex-col items-center justify-center px-6 py-10 relative overflow-hidden select-none">
-        <div
-          className="fixed inset-0 pointer-events-none"
-          style={{
-            background: 'radial-gradient(circle at 50% 25%, rgba(220, 38, 38, 0.25) 0%, rgba(3, 1, 2, 1) 65%)',
-          }}
-        />
-
-        <div className="w-full max-w-[400px] mx-auto relative z-10 text-center">
-          <div className="relative w-28 h-28 mx-auto mb-5">
-            <Image
-              src="/5555.png"
-              alt="TNKU Overheard Logo"
-              fill
-              priority
-              className="object-contain drop-shadow-[0_0_25px_rgba(220,38,38,0.45)]"
-            />
-          </div>
-
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.28em] text-red-400 uppercase mb-2">
-            <Lock size={12} /> ÖZEL ETKİNLİK GİRİŞİ
-          </div>
-
-          <h1 className="text-2xl md:text-3xl font-black tracking-[0.12em] text-white uppercase mb-2">
-            GÜNAH ÇIKARMA GECESİ
-          </h1>
-          <p className="text-white/50 text-xs font-medium mb-7 leading-relaxed">
-            İtiraf kürsüsüne bağlanmak için gece şifresini gir.
-          </p>
-
-          <form onSubmit={handleUnlock} className="space-y-4">
-            <div className="relative">
-              <KeyRound
-                size={18}
-                className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none"
-              />
-              <input
-                type="password"
-                value={passwordInput}
-                onChange={(e) => setPasswordInput(e.target.value)}
-                placeholder="Giriş şifresi..."
-                autoComplete="off"
-                className="w-full rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/15 focus:border-red-500/80 pl-11 pr-4 py-4 text-sm font-bold text-white placeholder-white/30 outline-none transition-all text-center tracking-widest"
-              />
-            </div>
-
-            {authError && (
-              <div className="p-3 rounded-2xl bg-red-500/15 border border-red-500/40 text-red-300 text-xs font-bold">
-                {authError}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={authLoading || !passwordInput.trim()}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-700 via-red-600 to-rose-600 disabled:opacity-35 text-white font-black text-xs tracking-[0.22em] uppercase flex items-center justify-center gap-2 shadow-[0_0_35px_rgba(220,38,38,0.45)] transition-all active:scale-[0.98] cursor-pointer"
-            >
-              <span>{authLoading ? 'KONTROL EDİLİYOR...' : 'İÇERİ GİR'}</span>
-              <ArrowRight size={16} />
-            </button>
-          </form>
-        </div>
-      </main>
-    );
-  }
-
-  // ANA İTİRAF EKRANI
   return (
-    <main className="min-h-screen bg-[#030102] text-white flex flex-col items-center justify-between px-5 py-7 md:py-10 relative overflow-hidden select-none">
-      {/* Seçilen Günaha Göre Değişen Sahne Atmosfer Işığı */}
+    <main className="min-h-screen bg-[#02040a] text-white flex flex-col items-center justify-between px-5 py-7 md:py-10 relative overflow-hidden select-none">
+      {/* Overheard Mavi Sahne Atmosfer Işığı */}
       <div
-        className="fixed inset-0 transition-all duration-700 pointer-events-none"
+        className="fixed inset-0 pointer-events-none"
         style={{
-          background: `radial-gradient(circle at 50% 12%, ${currentTheme.hex}30 0%, rgba(3, 1, 2, 1) 62%)`,
+          background: 'radial-gradient(circle at 50% 12%, rgba(37, 99, 235, 0.28) 0%, rgba(2, 4, 10, 1) 64%)',
         }}
       />
 
@@ -277,16 +113,16 @@ export default function ConfessionPartyPage() {
               alt="TNKU Overheard Logo"
               fill
               priority
-              className="object-contain drop-shadow-[0_0_25px_rgba(220,38,38,0.45)]"
+              className="object-contain drop-shadow-[0_0_28px_rgba(59,130,246,0.5)]"
             />
           </div>
 
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.28em] text-red-400/90 uppercase mb-1.5">
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.28em] text-blue-400/90 uppercase mb-1.5">
             <Lock size={11} /> %100 ANONİM • KAYIT TUTULMAZ
           </div>
 
-          <h1 className="text-2xl md:text-3xl font-black tracking-[0.12em] text-white uppercase">
-            GÜNAH ÇIKARMA GECESİ
+          <h1 className="text-2xl md:text-3xl font-black tracking-[0.14em] text-white uppercase">
+            OVERHEARD PARTY
           </h1>
           <p className="text-white/50 text-xs font-medium mt-1.5 max-w-xs mx-auto leading-relaxed">
             İçinde tuttuğun ne varsa dökül; onaylanan itiraflar anında DJ ekranına düşsün.
@@ -294,75 +130,49 @@ export default function ConfessionPartyPage() {
         </div>
 
         {submitted ? (
-          <div className="py-10 px-6 text-center bg-white/[0.03] backdrop-blur-xl border border-white/10 rounded-3xl mb-6 space-y-5">
-            <div className="w-16 h-16 mx-auto rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shadow-[0_0_30px_rgba(16,185,129,0.25)]">
+          <div className="py-10 px-6 text-center bg-white/[0.03] backdrop-blur-xl border border-blue-500/20 rounded-3xl mb-6 space-y-5">
+            <div className="w-16 h-16 mx-auto rounded-full bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400 shadow-[0_0_30px_rgba(59,130,246,0.3)]">
               <CheckCircle2 size={34} />
             </div>
             <div>
               <h2 className="text-xl font-black tracking-wider text-white uppercase mb-1.5">
-                GÜNAHIN İLETİLDİ 🕯️
+                İTİRAFIN İLETİLDİ ✨
               </h2>
               <p className="text-xs text-white/60 leading-relaxed">
-                İtirafın moderasyon kürsüsüne düştü. Birazdan dev ekranda herkesin gözü önünde yargılanabilir!
+                Mesajın moderasyona düştü. Onaylandığı an dev ekranda herkesin gözü önünde yayınlanacak!
               </p>
             </div>
             <button
               onClick={() => setSubmitted(false)}
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-white/10 hover:bg-white/15 border border-white/15 text-xs font-black tracking-[0.15em] uppercase transition-all active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-500/15 hover:bg-blue-500/25 border border-blue-400/25 text-xs font-black tracking-[0.15em] text-blue-200 uppercase transition-all active:scale-95 cursor-pointer"
             >
-              <RotateCcw size={15} /> YENİ GÜNAH YAZ
+              <RotateCcw size={15} /> YENİ İTİRAF YAZ
             </button>
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-5 mb-7">
-            {/* 1. Günah Derecesi */}
+          <form onSubmit={handleSubmit} className="space-y-4 mb-7">
+            {/* İtiraf Alanı */}
             <div>
-              <span className="block text-[10px] font-black tracking-[0.25em] text-white/45 uppercase mb-2.5 text-center">
-                GÜNAH DERECESİNİ SEÇ
+              <span className="flex items-center justify-center gap-1.5 text-[10px] font-black tracking-[0.25em] text-blue-300/60 uppercase mb-2.5">
+                <Sparkles size={12} /> ANONİM İTİRAFINI YAZ
               </span>
-              <div className="grid grid-cols-2 gap-2.5">
-                {SIN_CATEGORIES.map((cat) => {
-                  const Icon = cat.icon;
-                  const isSelected = selectedType === cat.id;
-                  return (
-                    <button
-                      type="button"
-                      key={cat.id}
-                      onClick={() => setSelectedType(cat.id)}
-                      className={`p-3.5 rounded-2xl border backdrop-blur-md text-left transition-all duration-300 cursor-pointer active:scale-[0.97] ${
-                        isSelected
-                          ? cat.activeCard
-                          : 'border-white/10 bg-white/[0.02] text-white/60 hover:border-white/20 hover:bg-white/[0.04]'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2 mb-0.5">
-                        <Icon size={16} />
-                        <span className="font-black text-xs tracking-wide">{cat.title}</span>
-                      </div>
-                      <span className="text-[10px] opacity-70 block">{cat.desc}</span>
-                    </button>
-                  );
-                })}
+              <div className="relative">
+                <textarea
+                  rows={5}
+                  maxLength={300}
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="İtirafını buraya dökül... (Örn: Kampüste kimsenin bilmediği...)"
+                  className="w-full rounded-3xl bg-white/[0.03] backdrop-blur-md border border-white/15 focus:border-blue-500/80 p-4 pb-8 text-sm text-white placeholder-white/30 outline-none resize-none transition-all"
+                />
+                <span
+                  className={`absolute bottom-3 right-4 text-[10px] font-black tracking-wider ${
+                    content.length > 260 ? 'text-amber-400' : 'text-white/35'
+                  }`}
+                >
+                  {content.length}/300
+                </span>
               </div>
-            </div>
-
-            {/* 2. İtiraf Alanı */}
-            <div className="relative">
-              <textarea
-                rows={4}
-                maxLength={300}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Günahını buraya dökül... (Örn: En yakın arkadaşımın...)"
-                className={`w-full rounded-3xl bg-white/[0.03] backdrop-blur-md border border-white/15 ${currentTheme.focusRing} p-4 pb-8 text-sm text-white placeholder-white/30 outline-none resize-none transition-all`}
-              />
-              <span
-                className={`absolute bottom-3 right-4 text-[10px] font-black tracking-wider ${
-                  content.length > 260 ? 'text-red-400' : 'text-white/35'
-                }`}
-              >
-                {content.length}/300
-              </span>
             </div>
 
             {errorMsg && (
@@ -374,10 +184,10 @@ export default function ConfessionPartyPage() {
             <button
               type="submit"
               disabled={loading || !content.trim()}
-              className={`w-full py-4 rounded-2xl bg-gradient-to-r ${currentTheme.buttonGradient} disabled:opacity-35 text-white font-black text-xs tracking-[0.22em] uppercase flex items-center justify-center gap-2 transition-all duration-300 active:scale-[0.98] cursor-pointer`}
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 disabled:opacity-35 text-white font-black text-xs tracking-[0.22em] uppercase flex items-center justify-center gap-2 shadow-[0_0_35px_rgba(37,99,235,0.45)] transition-all duration-300 active:scale-[0.98] cursor-pointer"
             >
               <Send size={16} />
-              {loading ? 'GÖNDERİLİYOR...' : 'GÜNAHIMI İTİRAF ET'}
+              {loading ? 'GÖNDERİLİYOR...' : 'İTİRAFIMI GÖNDER'}
             </button>
           </form>
         )}
@@ -385,7 +195,7 @@ export default function ConfessionPartyPage() {
         {/* CANLI TEPKİ BAR */}
         <div className="pt-4 border-t border-white/10">
           <p className="text-center text-[10px] text-white/45 font-black tracking-[0.25em] uppercase mb-3">
-            SAHNEDEKİ GÜNAHA TEPKİ PATLAT ⚡
+            SAHNEDEKİ İTİRAFA TEPKİ PATLAT ⚡
           </p>
           <div className="grid grid-cols-4 gap-2.5">
             {REACTION_EMOJIS.map((item, idx) => (
@@ -393,7 +203,7 @@ export default function ConfessionPartyPage() {
                 key={idx}
                 type="button"
                 onClick={() => sendEmojiReaction(item.emoji)}
-                className="flex flex-col items-center justify-center py-3 px-2 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-white/10 hover:border-white/25 active:scale-90 transition-all cursor-pointer group"
+                className="flex flex-col items-center justify-center py-3 px-2 rounded-2xl bg-white/[0.03] border border-white/10 hover:bg-blue-500/15 hover:border-blue-400/30 active:scale-90 transition-all cursor-pointer group"
               >
                 <span className="text-2xl group-hover:scale-125 transition-transform">{item.emoji}</span>
                 <span className="text-[9px] font-black tracking-wider text-white/50 mt-1 uppercase">

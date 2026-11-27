@@ -24,7 +24,7 @@ export async function verifyAdminPassword(password: string) {
   return normalized === 'dayılar';
 }
 
-// Bekleyen günahları getir
+// Bekleyen itirafları getir
 export async function getPendingMessages() {
   return await prisma.post.findMany({
     where: {
@@ -35,7 +35,7 @@ export async function getPendingMessages() {
   });
 }
 
-// Şu an DJ ekranında yayında olan aktif günahı getir
+// Şu an DJ ekranında yayında olan aktif itirafı getir
 export async function getActiveMessage() {
   return await prisma.post.findFirst({
     where: {
@@ -46,7 +46,7 @@ export async function getActiveMessage() {
   });
 }
 
-// Günahı onayla ve DJ ekranına fırlat
+// İtirafı onayla ve DJ ekranına fırlat
 export async function approveMessage(id: string) {
   await prisma.post.updateMany({
     where: {
@@ -77,7 +77,7 @@ export async function rejectMessage(id: string) {
   revalidatePath('/admin');
 }
 
-// DJ ekranındaki aktif günahı kaldır (Bekleme moduna dön)
+// DJ ekranındaki aktif itirafı kaldır (Bekleme moduna dön)
 export async function clearActiveMessage() {
   await prisma.post.updateMany({
     where: {
@@ -92,7 +92,7 @@ export async function clearActiveMessage() {
 }
 
 // Yayına almadan önce yazım hatası / sansür düzenlemesi yap
-export async function updateMessage(id: string, content: string, location: string) {
+export async function updateMessage(id: string, content: string, location: string = 'PARTY_OVERHEARD') {
   await prisma.post.update({
     where: { id },
     data: { content, location },
@@ -102,21 +102,21 @@ export async function updateMessage(id: string, content: string, location: strin
   revalidatePath('/dj');
 }
 
-// Katılımcı ekranından gönderilen günahı kaydet
+// Katılımcı ekranından gönderilen itirafı kaydet
 export async function sendPartyMessage(formData: FormData) {
   try {
     const type = formData.get('type') as string;
     const content = formData.get('content') as string;
 
     if (!content || !content.trim()) {
-      return { error: 'Günah metni boş olamaz!' };
+      return { error: 'İtiraf metni boş olamaz!' };
     }
 
     if (content.trim().length > 300) {
-      return { error: 'Günahın en fazla 300 karakter olabilir!' };
+      return { error: 'İtirafın en fazla 300 karakter olabilir!' };
     }
 
-    const targetLocation = type || 'PARTY_ITIRAF';
+    const targetLocation = type || 'PARTY_OVERHEARD';
 
     await prisma.post.create({
       data: {
@@ -129,12 +129,12 @@ export async function sendPartyMessage(formData: FormData) {
 
     return { success: true };
   } catch (error: any) {
-    console.error('Günah gönderilemedi:', error);
+    console.error('İtiraf gönderilemedi:', error);
     return { error: error.message || 'Veritabanı kayıt hatası oluştu.' };
   }
 }
 
-// Tüm parti/günah itiraflarını veritabanından kalıcı olarak sil
+// Tüm parti itiraflarını veritabanından kalıcı olarak sil
 export async function deleteAllMessages() {
   await prisma.post.deleteMany({
     where: {

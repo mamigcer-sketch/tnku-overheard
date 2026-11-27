@@ -13,7 +13,7 @@ import {
 } from './actions';
 import {
   ShieldAlert,
-  Flame,
+  Sparkles,
   Trash2,
   Send,
   RefreshCw,
@@ -33,16 +33,7 @@ import {
   Square,
 } from 'lucide-react';
 
-const CATEGORY_LABELS: Record<string, { label: string; badge: string }> = {
-  PARTY_ITIRAF: { label: '🕯️ MASUM İTİRAF', badge: 'bg-amber-500/20 text-amber-300 border-amber-500/40' },
-  PARTY_LINC: { label: '🔥 BÜYÜK GÜNAH', badge: 'bg-red-500/20 text-red-300 border-red-500/40' },
-  PARTY_LİNÇ: { label: '🔥 BÜYÜK GÜNAH', badge: 'bg-red-500/20 text-red-300 border-red-500/40' },
-  PARTY_REZIL: { label: '💀 REZİLLİK', badge: 'bg-purple-500/20 text-purple-300 border-purple-500/40' },
-  PARTY_IFSA: { label: '👁️ İFŞA & SIR', badge: 'bg-rose-500/20 text-rose-300 border-rose-500/40' },
-  PARTY_OVERHEARD: { label: '🕯️ İTİRAF', badge: 'bg-red-500/20 text-red-300 border-red-500/40' },
-};
-
-export default function AdminConfessionPage() {
+export default function AdminOverheardPage() {
   // Admin Şifre Kontrol State
   const [authChecked, setAuthChecked] = useState(false);
   const [isUnlocked, setIsUnlocked] = useState(false);
@@ -62,7 +53,6 @@ export default function AdminConfessionPage() {
   // Düzenleme State
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>('');
-  const [editLocation, setEditLocation] = useState<string>('PARTY_LINC');
 
   // Fotoğraf Modu State
   const [showPhotoTools, setShowPhotoTools] = useState(false);
@@ -70,13 +60,12 @@ export default function AdminConfessionPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('gunah_admin_unlocked');
-      if (saved === '1') {
+    queueMicrotask(() => {
+      if (localStorage.getItem('overheard_admin_unlocked') === '1') {
         setIsUnlocked(true);
       }
       setAuthChecked(true);
-    }
+    });
   }, []);
 
   const handleUnlock = async (e: React.FormEvent) => {
@@ -89,7 +78,7 @@ export default function AdminConfessionPage() {
     try {
       const ok = await verifyAdminPassword(passwordInput);
       if (ok) {
-        localStorage.setItem('gunah_admin_unlocked', '1');
+        localStorage.setItem('overheard_admin_unlocked', '1');
         setIsUnlocked(true);
         setPasswordInput('');
       } else {
@@ -103,7 +92,7 @@ export default function AdminConfessionPage() {
   };
 
   const handleLock = () => {
-    localStorage.removeItem('gunah_admin_unlocked');
+    localStorage.removeItem('overheard_admin_unlocked');
     setIsUnlocked(false);
     setPasswordInput('');
   };
@@ -185,7 +174,7 @@ export default function AdminConfessionPage() {
     try {
       await approveMessage(id);
       await fetchAll();
-      notify('🔥 Günah DJ Ekranına Fırlatıldı!');
+      notify('✨ İtiraf DJ Ekranına Fırlatıldı!');
     } catch (e) {
       notify('❌ Onaylama hatası!');
     } finally {
@@ -199,7 +188,7 @@ export default function AdminConfessionPage() {
     try {
       await rejectMessage(id);
       await fetchAll();
-      notify('🗑️ Günah çöpe atıldı.');
+      notify('🗑️ İtiraf çöpe atıldı.');
     } catch (e) {
       notify('❌ Silme hatası!');
     } finally {
@@ -242,17 +231,16 @@ export default function AdminConfessionPage() {
   const startEditing = (item: any) => {
     setEditingId(item.id);
     setEditContent(item.content);
-    setEditLocation(item.location || 'PARTY_LINC');
   };
 
   const saveEdit = async (id: string) => {
     if (!editContent.trim()) return;
     setLoading(true);
     try {
-      await updateMessage(id, editContent.trim(), editLocation);
+      await updateMessage(id, editContent.trim(), 'PARTY_OVERHEARD');
       setEditingId(null);
       await fetchAll();
-      notify('✏️ Günah düzenlendi.');
+      notify('✏️ İtiraf düzenlendi.');
     } catch (e) {
       notify('❌ Düzenleme kaydedilemedi.');
     } finally {
@@ -298,7 +286,7 @@ export default function AdminConfessionPage() {
       });
       setIsPhotoActive(false);
       setSelectedImage(null);
-      notify('🔙 Günah Ekranına Geri Dönüldü!');
+      notify('🔙 İtiraf Ekranına Geri Dönüldü!');
     } catch (e) {
       notify('❌ Hata oluştu.');
     } finally {
@@ -307,34 +295,34 @@ export default function AdminConfessionPage() {
   };
 
   if (!authChecked) {
-    return <main className="min-h-screen bg-[#040103]" />;
+    return <main className="min-h-screen bg-[#02040a]" />;
   }
 
   // ADMİN ŞİFRE GİRİŞ EKRANI
   if (!isUnlocked) {
     return (
-      <main className="min-h-screen bg-[#040103] text-white flex flex-col items-center justify-center p-5 relative overflow-hidden select-none">
+      <main className="min-h-screen bg-[#02040a] text-white flex flex-col items-center justify-center p-5 relative overflow-hidden select-none">
         <div
           className="fixed inset-0 pointer-events-none"
           style={{
-            background: 'radial-gradient(circle at 50% 25%, rgba(220, 38, 38, 0.22) 0%, rgba(4, 1, 3, 1) 65%)',
+            background: 'radial-gradient(circle at 50% 25%, rgba(37, 99, 235, 0.25) 0%, rgba(2, 4, 10, 1) 65%)',
           }}
         />
 
-        <div className="w-full max-w-[400px] bg-[#0b0407]/95 backdrop-blur-2xl border border-red-500/25 rounded-[2.5rem] p-7 md:p-8 shadow-2xl relative z-10 text-center">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center text-red-400">
+        <div className="w-full max-w-[400px] bg-[#060a14]/95 backdrop-blur-2xl border border-blue-500/25 rounded-[2.5rem] p-7 md:p-8 shadow-2xl relative z-10 text-center">
+          <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-blue-400">
             <ShieldAlert size={32} />
           </div>
 
-          <div className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.25em] text-red-400 uppercase mb-1.5">
-            <Lock size={11} />porno paneli
+          <div className="inline-flex items-center gap-1.5 text-[10px] font-black tracking-[0.25em] text-blue-400 uppercase mb-1.5">
+            <Lock size={11} /> YETKİLİ KONTROL PANELİ
           </div>
 
           <h1 className="text-xl md:text-2xl font-black tracking-wider text-white uppercase mb-2">
-            seks seks pornoo
+            OVERHEARD MODERASYONU
           </h1>
           <p className="text-xs text-gray-400 mb-6">
-            ekranını yönetmek için seks şifresini gir.
+            Sahne ekranını yönetmek için admin şifresini gir.
           </p>
 
           <form onSubmit={handleUnlock} className="space-y-4">
@@ -349,7 +337,7 @@ export default function AdminConfessionPage() {
                 onChange={(e) => setPasswordInput(e.target.value)}
                 placeholder="Admin şifresi..."
                 autoComplete="off"
-                className="w-full rounded-2xl bg-black/70 border border-white/15 focus:border-red-500 pl-11 pr-4 py-4 text-sm font-bold text-white placeholder-gray-600 outline-none transition-all text-center tracking-widest"
+                className="w-full rounded-2xl bg-black/70 border border-white/15 focus:border-blue-500 pl-11 pr-4 py-4 text-sm font-bold text-white placeholder-gray-600 outline-none transition-all text-center tracking-widest"
               />
             </div>
 
@@ -362,7 +350,7 @@ export default function AdminConfessionPage() {
             <button
               type="submit"
               disabled={authLoading || !passwordInput.trim()}
-              className="w-full py-4 rounded-2xl bg-gradient-to-r from-red-700 via-red-600 to-rose-600 disabled:opacity-35 text-white font-black text-xs tracking-[0.2em] uppercase flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
+              className="w-full py-4 rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-cyan-500 disabled:opacity-35 text-white font-black text-xs tracking-[0.2em] uppercase flex items-center justify-center gap-2 shadow-lg transition-all active:scale-95 cursor-pointer"
             >
               <span>{authLoading ? 'DOĞRULANIYOR...' : 'PANELİ AÇ'}</span>
               <ArrowRight size={16} />
@@ -375,20 +363,20 @@ export default function AdminConfessionPage() {
 
   // ADMİN MODERASYON PANELİ
   return (
-    <main className="min-h-screen bg-[#040103] text-white p-4 md:p-8 flex flex-col items-center relative overflow-x-hidden select-none">
-      <div className="w-full max-w-[650px] bg-[#0b0407]/95 backdrop-blur-2xl border border-red-500/20 rounded-[2.5rem] p-5 md:p-8 shadow-2xl relative z-10">
+    <main className="min-h-screen bg-[#02040a] text-white p-4 md:p-8 flex flex-col items-center relative overflow-x-hidden select-none">
+      <div className="w-full max-w-[650px] bg-[#060a14]/95 backdrop-blur-2xl border border-blue-500/20 rounded-[2.5rem] p-5 md:p-8 shadow-2xl relative z-10">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-5 mb-6">
           <div className="flex items-center gap-3">
-            <div className="p-3 bg-red-500/15 border border-red-500/30 rounded-2xl text-red-400">
+            <div className="p-3 bg-blue-500/15 border border-blue-500/30 rounded-2xl text-blue-400">
               <ShieldAlert size={24} />
             </div>
             <div>
               <h1 className="text-lg md:text-2xl font-black tracking-wider text-white">
-                GÜNAH MODERASYONU
+                OVERHEARD MODERASYONU
               </h1>
               <p className="text-xs text-gray-400 font-medium">
-                Onay Bekleyen: <span className="text-red-400 font-black">{pendingList.length}</span>
+                Onay Bekleyen: <span className="text-blue-400 font-black">{pendingList.length}</span>
               </p>
             </div>
           </div>
@@ -412,7 +400,7 @@ export default function AdminConfessionPage() {
         </div>
 
         {msg && (
-          <div className="mb-5 p-3 rounded-xl bg-red-500/20 border border-red-500/40 text-center text-xs font-black text-red-200 animate-pulse">
+          <div className="mb-5 p-3 rounded-xl bg-blue-500/20 border border-blue-500/40 text-center text-xs font-black text-blue-200 animate-pulse">
             {msg}
           </div>
         )}
@@ -432,14 +420,14 @@ export default function AdminConfessionPage() {
               <button
                 onClick={() => handlePlayIntroVideo(false)}
                 disabled={loading}
-                className="py-4 px-3 rounded-2xl bg-gradient-to-r from-amber-600 to-orange-600 hover:from-amber-500 hover:to-orange-500 text-white font-black text-[11px] tracking-[0.15em] uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(245,158,11,0.25)] transition-all active:scale-95 cursor-pointer"
+                className="py-4 px-3 rounded-2xl bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-black text-[11px] tracking-[0.15em] uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(6,182,212,0.25)] transition-all active:scale-95 cursor-pointer"
               >
                 <Film size={16} /> INTRO (1 KEZ)
               </button>
               <button
                 onClick={() => handlePlayIntroVideo(true)}
                 disabled={loading}
-                className="py-4 px-3 rounded-2xl bg-gradient-to-r from-red-700 to-rose-600 hover:from-red-600 hover:to-rose-500 text-white font-black text-[11px] tracking-[0.15em] uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(220,38,38,0.3)] transition-all active:scale-95 cursor-pointer"
+                className="py-4 px-3 rounded-2xl bg-gradient-to-r from-blue-700 to-indigo-600 hover:from-blue-600 hover:to-indigo-500 text-white font-black text-[11px] tracking-[0.15em] uppercase flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(37,99,235,0.3)] transition-all active:scale-95 cursor-pointer"
               >
                 <RefreshCw size={16} /> SÜREKLİ LOOP
               </button>
@@ -447,11 +435,11 @@ export default function AdminConfessionPage() {
           )}
         </div>
 
-        {/* ŞU AN DEV EKRANDA YAYINDA OLAN GÜNAH */}
-        <div className="mb-7 p-5 rounded-3xl bg-gradient-to-br from-red-950/50 to-black border border-red-500/40 shadow-[0_0_30px_rgba(220,38,38,0.15)]">
+        {/* ŞU AN DEV EKRANDA YAYINDA OLAN İTİRAF */}
+        <div className="mb-7 p-5 rounded-3xl bg-gradient-to-br from-blue-950/50 to-black border border-blue-500/40 shadow-[0_0_30px_rgba(37,99,235,0.18)]">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-[10px] font-black tracking-[0.2em] text-red-400 uppercase flex items-center gap-1.5">
-              <Flame size={14} className="animate-pulse" /> ŞU AN DJ EKRANINDA YAYINDA
+            <span className="text-[10px] font-black tracking-[0.2em] text-blue-400 uppercase flex items-center gap-1.5">
+              <Sparkles size={14} className="animate-pulse" /> ŞU AN DJ EKRANINDA YAYINDA
             </span>
             {activeMessage && (
               <button
@@ -466,12 +454,8 @@ export default function AdminConfessionPage() {
 
           {activeMessage ? (
             <div>
-              <span
-                className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black border mb-2 ${
-                  CATEGORY_LABELS[activeMessage.location]?.badge || 'bg-red-500/20 text-red-300 border-red-500/40'
-                }`}
-              >
-                {CATEGORY_LABELS[activeMessage.location]?.label || '🕯️ İTİRAF'}
+              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black border mb-2 bg-blue-500/20 text-blue-300 border-blue-500/40">
+                ✨ ANONİM İTİRAF
               </span>
               <p className="text-base md:text-lg font-bold text-white leading-snug break-words">
                 “{activeMessage.content}”
@@ -479,35 +463,34 @@ export default function AdminConfessionPage() {
             </div>
           ) : (
             <p className="text-xs text-gray-500 italic py-2">
-              Şu an ekranda aktif bir günah yok. Aşağıdaki kuyruktan birini seçip ekrana fırlat!
+              Şu an ekranda aktif bir itiraf yok. Aşağıdaki kuyruktan birini seçip ekrana fırlat!
             </p>
           )}
         </div>
 
-        {/* ONAY BEKLEYEN GÜNAHLAR LİSTESİ */}
+        {/* ONAY BEKLEYEN İTİRAFLAR LİSTESİ */}
         <div className="mb-8">
           <h2 className="text-xs font-black tracking-[0.2em] text-gray-400 uppercase mb-3">
-            Onay Bekleyen Günahlar ({pendingList.length})
+            Onay Bekleyen İtiraflar ({pendingList.length})
           </h2>
 
           {pendingList.length === 0 ? (
             <div className="p-8 rounded-3xl border border-dashed border-white/15 text-center text-gray-500 text-xs">
-              Henüz yeni günah düşmedi. Masalardan itiraflar geldikçe burada sıralanacak...
+              Henüz yeni itiraf düşmedi. Katılımcılar gönderdikçe burada sıralanacak...
             </div>
           ) : (
             <div className="space-y-3.5 max-h-[55vh] overflow-y-auto pr-1">
               {pendingList.map((item) => {
-                const catInfo = CATEGORY_LABELS[item.location] || CATEGORY_LABELS.PARTY_ITIRAF;
                 const isEditing = editingId === item.id;
 
                 return (
                   <div
                     key={item.id}
-                    className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-red-500/30 transition-all"
+                    className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 hover:border-blue-500/30 transition-all"
                   >
                     <div className="flex items-center justify-between gap-2 mb-2.5">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-black border ${catInfo.badge}`}>
-                        {catInfo.label}
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black border bg-blue-500/15 text-blue-300 border-blue-500/35">
+                        ✨ ANONİM İTİRAF
                       </span>
                       <span className="text-[10px] text-gray-500 font-mono">
                         {new Date(item.createdAt).toLocaleTimeString('tr-TR', {
@@ -519,21 +502,11 @@ export default function AdminConfessionPage() {
 
                     {isEditing ? (
                       <div className="space-y-2.5 mb-3">
-                        <select
-                          value={editLocation}
-                          onChange={(e) => setEditLocation(e.target.value)}
-                          className="w-full p-2 rounded-xl bg-black border border-white/20 text-xs text-white outline-none"
-                        >
-                          <option value="PARTY_ITIRAF">🕯️ Masum İtiraf</option>
-                          <option value="PARTY_LINC">🔥 Büyük Günah</option>
-                          <option value="PARTY_REZIL">💀 Rezillik</option>
-                          <option value="PARTY_IFSA">👁️ İfşa & Sır</option>
-                        </select>
                         <textarea
                           rows={3}
                           value={editContent}
                           onChange={(e) => setEditContent(e.target.value)}
-                          className="w-full p-3 rounded-xl bg-black border border-red-500/40 text-sm text-white outline-none resize-none"
+                          className="w-full p-3 rounded-xl bg-black border border-blue-500/40 text-sm text-white outline-none resize-none"
                         />
                         <div className="flex gap-2">
                           <button
@@ -561,7 +534,7 @@ export default function AdminConfessionPage() {
                         <button
                           onClick={() => handleApprove(item.id)}
                           disabled={loading}
-                          className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-500 hover:to-rose-500 text-white font-black text-xs tracking-wider uppercase flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer"
+                          className="flex-1 py-2.5 px-3 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-black text-xs tracking-wider uppercase flex items-center justify-center gap-1.5 shadow-lg active:scale-95 transition-all cursor-pointer"
                         >
                           <Send size={14} /> DJ EKRANINA VER
                         </button>
@@ -599,7 +572,7 @@ export default function AdminConfessionPage() {
             className="w-full flex items-center justify-between p-3 rounded-2xl bg-white/5 hover:bg-white/10 text-xs font-black tracking-wider text-gray-300 uppercase cursor-pointer"
           >
             <span className="flex items-center gap-2">
-              <Camera size={16} className="text-amber-400" /> Canlı Fotoğraf Modu (Opsiyonel)
+              <Camera size={16} className="text-cyan-400" /> Canlı Fotoğraf Modu (Opsiyonel)
             </span>
             {showPhotoTools ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
@@ -612,12 +585,12 @@ export default function AdminConfessionPage() {
                   disabled={loading}
                   className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
                 >
-                  <X size={16} /> FOTOĞRAFI KAPAT ➔ GÜNAHLARA DÖN
+                  <X size={16} /> FOTOĞRAFI KAPAT ➔ İTİRAFLARA DÖN
                 </button>
               ) : (
                 <>
-                  <label className="flex items-center justify-center gap-2 p-3 border border-dashed border-white/20 rounded-xl cursor-pointer hover:border-amber-400/50 text-gray-300">
-                    <ImageIcon size={18} className="text-amber-400" />
+                  <label className="flex items-center justify-center gap-2 p-3 border border-dashed border-white/20 rounded-xl cursor-pointer hover:border-cyan-400/50 text-gray-300">
+                    <ImageIcon size={18} className="text-cyan-400" />
                     <span className="text-xs font-bold">
                       {selectedImage ? 'Başka Fotoğraf Seç' : 'Galeriden Fotoğraf Seç'}
                     </span>
@@ -627,7 +600,7 @@ export default function AdminConfessionPage() {
                     <button
                       onClick={handleShowPhotoOnScreen}
                       disabled={loading}
-                      className="w-full py-3 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-black text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
+                      className="w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black text-xs tracking-wider flex items-center justify-center gap-2 cursor-pointer"
                     >
                       <Camera size={16} /> FOTOĞRAFI EKRANA VER
                     </button>
@@ -649,4 +622,4 @@ export default function AdminConfessionPage() {
       </div>
     </main>
   );
-} 
+}
